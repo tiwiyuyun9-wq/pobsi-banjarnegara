@@ -95,3 +95,12 @@ INSERT INTO users (username, password, role, fullname) VALUES
 ('admin', 'admin-pobsi-2026', 'admin', 'Admin Utama POBSI'),
 ('staff', 'staff-pobsi-2026', 'staff', 'Staff Lapangan POBSI')
 ON CONFLICT (username) DO NOTHING;
+
+-- Nonaktifkan Row Level Security (RLS) agar API client dapat membaca/menulis data secara langsung 
+-- (Cocok untuk setup awal/sederhana menyamai SQLite). Anda bisa mengaktifkannya kembali nanti dengan policy spesifik.
+ALTER TABLE players DISABLE ROW LEVEL SECURITY;
+ALTER TABLE standings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE events DISABLE ROW LEVEL SECURITY;
+ALTER TABLE documents DISABLE ROW LEVEL SECURITY;
+ALTER TABLE clubs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
