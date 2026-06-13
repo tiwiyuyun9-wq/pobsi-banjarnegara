@@ -1,0 +1,8 @@
+node_modules/
+.env
+credentials/
+__pycache__/
+*.bak
+*.pyc
+.DS_Store
+.gemini/
