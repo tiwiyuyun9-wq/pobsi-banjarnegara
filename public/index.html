@@ -73,20 +73,17 @@
         <button class="nav-link" data-tab="tab-champions" id="nav-btn-champions">
           <i class="fa-solid fa-trophy nav-icon"></i>Battle of Champions
         </button>
-        <button class="nav-link" data-tab="tab-handicap" id="nav-btn-handicap">
-          <i class="fa-solid fa-address-book nav-icon"></i>Rekap Handicap
-        </button>
-        <button class="nav-link" data-tab="tab-calculator" id="nav-btn-calculator">
-          <i class="fa-solid fa-calculator nav-icon"></i>Kalkulator Race
-        </button>
         <button class="nav-link" data-tab="tab-events" id="nav-btn-events">
-          <i class="fa-solid fa-calendar-days nav-icon"></i>Jadwal Event
+          <i class="fa-solid fa-calendar-days nav-icon"></i>Event
+        </button>
+        <button class="nav-link" data-tab="tab-clubs" id="nav-btn-clubs">
+          <i class="fa-solid fa-building nav-icon"></i>Klub
+        </button>
+        <button class="nav-link" data-tab="tab-handicap" id="nav-btn-handicap">
+          <i class="fa-solid fa-address-book nav-icon"></i>Handicap
         </button>
         <button class="nav-link" data-tab="tab-docs" id="nav-btn-docs">
           <i class="fa-solid fa-file-pdf nav-icon"></i>Surat Edaran
-        </button>
-        <button class="nav-link" data-tab="tab-clubs" id="nav-btn-clubs">
-          <i class="fa-solid fa-building nav-icon"></i>Klub Biliar
         </button>
       </nav>
     </div>
@@ -497,7 +494,7 @@
     <section class="tab-pane" id="tab-handicap">
       <div class="section-header">
         <span class="section-tag"><i class="fa-solid fa-address-book"></i> Standardisasi Resmi</span>
-        <h1 class="section-title">Rekap Handicap POBSI Banjarnegara</h1>
+        <h1 class="section-title">Handicap POBSI Banjarnegara</h1>
         <p class="section-subtitle">Daftar tingkat keahlian (Handicap) resmi atlet biliar Kabupaten Banjarnegara yang dikeluarkan oleh komisi teknik POBSI.</p>
       </div>
 
@@ -567,132 +564,6 @@
       </div>
     </section>
 
-    <!-- ==============================================
-         TAB 4: HANDICAP MATCH CALCULATOR (WOW FEATURE)
-         ============================================= -->
-    <section class="tab-pane" id="tab-calculator">
-      <div class="section-header">
-        <span class="section-tag"><i class="fa-solid fa-calculator"></i> Fitur Pintar</span>
-        <h1 class="section-title">Kalkulator Race Pertandingan</h1>
-        <p class="section-subtitle">Simulasi adil untuk menghitung jumlah race (target kemenangan) antar pemain berdasarkan handicap resmi POBSI.</p>
-      </div>
-
-      <div class="calculator-container">
-        <!-- Selector Panel -->
-        <div class="calc-card selector-panel">
-          <h2 class="calc-panel-title"><i class="fa-solid fa-sliders"></i> Atur Parameter Match</h2>
-          
-          <!-- Player A -->
-          <div class="player-selection-box p-side-a">
-            <label class="player-label" for="calc-select-player-a">Pemain A</label>
-            <div class="select-search-combo">
-              <select id="calc-select-player-a" class="calc-player-select">
-                <option value="custom">-- Input Manual --</option>
-                <!-- Populated with players list -->
-              </select>
-            </div>
-            <div class="handicap-radio-group" id="manual-hc-a-container">
-              <span class="radio-group-label">Handicap Pemain A:</span>
-              <div class="hc-options">
-                <input type="radio" name="hc-val-a" id="hc-a-3b" value="3B"><label for="hc-a-3b">3B</label>
-                <input type="radio" name="hc-val-a" id="hc-a-3n" value="3N"><label for="hc-a-3n">3N</label>
-                <input type="radio" name="hc-val-a" id="hc-a-3a" value="3A"><label for="hc-a-3a">3A</label>
-                <input type="radio" name="hc-val-a" id="hc-a-4b" value="4B" checked><label for="hc-a-4b">4B</label>
-                <input type="radio" name="hc-val-a" id="hc-a-4a" value="4A"><label for="hc-a-4a">4A</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="versus-divider">
-            <span class="vs-text">VS</span>
-          </div>
-
-          <!-- Player B -->
-          <div class="player-selection-box p-side-b">
-            <label class="player-label" for="calc-select-player-b">Pemain B</label>
-            <div class="select-search-combo">
-              <select id="calc-select-player-b" class="calc-player-select">
-                <option value="custom">-- Input Manual --</option>
-                <!-- Populated with players list -->
-              </select>
-            </div>
-            <div class="handicap-radio-group" id="manual-hc-b-container">
-              <span class="radio-group-label">Handicap Pemain B:</span>
-              <div class="hc-options">
-                <input type="radio" name="hc-val-b" id="hc-b-3b" value="3B"><label for="hc-b-3b">3B</label>
-                <input type="radio" name="hc-val-b" id="hc-b-3n" value="3N"><label for="hc-b-3n">3N</label>
-                <input type="radio" name="hc-val-b" id="hc-b-3a" value="3A"><label for="hc-b-3a">3A</label>
-                <input type="radio" name="hc-val-b" id="hc-b-4b" value="4B"><label for="hc-b-4b">4B</label>
-                <input type="radio" name="hc-val-b" id="hc-b-4a" value="4A" checked><label for="hc-b-4a">4A</label>
-              </div>
-            </div>
-          </div>
-
-          <button class="btn btn-primary btn-block" id="btn-calculate-match">
-            <i class="fa-solid fa-arrows-spin"></i> Hitung Hasil Race
-          </button>
-        </div>
-
-        <!-- Result Display Panel -->
-        <div class="calc-card result-panel">
-          <h2 class="calc-panel-title"><i class="fa-solid fa-square-poll-vertical"></i> Hasil Kalkulasi & Simulasi</h2>
-          
-          <div class="calculator-results-wrapper">
-            
-            <!-- Virtual Pool Table Visualization -->
-            <div class="virtual-table-visual">
-              <div class="table-cushion-top"></div>
-              <div class="table-felt">
-                <!-- Pockets -->
-                <div class="pocket tl"></div><div class="pocket tc"></div><div class="pocket tr"></div>
-                <div class="pocket bl"></div><div class="pocket bc"></div><div class="pocket br"></div>
-                
-                <!-- Match Details -->
-                <div class="felt-match-display">
-                  <div class="felt-player-side side-a">
-                    <span class="felt-player-name" id="felt-name-a">Pemain A</span>
-                    <span class="felt-player-badge" id="felt-hc-a">HC 4</span>
-                    <span class="felt-race-target" id="felt-race-a">5</span>
-                  </div>
-                  
-                  <div class="felt-vs-badge">RACE TO</div>
-                  
-                  <div class="felt-player-side side-b">
-                    <span class="felt-player-name" id="felt-name-b">Pemain B</span>
-                    <span class="felt-player-badge" id="felt-hc-b">HC 5</span>
-                    <span class="felt-race-target" id="felt-race-b">6</span>
-                  </div>
-                </div>
-
-                <div class="chalk-dust-lines" aria-hidden="true"></div>
-              </div>
-              <div class="table-cushion-bottom"></div>
-            </div>
-
-            <!-- Detailed Match Information Cards -->
-            <div class="match-info-summary">
-              <div class="match-info-card">
-                <div class="info-head"><i class="fa-solid fa-circle-question text-accent"></i> Keterangan Voor & Handicap</div>
-                <p class="info-body" id="match-calculation-notes">
-                  Pemain A (Handicap 4) mendapatkan keuntungan target kemenangan lebih pendek. Pemain B (Handicap 5) harus memenangkan 6 poin (Race to 6), sedangkan Pemain A cukup memenangkan 5 poin (Race to 5).
-                </p>
-              </div>
-
-              <div class="rules-reference-card">
-                <div class="rules-head"><i class="fa-solid fa-circle-info text-gold"></i> Referensi Aturan POBSI Banjarnegara</div>
-                <ul class="rules-list">
-                  <li><strong>Handicap 3:</strong> Pemula / Beginner lokal</li>
-                  <li><strong>Handicap 4:</strong> Pratama / Intermediate</li>
-                  <li><strong>Handicap 5:</strong> Utama / Advanced</li>
-                  <li><strong>Handicap 6:</strong> Pratama Nasional / Master Regional</li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ==============================================
          TAB 5: JADWAL EVENT (CALENDAR)
@@ -775,7 +646,7 @@
     <section class="tab-pane" id="tab-clubs">
       <div class="section-header">
         <span class="section-tag"><i class="fa-solid fa-building"></i> Direktori Klub</span>
-        <h1 class="section-title">Klub Biliar Resmi Banjarnegara</h1>
+        <h1 class="section-title">Klub Resmi Banjarnegara</h1>
         <p class="section-subtitle">Daftar lengkap klub biliar yang terdaftar resmi di bawah naungan POBSI Kabupaten Banjarnegara. Temukan venue terdekat untuk latihan dan kompetisi.</p>
       </div>
 
@@ -1409,9 +1280,8 @@
         <ul class="footer-links-list">
           <li><a href="#" onclick="switchTab('tab-home')">Beranda Utama</a></li>
           <li><a href="#" onclick="switchTab('tab-champions')">Klasemen Poin</a></li>
-          <li><a href="#" onclick="switchTab('tab-handicap')">Rekap Handicap</a></li>
-          <li><a href="#" onclick="switchTab('tab-calculator')">Kalkulator Race</a></li>
-          <li><a href="#" onclick="switchTab('tab-events')">Jadwal Turnamen</a></li>
+          <li><a href="#" onclick="switchTab('tab-events')">Event</a></li>
+          <li><a href="#" onclick="switchTab('tab-handicap')">Handicap</a></li>
         </ul>
       </div>
 
@@ -1538,9 +1408,7 @@
         <button class="sidebar-link" data-pane="pane-clubs">
           <i class="fa-solid fa-building"></i> Kelola Klub
         </button>
-        <button class="sidebar-link" id="sidebar-action-calc">
-          <i class="fa-solid fa-calculator"></i> Handicap Calculator
-        </button>
+
         <button class="sidebar-link" id="sidebar-action-docs">
           <i class="fa-solid fa-file-invoice"></i> Surat Edaran
         </button>
@@ -1625,13 +1493,7 @@
                   <span class="lbl-sub">Upload dokumen PDF resmi</span>
                 </div>
               </button>
-              <button class="mission-action-card action-calc" id="quick-btn-calc">
-                <div class="action-icon-wrapper-premium primary-glow"><i class="fa-solid fa-calculator"></i></div>
-                <div class="action-label-block">
-                  <span class="lbl-main">Hitung Handicap</span>
-                  <span class="lbl-sub">Race calculator simulator</span>
-                </div>
-              </button>
+
             </div>
           </div>          <!-- prioritized metrics grid: Hero card + 3 secondary cards -->
           <div class="admin-stats-grid-premium">
@@ -4794,6 +4656,7 @@
 
       </div>
     </main>
+  </div>
 
   <!-- Mobile-Friendly Bottom Navigation Bar (App-Style) -->
   <div class="mobile-bottom-nav">
@@ -4803,7 +4666,7 @@
     </button>
     <button class="mobile-nav-item" data-tab="tab-champions" onclick="switchTab('tab-champions')">
       <i class="fa-solid fa-trophy"></i>
-      <span>Klasemen</span>
+      <span>BOC</span>
     </button>
     <button class="mobile-nav-item" data-tab="tab-handicap" onclick="switchTab('tab-handicap')">
       <i class="fa-solid fa-users"></i>
@@ -4811,7 +4674,7 @@
     </button>
     <button class="mobile-nav-item" data-tab="tab-events" onclick="switchTab('tab-events')">
       <i class="fa-solid fa-calendar-days"></i>
-      <span>Agenda</span>
+      <span>Event</span>
     </button>
     <button class="mobile-nav-item" id="mobile-more-trigger">
       <i class="fa-solid fa-bars"></i>
@@ -4829,17 +4692,14 @@
     </div>
     <div class="sheet-content">
       <div class="sheet-menu-grid">
-        <button class="sheet-menu-item" data-tab="tab-calculator">
-          <div class="sheet-icon-wrapper"><i class="fa-solid fa-calculator"></i></div>
-          <span>Kalkulator Felt</span>
-        </button>
+
         <button class="sheet-menu-item" data-tab="tab-docs">
           <div class="sheet-icon-wrapper"><i class="fa-solid fa-file-pdf"></i></div>
           <span>Surat Edaran</span>
         </button>
         <button class="sheet-menu-item" data-tab="tab-clubs">
           <div class="sheet-icon-wrapper"><i class="fa-solid fa-building"></i></div>
-          <span>Klub Biliar</span>
+          <span>Klub</span>
         </button>
         <button class="sheet-menu-item" id="mobile-login-trigger">
           <div class="sheet-icon-wrapper auth-icon"><i class="fa-solid fa-user-shield"></i></div>
