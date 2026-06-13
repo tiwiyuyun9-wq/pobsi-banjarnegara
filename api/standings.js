@@ -1,35 +1,85 @@
-const { readLocalDb, fetchCsv } = require('./_utils');
+const { supabase } = require('./_supabase');
 
 module.exports = async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Content-Type', 'application/json');
 
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   try {
-    const csvUrl = process.env.GOOGLE_SHEET_STANDINGS_CSV;
-    
-    if (csvUrl) {
-      console.log('Fetching standings from Google Sheets...');
-      const standings = await fetchCsv(csvUrl);
-      
-      // Sort standings by rank or points (descending)
-      const sorted = standings.sort((a, b) => {
-        // Fallback to sort by rank (rank 1 is highest)
-        const rankA = parseInt(a.rank || 999, 10);
-        const rankB = parseInt(b.rank || 999, 10);
-        return rankA - rankB;
-      });
-      
-      return res.status(200).json(sorted);
-    } else {
-      console.log('Serving standings from local JSON db...');
-      const standings = readLocalDb('standings');
+    /* ==========================================================================
+       GET: Mengambil Klasemen Standings
+       ========================================================================== */
+    if (req.method === 'GET') {
+      const { data: standings, error } = await supabase
+        .from('standings')
+        .select('*')
+        .order('points', { ascending: false }); // Urutkan berdasarkan poin tertinggi
+
+      if (error) throw error;
+
+      // Jika ada yang belum di-rank, kembalikan saja langsung
       return res.status(200).json(standings);
     }
+
+    /* ==========================================================================
+       POST: Menambahkan/Mengupdate Klasemen (Upsert)
+       ========================================================================== */
+    if (req.method === 'POST') {
+      const { name, club, handicap, points, played, won, lost, boc_points } = req.body;
+      if (!name || !club || !handicap || points === undefined) {
+        return res.status(400).json({ error: "Nama, klub, handicap, dan poin wajib diisi!" });
+      }
+
+      const newStanding = {
+        name: name.trim(),
+        club: club.trim(),
+        handicap: handicap.toString().trim(),
+        points: parseInt(points, 10),
+        played: parseInt(played || 0, 10),
+        won: parseInt(won || 0, 10),
+        lost: parseInt(lost || 0, 10),
+        trend: "stable",
+        boc_points: boc_points ? (typeof boc_points === 'object' ? JSON.stringify(boc_points) : boc_points) : null
+      };
+
+      // Upsert ke Supabase menggunakan primary key 'name'
+      const { error: upsertErr } = await supabase
+        .from('standings')
+        .upsert([newStanding], { onConflict: 'name' });
+
+      if (upsertErr) throw upsertErr;
+
+      // Hitung ulang peringkat (rank) untuk seluruh atlet berdasarkan poin tertinggi
+      const { data: allStandings, error: fetchErr } = await supabase
+        .from('standings')
+        .select('*')
+        .order('points', { ascending: false });
+
+      if (fetchErr) throw fetchErr;
+
+      // Update rank secara asinkron di database
+      for (let i = 0; i < allStandings.length; i++) {
+        const rank = i + 1;
+        const playerName = allStandings[i].name;
+        
+        await supabase
+          .from('standings')
+          .update({ rank })
+          .eq('name', playerName);
+      }
+
+      return res.status(201).json(newStanding);
+    }
+
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Error fetching standings:', error);
-    const fallbackStandings = readLocalDb('standings');
-    return res.status(200).json(fallbackStandings);
+    console.error(`Error processing request in api/standings.js (${req.method}):`, error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };

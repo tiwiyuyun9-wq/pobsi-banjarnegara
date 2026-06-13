@@ -1,26 +1,87 @@
-const { readLocalDb, fetchCsv } = require('./_utils');
+const { supabase } = require('./_supabase');
 
 module.exports = async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Content-Type', 'application/json');
 
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const { id } = req.query;
+
   try {
-    const csvUrl = process.env.GOOGLE_SHEET_DOCS_CSV;
-    
-    if (csvUrl) {
-      console.log('Fetching documents from Google Sheets...');
-      const docs = await fetchCsv(csvUrl);
-      return res.status(200).json(docs);
-    } else {
-      console.log('Serving documents from local JSON db...');
-      const docs = readLocalDb('documents');
+    /* ==========================================================================
+       GET: Mengambil Dokumen Resmi
+       ========================================================================== */
+    if (req.method === 'GET') {
+      const { data: docs, error } = await supabase
+        .from('documents')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
       return res.status(200).json(docs);
     }
+
+    /* ==========================================================================
+       POST: Menambahkan Dokumen Baru
+       ========================================================================== */
+    if (req.method === 'POST') {
+      const { title, date, fileSize, fileType } = req.body;
+      if (!title || !date) {
+        return res.status(400).json({ error: "Nama dokumen dan tanggal rilis wajib diisi!" });
+      }
+
+      // Hitung jumlah baris untuk generate ID
+      const { count, error: countErr } = await supabase
+        .from('documents')
+        .select('*', { count: 'exact', head: true });
+
+      if (countErr) throw countErr;
+
+      const nextNum = (count || 0) + 1;
+      const newId = `D${nextNum.toString().padStart(3, '0')}`;
+
+      const newDoc = {
+        id: newId,
+        title: title.trim(),
+        date: date.trim(),
+        fileSize: fileSize || "120 KB",
+        fileType: fileType || "PDF"
+      };
+
+      const { data, error } = await supabase
+        .from('documents')
+        .insert([newDoc])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return res.status(201).json(data);
+    }
+
+    /* ==========================================================================
+       DELETE: Menghapus Dokumen
+       ========================================================================== */
+    if (req.method === 'DELETE') {
+      if (!id) return res.status(400).json({ error: "ID dokumen wajib diberikan!" });
+
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return res.status(200).json({ success: true, message: "Berkas berhasil dihapus." });
+    }
+
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Error fetching documents:', error);
-    const fallbackDocs = readLocalDb('documents');
-    return res.status(200).json(fallbackDocs);
+    console.error(`Error processing request in api/docs.js (${req.method}):`, error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };

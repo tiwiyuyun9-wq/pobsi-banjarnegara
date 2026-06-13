@@ -224,7 +224,7 @@ db.serialize(() => {
 });
 
 /* ==========================================================================
-   MOUNT MODULAR ROUTERS
+   MOUNT MODULAR ROUTERS (SQLite Fallback / Supabase Router Proxy)
    ========================================================================== */
 // Disable caching for all API responses in local development
 app.use('/api', (req, res, next) => {
@@ -234,37 +234,92 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-app.use('/api/players', require('./api/routes/playerRoutes'));
-app.use('/api/standings', require('./api/routes/standingRoutes'));
-app.use('/api/events', require('./api/routes/eventRoutes'));
-app.use('/api/docs', require('./api/routes/docRoutes'));
-app.use('/api/clubs', require('./api/routes/clubRoutes'));
+const isSupabaseEnabled = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
 
-// Rute Autentikasi Admin Rahasia (RBAC)
-app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username dan sandi wajib diisi!" });
-  }
+if (isSupabaseEnabled) {
+  console.log('☁️ Supabase Cloud Mode is ACTIVE locally! Proxying local routes to Supabase handlers...');
+  
+  // Require Serverless Handlers
+  const playersHandler = require('./api/players');
+  const standingsHandler = require('./api/standings');
+  const standingsResetHandler = require('./api/standings/reset');
+  const eventsHandler = require('./api/events');
+  const docsHandler = require('./api/docs');
+  const clubsHandler = require('./api/clubs');
+  const loginHandler = require('./api/admin/login');
 
-  db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [username, password], (err, user) => {
-    if (err) {
-      console.error("Gagal query SQLite users:", err);
-      return res.status(500).json({ error: "Kegagalan internal database!" });
+  // helper function to bridge Express API signature and Vercel Serverless signature
+  const bridge = (handler, idParam = null) => {
+    return async (req, res) => {
+      try {
+        if (idParam && req.params[idParam]) {
+          req.query = { ...req.query, [idParam]: req.params[idParam] };
+        }
+        await handler(req, res);
+      } catch (err) {
+        console.error('Bridge handler execution failed:', err);
+        res.status(500).json({ error: err.message || 'Internal Bridge Error' });
+      }
+    };
+  };
+
+  // Players
+  app.all('/api/players', bridge(playersHandler));
+  app.all('/api/players/:id', bridge(playersHandler, 'id'));
+
+  // Standings
+  app.all('/api/standings/reset', bridge(standingsResetHandler));
+  app.all('/api/standings', bridge(standingsHandler));
+
+  // Events
+  app.all('/api/events', bridge(eventsHandler));
+  app.all('/api/events/:id', bridge(eventsHandler, 'id'));
+
+  // Docs
+  app.all('/api/docs', bridge(docsHandler));
+
+  // Clubs
+  app.all('/api/clubs', bridge(clubsHandler));
+  app.all('/api/clubs/:id', bridge(clubsHandler, 'id'));
+
+  // Admin Login
+  app.all('/api/admin/login', bridge(loginHandler));
+
+} else {
+  console.log('💾 SQLite Local Mode is ACTIVE! Using SQLite database handlers...');
+  
+  app.use('/api/players', require('./api/routes/playerRoutes'));
+  app.use('/api/standings', require('./api/routes/standingRoutes'));
+  app.use('/api/events', require('./api/routes/eventRoutes'));
+  app.use('/api/docs', require('./api/routes/docRoutes'));
+  app.use('/api/clubs', require('./api/routes/clubRoutes'));
+
+  // Rute Autentikasi Admin Rahasia (RBAC)
+  app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username dan sandi wajib diisi!" });
     }
-    if (user) {
-      res.json({ 
-        success: true, 
-        token: "POBSI_BNA_SECRET_AUTH_TOKEN_2026",
-        role: user.role,
-        fullname: user.fullname,
-        username: user.username
-      });
-    } else {
-      res.status(401).json({ error: "Username atau sandi administratif tidak cocok!" });
-    }
+
+    db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [username, password], (err, user) => {
+      if (err) {
+        console.error("Gagal query SQLite users:", err);
+        return res.status(500).json({ error: "Kegagalan internal database!" });
+      }
+      if (user) {
+        res.json({ 
+          success: true, 
+          token: "POBSI_BNA_SECRET_AUTH_TOKEN_2026",
+          role: user.role,
+          fullname: user.fullname,
+          username: user.username
+        });
+      } else {
+        res.status(401).json({ error: "Username atau sandi administratif tidak cocok!" });
+      }
+    });
   });
-});
+}
 
 // Fallback untuk SPA: Sajikan index.html jika ada rute frontend tak dikenal
 app.get('*', (req, res) => {
