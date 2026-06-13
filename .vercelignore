@@ -1,0 +1,12 @@
+# Exclude local-only Express server components from Vercel deployment
+# This prevents Vercel from treating controller/route files as serverless functions
+api/controllers/
+api/config/
+api/routes/
+server.js
+migrate_data.py
+credentials/
+__pycache__/
+*.pyc
+*.db
+.env

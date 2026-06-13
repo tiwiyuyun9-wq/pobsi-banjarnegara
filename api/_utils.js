@@ -5,7 +5,7 @@ const https = require('https');
 // Membaca data dari database JSON lokal (db.json)
 function readLocalDb(key) {
   try {
-    const filePath = path.join(process.cwd(), 'api', 'db.json');
+    const filePath = path.join(process.cwd(), 'api', 'data', 'db.json');
     const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     return data[key] || [];
   } catch (error) {

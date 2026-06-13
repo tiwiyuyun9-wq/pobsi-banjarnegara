@@ -1,4 +1,19 @@
 // Entry Point Server Express Utama - POBSI Banjarnegara
+// Auto-install sqlite3 locally if missing (prevents Vercel deployment issues)
+try {
+  require('sqlite3');
+} catch (e) {
+  console.log('⚠️ sqlite3 tidak ditemukan secara lokal. Mengunduh dan menginstal sqlite3...');
+  try {
+    const { execSync } = require('child_process');
+    execSync('npm install sqlite3@5.1.7 --no-save', { stdio: 'inherit' });
+    console.log('✅ sqlite3 berhasil diinstal secara lokal!');
+  } catch (err) {
+    console.error('❌ Gagal menginstal sqlite3 secara otomatis:', err);
+    process.exit(1);
+  }
+}
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
