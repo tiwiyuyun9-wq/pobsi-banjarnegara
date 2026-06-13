@@ -45,8 +45,8 @@ CREATE TABLE events (
     title TEXT NOT NULL,
     date TEXT NOT NULL,
     venue TEXT NOT NULL,
-    prizePool TEXT,
-    entryFee TEXT,
+    "prizePool" TEXT,
+    "entryFee" TEXT,
     contact TEXT NOT NULL,
     status TEXT DEFAULT 'Daftar',
     description TEXT,
@@ -66,8 +66,8 @@ CREATE TABLE documents (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     date TEXT NOT NULL,
-    fileSize TEXT,
-    fileType TEXT DEFAULT 'PDF'
+    "fileSize" TEXT,
+    "fileType" TEXT DEFAULT 'PDF'
 );
 
 -- 5. Buat Tabel Clubs
