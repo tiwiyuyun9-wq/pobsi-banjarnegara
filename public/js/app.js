@@ -31,8 +31,6 @@ async function initApp() {
   renderHandicapList();
   setupHandicapListeners();
 
-  // Load Calculator
-  setupCalculator();
 
   // Load Events Calendar
   renderEvents("all");
@@ -161,7 +159,7 @@ function setupTabNavigation() {
   const tabPanes = document.querySelectorAll(".tab-pane");
   const navMenu = document.getElementById("navigation-menu");
   const toggleBtn = document.getElementById("mobile-menu-toggle");
-  const validTabs = ["home", "champions", "handicap", "calculator", "events", "docs", "clubs"];
+  const validTabs = ["home", "champions", "handicap", "events", "docs", "clubs"];
 
   window.switchTab = function(tabId, updateHash = true) {
     // Sembunyikan semua tab pane
@@ -1193,188 +1191,8 @@ function setupHandicapListeners() {
   if (clubSelect) clubSelect.addEventListener("change", renderHandicapList);
 }
 
-// 9. Handicap Match Calculator Logic
-function setupCalculator() {
-  const selectPlayerA = document.getElementById("calc-select-player-a");
-  const selectPlayerB = document.getElementById("calc-select-player-b");
-  const manualContainerA = document.getElementById("manual-hc-a-container");
-  const manualContainerB = document.getElementById("manual-hc-b-container");
-  const btnCalculate = document.getElementById("btn-calculate-match");
-
-  if (!selectPlayerA || !selectPlayerB) return;
-
-  // Reset dropdowns
-  selectPlayerA.innerHTML = '<option value="custom">-- Input Manual --</option>';
-  selectPlayerB.innerHTML = '<option value="custom">-- Input Manual --</option>';
-
-  // Urutkan alfabetis
-  const sortedPlayers = [...appData.players].sort((a,b) => a.name.localeCompare(b.name));
-
-  // Isi data dropdown
-  const populateOptions = (selectElement) => {
-    sortedPlayers.forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = `${p.name} (HC ${p.handicap} - ${p.club})`;
-      opt.dataset.handicap = p.handicap;
-      opt.dataset.name = p.name;
-      selectElement.appendChild(opt);
-    });
-  };
-
-  populateOptions(selectPlayerA);
-  populateOptions(selectPlayerB);
-
-  // Tampilkan/sembunyikan handicap manual ketika dropdown dipilih
-  const handlePlayerChange = (selectEl, manualContainerId) => {
-    const container = document.getElementById(manualContainerId);
-    if (selectEl.value === "custom") {
-      container.style.opacity = "1";
-      container.style.pointerEvents = "all";
-    } else {
-      container.style.opacity = "0.4";
-      container.style.pointerEvents = "none";
-      
-      const opt = selectEl.options[selectEl.selectedIndex];
-      const hc = opt.dataset.handicap.toString().toLowerCase();
-      const side = manualContainerId.includes("-a-") ? "a" : "b";
-      const radio = document.getElementById(`hc-${side}-${hc}`);
-      if (radio) radio.checked = true;
-    }
-  };
-
-  selectPlayerA.addEventListener("change", () => handlePlayerChange(selectPlayerA, "manual-hc-a-container"));
-  selectPlayerB.addEventListener("change", () => handlePlayerChange(selectPlayerB, "manual-hc-b-container"));
-
-  // Helper local untuk kalkulasi race dengan handicap alfanumerik
-  function calculateAlphanumericRace(nameA, nameB, hcA, hcB) {
-    const tierMap = { '3B': 1, '3N': 2, '3A': 3, '4B': 4, '4A': 5 };
-    const rA = tierMap[hcA] || 3;
-    const rB = tierMap[hcB] || 3;
-    const diff = Math.abs(rA - rB);
-    const minRank = Math.min(rA, rB);
-    const maxRank = Math.max(rA, rB);
-    
-    let raceA = 5;
-    let raceB = 5;
-    
-    if (rA === rB) {
-      const baseRace = rA === 1 ? 3 : (rA === 2 ? 3 : (rA === 3 ? 4 : (rA === 4 ? 5 : 6)));
-      return {
-        raceA: baseRace,
-        raceB: baseRace,
-        notes: `Kedua pemain memiliki tingkat handicap seimbang (HC ${hcA}). Pertandingan dimainkan secara adil dengan <strong>Race to ${baseRace}</strong> tanpa voor.`
-      };
-    }
-    
-    // Perbedaan Handicap
-    if (minRank === 1 && maxRank === 2) {
-      raceA = rA === 1 ? 3 : 4;
-      raceB = rB === 1 ? 3 : 4;
-    } else if (minRank === 2 && maxRank === 3) {
-      raceA = rA === 2 ? 3 : 4;
-      raceB = rB === 2 ? 3 : 4;
-    } else if (minRank === 3 && maxRank === 4) {
-      raceA = rA === 3 ? 4 : 5;
-      raceB = rB === 3 ? 4 : 5;
-    } else if (minRank === 4 && maxRank === 5) {
-      raceA = rA === 4 ? 5 : 6;
-      raceB = rB === 4 ? 5 : 6;
-    } else if (minRank === 1 && maxRank === 3) {
-      raceA = rA === 1 ? 3 : 5;
-      raceB = rB === 1 ? 3 : 5;
-    } else if (minRank === 2 && maxRank === 4) {
-      raceA = rA === 2 ? 3 : 5;
-      raceB = rB === 2 ? 3 : 5;
-    } else if (minRank === 3 && maxRank === 5) {
-      raceA = rA === 3 ? 4 : 6;
-      raceB = rB === 3 ? 4 : 6;
-    } else if (minRank === 1 && maxRank === 4) {
-      raceA = rA === 1 ? 3 : 6;
-      raceB = rB === 1 ? 3 : 6;
-    } else if (minRank === 2 && maxRank === 5) {
-      raceA = rA === 2 ? 3 : 6;
-      raceB = rB === 2 ? 3 : 6;
-    } else if (minRank === 1 && maxRank === 5) {
-      raceA = rA === 1 ? 2 : 6;
-      raceB = rB === 1 ? 2 : 6;
-    } else {
-      if (rA < rB) {
-        raceA = 3;
-        raceB = 5;
-      } else {
-        raceA = 5;
-        raceB = 3;
-      }
-    }
-    
-    const weakerPlayer = rA < rB ? nameA : nameB;
-    const strongerPlayer = rA > rB ? nameA : nameB;
-    const weakerHc = rA < rB ? hcA : hcB;
-    const strongerHc = rA > rB ? hcA : hcB;
-    const targetWeaker = rA < rB ? raceA : raceB;
-    const targetStronger = rA > rB ? raceA : raceB;
-    
-    return {
-      raceA,
-      raceB,
-      notes: `Pertandingan handicap tidak seimbang. <strong>${weakerPlayer} (HC ${weakerHc})</strong> mendapatkan voor target kemenangan lebih pendek dengan <strong>Race to ${targetWeaker}</strong>, sedangkan <strong>${strongerPlayer} (HC ${strongerHc})</strong> harus mencapai <strong>Race to ${targetStronger}</strong>.`
-    };
-  }
-
-  // Tombol aksi kalkulasi
-  btnCalculate.addEventListener("click", () => {
-    let nameA = "Pemain A";
-    let nameB = "Pemain B";
-    let hcA = '4B';
-    let hcB = '4A';
-
-    // Ambil detail Pemain A
-    if (selectPlayerA.value !== "custom") {
-      const optA = selectPlayerA.options[selectPlayerA.selectedIndex];
-      nameA = optA.dataset.name;
-      hcA = optA.dataset.handicap.toString();
-    } else {
-      nameA = "Pemain A (Manual)";
-      const checkedRadioA = document.querySelector('input[name="hc-val-a"]:checked');
-      if (checkedRadioA) hcA = checkedRadioA.value.toString();
-    }
-
-    // Ambil detail Pemain B
-    if (selectPlayerB.value !== "custom") {
-      const optB = selectPlayerB.options[selectPlayerB.selectedIndex];
-      nameB = optB.dataset.name;
-      hcB = optB.dataset.handicap.toString();
-    } else {
-      nameB = "Pemain B (Manual)";
-      const checkedRadioB = document.querySelector('input[name="hc-val-b"]:checked');
-      if (checkedRadioB) hcB = checkedRadioB.value.toString();
-    }
-
-    // Kalkulasikan dengan helper baru alfanumerik
-    const res = calculateAlphanumericRace(nameA, nameB, hcA, hcB);
-
-    // Render ke Meja Biliar Virtual
-    document.getElementById("felt-name-a").textContent = nameA;
-    document.getElementById("felt-name-b").textContent = nameB;
-    document.getElementById("felt-hc-a").textContent = `HC ${hcA}`;
-    document.getElementById("felt-hc-b").textContent = `HC ${hcB}`;
-    document.getElementById("felt-race-a").textContent = res.raceA;
-    document.getElementById("felt-race-b").textContent = res.raceB;
-
-    // Render Keterangan
-    document.getElementById("match-calculation-notes").innerHTML = `
-      <strong>${nameA} (HC ${hcA})</strong> vs <strong>${nameB} (HC ${hcB})</strong>.<br><br>
-      ${res.notes}
-      <br><br>
-      <em>Aturan ini mendasarkan pembagian beban pertandingan yang adil agar atlet dari berbagai level bisa bertanding secara kompetitif dan sportif di Banjarnegara sesuai arahan POBSI.</em>
-    `;
-    
-    // Scroll meja hasil ke layar
-    const resultPanel = document.querySelector(".result-panel");
-    resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  });
-}
+// 9. Handicap Match Calculator Logic (Removed)
+function setupCalculator() {}
 
 // 10. Event Calendar Logic
 function renderEvents(filter = "all") {
@@ -2100,10 +1918,6 @@ function setupAdminUIListeners() {
   if (actionBoc) {
     actionBoc.addEventListener("click", () => exitAdminToPublic("tab-champions"));
   }
-  const actionCalc = document.getElementById("sidebar-action-calc");
-  if (actionCalc) {
-    actionCalc.addEventListener("click", () => exitAdminToPublic("tab-calculator"));
-  }
   const actionDocs = document.getElementById("sidebar-action-docs");
   if (actionDocs) {
     actionDocs.addEventListener("click", () => exitAdminToPublic("tab-docs"));
@@ -2117,10 +1931,6 @@ function setupAdminUIListeners() {
   const quickDocs = document.getElementById("quick-btn-docs");
   if (quickDocs) {
     quickDocs.addEventListener("click", () => exitAdminToPublic("tab-docs"));
-  }
-  const quickCalc = document.getElementById("quick-btn-calc");
-  if (quickCalc) {
-    quickCalc.addEventListener("click", () => exitAdminToPublic("tab-calculator"));
   }
 }
 
@@ -6440,8 +6250,7 @@ function openAthleteProfile(slug) {
       backText = 'Kembali ke Jadwal Event';
     } else if (fromTab === 'tab-clubs') {
       backText = 'Kembali ke Klub Biliar';
-    } else if (fromTab === 'tab-calculator') {
-      backText = 'Kembali ke Kalkulator Race';
+
     } else if (fromTab === 'tab-champions') {
       backText = 'Kembali ke Klasemen Battle of Champions';
     }
