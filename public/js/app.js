@@ -6245,11 +6245,11 @@ function openAthleteProfile(slug) {
     if (fromTab === 'tab-home') {
       backText = 'Kembali ke Beranda';
     } else if (fromTab === 'tab-handicap') {
-      backText = 'Kembali ke Rekap Handicap';
+      backText = 'Kembali ke Handicap';
     } else if (fromTab === 'tab-events') {
-      backText = 'Kembali ke Jadwal Event';
+      backText = 'Kembali ke Event';
     } else if (fromTab === 'tab-clubs') {
-      backText = 'Kembali ke Klub Biliar';
+      backText = 'Kembali ke Klub';
 
     } else if (fromTab === 'tab-champions') {
       backText = 'Kembali ke Klasemen Battle of Champions';
@@ -6431,7 +6431,7 @@ window.openPublicEventDetail = function(eventId) {
     const backBtn = document.querySelector("#public-event-detail-page .ap-back-btn");
     const backText = document.getElementById("pub-event-back-text");
     if (backBtn && backText) {
-      backText.textContent = "Kembali ke Kalender Event";
+      backText.textContent = "Kembali ke Event";
       backBtn.onclick = () => {
         closePublicEventDetail();
       };
@@ -7010,7 +7010,7 @@ function renderPublicEventDetail(event) {
     if (event.elimination_type === 'boc') {
       backTextEl.textContent = "Kembali ke Battle of Champions";
     } else {
-      backTextEl.textContent = "Kembali ke Kalender Event";
+      backTextEl.textContent = "Kembali ke Event";
     }
   }
 
