@@ -1116,7 +1116,7 @@ function renderHandicapList() {
     return matchSearch && matchHc && matchClub;
   });
 
-  tableBody.innerHTML = filtered.map(player => {
+  tableBody.innerHTML = filtered.map((player, index) => {
     const points = parseFloat(player.points || 0.0);
     const hc = player.handicap ? player.handicap.toString().trim() : '3B';
     
@@ -1153,7 +1153,7 @@ function renderHandicapList() {
 
     return `
       <tr>
-        <td style="color:var(--text-muted); font-size:0.85rem">${player.id || 'P000'}</td>
+        <td style="color:var(--text-muted); font-size:0.85rem">${index + 1}</td>
         <td class="table-name-bold">
           <div class="player-profile-cell">
             <img src="${player.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(player.name)}`}" alt="${player.name}" class="player-avatar-small" onerror="this.src='images/player-avatar.png';">
@@ -1161,7 +1161,6 @@ function renderHandicapList() {
               <span class="player-name-text">${player.name}</span>
               <span class="player-sub-info">${player.gender || 'Laki-laki'} &bull; ${player.age || 24} Tahun</span>
               <div class="player-contact-sub">
-                <span class="contact-item"><i class="fa-solid fa-phone"></i> ${player.phone || '0812-XXXX-XXXX'}</span>
                 <span class="contact-item"><i class="fa-solid fa-location-dot"></i> ${player.address || 'Banjarnegara'}</span>
               </div>
             </div>
@@ -1171,13 +1170,12 @@ function renderHandicapList() {
         <td class="text-center"><span class="table-badge-hc ${getHandicapColorClass(hc)}">HC ${hc}</span></td>
         <td class="text-center text-accent" style="font-weight:600">${points} Pts</td>
         <td style="vertical-align: middle;">${progressHtml}</td>
-        <td class="text-center"><span class="status-active-badge">${player.status || 'Aktif'}</span></td>
       </tr>
     `;
   }).join("");
 
   if (filtered.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-face-frown" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Tidak ada data pemain yang cocok</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-face-frown" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Tidak ada data pemain yang cocok</td></tr>`;
   }
 }
 
