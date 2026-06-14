@@ -1837,6 +1837,10 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--transition-smooth);
   min-width: 160px;
 }
+.select-wrapper select option {
+  background-color: #0a0f1d;
+  color: #fff;
+}
 .select-wrapper select:focus {
   border-color: var(--primary-light);
   box-shadow: 0 0 0 3px var(--primary-glow);
