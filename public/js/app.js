@@ -6238,7 +6238,8 @@ function openAthleteProfile(slug) {
   }
 
   // Set the back button text dynamically
-  let backText = 'Kembali ke Klasemen Battle of Champions';
+  const isMobile = window.innerWidth < 768;
+  let backText = isMobile ? 'Kembali ke Klasemen BOC' : 'Kembali ke Klasemen Battle of Champions';
   if (fromEvent) {
     backText = 'Kembali ke Detail Event';
   } else if (fromTab) {
@@ -6252,7 +6253,7 @@ function openAthleteProfile(slug) {
       backText = 'Kembali ke Klub';
 
     } else if (fromTab === 'tab-champions') {
-      backText = 'Kembali ke Klasemen Battle of Champions';
+      backText = isMobile ? 'Kembali ke Klasemen BOC' : 'Kembali ke Klasemen Battle of Champions';
     }
   }
 
@@ -7927,12 +7928,13 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
 
   const xLabels = ['BOC #1', 'BOC #2', 'BOC #3', 'BOC #4'];
 
-  const w = 780;
-  const h = 220;
-  const padLeft = 45;
-  const padRight = 30;
-  const padTop = 35;
-  const padBottom = 35;
+  const isMobile = window.innerWidth < 768;
+  const w = isMobile ? 360 : 780;
+  const h = isMobile ? 180 : 220;
+  const padLeft = isMobile ? 32 : 45;
+  const padRight = isMobile ? 16 : 30;
+  const padTop = isMobile ? 25 : 35;
+  const padBottom = isMobile ? 25 : 35;
   const plotW = w - padLeft - padRight;
   const plotH = h - padTop - padBottom;
 
