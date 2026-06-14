@@ -1876,6 +1876,42 @@ h1, h2, h3, h4, h5, h6 {
 }
 .premium-table tbody tr:last-child td { border-bottom: none; }
 
+/* Sticky Table Columns and Vertical Sticky Headers */
+.sticky-col {
+  position: sticky !important;
+  z-index: 2;
+}
+
+.premium-table thead th {
+  position: sticky;
+  top: 73px;
+  z-index: 3;
+  background: #0d1527 !important; /* solid navy matching header */
+}
+
+.premium-table thead th.sticky-col {
+  z-index: 4 !important;
+  top: 73px !important;
+  background: #0d1527 !important;
+}
+
+th.sticky-col {
+  z-index: 4 !important;
+  background: #0d1527 !important; /* solid navy matching header */
+}
+
+td.sticky-col {
+  background: #060b18 !important; /* solid body background */
+}
+
+tr.boc-qualified-row td.sticky-col {
+  background: #0c101e !important; /* solid background for qualified row */
+}
+
+tr:hover td.sticky-col {
+  background: #141b2f !important; /* solid background for hover */
+}
+
 /* Table Utilities */
 .text-center { text-align: center; }
 .text-green { color: var(--green); font-weight: 600; }
@@ -3897,23 +3933,56 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.78rem;
   }
 
-  /* Make non-essential sticky columns static on mobile to enable standings table scrolling */
-  #standings-table th.sticky-col:nth-child(3),
+  /* Enable internal scroll box on mobile for standing tables so headers stick to the top */
+  .table-card {
+    overflow: hidden !important;
+  }
+  .table-wrapper {
+    max-height: 65vh;
+    overflow: auto !important;
+  }
+
+  /* Make table headers sticky vertically on mobile view at top: 0px of scroll container */
+  .premium-table thead th,
+  .premium-table thead th.sticky-col {
+    top: 0px !important;
+  }
+
+  /* Make non-essential body columns static on mobile to enable standings table scrolling */
   #standings-table td.sticky-col:nth-child(3),
-  #standings-table th.sticky-col:nth-last-child(2),
   #standings-table td.sticky-col:nth-last-child(2),
-  #standings-table th.sticky-col:nth-last-child(1),
   #standings-table td.sticky-col:nth-last-child(1),
-  #boc-admin-table th.sticky-col:nth-child(3),
   #boc-admin-table td.sticky-col:nth-child(3),
-  #boc-admin-table th.sticky-col:nth-last-child(3),
   #boc-admin-table td.sticky-col:nth-last-child(3),
-  #boc-admin-table th.sticky-col:nth-last-child(2),
   #boc-admin-table td.sticky-col:nth-last-child(2),
-  #boc-admin-table th.sticky-col:nth-last-child(1),
   #boc-admin-table td.sticky-col:nth-last-child(1) {
     position: static !important;
     background: transparent !important;
+  }
+
+  /* Override horizontal sticky behavior for non-essential header columns, but keep them sticky vertically */
+  #standings-table th.sticky-col:nth-child(3),
+  #standings-table th.sticky-col:nth-last-child(2),
+  #standings-table th.sticky-col:nth-last-child(1),
+  #boc-admin-table th.sticky-col:nth-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(2),
+  #boc-admin-table th.sticky-col:nth-last-child(1) {
+    position: sticky !important;
+    top: 0px !important;
+    left: auto !important;
+    right: auto !important;
+    background: #0d1527 !important;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Allow vertical sticky headers to bind to browser window viewport on desktop */
+  .table-card {
+    overflow: visible !important;
+  }
+  .table-wrapper {
+    overflow: visible !important;
   }
 }
 
@@ -7808,6 +7877,9 @@ h1, h2, h3, h4, h5, h6 {
   gap: 24px;
   margin-bottom: 24px;
 }
+.ap-main-layout-grid > div {
+  min-width: 0;
+}
 
 .ap-breakdown-grid {
   display: flex;
@@ -8021,6 +8093,9 @@ h1, h2, h3, h4, h5, h6 {
   gap: 24px;
   margin-bottom: 24px;
 }
+.ap-lower-layout-grid > div {
+  min-width: 0;
+}
 
 /* Results Table */
 .ap-table-responsive {
@@ -8108,6 +8183,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-width: 0;
 }
 
 .ap-club-name {
@@ -8421,254 +8497,7 @@ h1, h2, h3, h4, h5, h6 {
   visibility: visible;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1180px) {
-  .ap-hero-content {
-    grid-template-columns: 1fr;
-    padding: 30px;
-    text-align: center;
-    gap: 18px;
-  }
-  .ap-hero-avatar-area {
-    margin-bottom: 5px;
-  }
-  .ap-hero-details {
-    align-items: center;
-    text-align: center;
-  }
-  .ap-hero-name-row {
-    justify-content: center;
-  }
-  .ap-hero-meta-row {
-    justify-content: center;
-  }
-  .ap-hero-right {
-    justify-content: center;
-  }
-  .ap-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .ap-main-layout-grid, .ap-lower-layout-grid {
-    grid-template-columns: 1fr;
-  }
-  .ap-nearby-layout {
-    grid-template-columns: 1fr;
-  }
-  .ap-nearby-flex-row {
-    flex-direction: column;
-    width: 100%;
-  }
-  .ap-nearby-action-card {
-    width: 100%;
-  }
-}
 
-@media (max-width: 640px) {
-  .ap-kpi-grid {
-    grid-template-columns: 1fr;
-  }
-  .ap-hero-name {
-    font-size: 1.8rem;
-  }
-  .ap-breakdown-item {
-    grid-template-columns: 35fr 50fr 15fr;
-  }
-}
-
-/* Context Dropdown Menu */
-.pm-dropdown-container {
-  position: relative;
-  display: inline-block;
-}
-
-.pm-context-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 1000;
-  display: none;
-  min-width: 140px;
-  padding: 6px 0;
-  margin-top: 4px;
-  background: var(--bg-surface-solid);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  animation: pmFadeIn 0.15s ease-out;
-}
-
-@keyframes pmFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.pm-context-menu.show {
-  display: block;
-}
-
-.pm-context-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 14px;
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: left;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.pm-context-menu-item:hover {
-  color: var(--text-main);
-  background: rgba(59, 130, 246, 0.08);
-}
-.ap-nearby-action-card:hover .ap-nac-icon-circle {
-  transform: translateX(4px);
-  background: #3b82f6;
-  color: #fff;
-}
-
-/* 11. Qualification Floating Banner */
-.ap-qualification-banner {
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
-  border: 1px solid rgba(251, 191, 36, 0.25);
-  border-radius: 12px;
-  padding: 16px 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.03);
-}
-
-.ap-qual-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.ap-qual-icon {
-  font-size: 1.6rem;
-  color: #fbbf24;
-  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
-}
-
-.ap-qual-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.ap-qual-text strong {
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #fbbf24;
-}
-
-.ap-qual-text span {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 2px;
-}
-
-/* Qualification out banner override */
-.ap-qualification-banner.ap-qual-out {
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.02) 100%);
-  border-color: rgba(239, 68, 68, 0.25);
-  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.03);
-}
-
-.ap-qualification-banner.ap-qual-out .ap-qual-icon {
-  color: #ef4444;
-  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.3));
-}
-
-.ap-qualification-banner.ap-qual-out .ap-qual-text strong {
-  color: #f87171;
-}
-
-/* Floating Toast Alert */
-.ap-copy-toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%) translateY(30px);
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  backdrop-filter: blur(10px);
-  padding: 12px 24px;
-  border-radius: 50px;
-  color: #60a5fa;
-  font-size: 0.85rem;
-  font-weight: 700;
-  z-index: 9999;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 15px rgba(59, 130, 246, 0.1);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.ap-copy-toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1180px) {
-  .ap-hero-content {
-    grid-template-columns: 1fr;
-    padding: 30px;
-    text-align: center;
-    gap: 18px;
-  }
-  .ap-hero-avatar-area {
-    margin-bottom: 5px;
-  }
-  .ap-hero-details {
-    align-items: center;
-    text-align: center;
-  }
-  .ap-hero-name-row {
-    justify-content: center;
-  }
-  .ap-hero-meta-row {
-    justify-content: center;
-  }
-  .ap-hero-right {
-    justify-content: center;
-  }
-  .ap-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .ap-main-layout-grid, .ap-lower-layout-grid {
-    grid-template-columns: 1fr;
-  }
-  .ap-nearby-layout {
-    grid-template-columns: 1fr;
-  }
-  .ap-nearby-flex-row {
-    flex-direction: column;
-    width: 100%;
-  }
-  .ap-nearby-action-card {
-    width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .ap-kpi-grid {
-    grid-template-columns: 1fr;
-  }
-  .ap-hero-name {
-    font-size: 1.8rem;
-  }
-  .ap-breakdown-item {
-    grid-template-columns: 35fr 50fr 15fr;
-  }
-}
 
 /* Context Dropdown Menu */
 .pm-dropdown-container {
@@ -8731,6 +8560,169 @@ h1, h2, h3, h4, h5, h6 {
   color: #ef4444;
 }
 
+.ap-nearby-action-card:hover .ap-nac-icon-circle {
+  transform: translateX(4px);
+  background: #3b82f6;
+  color: #fff;
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 1180px) {
+  .ap-hero-content {
+    grid-template-columns: 1fr;
+    padding: 30px;
+    text-align: center;
+    gap: 18px;
+  }
+  .ap-hero-avatar-area {
+    margin-bottom: 5px;
+  }
+  .ap-hero-details {
+    align-items: center;
+    text-align: center;
+  }
+  .ap-hero-name-row {
+    justify-content: center;
+  }
+  .ap-hero-meta-row {
+    justify-content: center;
+  }
+  .ap-hero-right {
+    justify-content: center;
+  }
+  .ap-main-layout-grid, .ap-lower-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .ap-nearby-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  #athlete-profile-page {
+    padding: 24px 16px;
+  }
+  .ap-card-box {
+    padding: 16px;
+  }
+  .ap-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  .ap-kpi-card {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+  .ap-kpi-icon-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+  .ap-kpi-value {
+    font-size: 1.35rem;
+  }
+  .ap-kpi-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.5px;
+  }
+  .ap-kpi-subtext {
+    font-size: 0.65rem;
+  }
+  .ap-meta-divider {
+    display: none;
+  }
+  .ap-boc-results-table th, 
+  .ap-boc-results-table td {
+    white-space: nowrap;
+  }
+  .ap-nearby-flex-row {
+    flex-direction: row !important;
+    overflow-x: auto;
+    width: 100% !important;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+  }
+  .ap-nearby-card-mock {
+    flex: 0 0 220px !important;
+    scroll-snap-align: start;
+    padding: 10px 12px;
+  }
+  .ap-nearby-action-card {
+    width: 100% !important;
+    height: auto;
+    min-height: 48px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ap-hero-name {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ap-breakdown-item {
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .ap-breakdown-label {
+    grid-column: 1 / span 2;
+    margin-bottom: 2px;
+  }
+  .ap-breakdown-bar-track {
+    grid-column: 1;
+    height: 7px;
+  }
+  .ap-breakdown-value {
+    grid-column: 2;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+  .ap-result-row-mock {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .ap-res-title {
+    font-size: 0.76rem;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ap-res-badge {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+  }
+  .ap-res-points {
+    font-size: 0.76rem;
+    padding: 2px 6px;
+    min-width: 55px;
+  }
+  .ap-club-info-container {
+    gap: 12px;
+  }
+  .ap-club-shield {
+    width: 65px;
+    height: 80px;
+  }
+  .ap-club-name {
+    font-size: 0.95rem;
+  }
+  .ap-club-loc {
+    margin-bottom: 6px;
+  }
+}
+
+
+
+
 /* Style premium number spinners inside admin console forms */
 .admin-form-element input[type="number"] {
   color-scheme: dark;
@@ -8746,29 +8738,6 @@ h1, h2, h3, h4, h5, h6 {
 .admin-form-element input[type="number"]::-webkit-inner-spin-button:hover,
 .admin-form-element input[type="number"]::-webkit-outer-spin-button:hover {
   opacity: 1;
-}
-
-/* Sticky Table Columns */
-.sticky-col {
-  position: sticky !important;
-  z-index: 2;
-}
-
-th.sticky-col {
-  z-index: 4 !important;
-  background: #0d1527 !important; /* solid navy matching header */
-}
-
-td.sticky-col {
-  background: #060b18 !important; /* solid body background */
-}
-
-tr.boc-qualified-row td.sticky-col {
-  background: #0c101e !important; /* solid background for qualified row */
-}
-
-tr:hover td.sticky-col {
-  background: #141b2f !important; /* solid background for hover */
 }
 
 /* ==========================================================================
