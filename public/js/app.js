@@ -1,6 +1,7 @@
 // Logic Web POBSI Kabupaten Banjarnegara - Modern Premium Billiards Platform
 let appData = POBSI_DATA; // Inisialisasi awal dengan data lokal offline dari data.js
 let standingsCurrentPage = 1;
+let handicapCurrentPage = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
@@ -1116,7 +1117,23 @@ function renderHandicapList() {
     return matchSearch && matchHc && matchClub;
   });
 
-  tableBody.innerHTML = filtered.map(player => {
+  // Pagination Configuration (20 per page)
+  const itemsPerPage = 20;
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  if (handicapCurrentPage > totalPages) {
+    handicapCurrentPage = totalPages;
+  }
+  if (handicapCurrentPage < 1) {
+    handicapCurrentPage = 1;
+  }
+
+  const startIndex = (handicapCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const pagedItems = filtered.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = pagedItems.map((player, index) => {
     const points = parseFloat(player.points || 0.0);
     const hc = player.handicap ? player.handicap.toString().trim() : '3B';
     
@@ -1152,8 +1169,8 @@ function renderHandicapList() {
     }
 
     return `
-      <tr>
-        <td style="color:var(--text-muted); font-size:0.85rem">${player.id || 'P000'}</td>
+      <tr onclick="openAthleteProfile('${generateSlug(player.name)}')" style="border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.03)'" onmouseout="this.style.backgroundColor=''">
+        <td style="color:var(--text-muted); font-size:0.85rem">${startIndex + index + 1}</td>
         <td class="table-name-bold">
           <div class="player-profile-cell">
             <img src="${player.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(player.name)}`}" alt="${player.name}" class="player-avatar-small" onerror="this.src='images/player-avatar.png';">
@@ -1161,7 +1178,6 @@ function renderHandicapList() {
               <span class="player-name-text">${player.name}</span>
               <span class="player-sub-info">${player.gender || 'Laki-laki'} &bull; ${player.age || 24} Tahun</span>
               <div class="player-contact-sub">
-                <span class="contact-item"><i class="fa-solid fa-phone"></i> ${player.phone || '0812-XXXX-XXXX'}</span>
                 <span class="contact-item"><i class="fa-solid fa-location-dot"></i> ${player.address || 'Banjarnegara'}</span>
               </div>
             </div>
@@ -1171,13 +1187,61 @@ function renderHandicapList() {
         <td class="text-center"><span class="table-badge-hc ${getHandicapColorClass(hc)}">HC ${hc}</span></td>
         <td class="text-center text-accent" style="font-weight:600">${points} Pts</td>
         <td style="vertical-align: middle;">${progressHtml}</td>
-        <td class="text-center"><span class="status-active-badge">${player.status || 'Aktif'}</span></td>
       </tr>
     `;
   }).join("");
 
-  if (filtered.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-face-frown" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Tidak ada data pemain yang cocok</td></tr>`;
+  if (totalItems === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-face-frown" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Tidak ada data pemain yang cocok</td></tr>`;
+  }
+
+  // Update Pagination Info
+  const pageRangeEl = document.getElementById("handicap-page-range");
+  const totalCountEl = document.getElementById("handicap-total-count");
+  if (pageRangeEl && totalCountEl) {
+    pageRangeEl.textContent = totalItems > 0 ? `${startIndex + 1}-${endIndex}` : "0-0";
+    totalCountEl.textContent = totalItems;
+  }
+
+  // Render Page Numbers
+  renderHandicapPageNumbers(totalPages);
+
+  // Disable/enable prev/next buttons
+  const prevBtn = document.getElementById("handicap-prev-page");
+  const nextBtn = document.getElementById("handicap-next-page");
+  if (prevBtn) prevBtn.disabled = handicapCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = handicapCurrentPage >= totalPages;
+}
+
+function renderHandicapPageNumbers(totalPages) {
+  const container = document.getElementById("handicap-page-numbers");
+  if (!container) return;
+
+  container.innerHTML = "";
+  
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.className = `pm-page-btn ${handicapCurrentPage === i ? "active" : ""}`;
+    btn.textContent = i;
+    btn.style.width = "28px";
+    btn.style.height = "28px";
+    btn.style.borderRadius = "6px";
+    btn.style.border = handicapCurrentPage === i ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.08)";
+    btn.style.background = handicapCurrentPage === i ? "var(--gradient-primary)" : "rgba(255,255,255,0.02)";
+    btn.style.color = handicapCurrentPage === i ? "#fff" : "var(--text-dim)";
+    btn.style.cursor = "pointer";
+    btn.style.fontSize = "0.78rem";
+    btn.style.fontWeight = "600";
+    btn.style.display = "flex";
+    btn.style.alignItems = "center";
+    btn.style.justifyContent = "center";
+    btn.style.transition = "var(--transition-fast)";
+    
+    btn.addEventListener("click", () => {
+      handicapCurrentPage = i;
+      renderHandicapList();
+    });
+    container.appendChild(btn);
   }
 }
 
@@ -1186,9 +1250,54 @@ function setupHandicapListeners() {
   const hcSelect = document.getElementById("handicap-filter-select");
   const clubSelect = document.getElementById("club-filter-select");
 
-  if (searchInput) searchInput.addEventListener("input", renderHandicapList);
-  if (hcSelect) hcSelect.addEventListener("change", renderHandicapList);
-  if (clubSelect) clubSelect.addEventListener("change", renderHandicapList);
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      handicapCurrentPage = 1;
+      renderHandicapList();
+    });
+  }
+  if (hcSelect) {
+    hcSelect.addEventListener("change", () => {
+      handicapCurrentPage = 1;
+      renderHandicapList();
+    });
+  }
+  if (clubSelect) {
+    clubSelect.addEventListener("change", () => {
+      handicapCurrentPage = 1;
+      renderHandicapList();
+    });
+  }
+
+  // Prev / Next button listeners
+  const prevBtn = document.getElementById("handicap-prev-page");
+  const nextBtn = document.getElementById("handicap-next-page");
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (handicapCurrentPage > 1) {
+        handicapCurrentPage--;
+        renderHandicapList();
+      }
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const searchQuery = document.getElementById("handicap-search-input").value.toLowerCase();
+      const hcFilter = document.getElementById("handicap-filter-select").value;
+      const clubFilter = document.getElementById("club-filter-select").value;
+      const filteredCount = appData.players.filter(player => {
+        const matchSearch = player.name.toLowerCase().includes(searchQuery) || player.club.toLowerCase().includes(searchQuery);
+        const matchHc = hcFilter === "all" || player.handicap.toString().trim() === hcFilter.trim();
+        const matchClub = clubFilter === "all" || player.club === clubFilter;
+        return matchSearch && matchHc && matchClub;
+      }).length;
+      const totalPages = Math.ceil(filteredCount / 20) || 1;
+      if (handicapCurrentPage < totalPages) {
+        handicapCurrentPage++;
+        renderHandicapList();
+      }
+    });
+  }
 }
 
 // 9. Handicap Match Calculator Logic (Removed)

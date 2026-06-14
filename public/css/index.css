@@ -1837,6 +1837,10 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--transition-smooth);
   min-width: 160px;
 }
+.select-wrapper select option {
+  background-color: #0a0f1d;
+  color: #fff;
+}
 .select-wrapper select:focus {
   border-color: var(--primary-light);
   box-shadow: 0 0 0 3px var(--primary-glow);
@@ -3645,7 +3649,75 @@ tr:hover td.sticky-col {
   .filter-group { width: 100%; flex-direction: column; }
   .select-wrapper select { width: 100%; }
 
-  .handicap-stats-row { grid-template-columns: 1fr; gap: 16px; }
+  .handicap-stats-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+  }
+  .handicap-stats-row .mini-stat-box {
+    padding: 12px 6px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+  }
+  .handicap-stats-row .mini-stat-label {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.2px !important;
+    margin-bottom: 2px !important;
+    line-height: 1.2 !important;
+  }
+  .handicap-stats-row .mini-stat-value {
+    font-size: 1.15rem !important;
+  }
+
+  .handicap-table-actions {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 12px 14px !important;
+  }
+  .handicap-search-box {
+    flex: 1.2 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  #handicap-search-input {
+    padding: 6px 8px 6px 26px !important;
+    font-size: 0.7rem !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+  }
+  .handicap-search-box i {
+    left: 8px !important;
+    font-size: 0.75rem !important;
+  }
+  .handicap-filter-group {
+    flex: 1.8 !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  .handicap-filter-group .select-wrapper {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  #handicap-filter-select,
+  #club-filter-select {
+    width: 100% !important;
+    padding: 6px 14px 6px 6px !important;
+    font-size: 0.7rem !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+    background-position: right 4px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 8px !important;
+  }
+  .handicap-filter-group .select-wrapper .select-icon {
+    display: none !important;
+  }
   .events-cards-grid { grid-template-columns: 1fr; }
   .footer-container { grid-template-columns: 1fr; gap: 40px; }
 
@@ -10175,13 +10247,28 @@ tr:hover td.sticky-col {
 }
 
 /* --- PREMIUM PUBLIC BOC DASHBOARD STYLING --- */
+.boc-header-flex {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .boc-select-label {
+    display: none !important;
+  }
+  .section-tag {
+    font-size: 0.72rem !important;
+    letter-spacing: 0.8px !important;
+    gap: 6px !important;
+  }
+}
+
 .boc-public-hero-card {
   display: block;
   background: linear-gradient(135deg, rgba(16, 29, 66, 0.4) 0%, rgba(6, 11, 24, 0.25) 100%);
-  border: 1px solid rgba(251, 191, 36, 0.15);
+  border: 1.5px solid rgba(251, 191, 36, 0.38);
   border-radius: var(--radius-lg);
   padding: 28px;
-  box-shadow: var(--shadow-lg), 0 0 40px rgba(251, 191, 36, 0.03);
+  box-shadow: var(--shadow-lg), 0 0 45px rgba(251, 191, 36, 0.08);
   position: relative;
   overflow: hidden;
   animation: ap-fade-in 0.5s ease-out;
