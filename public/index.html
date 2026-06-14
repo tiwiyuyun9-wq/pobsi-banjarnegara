@@ -322,21 +322,23 @@
       <div id="boc-public-standings-container">
         <!-- New Flex Header with Year Dropdown -->
         <div class="boc-header-flex">
-          <div class="section-header" style="margin-bottom: 0; padding-bottom: 0; flex: 1;">
-            <span class="section-tag"><i class="fa-solid fa-trophy"></i> Turnamen Bergengsi</span>
+          <div class="section-header" style="margin-bottom: 0; padding-bottom: 0; flex: 1; width: 100%;">
+            <div class="boc-tag-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; width: 100%;">
+              <span class="section-tag" style="margin-bottom: 0;"><i class="fa-solid fa-trophy"></i> Turnamen Bergengsi</span>
+              <!-- Year Selector dropdown -->
+              <div class="boc-season-select-wrapper" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span class="boc-select-label" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px; white-space: nowrap;"><i class="fa-solid fa-calendar-days text-accent"></i> Musim:</span>
+                <div class="select-wrapper" style="margin: 0; min-width: 100px;">
+                  <select id="boc-public-season-select" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 20px 6px 8px; border-radius: var(--radius-sm); color: #fff; font-family: var(--font-headers); font-weight: 700; font-size: 0.75rem; width: 100%; cursor: pointer;">
+                    <option value="2026">Musim 2026</option>
+                    <option value="2027">Musim 2027</option>
+                    <option value="2028">Musim 2028</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             <h1 class="section-title">Battle Of Champions <span class="dynamic-boc-year">2026</span></h1>
             <p class="section-subtitle">Papan klasemen akumulasi poin atlet biliar Banjarnegara dalam seri sirkuit Battle of Champions <span class="dynamic-boc-year">2026</span> resmi.</p>
-          </div>
-          <!-- Year Selector dropdown -->
-          <div class="boc-season-select-wrapper">
-            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;"><i class="fa-solid fa-calendar-days text-accent"></i> Pilih Musim Sirkuit</span>
-            <div class="select-wrapper" style="margin: 0; width: 100%;">
-              <select id="boc-public-season-select" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 30px 8px 12px; border-radius: var(--radius-sm); color: #fff; font-family: var(--font-headers); font-weight: 700; font-size: 0.85rem; width: 100%; cursor: pointer;">
-                <option value="2026">Musim 2026</option>
-                <option value="2027">Musim 2027</option>
-                <option value="2028">Musim 2028</option>
-              </select>
-            </div>
           </div>
         </div>
 
