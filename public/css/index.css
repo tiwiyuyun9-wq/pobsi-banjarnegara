@@ -1996,7 +1996,6 @@ h1, h2, h3, h4, h5, h6 {
 /* BOC Qualified Rows */
 .boc-qualified-row {
   background: rgba(245, 158, 11, 0.03) !important;
-  border-left: 3px solid var(--gold) !important;
 }
 .boc-qualified-row:hover { background: rgba(245, 158, 11, 0.06) !important; }
 
@@ -3865,6 +3864,56 @@ h1, h2, h3, h4, h5, h6 {
   .mobile-nav-item.active i {
     transform: translateY(-2px);
     filter: drop-shadow(0 0 5px rgba(96, 165, 250, 0.6));
+  }
+
+  .calendar-toolbar {
+    position: sticky;
+    top: 69px;
+    z-index: 99;
+    background: rgba(6, 11, 24, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    margin: -24px -16px 20px -16px;
+    padding: 12px 16px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .calendar-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .event-filter-btns {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+
+  .event-tab-btn {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+  }
+
+  /* Make non-essential sticky columns static on mobile to enable standings table scrolling */
+  #standings-table th.sticky-col:nth-child(3),
+  #standings-table td.sticky-col:nth-child(3),
+  #standings-table th.sticky-col:nth-last-child(2),
+  #standings-table td.sticky-col:nth-last-child(2),
+  #standings-table th.sticky-col:nth-last-child(1),
+  #standings-table td.sticky-col:nth-last-child(1),
+  #boc-admin-table th.sticky-col:nth-child(3),
+  #boc-admin-table td.sticky-col:nth-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(3),
+  #boc-admin-table td.sticky-col:nth-last-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(2),
+  #boc-admin-table td.sticky-col:nth-last-child(2),
+  #boc-admin-table th.sticky-col:nth-last-child(1),
+  #boc-admin-table td.sticky-col:nth-last-child(1) {
+    position: static !important;
+    background: transparent !important;
   }
 }
 
@@ -10550,8 +10599,15 @@ tr:hover td.sticky-col {
   position: relative;
 }
 
-.boc-qualified-row td:first-child {
-  border-left: 3px solid #fbbf24;
+.boc-qualified-row td:first-child::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #fbbf24;
+  z-index: 10;
 }
 
 /* Custom Cut-off Boundary Row */
