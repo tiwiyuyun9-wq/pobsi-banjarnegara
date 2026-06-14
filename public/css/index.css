@@ -4022,6 +4022,8 @@ tr:hover td.sticky-col {
   .premium-table thead th,
   .premium-table thead th.sticky-col {
     top: 0px !important;
+    background: #0d1527 !important;
+    z-index: 3 !important;
   }
 
   /* Make non-essential body columns static on mobile to enable standings table scrolling */
