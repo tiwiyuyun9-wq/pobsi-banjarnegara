@@ -160,7 +160,7 @@ function setupTabNavigation() {
   const tabPanes = document.querySelectorAll(".tab-pane");
   const navMenu = document.getElementById("navigation-menu");
   const toggleBtn = document.getElementById("mobile-menu-toggle");
-  const validTabs = ["home", "champions", "handicap", "events", "docs", "clubs"];
+  const validTabs = ["home", "champions", "handicap", "events", "docs", "clubs", "about", "privacy", "terms"];
 
   window.switchTab = function(tabId, updateHash = true) {
     // Sembunyikan semua tab pane
@@ -425,30 +425,11 @@ function loadStatistics() {
   }
   document.getElementById("hc-stat-most").textContent = `HC ${mostCommonHc}`;
 
-  // Hero Floating Cards Data
-  // Ranking 1 from standings
-  const rank1 = appData.standings.length > 0 ? appData.standings[0] : null;
-  const rank1NameEl = document.getElementById("hero-rank1-name");
-  const rank1WinrateEl = document.getElementById("hero-rank1-winrate");
-  if (rank1 && rank1NameEl) {
-    let displayName = rank1.name.toUpperCase();
-    if (displayName.length > 12) {
-      displayName = displayName.substring(0, 12).trim() + '...';
-    }
-    rank1NameEl.textContent = displayName;
-  }
-  if (rank1 && rank1WinrateEl) {
-    // Calculate a win rate estimate from points (simulated)
-    const maxPts = appData.standings.length > 0 ? Math.max(...appData.standings.map(s => s.total_points || s.points || 0)) : 100;
-    const rank1Pts = rank1.total_points || rank1.points || 0;
-    const winRate = maxPts > 0 ? Math.round((rank1Pts / maxPts) * 100) : 0;
-    rank1WinrateEl.textContent = winRate + '%';
-  }
+  // Hero Floating Cards Data: BOC Prize Pool Showcase (Static display in HTML)
 
-  // Active athletes count
-  const activeCountEl = document.getElementById("hero-active-count");
-  const activeAthletes = appData.players.filter(p => p.status === 'Aktif').length;
-  if (activeCountEl) activeCountEl.textContent = activeAthletes + '+';
+  // Average handicap display
+  const heroAvgHandicapEl = document.getElementById("hero-avg-handicap");
+  if (heroAvgHandicapEl) heroAvgHandicapEl.textContent = `HC ${hcAvg}`;
 
   // Dynamic Hero Event Card
   const heroEvent = appData.events.find(e => e.status === "Live") || 
