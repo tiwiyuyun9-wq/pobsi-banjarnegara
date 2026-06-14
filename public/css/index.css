@@ -715,7 +715,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 240px;
+  width: 280px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(37, 99, 235, 0.05);
   transition: all 0.3s ease;
   cursor: pointer;
@@ -728,7 +728,7 @@ h1, h2, h3, h4, h5, h6 {
 .card-ranking {
   position: relative;
   overflow: hidden;
-  height: 155px;
+  height: auto;
 }
 .card-athletes {
   padding: 12px 18px;
@@ -11356,6 +11356,329 @@ tr:hover td.sticky-col {
   .boc-playoff-stats-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   TENTANG KAMI, PRIVASI, & SYARAT PAGES (PREMIUM STYLING)
+   ========================================================================== */
+
+/* Tentang Kami Content Styles */
+.about-history-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+@media (max-width: 992px) {
+  .about-history-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+.about-text-card {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.about-text-card h2 {
+  font-family: var(--font-headers);
+  font-size: 1.6rem;
+  color: #FFFFFF;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.about-text-card p {
+  color: var(--text-main);
+  line-height: 1.65;
+  margin: 0;
+  font-size: 0.95rem;
+}
+.about-vision-card {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(10, 18, 48, 0.6) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.about-vision-card h3 {
+  font-family: var(--font-headers);
+  font-size: 1.3rem;
+  color: #60A5FA;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  padding-bottom: 10px;
+}
+.about-vision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.about-vision-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.about-vision-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  color: #fff;
+  font-family: var(--font-headers);
+  font-weight: 800;
+  font-size: 0.82rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+.about-vision-text {
+  color: var(--text-main);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* Board Organizational Chart Styles ("Bagan Pengurus") */
+.org-chart-section {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 40px 24px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 32px;
+}
+.org-chart-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.org-chart-header h2 {
+  font-family: var(--font-headers);
+  font-size: 1.8rem;
+  color: #FFFFFF;
+  margin: 0 0 10px 0;
+  text-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+.org-chart-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tree visualization structure */
+.org-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.org-node {
+  background: rgba(15, 23, 50, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 250px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+.org-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+.org-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headers);
+  font-weight: 800;
+  color: #fff;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-sm);
+}
+.org-node-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+.org-node-role {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  font-family: var(--font-headers);
+}
+.org-node-name {
+  font-family: var(--font-headers);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Connectors */
+.org-connector {
+  width: 2px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Badging */
+.badge-gold { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.25); color: #fbbf24; }
+.badge-blue { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); color: #60a5fa; }
+.badge-green { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; }
+.badge-purple { background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.25); color: #a78bfa; }
+.badge-commission { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-dim); }
+
+/* Node Custom borders */
+.node-pelindung { border-color: rgba(255,255,255,0.1); min-width: 280px; }
+.node-ketua { border-color: rgba(251, 191, 36, 0.45); box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
+.node-ketua .org-avatar { border-color: #fbbf24; color: #fbbf24; }
+.node-wakil { border-color: rgba(59, 130, 246, 0.45); }
+.node-wakil .org-avatar { border-color: #60a5fa; color: #60a5fa; }
+.node-sekretaris { border-color: rgba(16, 185, 129, 0.45); }
+.node-sekretaris .org-avatar { border-color: #34d399; color: #34d399; }
+.node-bendahara { border-color: rgba(139, 92, 246, 0.45); }
+.node-bendahara .org-avatar { border-color: #a78bfa; color: #a78bfa; }
+
+/* Grid columns for split roles */
+.org-split-row {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.org-commissions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+  margin-top: 10px;
+}
+@media (max-width: 992px) {
+  .org-commissions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+.org-node.node-commission {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Legal layout (Privacy Policy & Terms) */
+.legal-wrapper {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+  max-width: 900px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .legal-wrapper {
+    padding: 24px 16px;
+  }
+}
+.legal-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+.legal-title {
+  font-family: var(--font-headers);
+  font-size: 2rem;
+  color: #fff;
+  margin: 0 0 10px 0;
+}
+.legal-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.legal-section {
+  margin-bottom: 28px;
+}
+.legal-section h3 {
+  font-family: var(--font-headers);
+  font-size: 1.25rem;
+  color: #fff;
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.legal-section p {
+  color: var(--text-main);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0 0 14px 0;
+}
+.legal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.legal-list li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.legal-list li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: #60a5fa;
+  font-size: 0.75rem;
+  top: 2px;
+}
+.legal-highlight-box {
+  background: rgba(37, 99, 235, 0.04);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  margin: 20px 0;
+}
+.legal-highlight-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #60a5fa;
 }
 
 

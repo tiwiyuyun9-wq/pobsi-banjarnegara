@@ -156,44 +156,40 @@
             </div>
 
             <!-- Floating Card: Ranking 1 -->
-            <div class="hero-floating-card card-ranking" onclick="switchTab('tab-champions')">
-              <div class="ranking-card-inner">
-                <div class="ranking-card-left">
-                  <span class="floating-card-sub text-accent">RANKING 1</span>
-                  <h4 class="floating-card-title" id="hero-rank1-name">RIZKY A.</h4>
-                  <div class="ranking-winrate">
-                    <span class="winrate-label">Win Rate</span>
-                    <span class="winrate-value" id="hero-rank1-winrate">82%</span>
-                  </div>
-                  <!-- Mini line chart path SVG representation -->
-                  <div class="mini-chart-wrapper">
-                    <svg class="mini-chart-svg" viewBox="0 0 120 35" width="120" height="35">
-                      <path d="M10,28 L30,22 L50,25 L70,16 L95,8" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"></path>
-                      <circle cx="10" cy="28" r="2.5" fill="#60A5FA" filter="drop-shadow(0 0 3px #60A5FA)"></circle>
-                      <circle cx="30" cy="22" r="2.5" fill="#60A5FA" filter="drop-shadow(0 0 3px #60A5FA)"></circle>
-                      <circle cx="50" cy="25" r="2.5" fill="#60A5FA" filter="drop-shadow(0 0 3px #60A5FA)"></circle>
-                      <circle cx="70" cy="16" r="2.5" fill="#60A5FA" filter="drop-shadow(0 0 3px #60A5FA)"></circle>
-                      <circle cx="95" cy="8" r="2.5" fill="#60A5FA" filter="drop-shadow(0 0 3px #60A5FA)"></circle>
-                      <!-- Arrow pointing up-right -->
-                      <path d="M95,8 L107,3 M107,3 L101,3 M107,3 L107,9" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 3px #60A5FA)"></path>
-                    </svg>
-                  </div>
+            <!-- Floating Card: BOC Prize Pool Showcase -->
+            <div class="hero-floating-card card-ranking" onclick="switchTab('tab-champions')" style="box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; justify-content: center; height: auto; min-height: 165px;">
+              <span class="floating-card-sub text-accent" style="font-weight: 800; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-crown text-gold"></i> BATTLE OF CHAMPION 2026</span>
+              
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-size: 0.65rem; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL PRIZE POOL</span>
+                <span class="prize-pool-glorious-text" style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(251, 191, 36, 0.2); font-family: var(--font-headers);">RP 15.000.000</span>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
+                  <span style="font-size: 0.58rem; color: #fbbf24; font-weight: 800; letter-spacing: 0.3px;">JUARA 1</span>
+                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 7,5 JT</span>
                 </div>
-                <div class="ranking-card-right-img">
-                  <img src="images/player-avatar.png" alt="Rizky A. Athlete" class="ranking-player-img">
+                <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
+                  <span style="font-size: 0.58rem; color: #e2e8f0; font-weight: 800; letter-spacing: 0.3px;">JUARA 2</span>
+                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 4,5 JT</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
+                  <span style="font-size: 0.58rem; color: #f97316; font-weight: 800; letter-spacing: 0.3px;">JUARA 3</span>
+                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 3,0 JT</span>
                 </div>
               </div>
             </div>
 
-            <!-- Floating Card: Atlet Aktif (Wide Pill) -->
+            <!-- Floating Card: Rata-rata Handicap (Wide Pill) -->
             <div class="hero-floating-card card-athletes" onclick="switchTab('tab-handicap')">
               <div class="athletes-card-inner">
                 <div class="athletes-icon-wrapper">
-                  <i class="fa-solid fa-users athletes-gradient-icon"></i>
+                  <i class="fa-solid fa-chart-line athletes-gradient-icon"></i>
                 </div>
                 <div class="athletes-info">
-                  <strong id="hero-active-count">120+</strong>
-                  <small>Atlet Aktif</small>
+                  <strong id="hero-avg-handicap">HC 3.5</strong>
+                  <small>Rata-rata Handicap</small>
                 </div>
                 <div class="athletes-chevron">
                   <i class="fa-solid fa-chevron-right"></i>
@@ -690,6 +686,232 @@
       <!-- Clubs Cards Grid -->
       <div class="clubs-cards-grid" id="clubs-cards-container">
         <!-- Dynamically populated by JS -->
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 8: TENTANG KAMI & BAGAN PENGURUS
+         ============================================== -->
+    <section class="tab-pane" id="tab-about">
+      <div class="section-header">
+        <span class="section-tag"><i class="fa-solid fa-circle-info"></i> Profil Organisasi</span>
+        <h1 class="section-title">Tentang POBSI Banjarnegara</h1>
+        <p class="section-subtitle">Mengenal Persatuan Olahraga Biliar Seluruh Indonesia (POBSI) Pengurus Kabupaten Banjarnegara, sejarah, visi-misi, dan struktur kepengurusan resmi.</p>
+      </div>
+
+      <div class="about-history-grid animate-on-scroll">
+        <!-- Sejarah Singkat -->
+        <div class="about-text-card">
+          <h2><i class="fa-solid fa-clock-rotate-left text-blue"></i> Sejarah Singkat</h2>
+          <p>
+            Persatuan Olahraga Biliar Seluruh Indonesia (POBSI) Kabupaten Banjarnegara didirikan sebagai wadah resmi untuk menaungi, membina, dan mengembangkan olahraga biliar di wilayah Kabupaten Banjarnegara. Sejak berdirinya, POBSI Banjarnegara berkomitmen mengubah persepsi biliar dari sekadar permainan rekreasi menjadi cabang olahraga prestasi yang disegani di tingkat regional maupun nasional.
+          </p>
+          <p>
+            Di bawah naungan Komite Olahraga Nasional Indonesia (KONI) Kabupaten Banjarnegara, kami terus menyelenggarakan turnamen sirkuit resmi, standarisasi handicap atlet melalui database digital terintegrasi, serta pelatihan wasit dan pelatih bersertifikasi. Upaya pembinaan usia dini terus digalakkan guna melahirkan generasi muda biliar Banjarnegara yang berprestasi dan berintegritas tinggi.
+          </p>
+        </div>
+
+        <!-- Visi & Misi -->
+        <div class="about-vision-card">
+          <h3><i class="fa-solid fa-bullseye"></i> Visi & Misi</h3>
+          <div class="about-vision-list">
+            <div class="about-vision-item">
+              <span class="about-vision-number">1</span>
+              <div class="about-vision-text"><strong>Visi:</strong> Mewujudkan POBSI Banjarnegara sebagai organisasi olahraga biliar profesional yang transparan, modern, dan berprestasi unggul di tingkat nasional.</div>
+            </div>
+            <div class="about-vision-item">
+              <span class="about-vision-number">2</span>
+              <div class="about-vision-text"><strong>Misi 1:</strong> Menyelenggarakan pembinaan atlet usia dini dan turnamen sirkuit secara konsisten, berjenjang, dan berkesinambungan.</div>
+            </div>
+            <div class="about-vision-item">
+              <span class="about-vision-number">3</span>
+              <div class="about-vision-text"><strong>Misi 2:</strong> Mengembangkan platform digital handicap terintegrasi untuk menjamin keadilan kompetisi ("Fair Play") bagi seluruh atlet dan klub.</div>
+            </div>
+            <div class="about-vision-item">
+              <span class="about-vision-number">4</span>
+              <div class="about-vision-text"><strong>Misi 3:</strong> Meningkatkan kapasitas kompetensi wasit, pelatih, serta standardisasi arena olahraga biliar di Kabupaten Banjarnegara.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Struktur Kepengurusan ("Bagan Pengurus") -->
+      <div class="org-chart-section animate-on-scroll">
+        <div class="org-chart-header">
+          <h2>Struktur Organisasi POBSI Banjarnegara</h2>
+          <p>Masa Bakti Kepengurusan Pengurus Kabupaten (Pengkab) POBSI Banjarnegara</p>
+        </div>
+
+        <div class="org-tree">
+          <!-- Pelindung -->
+          <div class="org-node node-pelindung">
+            <div class="org-avatar" style="border-color: #94a3b8; color: #94a3b8;"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="org-node-details">
+              <span class="org-node-role badge-commission">Pelindung</span>
+              <span class="org-node-name">Ketua KONI Banjarnegara</span>
+            </div>
+          </div>
+
+          <div class="org-connector"></div>
+
+          <!-- Ketua Umum -->
+          <div class="org-node node-ketua">
+            <div class="org-avatar">WH</div>
+            <div class="org-node-details">
+              <span class="org-node-role badge-gold">Ketua Umum</span>
+              <span class="org-node-name">Wahyu Hidayat, S.E.</span>
+            </div>
+          </div>
+
+          <div class="org-connector"></div>
+
+          <!-- Wakil Ketua -->
+          <div class="org-node node-wakil">
+            <div class="org-avatar">BS</div>
+            <div class="org-node-details">
+              <span class="org-node-role badge-blue">Wakil Ketua</span>
+              <span class="org-node-name">FX. Bambang Setyono</span>
+            </div>
+          </div>
+
+          <div class="org-connector"></div>
+
+          <!-- Row: Sekretaris & Bendahara -->
+          <div class="org-split-row">
+            <div class="org-node node-sekretaris">
+              <div class="org-avatar">YT</div>
+              <div class="org-node-details">
+                <span class="org-node-role badge-green">Sekretaris Umum</span>
+                <span class="org-node-name">Yanto, S.Kom</span>
+              </div>
+            </div>
+
+            <div class="org-node node-bendahara">
+              <div class="org-avatar">HP</div>
+              <div class="org-node-details">
+                <span class="org-node-role badge-purple">Bendahara Umum</span>
+                <span class="org-node-name">Heri Purwanto</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="org-connector"></div>
+
+          <!-- Komisi-Komisi -->
+          <div class="org-commissions-grid">
+            <div class="org-node node-commission">
+              <span class="org-node-role badge-commission">Komisi Teknik & Handicap</span>
+              <span class="org-node-name">Slamet Riyadi</span>
+            </div>
+            <div class="org-node node-commission">
+              <span class="org-node-role badge-commission">Komisi Pembinaan Prestasi</span>
+              <span class="org-node-name">Edy Susanto, S.Pd.</span>
+            </div>
+            <div class="org-node node-commission">
+              <span class="org-node-role badge-commission">Komisi Wasit & Pertandingan</span>
+              <span class="org-node-name">Joko Wahyono</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 9: KEBIJAKAN PRIVASI
+         ============================================== -->
+    <section class="tab-pane" id="tab-privacy">
+      <div class="legal-wrapper animate-on-scroll">
+        <div class="legal-header">
+          <h1 class="legal-title"><i class="fa-solid fa-shield-halved text-blue"></i> Kebijakan Privasi</h1>
+          <span class="legal-meta">Terakhir Diperbarui: 15 Juni 2026</span>
+        </div>
+
+        <div class="legal-section">
+          <p>
+            Persatuan Olahraga Biliar Seluruh Indonesia (POBSI) Kabupaten Banjarnegara berkomitmen penuh untuk melindungi privasi atlet resmi, pengurus klub, dan pengguna platform digital kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, mengelola, mengamankan, dan memublikasikan data informasi Anda pada portal resmi ini.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h3>1. Informasi yang Kami Kumpulkan</h3>
+          <p>Untuk menunjang transparansi administrasi olahraga biliar resmi, kami mengumpulkan data-data berikut:</p>
+          <ul class="legal-list">
+            <li><strong>Profil Atlet:</strong> Nama lengkap, asal klub, data handicap level, perolehan poin sirkuit, peringkat prestasi, dan foto profil resmi.</li>
+            <li><strong>Data Kontak Sensitif:</strong> Nomor handphone/WhatsApp pengurus klub dan atlet disimpan secara aman dalam database internal terenkripsi demi kepatuhan perlindungan data pribadi dan <strong>tidak dipublikasikan secara terbuka</strong> kepada publik.</li>
+            <li><strong>Administrasi Klub:</strong> Nama arena billiard, alamat lengkap, nama pemilik/penanggung jawab, jumlah meja resmi, dan dokumen afiliasi klub.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3>2. Penggunaan Data dan Informasi</h3>
+          <p>Informasi yang dikumpulkan digunakan semata-mata untuk kepentingan perkembangan olahraga biliar Banjarnegara, meliputi:</p>
+          <ul class="legal-list">
+            <li>Penyusunan klasemen poin sirkuit utama "Battle of Champions" secara akurat dan transparan.</li>
+            <li>Sinkronisasi data handicap tingkat kabupaten untuk mewujudkan sistem pertandingan handicap yang adil bagi seluruh atlet.</li>
+            <li>Penerbitan surat edaran dan surat keputusan pengurus kabupaten POBSI Banjarnegara.</li>
+            <li>Verifikasi keanggotaan klub resmi dalam naungan KONI Kabupaten Banjarnegara.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3>3. Hak Akses dan Perubahan Data</h3>
+          <p>
+            Atlet dan klub resmi berhak meminta perubahan, pembetulan, atau pembaruan data pribadi jika terdapat kesalahan (misalnya ejaan nama atau level handicap terbaru). Pengajuan pembaruan data wajib dikoordinasikan melalui pengurus klub resmi terdaftar untuk diverifikasi oleh Komisi Teknik & Handicap POBSI Banjarnegara sebelum disetujui oleh Administrator Sistem.
+          </p>
+        </div>
+
+        <div class="legal-highlight-box">
+          <p><i class="fa-solid fa-circle-info"></i> Pertanyaan atau permintaan terkait privasi data dapat diajukan langsung melalui Humas Sekretariat POBSI Kabupaten Banjarnegara via kontak yang tertera di bagian footer halaman portal ini.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 10: SYARAT & KETENTUAN
+         ============================================== -->
+    <section class="tab-pane" id="tab-terms">
+      <div class="legal-wrapper animate-on-scroll">
+        <div class="legal-header">
+          <h1 class="legal-title"><i class="fa-solid fa-file-contract text-gold"></i> Syarat & Ketentuan</h1>
+          <span class="legal-meta">Terakhir Diperbarui: 15 Juni 2026</span>
+        </div>
+
+        <div class="legal-section">
+          <p>
+            Selamat datang di Portal Digital Resmi POBSI Kabupaten Banjarnegara. Dengan menggunakan layanan portal, mendaftarkan atlet, atau terafiliasi sebagai klub resmi, Anda dianggap menyetujui seluruh aturan, syarat, dan ketentuan penggunaan platform serta regulasi olahraga biliar resmi yang tercantum di bawah ini.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h3>1. Status Keanggotaan dan Afiliasi Klub</h3>
+          <ul class="legal-list">
+            <li>Setiap klub biliar yang ingin terdaftar secara resmi di bawah POBSI Banjarnegara wajib memenuhi persyaratan sarana prasarana penunjang latihan, termasuk ketersediaan meja biliar standar dan izin operasional arena.</li>
+            <li>Klub wajib menunjuk satu orang Penanggung Jawab (PJ) atau Pemilik Klub yang sah sebagai penghubung komunikasi administratif resmi dengan Sekretariat POBSI Banjarnegara.</li>
+            <li>POBSI Banjarnegara berhak melakukan peninjauan berkala (survei fisik) ke lokasi klub sebelum menyetujui permohonan pendaftaran atau perpanjangan status afiliasi resmi.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3>2. Sistem Handicap Sirkuit POBSI</h3>
+          <ul class="legal-list">
+            <li>Handicap Tier (HT) resmi yang terdaftar pada database portal ini ditentukan berdasarkan penilaian teknis oleh Komisi Teknik & Handicap POBSI Kabupaten Banjarnegara.</li>
+            <li>Kenaikan atau penyesuaian level handicap atlet dilakukan secara berkala melalui monitoring hasil pertandingan sirkuit kabupaten, kejuaraan resmi lainnya, dan rekomendasi tim pemantau bakat.</li>
+            <li>Manipulasi data handicap atlet saat pendaftaran turnamen sirkuit resmi diklasifikasikan sebagai pelanggaran berat "Fair Play" dan dapat dikenakan sanksi diskualifikasi dari turnamen atau pembekuan status atlet.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3>3. Kualifikasi Battle of Champions (BOC)</h3>
+          <ul class="legal-list">
+            <li>Battle of Champions merupakan turnamen puncak sirkuit tahunan yang hanya diikuti oleh 16 atlet teratas (Top 16) dengan akumulasi poin sirkuit terbanyak selama musim kualifikasi berjalan.</li>
+            <li>Poin kualifikasi dihitung secara transparan berdasarkan perolehan peringkat juara di setiap seri sirkuit kabupaten resmi yang diakui oleh POBSI Banjarnegara.</li>
+            <li>Finalis BOC wajib mematuhi kode etik berpakaian (dress code) resmi turnamen (misalnya kaos polo/jersey klub, celana bahan hitam, dan sepatu tertutup).</li>
+          </ul>
+        </div>
+
+        <div class="legal-highlight-box" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.04);">
+          <p style="color: #fbbf24;"><i class="fa-solid fa-triangle-exclamation"></i> POBSI Kabupaten Banjarnegara berhak memperbarui regulasi teknis turnamen dan syarat penggunaan portal ini sewaktu-waktu. Seluruh perubahan resmi akan diumumkan secara transparan melalui Surat Edaran digital di portal ini.</p>
+        </div>
       </div>
     </section>
 
@@ -1291,9 +1513,9 @@
         <h4 class="footer-title">Tautan Navigasi</h4>
         <ul class="footer-links-list">
           <li><a href="#" onclick="switchTab('tab-home')">Beranda Utama</a></li>
-          <li><a href="#" onclick="switchTab('tab-champions')">Klasemen Poin</a></li>
-          <li><a href="#" onclick="switchTab('tab-events')">Event</a></li>
-          <li><a href="#" onclick="switchTab('tab-handicap')">Handicap</a></li>
+          <li><a href="#" onclick="switchTab('tab-about')">Tentang Kami</a></li>
+          <li><a href="#" onclick="switchTab('tab-privacy')">Kebijakan Privasi</a></li>
+          <li><a href="#" onclick="switchTab('tab-terms')">Syarat & Ketentuan</a></li>
         </ul>
       </div>
 
@@ -4704,7 +4926,6 @@
     </div>
     <div class="sheet-content">
       <div class="sheet-menu-grid">
-
         <button class="sheet-menu-item" data-tab="tab-docs">
           <div class="sheet-icon-wrapper"><i class="fa-solid fa-file-pdf"></i></div>
           <span>Surat Edaran</span>
@@ -4712,6 +4933,18 @@
         <button class="sheet-menu-item" data-tab="tab-clubs">
           <div class="sheet-icon-wrapper"><i class="fa-solid fa-building"></i></div>
           <span>Klub</span>
+        </button>
+        <button class="sheet-menu-item" data-tab="tab-about">
+          <div class="sheet-icon-wrapper"><i class="fa-solid fa-circle-info"></i></div>
+          <span>Tentang Kami</span>
+        </button>
+        <button class="sheet-menu-item" data-tab="tab-privacy">
+          <div class="sheet-icon-wrapper"><i class="fa-solid fa-shield-halved"></i></div>
+          <span>Kebijakan Privasi</span>
+        </button>
+        <button class="sheet-menu-item" data-tab="tab-terms">
+          <div class="sheet-icon-wrapper"><i class="fa-solid fa-file-contract"></i></div>
+          <span>Syarat & Ketentuan</span>
         </button>
       </div>
     </div>
