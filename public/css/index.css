@@ -3897,6 +3897,25 @@ h1, h2, h3, h4, h5, h6 {
     padding: 6px 12px;
     font-size: 0.78rem;
   }
+
+  /* Make non-essential sticky columns static on mobile to enable standings table scrolling */
+  #standings-table th.sticky-col:nth-child(3),
+  #standings-table td.sticky-col:nth-child(3),
+  #standings-table th.sticky-col:nth-last-child(2),
+  #standings-table td.sticky-col:nth-last-child(2),
+  #standings-table th.sticky-col:nth-last-child(1),
+  #standings-table td.sticky-col:nth-last-child(1),
+  #boc-admin-table th.sticky-col:nth-child(3),
+  #boc-admin-table td.sticky-col:nth-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(3),
+  #boc-admin-table td.sticky-col:nth-last-child(3),
+  #boc-admin-table th.sticky-col:nth-last-child(2),
+  #boc-admin-table td.sticky-col:nth-last-child(2),
+  #boc-admin-table th.sticky-col:nth-last-child(1),
+  #boc-admin-table td.sticky-col:nth-last-child(1) {
+    position: static !important;
+    background: transparent !important;
+  }
 }
 
 /* Premium Athlete Avatar File Upload Zone */
