@@ -3748,6 +3748,80 @@ tr:hover td.sticky-col {
   .workspace-body { padding: 20px; }
   .admin-stats-grid { grid-template-columns: 1fr; gap: 16px; }
   .shortcut-grid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* Documents Mobile Table Responsive Optimization */
+  #docs-table thead {
+    display: none !important;
+  }
+  #docs-table tbody tr {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    position: relative !important;
+    gap: 4px !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+  }
+  #docs-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.04) !important;
+  }
+  #docs-table tbody td {
+    display: block !important;
+    width: auto !important;
+    padding: 0 !important;
+    border: none !important;
+    text-align: left !important;
+    background: transparent !important;
+  }
+  #docs-table tbody td:nth-child(1) {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    padding-right: 48px !important;
+    line-height: 1.4 !important;
+    color: var(--text-main) !important;
+  }
+  #docs-table tbody td:nth-child(4) {
+    display: none !important;
+  }
+  #docs-table tbody td:nth-child(2) {
+    font-size: 0.78rem !important;
+    color: var(--text-dim) !important;
+    display: inline-block !important;
+  }
+  #docs-table tbody td:nth-child(3) {
+    font-size: 0.78rem !important;
+    color: var(--text-dim) !important;
+    display: inline-block !important;
+  }
+  #docs-table tbody td:nth-child(3)::before {
+    content: " • " !important;
+    color: var(--text-muted) !important;
+    margin: 0 4px !important;
+  }
+  #docs-table tbody td:nth-child(5) {
+    position: absolute !important;
+    right: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+  #docs-table .btn-download-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: var(--primary-light) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  #docs-table .btn-download-icon:hover {
+    background: var(--gradient-primary) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
 }
 
 @media (max-width: 480px) {
