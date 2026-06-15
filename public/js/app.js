@@ -1402,16 +1402,20 @@ function getFileTypeLabel(title, fileType) {
 }
 
 // 11. Document Hub Logic
-function renderDocuments(searchQuery = "") {
+function renderDocuments(searchQuery = "", filterType = "ALL") {
   const tableBody = document.getElementById("docs-table-body");
   if (!tableBody) return;
 
-  const filtered = (appData.documents || []).filter(doc => 
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = (appData.documents || []).filter(doc => {
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterType === "ALL") return matchesSearch;
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return matchesSearch && docType === filterType;
+  });
 
   tableBody.innerHTML = filtered.map(doc => {
     const iconClass = getFileIconClass(doc.title, doc.fileType);
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
     return `
       <tr>
         <td class="table-name-bold">
@@ -1420,7 +1424,7 @@ function renderDocuments(searchQuery = "") {
         </td>
         <td style="color:var(--text-muted)">${doc.date}</td>
         <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
-        <td class="text-center"><span class="player-hc-badge">${doc.fileType || 'PDF'}</span></td>
+        <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
         <td class="text-center">
           <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
             <i class="fa-solid fa-arrow-down-long"></i>
@@ -1437,10 +1441,19 @@ function renderDocuments(searchQuery = "") {
 
 function setupDocsSearch() {
   const input = document.getElementById("docs-search-input");
+  const filterSelect = document.getElementById("docs-filter-type");
+
+  function handleFilter() {
+    const searchVal = input ? input.value : "";
+    const filterVal = filterSelect ? filterSelect.value : "ALL";
+    renderDocuments(searchVal, filterVal);
+  }
+
   if (input) {
-    input.addEventListener("input", (e) => {
-      renderDocuments(e.target.value);
-    });
+    input.addEventListener("input", handleFilter);
+  }
+  if (filterSelect) {
+    filterSelect.addEventListener("change", handleFilter);
   }
 }
 
@@ -14599,18 +14612,22 @@ let currentDocBase64 = "";
 let selectedFileExt = "";
 let selectedFileType = "";
 
-function renderAdminDocsDashboard(searchQuery = "") {
+function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
   const tableBody = document.getElementById("pm-doc-table-body");
   if (!tableBody) return;
 
   const docs = appData.documents || [];
-  const filtered = docs.filter(doc => 
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = docs.filter(doc => {
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterType === "ALL") return matchesSearch;
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return matchesSearch && docType === filterType;
+  });
 
   // Render Rows
   tableBody.innerHTML = filtered.map((doc, idx) => {
     const iconClass = getFileIconClass(doc.title, doc.fileType);
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
     return `
       <tr>
         <td class="text-center" style="font-weight: 600; color: var(--text-muted);">${idx + 1}</td>
@@ -14620,13 +14637,13 @@ function renderAdminDocsDashboard(searchQuery = "") {
         </td>
         <td style="color:var(--text-muted)">${doc.date}</td>
         <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
-        <td class="text-center"><span class="player-hc-badge">${doc.fileType || 'PDF'}</span></td>
+        <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
         <td class="text-center">
           <div style="display: flex; gap: 8px; justify-content: center;">
-            <a href="${doc.fileUrl || '#'}" target="_blank" class="pm-btn pm-btn-ghost pm-btn-sm" style="padding: 6px 10px; font-size: 0.8rem; display: inline-flex; align-items: center;" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
+            <a href="${doc.fileUrl || '#'}" target="_blank" class="doc-action-btn doc-action-btn-download" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
               <i class="fa-solid fa-download"></i>
             </a>
-            <button class="pm-btn pm-btn-ghost pm-btn-sm text-red" style="padding: 6px 10px; font-size: 0.8rem; display: inline-flex; align-items: center;" onclick="deleteAdminDoc('${doc.id}')" title="Hapus Dokumen">
+            <button class="doc-action-btn doc-action-btn-delete" onclick="deleteAdminDoc('${doc.id}')" title="Hapus Dokumen">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -14737,16 +14754,26 @@ function setupDocManagement() {
     btnClearDoc.addEventListener("click", resetUploadState);
   }
 
-  // Search
+  const filterTypeSelect = document.getElementById("pm-doc-filter-type");
+
+  function handleFilterChange() {
+    const searchVal = searchInput ? searchInput.value : "";
+    const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+    renderAdminDocsDashboard(searchVal, filterVal);
+  }
+
   if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      renderAdminDocsDashboard(e.target.value);
-    });
+    searchInput.addEventListener("input", handleFilterChange);
+  }
+
+  if (filterTypeSelect) {
+    filterTypeSelect.addEventListener("change", handleFilterChange);
   }
 
   if (btnReset) {
     btnReset.addEventListener("click", () => {
       if (searchInput) searchInput.value = "";
+      if (filterTypeSelect) filterTypeSelect.value = "ALL";
       renderAdminDocsDashboard();
     });
   }
@@ -14757,14 +14784,12 @@ function setupDocManagement() {
 
     dropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dropZone.style.borderColor = "var(--color-accent)";
-      dropZone.style.background = "rgba(255,255,255,0.05)";
+      dropZone.classList.add("dragover");
     });
 
     ["dragleave", "drop"].forEach(eventName => {
       dropZone.addEventListener(eventName, () => {
-        dropZone.style.borderColor = "rgba(255,255,255,0.15)";
-        dropZone.style.background = "transparent";
+        dropZone.classList.remove("dragover");
       });
     });
 
@@ -14886,6 +14911,10 @@ function setupDocManagement() {
             resetUploadState();
             if (modal) modal.style.display = "none";
 
+            // Reset search/filter inputs
+            if (searchInput) searchInput.value = "";
+            if (filterTypeSelect) filterTypeSelect.value = "ALL";
+
             // Reload data
             await loadDataFromApi();
             renderAdminDocsDashboard();
@@ -14916,6 +14945,10 @@ function setupDocManagement() {
         form.reset();
         resetUploadState();
         if (modal) modal.style.display = "none";
+
+        // Reset search/filter inputs
+        if (searchInput) searchInput.value = "";
+        if (filterTypeSelect) filterTypeSelect.value = "ALL";
 
         renderAdminDocsDashboard();
         renderDocuments();

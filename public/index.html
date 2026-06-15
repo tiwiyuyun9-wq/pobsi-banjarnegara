@@ -611,11 +611,22 @@
       </div>
 
       <div class="table-card">
-        <div class="table-actions">
+        <div class="table-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <h2 class="table-card-title"><i class="fa-solid fa-download"></i> Pusat Unduhan Berkas</h2>
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="docs-search-input" placeholder="Cari nama dokumen...">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="search-box" style="margin: 0;">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="docs-search-input" placeholder="Cari nama dokumen...">
+            </div>
+            <div class="select-wrapper">
+              <i class="fa-solid fa-file-invoice select-icon"></i>
+              <select id="docs-filter-type" aria-label="Filter Format File">
+                <option value="ALL">Semua Format</option>
+                <option value="PDF">PDF</option>
+                <option value="WORD">Word (.docx/.doc)</option>
+                <option value="EXCEL">Excel (.xlsx/.xls)</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -4720,9 +4731,8 @@
           </div>
         </div>
 
-        <!-- PANE 6: KELOLA SURAT EDARAN — Document Management Console -->
         <div class="workspace-pane" id="pane-docs" style="display:none;">
-          <div class="pm-console">
+          <div class="pm-console" style="grid-template-columns: 1fr;">
             <!-- LEFT: Main Content Area -->
             <div class="pm-main">
               <!-- Page Header -->
@@ -4757,8 +4767,15 @@
                 <div class="pm-stat-card">
                   <div class="pm-stat-icon green"><i class="fa-solid fa-calendar-check"></i></div>
                   <div class="pm-stat-info">
-                    <span class="pm-stat-value" id="pm-docs-latest-date">-</span>
+                    <span class="pm-stat-value" id="pm-docs-latest-date" style="font-size: 1.15rem; line-height: 1.4; white-space: nowrap;">-</span>
                     <span class="pm-stat-label">Rilis Terbaru</span>
+                  </div>
+                </div>
+                <div class="pm-stat-card">
+                  <div class="pm-stat-icon purple"><i class="fa-solid fa-file-shield"></i></div>
+                  <div class="pm-stat-info">
+                    <span class="pm-stat-value" style="font-size: 1.15rem; line-height: 1.4; white-space: nowrap;">PDF, DOC, XLS</span>
+                    <span class="pm-stat-label">Format File</span>
                   </div>
                 </div>
               </div>
@@ -4770,6 +4787,14 @@
                   <input type="text" id="pm-doc-search-input" placeholder="Cari surat edaran..." autocomplete="off">
                 </div>
                 <div class="pm-filter-group">
+                  <div class="pm-select-wrap">
+                    <select id="pm-doc-filter-type">
+                      <option value="ALL">Semua Format</option>
+                      <option value="PDF">PDF</option>
+                      <option value="WORD">Word (.docx/.doc)</option>
+                      <option value="EXCEL">Excel (.xlsx/.xls)</option>
+                    </select>
+                  </div>
                   <button class="pm-btn pm-btn-ghost" id="pm-doc-reset-filters">
                     <i class="fa-solid fa-rotate-left"></i> Reset
                   </button>
@@ -4825,10 +4850,10 @@
                   <div class="form-group-item" style="margin-bottom: 20px;">
                     <label class="form-lbl">Unggah Dokumen Resmi (PDF, Word, Excel)</label>
                     <input type="file" id="adm-doc-file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
-                    <div class="avatar-upload-zone" id="doc-drop-zone" style="height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px dashed rgba(255,255,255,0.15); border-radius: var(--radius-sm); cursor: pointer; padding: 20px; text-align: center; transition: all 0.3s ease;">
-                      <i class="fa-solid fa-file-invoice upload-zone-icon" style="font-size: 1.8rem; margin-bottom: 8px; color: var(--text-muted);"></i>
-                      <span class="upload-zone-text" style="font-size: 0.85rem;">Tarik file ke sini atau <strong>klik untuk upload</strong></span>
-                      <span class="upload-zone-sub" style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Format: PDF, Word, Excel (Maks. 5MB)</span>
+                    <div class="doc-upload-zone" id="doc-drop-zone">
+                      <i class="fa-solid fa-file-invoice upload-zone-icon"></i>
+                      <span class="upload-zone-text">Tarik file ke sini atau <strong>klik untuk upload</strong></span>
+                      <span class="upload-zone-sub">Format: PDF, Word, Excel (Maks. 5MB)</span>
                     </div>
                     <div class="avatar-upload-preview" id="doc-preview-container" style="display: none; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
                       <i id="doc-preview-icon" class="fa-solid fa-file-pdf text-red" style="font-size: 2rem;"></i>

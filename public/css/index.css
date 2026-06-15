@@ -5773,8 +5773,10 @@ tr:hover td.sticky-col {
 }
 
 .pm-stat-card {
-  background: var(--bg-surface-solid);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 26, 46, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-md);
   padding: 18px 20px;
   display: flex;
@@ -5783,9 +5785,9 @@ tr:hover td.sticky-col {
   transition: var(--transition-smooth);
 }
 .pm-stat-card:hover {
-  border-color: var(--border-glow);
-  box-shadow: var(--shadow-neon);
-  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-neon-strong);
+  transform: translateY(-3px);
 }
 
 .pm-stat-icon {
@@ -5802,6 +5804,7 @@ tr:hover td.sticky-col {
 .pm-stat-icon.green { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.15); }
 .pm-stat-icon.amber { background: rgba(245, 158, 11, 0.1); color: var(--gold-light); border: 1px solid rgba(245, 158, 11, 0.15); }
 .pm-stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.15); }
+.pm-stat-icon.red { background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.15); }
 
 .pm-stat-info { display: flex; flex-direction: column; }
 .pm-stat-value { font-family: var(--font-headers); font-size: 1.6rem; font-weight: 800; line-height: 1.1; color: var(--text-main); }
@@ -11680,6 +11683,126 @@ tr:hover td.sticky-col {
   font-size: 0.9rem;
   color: #60a5fa;
 }
+
+/* ==========================================================================
+   POBSI Circular Letters & Documents Polish Styles
+   ========================================================================== */
+
+/* Dynamic Colored Badges for Circular Letters Formats */
+.doc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-headers);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.doc-badge-pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+.doc-badge-word {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+}
+.doc-badge-excel {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+/* Action buttons for Documents */
+.doc-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-size: 0.85rem;
+  background: transparent;
+}
+.doc-action-btn-download {
+  background: rgba(59, 130, 246, 0.08);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.12);
+}
+.doc-action-btn-download:hover {
+  background: rgba(59, 130, 246, 0.22);
+  color: #fff;
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  transform: scale(1.05);
+}
+.doc-action-btn-delete {
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.12);
+}
+.doc-action-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fff;
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+/* Document Upload Area Premium Layout */
+.doc-upload-zone {
+  height: 125px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 20px;
+  text-align: center;
+  background: rgba(15, 23, 50, 0.15);
+  transition: var(--transition-smooth);
+  position: relative;
+}
+.doc-upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.04);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+}
+.doc-upload-zone.dragover {
+  border-color: var(--accent-light);
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  transform: scale(1.01);
+}
+.doc-upload-zone i {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+}
+.doc-upload-zone:hover i, .doc-upload-zone.dragover i {
+  color: var(--accent-light);
+  transform: translateY(-2px);
+}
+.doc-upload-zone .upload-zone-text {
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+.doc-upload-zone .upload-zone-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
 
 
 
