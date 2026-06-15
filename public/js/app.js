@@ -2,6 +2,8 @@
 let appData = POBSI_DATA; // Inisialisasi awal dengan data lokal offline dari data.js
 let standingsCurrentPage = 1;
 let handicapCurrentPage = 1;
+let docsCurrentPage = 1;
+let admDocsCurrentPage = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
@@ -1378,42 +1380,187 @@ function setupEventsFilters() {
   });
 }
 
+// Helper untuk mendeteksi ikon dokumen secara dinamis
+function getFileIconClass(title, fileType) {
+  const lower = (title || "").toLowerCase();
+  const type = (fileType || "").toUpperCase();
+  if (lower.endsWith('.pdf') || type === 'PDF' || type.includes('PDF')) {
+    return 'fa-solid fa-file-pdf text-red';
+  } else if (lower.endsWith('.doc') || lower.endsWith('.docx') || type === 'DOC' || type === 'WORD' || type.includes('WORD') || type.includes('OFFICEDOCUMENT.WORDPROCESSINGML')) {
+    return 'fa-solid fa-file-word text-blue';
+  } else if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || type === 'EXCEL' || type === 'XLS' || type.includes('EXCEL') || type.includes('OFFICEDOCUMENT.SPREADSHEETML')) {
+    return 'fa-solid fa-file-excel text-green';
+  }
+  return 'fa-solid fa-file text-muted';
+}
+
+function getFileTypeLabel(title, fileType) {
+  const lower = (title || "").toLowerCase();
+  const type = (fileType || "").toUpperCase();
+  if (lower.endsWith('.pdf') || type === 'PDF' || type.includes('PDF')) return 'PDF';
+  if (lower.endsWith('.docx') || lower.endsWith('.doc') || type === 'DOC' || type === 'WORD' || type.includes('WORD')) return 'WORD';
+  if (lower.endsWith('.xlsx') || lower.endsWith('.xls') || type === 'EXCEL' || type === 'XLS' || type.includes('EXCEL')) return 'EXCEL';
+  return 'PDF';
+}
+
 // 11. Document Hub Logic
-function renderDocuments(searchQuery = "") {
+function renderDocuments(searchQuery = "", filterType = "ALL") {
   const tableBody = document.getElementById("docs-table-body");
   if (!tableBody) return;
 
-  const filtered = appData.documents.filter(doc => 
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = (appData.documents || []).filter(doc => {
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterType === "ALL") return matchesSearch;
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return matchesSearch && docType === filterType;
+  });
 
-  tableBody.innerHTML = filtered.map(doc => `
-    <tr>
-      <td class="table-name-bold">
-        <i class="fa-solid fa-file-pdf text-red" style="margin-right:8px; font-size:1.1rem"></i>
-        ${doc.title}
-      </td>
-      <td style="color:var(--text-muted)">${doc.date}</td>
-      <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
-      <td class="text-center"><span class="player-hc-badge">${doc.fileType || 'PDF'}</span></td>
-      <td class="text-center">
-        <a href="#" class="btn-download-icon" aria-label="Unduh ${doc.title}" onclick="alert('Mengunduh berkas: ${doc.title}'); return false;">
-          <i class="fa-solid fa-arrow-down-long"></i>
-        </a>
-      </td>
-    </tr>
-  `).join("");
+  const totalItems = filtered.length;
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-  if (filtered.length === 0) {
+  if (docsCurrentPage > totalPages) {
+    docsCurrentPage = totalPages;
+  }
+  if (docsCurrentPage < 1) {
+    docsCurrentPage = 1;
+  }
+
+  const startIndex = (docsCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedDocs = filtered.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = paginatedDocs.map(doc => {
+    const iconClass = getFileIconClass(doc.title, doc.fileType);
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return `
+      <tr>
+        <td class="table-name-bold">
+          <i class="${iconClass}" style="margin-right:8px; font-size:1.1rem"></i>
+          ${doc.title}
+        </td>
+        <td style="color:var(--text-muted)">${doc.date}</td>
+        <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
+        <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
+        <td class="text-center">
+          <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="showCustomToast('Unduhan tidak tersedia untuk dokumen ini.', 'error'); return false;"`}>
+            <i class="fa-solid fa-arrow-down-long"></i>
+          </a>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  if (totalItems === 0) {
     tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Dokumen resmi tidak ditemukan</td></tr>`;
+  }
+
+  // Update Pagination Info
+  const pageRangeEl = document.getElementById("docs-page-range");
+  const totalCountEl = document.getElementById("docs-total-count");
+  if (pageRangeEl && totalCountEl) {
+    pageRangeEl.textContent = totalItems > 0 ? `${startIndex + 1}-${endIndex}` : "0-0";
+    totalCountEl.textContent = totalItems;
+  }
+
+  // Render Page Numbers
+  renderDocsPageNumbers(totalPages);
+}
+
+function renderDocsPageNumbers(totalPages) {
+  const container = document.getElementById("docs-page-numbers");
+  const prevBtn = document.getElementById("docs-prev-page");
+  const nextBtn = document.getElementById("docs-next-page");
+
+  if (prevBtn) prevBtn.disabled = docsCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = docsCurrentPage >= totalPages;
+
+  if (!container) return;
+  container.innerHTML = "";
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, docsCurrentPage - Math.floor(maxVisible / 2));
+  let endPage = startPage + maxVisible - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.className = `pm-page-btn ${docsCurrentPage === i ? "active" : ""}`;
+    btn.textContent = i;
+    btn.style.width = "28px";
+    btn.style.height = "28px";
+    btn.style.borderRadius = "6px";
+    btn.style.border = docsCurrentPage === i ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.08)";
+    btn.style.background = docsCurrentPage === i ? "var(--gradient-primary)" : "rgba(255,255,255,0.02)";
+    btn.style.color = docsCurrentPage === i ? "#fff" : "var(--text-dim)";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "600";
+    btn.style.fontSize = "0.75rem";
+    
+    btn.addEventListener("click", () => {
+      docsCurrentPage = i;
+      const searchVal = document.getElementById("docs-search-input")?.value || "";
+      const filterVal = document.getElementById("docs-filter-type")?.value || "ALL";
+      renderDocuments(searchVal, filterVal);
+    });
+    container.appendChild(btn);
   }
 }
 
 function setupDocsSearch() {
   const input = document.getElementById("docs-search-input");
+  const filterSelect = document.getElementById("docs-filter-type");
+
+  function handleFilter() {
+    docsCurrentPage = 1; // Reset to page 1 on filter/search change
+    const searchVal = input ? input.value : "";
+    const filterVal = filterSelect ? filterSelect.value : "ALL";
+    renderDocuments(searchVal, filterVal);
+  }
+
   if (input) {
-    input.addEventListener("input", (e) => {
-      renderDocuments(e.target.value);
+    input.addEventListener("input", handleFilter);
+  }
+  if (filterSelect) {
+    filterSelect.addEventListener("change", handleFilter);
+  }
+
+  // Bind pagination arrows
+  const prevBtn = document.getElementById("docs-prev-page");
+  const nextBtn = document.getElementById("docs-next-page");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (docsCurrentPage > 1) {
+        docsCurrentPage--;
+        const searchVal = input ? input.value : "";
+        const filterVal = filterSelect ? filterSelect.value : "ALL";
+        renderDocuments(searchVal, filterVal);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const docs = appData.documents || [];
+      const searchVal = input ? input.value : "";
+      const filterVal = filterSelect ? filterSelect.value : "ALL";
+      const filteredCount = docs.filter(doc => {
+        const matchesSearch = doc.title.toLowerCase().includes(searchVal.toLowerCase());
+        if (filterVal === "ALL") return matchesSearch;
+        const docType = getFileTypeLabel(doc.title, doc.fileType);
+        return matchesSearch && docType === filterVal;
+      }).length;
+      const totalPages = Math.ceil(filteredCount / 10) || 1;
+
+      if (docsCurrentPage < totalPages) {
+        docsCurrentPage++;
+        renderDocuments(searchVal, filterVal);
+      }
     });
   }
 }
@@ -1677,6 +1824,7 @@ window.switchAdminPane = function(paneId, updateHash = true) {
       if (paneId === "pane-clubs") paneTitle.textContent = "Kelola Klub Biliar";
       if (paneId === "pane-athlete-detail") paneTitle.textContent = "Detail Profil Atlet";
       if (paneId === "pane-club-detail") paneTitle.textContent = "Detail Profil Klub";
+      if (paneId === "pane-docs") paneTitle.textContent = "Kelola Surat Edaran";
     }
 
   // Bersihkan path ke /admin jika bukan halaman detail atlet atau detail klub
@@ -1708,6 +1856,12 @@ window.switchAdminPane = function(paneId, updateHash = true) {
   if (paneId === "pane-events") {
     if (typeof renderAdminEventsDashboard === "function") {
       renderAdminEventsDashboard();
+    }
+  }
+
+  if (paneId === "pane-docs") {
+    if (typeof renderAdminDocsDashboard === "function") {
+      renderAdminDocsDashboard();
     }
   }
 };
@@ -2066,6 +2220,7 @@ async function setupAdminPanel() {
   setupAthleteDetailActions();
   setupClubDetailActions();
   setupBocAdminListeners();
+  setupDocManagement();
 
   // --- LOGIC DIRECT FILE UPLOAD AVATAR ---
   let currentUploadedAvatarBase64 = "";
@@ -14557,3 +14712,530 @@ function setupDatePickers() {
     flatpickr("#edit-evt-date-wrapper", config);
   }
 }
+
+// ==========================================================================
+// 13. Kelola Surat Edaran Admin Logic (Upload PDF/Word/Excel Base64 & CRUD)
+// ==========================================================================
+let currentDocBase64 = "";
+let selectedFileExt = "";
+let selectedFileType = "";
+
+function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
+  const tableBody = document.getElementById("pm-doc-table-body");
+  if (!tableBody) return;
+
+  const docs = appData.documents || [];
+  const filtered = docs.filter(doc => {
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterType === "ALL") return matchesSearch;
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return matchesSearch && docType === filterType;
+  });
+
+  const totalItems = filtered.length;
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  if (admDocsCurrentPage > totalPages) {
+    admDocsCurrentPage = totalPages;
+  }
+  if (admDocsCurrentPage < 1) {
+    admDocsCurrentPage = 1;
+  }
+
+  const startIndex = (admDocsCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedDocs = filtered.slice(startIndex, endIndex);
+
+  // Render Rows
+  tableBody.innerHTML = paginatedDocs.map((doc, idx) => {
+    const iconClass = getFileIconClass(doc.title, doc.fileType);
+    const docType = getFileTypeLabel(doc.title, doc.fileType);
+    return `
+      <tr>
+        <td class="text-center" style="font-weight: 600; color: var(--text-muted);">${startIndex + idx + 1}</td>
+        <td class="table-name-bold">
+          <i class="${iconClass}" style="margin-right:8px; font-size:1.1rem"></i>
+          ${doc.title}
+        </td>
+        <td style="color:var(--text-muted)">${doc.date}</td>
+        <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
+        <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
+        <td class="text-center">
+          <div style="display: flex; gap: 8px; justify-content: center;">
+            <a href="${doc.fileUrl || '#'}" target="_blank" class="doc-action-btn doc-action-btn-download" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="showCustomToast('Unduhan tidak tersedia untuk dokumen ini.', 'error'); return false;"`}>
+              <i class="fa-solid fa-download"></i>
+            </a>
+            <button class="doc-action-btn doc-action-btn-delete" onclick="deleteAdminDoc('${doc.id}')" title="Hapus Dokumen">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  if (totalItems === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Surat edaran tidak ditemukan</td></tr>`;
+  }
+
+  // Update Stats row
+  const totalDocsEl = document.getElementById("pm-total-docs");
+  const totalSizeEl = document.getElementById("pm-docs-size");
+  const latestDateEl = document.getElementById("pm-docs-latest-date");
+
+  if (totalDocsEl) totalDocsEl.textContent = docs.length;
+
+  // Calculate total size
+  let totalKB = 0;
+  docs.forEach(d => {
+    let sizeStr = d.fileSize || "0 KB";
+    let val = parseFloat(sizeStr);
+    if (isNaN(val)) val = 0;
+    if (sizeStr.toUpperCase().includes("MB")) {
+      totalKB += val * 1024;
+    } else {
+      totalKB += val;
+    }
+  });
+
+  if (totalSizeEl) {
+    if (totalKB >= 1024) {
+      totalSizeEl.textContent = (totalKB / 1024).toFixed(1) + " MB";
+    } else {
+      totalSizeEl.textContent = totalKB.toFixed(0) + " KB";
+    }
+  }
+
+  if (latestDateEl) {
+    if (docs.length > 0) {
+      latestDateEl.textContent = docs[0].date;
+    } else {
+      latestDateEl.textContent = "-";
+    }
+  }
+
+  // Update Pagination Info
+  const pageRangeEl = document.getElementById("adm-docs-page-range");
+  const totalCountEl = document.getElementById("adm-docs-total-count");
+  if (pageRangeEl && totalCountEl) {
+    pageRangeEl.textContent = totalItems > 0 ? `${startIndex + 1}-${endIndex}` : "0-0";
+    totalCountEl.textContent = totalItems;
+  }
+
+  // Render Page Numbers
+  renderAdminDocsPageNumbers(totalPages);
+}
+
+function renderAdminDocsPageNumbers(totalPages) {
+  const container = document.getElementById("adm-docs-page-numbers");
+  const prevBtn = document.getElementById("adm-docs-prev-page");
+  const nextBtn = document.getElementById("adm-docs-next-page");
+
+  if (prevBtn) prevBtn.disabled = admDocsCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = admDocsCurrentPage >= totalPages;
+
+  if (!container) return;
+  container.innerHTML = "";
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, admDocsCurrentPage - Math.floor(maxVisible / 2));
+  let endPage = startPage + maxVisible - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.className = `pm-page-btn ${admDocsCurrentPage === i ? "active" : ""}`;
+    btn.textContent = i;
+    btn.style.width = "28px";
+    btn.style.height = "28px";
+    btn.style.borderRadius = "6px";
+    btn.style.border = admDocsCurrentPage === i ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.08)";
+    btn.style.background = admDocsCurrentPage === i ? "var(--gradient-primary)" : "rgba(255,255,255,0.02)";
+    btn.style.color = admDocsCurrentPage === i ? "#fff" : "var(--text-dim)";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "600";
+    btn.style.fontSize = "0.75rem";
+    
+    btn.addEventListener("click", () => {
+      admDocsCurrentPage = i;
+      const searchVal = document.getElementById("pm-doc-search-input")?.value || "";
+      const filterVal = document.getElementById("pm-doc-filter-type")?.value || "ALL";
+      renderAdminDocsDashboard(searchVal, filterVal);
+    });
+    container.appendChild(btn);
+  }
+}
+
+function setupDocManagement() {
+  const modal = document.getElementById("pm-add-doc-modal");
+  const btnOpen = document.getElementById("btn-open-add-doc-modal");
+  const btnClose = document.getElementById("pm-doc-modal-close");
+  const form = document.getElementById("form-admin-add-doc");
+
+  const searchInput = document.getElementById("pm-doc-search-input");
+  const btnReset = document.getElementById("pm-doc-reset-filters");
+
+  const dropZone = document.getElementById("doc-drop-zone");
+  const fileInput = document.getElementById("adm-doc-file");
+  const previewContainer = document.getElementById("doc-preview-container");
+  const previewFilename = document.getElementById("doc-preview-filename");
+  const btnClearDoc = document.getElementById("btn-clear-doc");
+
+  // Open modal
+  if (btnOpen && modal) {
+    btnOpen.addEventListener("click", () => {
+      // Role Check
+      const role = localStorage.getItem("pobsi_admin_role") || "admin";
+      const restrictOverlay = document.getElementById("restrict-docs-overlay");
+      if (restrictOverlay) {
+        restrictOverlay.style.display = role === "staff" ? "flex" : "none";
+      }
+
+      // Prepopulate date input with today's date in Indonesian
+      const dateInput = document.getElementById("adm-doc-date");
+      if (dateInput) {
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const today = new Date();
+        dateInput.value = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+      }
+
+      modal.style.display = "flex";
+    });
+  }
+
+  // Close modal
+  if (btnClose && modal) {
+    btnClose.addEventListener("click", () => { modal.style.display = "none"; });
+  }
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+  }
+
+  // Reset form / upload state
+  function resetUploadState() {
+    currentDocBase64 = "";
+    selectedFileExt = "";
+    selectedFileType = "";
+    if (fileInput) fileInput.value = "";
+    if (dropZone) dropZone.style.display = "flex";
+    if (previewContainer) previewContainer.style.display = "none";
+  }
+
+  if (btnClearDoc) {
+    btnClearDoc.addEventListener("click", resetUploadState);
+  }
+
+  const filterTypeSelect = document.getElementById("pm-doc-filter-type");
+
+  function handleFilterChange() {
+    admDocsCurrentPage = 1; // Reset to page 1 on filter/search change
+    const searchVal = searchInput ? searchInput.value : "";
+    const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+    renderAdminDocsDashboard(searchVal, filterVal);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", handleFilterChange);
+  }
+
+  if (filterTypeSelect) {
+    filterTypeSelect.addEventListener("change", handleFilterChange);
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      if (filterTypeSelect) filterTypeSelect.value = "ALL";
+      admDocsCurrentPage = 1;
+      renderAdminDocsDashboard();
+    });
+  }
+
+  // Bind pagination arrows for admin docs
+  const prevBtn = document.getElementById("adm-docs-prev-page");
+  const nextBtn = document.getElementById("adm-docs-next-page");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (admDocsCurrentPage > 1) {
+        admDocsCurrentPage--;
+        const searchVal = searchInput ? searchInput.value : "";
+        const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+        renderAdminDocsDashboard(searchVal, filterVal);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const docs = appData.documents || [];
+      const searchVal = searchInput ? searchInput.value : "";
+      const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+      const filteredCount = docs.filter(doc => {
+        const matchesSearch = doc.title.toLowerCase().includes(searchVal.toLowerCase());
+        if (filterVal === "ALL") return matchesSearch;
+        const docType = getFileTypeLabel(doc.title, doc.fileType);
+        return matchesSearch && docType === filterVal;
+      }).length;
+      const totalPages = Math.ceil(filteredCount / 10) || 1;
+
+      if (admDocsCurrentPage < totalPages) {
+        admDocsCurrentPage++;
+        renderAdminDocsDashboard(searchVal, filterVal);
+      }
+    });
+  }
+
+  // File Upload Drag & Drop
+  if (dropZone && fileInput) {
+    dropZone.addEventListener("click", () => fileInput.click());
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.classList.remove("dragover");
+      });
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleDocFileSelection(files[0]);
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (files.length > 0) handleDocFileSelection(files[0]);
+    });
+  }
+
+  function handleDocFileSelection(file) {
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ];
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".xls", ".xlsx"];
+    const fileExt = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExt)) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah berkas PDF, Word, atau Excel.", "error");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showCustomToast("Ukuran dokumen terlalu besar! Maksimal batas ukuran berkas adalah 5MB.", "error");
+      return;
+    }
+
+    selectedFileExt = fileExt;
+    selectedFileType = getFileTypeLabel(file.name, file.type);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentDocBase64 = e.target.result;
+      
+      // Update UI Previews
+      if (previewFilename) {
+        previewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      }
+
+      // Update Preview Icon dynamically
+      const previewIcon = document.getElementById("doc-preview-icon");
+      if (previewIcon) {
+        previewIcon.className = getFileIconClass(file.name, file.type);
+        previewIcon.style.fontSize = "2rem";
+      }
+
+      const filetypeLabel = document.getElementById("doc-preview-filetype-label");
+      if (filetypeLabel) {
+        filetypeLabel.textContent = `Format ${selectedFileType} Terverifikasi`;
+      }
+      
+      if (dropZone) dropZone.style.display = "none";
+      if (previewContainer) previewContainer.style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Form Submit
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Role restrict check
+      const role = localStorage.getItem("pobsi_admin_role") || "admin";
+      if (role === "staff") {
+        showCustomToast("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat mengunggah berkas.", "error");
+        return;
+      }
+
+      const titleInput = document.getElementById("adm-doc-title");
+      const dateInput = document.getElementById("adm-doc-date");
+
+      const title = titleInput.value.trim();
+      const date = dateInput.value.trim();
+
+      if (!title || !date) {
+        showCustomToast("Judul dokumen dan tanggal rilis wajib diisi!", "error");
+        return;
+      }
+
+      if (!currentDocBase64) {
+        showCustomToast("Silakan pilih berkas dokumen untuk diunggah!", "error");
+        return;
+      }
+
+      // Calculate file size string
+      const previewText = previewFilename ? previewFilename.textContent : "";
+      const sizeMatch = previewText.match(/\((.*?)\)/);
+      const fileSize = sizeMatch ? sizeMatch[1] : "500 KB";
+
+      const payload = {
+        title,
+        date,
+        fileSize,
+        fileType: selectedFileType || "PDF",
+        fileExtension: selectedFileExt || ".pdf",
+        fileData: currentDocBase64
+      };
+
+      if (isServerOnline) {
+        try {
+          const res = await fetch('/api/docs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (res.ok) {
+            showCustomToast(`Berhasil mengunggah dokumen "${title}"!`, "success");
+            form.reset();
+            resetUploadState();
+            if (modal) modal.style.display = "none";
+
+            // Reset search/filter inputs & page index
+            if (searchInput) searchInput.value = "";
+            if (filterTypeSelect) filterTypeSelect.value = "ALL";
+            docsCurrentPage = 1;
+            admDocsCurrentPage = 1;
+
+            // Reload data
+            await loadDataFromApi();
+            renderAdminDocsDashboard();
+            renderDocuments(); // Update public table too
+          } else {
+            const errJson = await res.json();
+            showCustomToast(`Gagal menyimpan berkas: ${errJson.error || 'Server error'}`, "error");
+          }
+        } catch (err) {
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
+        }
+      } else {
+        // Local mode fallback
+        const tempId = `D_TEMP_${(appData.documents || []).length + 1}`;
+        const newDoc = {
+          id: tempId,
+          title: title + (title.toLowerCase().endsWith(selectedFileExt) ? "" : selectedFileExt),
+          date,
+          fileSize,
+          fileType: selectedFileType || "PDF",
+          fileUrl: "" 
+        };
+
+        if (!appData.documents) appData.documents = [];
+        appData.documents.unshift(newDoc);
+
+        showCustomToast(`Mode Luring: Berkas "${title}" ditambahkan sementara di memori browser!`, "info");
+        form.reset();
+        resetUploadState();
+        if (modal) modal.style.display = "none";
+
+        // Reset search/filter inputs & page index
+        if (searchInput) searchInput.value = "";
+        if (filterTypeSelect) filterTypeSelect.value = "ALL";
+        docsCurrentPage = 1;
+        admDocsCurrentPage = 1;
+
+        renderAdminDocsDashboard();
+        renderDocuments();
+      }
+    });
+  }
+}
+
+// Delete Document
+window.deleteAdminDoc = async function(id) {
+  const role = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (role === "staff") {
+    showCustomToast("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat menghapus dokumen resmi.", "error");
+    return;
+  }
+
+  const doc = (appData.documents || []).find(d => d.id === id);
+  if (!doc) return;
+
+  showCustomConfirm(
+    "Konfirmasi Hapus Dokumen",
+    `Apakah Anda yakin ingin menghapus dokumen "${doc.title}"? Tindakan ini tidak dapat dibatalkan.`,
+    async () => {
+      if (isServerOnline) {
+        try {
+          const res = await fetch(`/api/docs/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (res.ok) {
+            showCustomToast("Dokumen berhasil dihapus!", "success");
+            await loadDataFromApi();
+            renderAdminDocsDashboard();
+            renderDocuments();
+          } else {
+            // Try fallback to query param endpoint
+            const resQuery = await fetch(`/api/docs?id=${id}`, {
+              method: 'DELETE'
+            });
+            if (resQuery.ok) {
+              showCustomToast("Dokumen berhasil dihapus!", "success");
+              await loadDataFromApi();
+              renderAdminDocsDashboard();
+              renderDocuments();
+            } else {
+              const errJson = await resQuery.json().catch(() => ({}));
+              showCustomToast(`Gagal menghapus berkas: ${errJson.error || 'Server error'}`, "error");
+            }
+          }
+        } catch (err) {
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
+        }
+      } else {
+        // Local memory delete
+        const idx = (appData.documents || []).findIndex(d => d.id === id);
+        if (idx > -1) {
+          appData.documents.splice(idx, 1);
+          showCustomToast("Mode Luring: Berkas dihapus dari memori browser.", "info");
+          renderAdminDocsDashboard();
+          renderDocuments();
+        }
+      }
+    },
+    "Hapus",
+    "danger"
+  );
+};
+
+window.renderAdminDocsDashboard = renderAdminDocsDashboard;
+window.setupDocManagement = setupDocManagement;
+
