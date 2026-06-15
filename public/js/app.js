@@ -2,6 +2,8 @@
 let appData = POBSI_DATA; // Inisialisasi awal dengan data lokal offline dari data.js
 let standingsCurrentPage = 1;
 let handicapCurrentPage = 1;
+let docsCurrentPage = 1;
+let admDocsCurrentPage = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
@@ -1413,7 +1415,22 @@ function renderDocuments(searchQuery = "", filterType = "ALL") {
     return matchesSearch && docType === filterType;
   });
 
-  tableBody.innerHTML = filtered.map(doc => {
+  const totalItems = filtered.length;
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  if (docsCurrentPage > totalPages) {
+    docsCurrentPage = totalPages;
+  }
+  if (docsCurrentPage < 1) {
+    docsCurrentPage = 1;
+  }
+
+  const startIndex = (docsCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedDocs = filtered.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = paginatedDocs.map(doc => {
     const iconClass = getFileIconClass(doc.title, doc.fileType);
     const docType = getFileTypeLabel(doc.title, doc.fileType);
     return `
@@ -1434,8 +1451,63 @@ function renderDocuments(searchQuery = "", filterType = "ALL") {
     `;
   }).join("");
 
-  if (filtered.length === 0) {
+  if (totalItems === 0) {
     tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Dokumen resmi tidak ditemukan</td></tr>`;
+  }
+
+  // Update Pagination Info
+  const pageRangeEl = document.getElementById("docs-page-range");
+  const totalCountEl = document.getElementById("docs-total-count");
+  if (pageRangeEl && totalCountEl) {
+    pageRangeEl.textContent = totalItems > 0 ? `${startIndex + 1}-${endIndex}` : "0-0";
+    totalCountEl.textContent = totalItems;
+  }
+
+  // Render Page Numbers
+  renderDocsPageNumbers(totalPages);
+}
+
+function renderDocsPageNumbers(totalPages) {
+  const container = document.getElementById("docs-page-numbers");
+  const prevBtn = document.getElementById("docs-prev-page");
+  const nextBtn = document.getElementById("docs-next-page");
+
+  if (prevBtn) prevBtn.disabled = docsCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = docsCurrentPage >= totalPages;
+
+  if (!container) return;
+  container.innerHTML = "";
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, docsCurrentPage - Math.floor(maxVisible / 2));
+  let endPage = startPage + maxVisible - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.className = `pm-page-btn ${docsCurrentPage === i ? "active" : ""}`;
+    btn.textContent = i;
+    btn.style.width = "28px";
+    btn.style.height = "28px";
+    btn.style.borderRadius = "6px";
+    btn.style.border = docsCurrentPage === i ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.08)";
+    btn.style.background = docsCurrentPage === i ? "var(--gradient-primary)" : "rgba(255,255,255,0.02)";
+    btn.style.color = docsCurrentPage === i ? "#fff" : "var(--text-dim)";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "600";
+    btn.style.fontSize = "0.75rem";
+    
+    btn.addEventListener("click", () => {
+      docsCurrentPage = i;
+      const searchVal = document.getElementById("docs-search-input")?.value || "";
+      const filterVal = document.getElementById("docs-filter-type")?.value || "ALL";
+      renderDocuments(searchVal, filterVal);
+    });
+    container.appendChild(btn);
   }
 }
 
@@ -1444,6 +1516,7 @@ function setupDocsSearch() {
   const filterSelect = document.getElementById("docs-filter-type");
 
   function handleFilter() {
+    docsCurrentPage = 1; // Reset to page 1 on filter/search change
     const searchVal = input ? input.value : "";
     const filterVal = filterSelect ? filterSelect.value : "ALL";
     renderDocuments(searchVal, filterVal);
@@ -1454,6 +1527,41 @@ function setupDocsSearch() {
   }
   if (filterSelect) {
     filterSelect.addEventListener("change", handleFilter);
+  }
+
+  // Bind pagination arrows
+  const prevBtn = document.getElementById("docs-prev-page");
+  const nextBtn = document.getElementById("docs-next-page");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (docsCurrentPage > 1) {
+        docsCurrentPage--;
+        const searchVal = input ? input.value : "";
+        const filterVal = filterSelect ? filterSelect.value : "ALL";
+        renderDocuments(searchVal, filterVal);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const docs = appData.documents || [];
+      const searchVal = input ? input.value : "";
+      const filterVal = filterSelect ? filterSelect.value : "ALL";
+      const filteredCount = docs.filter(doc => {
+        const matchesSearch = doc.title.toLowerCase().includes(searchVal.toLowerCase());
+        if (filterVal === "ALL") return matchesSearch;
+        const docType = getFileTypeLabel(doc.title, doc.fileType);
+        return matchesSearch && docType === filterVal;
+      }).length;
+      const totalPages = Math.ceil(filteredCount / 10) || 1;
+
+      if (docsCurrentPage < totalPages) {
+        docsCurrentPage++;
+        renderDocuments(searchVal, filterVal);
+      }
+    });
   }
 }
 
@@ -14624,13 +14732,28 @@ function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
     return matchesSearch && docType === filterType;
   });
 
+  const totalItems = filtered.length;
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  if (admDocsCurrentPage > totalPages) {
+    admDocsCurrentPage = totalPages;
+  }
+  if (admDocsCurrentPage < 1) {
+    admDocsCurrentPage = 1;
+  }
+
+  const startIndex = (admDocsCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedDocs = filtered.slice(startIndex, endIndex);
+
   // Render Rows
-  tableBody.innerHTML = filtered.map((doc, idx) => {
+  tableBody.innerHTML = paginatedDocs.map((doc, idx) => {
     const iconClass = getFileIconClass(doc.title, doc.fileType);
     const docType = getFileTypeLabel(doc.title, doc.fileType);
     return `
       <tr>
-        <td class="text-center" style="font-weight: 600; color: var(--text-muted);">${idx + 1}</td>
+        <td class="text-center" style="font-weight: 600; color: var(--text-muted);">${startIndex + idx + 1}</td>
         <td class="table-name-bold">
           <i class="${iconClass}" style="margin-right:8px; font-size:1.1rem"></i>
           ${doc.title}
@@ -14652,7 +14775,7 @@ function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
     `;
   }).join("");
 
-  if (filtered.length === 0) {
+  if (totalItems === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Surat edaran tidak ditemukan</td></tr>`;
   }
 
@@ -14690,6 +14813,61 @@ function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
     } else {
       latestDateEl.textContent = "-";
     }
+  }
+
+  // Update Pagination Info
+  const pageRangeEl = document.getElementById("adm-docs-page-range");
+  const totalCountEl = document.getElementById("adm-docs-total-count");
+  if (pageRangeEl && totalCountEl) {
+    pageRangeEl.textContent = totalItems > 0 ? `${startIndex + 1}-${endIndex}` : "0-0";
+    totalCountEl.textContent = totalItems;
+  }
+
+  // Render Page Numbers
+  renderAdminDocsPageNumbers(totalPages);
+}
+
+function renderAdminDocsPageNumbers(totalPages) {
+  const container = document.getElementById("adm-docs-page-numbers");
+  const prevBtn = document.getElementById("adm-docs-prev-page");
+  const nextBtn = document.getElementById("adm-docs-next-page");
+
+  if (prevBtn) prevBtn.disabled = admDocsCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = admDocsCurrentPage >= totalPages;
+
+  if (!container) return;
+  container.innerHTML = "";
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, admDocsCurrentPage - Math.floor(maxVisible / 2));
+  let endPage = startPage + maxVisible - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.className = `pm-page-btn ${admDocsCurrentPage === i ? "active" : ""}`;
+    btn.textContent = i;
+    btn.style.width = "28px";
+    btn.style.height = "28px";
+    btn.style.borderRadius = "6px";
+    btn.style.border = admDocsCurrentPage === i ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.08)";
+    btn.style.background = admDocsCurrentPage === i ? "var(--gradient-primary)" : "rgba(255,255,255,0.02)";
+    btn.style.color = admDocsCurrentPage === i ? "#fff" : "var(--text-dim)";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "600";
+    btn.style.fontSize = "0.75rem";
+    
+    btn.addEventListener("click", () => {
+      admDocsCurrentPage = i;
+      const searchVal = document.getElementById("pm-doc-search-input")?.value || "";
+      const filterVal = document.getElementById("pm-doc-filter-type")?.value || "ALL";
+      renderAdminDocsDashboard(searchVal, filterVal);
+    });
+    container.appendChild(btn);
   }
 }
 
@@ -14757,6 +14935,7 @@ function setupDocManagement() {
   const filterTypeSelect = document.getElementById("pm-doc-filter-type");
 
   function handleFilterChange() {
+    admDocsCurrentPage = 1; // Reset to page 1 on filter/search change
     const searchVal = searchInput ? searchInput.value : "";
     const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
     renderAdminDocsDashboard(searchVal, filterVal);
@@ -14774,7 +14953,43 @@ function setupDocManagement() {
     btnReset.addEventListener("click", () => {
       if (searchInput) searchInput.value = "";
       if (filterTypeSelect) filterTypeSelect.value = "ALL";
+      admDocsCurrentPage = 1;
       renderAdminDocsDashboard();
+    });
+  }
+
+  // Bind pagination arrows for admin docs
+  const prevBtn = document.getElementById("adm-docs-prev-page");
+  const nextBtn = document.getElementById("adm-docs-next-page");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (admDocsCurrentPage > 1) {
+        admDocsCurrentPage--;
+        const searchVal = searchInput ? searchInput.value : "";
+        const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+        renderAdminDocsDashboard(searchVal, filterVal);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const docs = appData.documents || [];
+      const searchVal = searchInput ? searchInput.value : "";
+      const filterVal = filterTypeSelect ? filterTypeSelect.value : "ALL";
+      const filteredCount = docs.filter(doc => {
+        const matchesSearch = doc.title.toLowerCase().includes(searchVal.toLowerCase());
+        if (filterVal === "ALL") return matchesSearch;
+        const docType = getFileTypeLabel(doc.title, doc.fileType);
+        return matchesSearch && docType === filterVal;
+      }).length;
+      const totalPages = Math.ceil(filteredCount / 10) || 1;
+
+      if (admDocsCurrentPage < totalPages) {
+        admDocsCurrentPage++;
+        renderAdminDocsDashboard(searchVal, filterVal);
+      }
     });
   }
 
@@ -14911,9 +15126,11 @@ function setupDocManagement() {
             resetUploadState();
             if (modal) modal.style.display = "none";
 
-            // Reset search/filter inputs
+            // Reset search/filter inputs & page index
             if (searchInput) searchInput.value = "";
             if (filterTypeSelect) filterTypeSelect.value = "ALL";
+            docsCurrentPage = 1;
+            admDocsCurrentPage = 1;
 
             // Reload data
             await loadDataFromApi();
@@ -14946,9 +15163,11 @@ function setupDocManagement() {
         resetUploadState();
         if (modal) modal.style.display = "none";
 
-        // Reset search/filter inputs
+        // Reset search/filter inputs & page index
         if (searchInput) searchInput.value = "";
         if (filterTypeSelect) filterTypeSelect.value = "ALL";
+        docsCurrentPage = 1;
+        admDocsCurrentPage = 1;
 
         renderAdminDocsDashboard();
         renderDocuments();

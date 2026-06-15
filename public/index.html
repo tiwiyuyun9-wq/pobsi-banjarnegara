@@ -646,6 +646,17 @@
             </tbody>
           </table>
         </div>
+        <!-- Documents Public Pagination Controls (10 items limit per page) -->
+        <div class="pm-pagination" style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.35); border-top: 1px solid rgba(255, 255, 255, 0.06); padding: 12px 24px; border-radius: 0 0 var(--radius-md) var(--radius-md);">
+          <div class="pm-pagination-info" style="font-size: 0.8rem; color: var(--text-dim);">
+            Menampilkan <span id="docs-page-range" style="color: var(--text-main); font-weight: 600;">0-0</span> dari <span id="docs-total-count" style="color: var(--text-main); font-weight: 600;">0</span> dokumen
+          </div>
+          <div class="pm-pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+            <button class="pm-page-btn" id="docs-prev-page" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-fast);"><i class="fa-solid fa-chevron-left" style="font-size: 0.75rem;"></i></button>
+            <div id="docs-page-numbers" style="display: flex; gap: 6px;"></div>
+            <button class="pm-page-btn" id="docs-next-page" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-fast);"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></button>
+          </div>
+        </div>
       </div>
 
       <!-- Announcement Banner -->
@@ -4818,6 +4829,17 @@
                     <!-- Dynamically populated -->
                   </tbody>
                 </table>
+                <!-- Admin Documents Pagination Controls (10 items limit per page) -->
+                <div class="pm-pagination" style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.35); border-top: 1px solid rgba(255, 255, 255, 0.06); padding: 12px 24px;">
+                  <div class="pm-pagination-info" style="font-size: 0.8rem; color: var(--text-dim);">
+                    Menampilkan <span id="adm-docs-page-range" style="color: var(--text-main); font-weight: 600;">0-0</span> dari <span id="adm-docs-total-count" style="color: var(--text-main); font-weight: 600;">0</span> dokumen
+                  </div>
+                  <div class="pm-pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                    <button class="pm-page-btn" id="adm-docs-prev-page" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-fast);"><i class="fa-solid fa-chevron-left" style="font-size: 0.75rem;"></i></button>
+                    <div id="adm-docs-page-numbers" style="display: flex; gap: 6px;"></div>
+                    <button class="pm-page-btn" id="adm-docs-next-page" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-fast);"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
