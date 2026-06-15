@@ -1715,7 +1715,7 @@ async function checkAdminRoute() {
       } else {
         // Cek hash URL untuk menentukan panel aktif
         const hash = window.location.hash.replace("#", "");
-        const validPanes = ["overview", "players", "standings", "events", "clubs", "boc", "event-detail", "athlete-detail", "club-detail"];
+        const validPanes = ["overview", "players", "standings", "events", "clubs", "boc", "event-detail", "athlete-detail", "club-detail", "settings", "docs"];
         
         if (validPanes.includes(hash)) {
           switchAdminPane(`pane-${hash}`, false);
@@ -8531,8 +8531,9 @@ window.showCustomToast = showCustomToast;
 // Dynamic Sirkuit Management Utilities
 async function recalculateAndSyncAllStandings() {
   const standings = appData.standings || [];
-  
-  for (const player of standings) {
+  const totalPlayers = standings.length;
+  for (let i = 0; i < totalPlayers; i++) {
+    const player = standings[i];
     const scores = getPlayerEventScores(player.name, player.points);
     let totalPoints = 0;
     let played = 0;
@@ -8554,7 +8555,9 @@ async function recalculateAndSyncAllStandings() {
     
     if (isServerOnline) {
       try {
-        await fetch('/api/standings', {
+        const isLastPlayer = i === totalPlayers - 1;
+        const url = `/api/standings${!isLastPlayer ? '?skipRank=true' : ''}`;
+        await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -8603,6 +8606,8 @@ function renderManageSirkuitList() {
           <button onclick="cancelSirkuitEdit(${idx})" class="pm-btn pm-btn-sm" style="padding: 4px 8px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;" title="Batal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
+          <button onclick="moveSirkuitUp(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Atas" ${idx === 0 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-up"></i></button>
+          <button onclick="moveSirkuitDown(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Bawah" ${idx === bocSirkuits.length - 1 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-down"></i></button>
           <button onclick="startSirkuitEdit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #60a5fa; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Ubah Nama"><i class="fa-solid fa-pen-to-square"></i></button>
           <button onclick="deleteSirkuit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #ef4444; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
@@ -8663,6 +8668,48 @@ window.deleteSirkuit = async function(idx) {
       await recalculateAndSyncAllStandings();
     }
   );
+};
+
+window.swapSirkuitIndices = async function(idx1, idx2) {
+  // Swap elements in global bocSirkuits array
+  const tempSirkuit = bocSirkuits[idx1];
+  bocSirkuits[idx1] = bocSirkuits[idx2];
+  bocSirkuits[idx2] = tempSirkuit;
+  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+
+  // Swap exactBocPoints scores for all players to maintain points alignment
+  Object.keys(exactBocPoints).forEach(pName => {
+    const pts = exactBocPoints[pName];
+    if (Array.isArray(pts)) {
+      while (pts.length < bocSirkuits.length) {
+        pts.push("");
+      }
+      const tempPt = pts[idx1];
+      pts[idx1] = pts[idx2];
+      pts[idx2] = tempPt;
+    }
+  });
+  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
+
+  // Recalculate and sync all player standings to the database server
+  await recalculateAndSyncAllStandings();
+
+  // Re-render UI views
+  renderManageSirkuitList();
+  renderStandings();
+  renderAdminBocConsole();
+};
+
+window.moveSirkuitUp = async function(idx) {
+  if (idx <= 0) return;
+  await window.swapSirkuitIndices(idx, idx - 1);
+  showCustomToast("Urutan seri sirkuit berhasil digeser ke atas!", "success");
+};
+
+window.moveSirkuitDown = async function(idx) {
+  if (idx >= bocSirkuits.length - 1) return;
+  await window.swapSirkuitIndices(idx, idx + 1);
+  showCustomToast("Urutan seri sirkuit berhasil digeser ke bawah!", "success");
 };
 
 // Show custom styled confirmation dialog

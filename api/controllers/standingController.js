@@ -37,12 +37,14 @@ exports.updateStanding = async (req, res) => {
     );
 
     // Hitung ulang peringkat berdasarkan poin tertinggi
-    const allStandings = await dbAll(`SELECT * FROM standings ORDER BY points DESC`);
-    
-    for (let i = 0; i < allStandings.length; i++) {
-      const rank = i + 1;
-      const player_name = allStandings[i].name;
-      await dbRun(`UPDATE standings SET rank = ? WHERE name = ?`, [rank, player_name]);
+    const skipRank = req.query.skipRank === 'true';
+    if (!skipRank) {
+      const allStandings = await dbAll(`SELECT * FROM standings ORDER BY points DESC`);
+      for (let i = 0; i < allStandings.length; i++) {
+        const rank = i + 1;
+        const player_name = allStandings[i].name;
+        await dbRun(`UPDATE standings SET rank = ? WHERE name = ?`, [rank, player_name]);
+      }
     }
 
     res.status(201).json(newStanding);

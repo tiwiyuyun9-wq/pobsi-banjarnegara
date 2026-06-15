@@ -3270,20 +3270,22 @@ tr:hover td.sticky-col {
 .form-group-item { display: flex; flex-direction: column; gap: 6px; }
 .form-lbl { font-family: var(--font-headers); font-weight: 600; font-size: 0.85rem; color: var(--text-muted); }
 
-.admin-form-element input[type="text"],
-.admin-form-element input[type="number"] {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  outline: none;
-  transition: var(--transition-smooth);
-  width: 100%;
+.admin-form-element input,
+.admin-form-element select {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  padding: 12px 16px !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.9rem !important;
+  outline: none !important;
+  transition: var(--transition-smooth) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
-.admin-form-element input:focus {
+.admin-form-element input:focus,
+.admin-form-element select:focus {
   border-color: var(--primary-light);
   box-shadow: 0 0 0 3px var(--primary-glow), var(--shadow-neon);
 }
@@ -11816,12 +11818,12 @@ tr:hover td.sticky-col {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15, 26, 46, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 16px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   height: fit-content;
 }
 
@@ -11904,3 +11906,14 @@ tr:hover td.sticky-col {
     font-size: 0.8rem;
   }
 }
+
+/* Custom Autofill Styles to prevent default Chrome autofill yellow/white styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+

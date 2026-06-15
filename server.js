@@ -244,6 +244,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+
 const isSupabaseEnabled = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
 
 if (isSupabaseEnabled) {

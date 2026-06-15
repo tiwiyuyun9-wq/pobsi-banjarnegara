@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=5">
+  <link rel="stylesheet" href="css/index.css?v=7">
   
   <!-- Flatpickr for premium Date Picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -5065,18 +5065,19 @@
 
         <!-- PANE 9: SYSTEM SETTINGS -->
         <div class="workspace-pane" id="pane-settings" style="display:none;">
-          <div class="settings-container" style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 600px;">
-            
-            <!-- Header -->
-            <div class="pm-header" style="margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 16px;">
-              <div class="pm-title-section">
-                <h2 class="pm-title">Pengaturan Sistem</h2>
-                <p class="pm-subtitle">Kelola informasi organisasi, aturan sirkuit BOC, ubah kata sandi, dan pengelolaan hak akses administrator.</p>
+          <div class="pm-console" style="grid-template-columns: 1fr;">
+            <!-- LEFT: Main Content Area -->
+            <div class="pm-main">
+              <!-- Page Header -->
+              <div class="pm-header">
+                <div class="pm-header-left">
+                  <h2 class="pm-title">Pengaturan Sistem</h2>
+                  <p class="pm-subtitle">Kelola informasi organisasi, aturan sirkuit BOC, ubah kata sandi, dan pengelolaan hak akses administrator.</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Settings Layout -->
-            <div class="settings-layout">
+              <!-- Settings Layout -->
+              <div class="settings-layout">
               
               <!-- Left Side: Settings Sub-menu Nav -->
               <aside class="settings-submenu">
@@ -5102,7 +5103,7 @@
                 
                 <!-- Sub-pane 1: Profil Organisasi -->
                 <div class="settings-pane-card active" id="sub-org">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
                     <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-building text-gold" style="color: #fbbf24;"></i> Profil Organisasi POBSI
                     </h3>
@@ -5144,7 +5145,7 @@
 
                 <!-- Sub-pane 2: Regulasi Sirkuit -->
                 <div class="settings-pane-card" id="sub-rules">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
                     <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-trophy text-gold" style="color: #fbbf24;"></i> Regulasi Sirkuit BOC
                     </h3>
@@ -5193,7 +5194,7 @@
 
                 <!-- Sub-pane 3: Keamanan & Sandi -->
                 <div class="settings-pane-card" id="sub-pwd">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
                     <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-key text-gold" style="color: #fbbf24;"></i> Ubah Kata Sandi Akun
                     </h3>
@@ -5224,7 +5225,7 @@
 
                 <!-- Sub-pane 4: Akun Pengelola -->
                 <div class="settings-pane-card" id="sub-users">
-                  <div id="settings-admin-users-card" class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px; width: 100%; box-sizing: border-box;">
+                  <div id="settings-admin-users-card" class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px; width: 100%; box-sizing: border-box;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
                       <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-user-shield text-gold" style="color: #fbbf24;"></i> Akun Pengelola Administratif
@@ -5256,7 +5257,7 @@
 
                 <!-- Sub-pane 5: Status Koneksi -->
                 <div class="settings-pane-card" id="sub-db">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
                     <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-database text-gold" style="color: #fbbf24;"></i> Sinkronisasi & Mode Database
                     </h3>
@@ -5296,6 +5297,8 @@
             </div>
 
           </div>
+
+        </div>
           
           <!-- Add Admin User Modal Overlay -->
           <div class="pm-modal-overlay" id="settings-add-user-modal" style="display:none;">
@@ -5402,6 +5405,6 @@
 
   <!-- Loaded Data and Script files -->
   <script src="js/data.js"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
