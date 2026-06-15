@@ -55,23 +55,26 @@ module.exports = async (req, res) => {
 
       if (upsertErr) throw upsertErr;
 
-      // Hitung ulang peringkat (rank) untuk seluruh atlet berdasarkan poin tertinggi
-      const { data: allStandings, error: fetchErr } = await supabase
-        .from('standings')
-        .select('*')
-        .order('points', { ascending: false });
-
-      if (fetchErr) throw fetchErr;
-
-      // Update rank secara asinkron di database
-      for (let i = 0; i < allStandings.length; i++) {
-        const rank = i + 1;
-        const playerName = allStandings[i].name;
-        
-        await supabase
+      const skipRank = req.query.skipRank === 'true';
+      if (!skipRank) {
+        // Hitung ulang peringkat (rank) untuk seluruh atlet berdasarkan poin tertinggi
+        const { data: allStandings, error: fetchErr } = await supabase
           .from('standings')
-          .update({ rank })
-          .eq('name', playerName);
+          .select('*')
+          .order('points', { ascending: false });
+
+        if (fetchErr) throw fetchErr;
+
+        // Update rank secara asinkron di database
+        for (let i = 0; i < allStandings.length; i++) {
+          const rank = i + 1;
+          const playerName = allStandings[i].name;
+          
+          await supabase
+            .from('standings')
+            .update({ rank })
+            .eq('name', playerName);
+        }
       }
 
       return res.status(201).json(newStanding);

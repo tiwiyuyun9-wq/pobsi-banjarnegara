@@ -244,6 +244,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+
 const isSupabaseEnabled = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
 
 if (isSupabaseEnabled) {
@@ -257,6 +258,8 @@ if (isSupabaseEnabled) {
   const docsHandler = require('./api/docs');
   const clubsHandler = require('./api/clubs');
   const loginHandler = require('./api/admin/login');
+  const usersHandler = require('./api/admin/users');
+  const changePasswordHandler = require('./api/admin/change-password');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -294,6 +297,8 @@ if (isSupabaseEnabled) {
 
   // Admin Login
   app.all('/api/admin/login', bridge(loginHandler));
+  app.all('/api/admin/users', bridge(usersHandler));
+  app.all('/api/admin/change-password', bridge(changePasswordHandler));
 
 } else {
   console.log('💾 SQLite Local Mode is ACTIVE! Using SQLite database handlers...');
@@ -327,6 +332,85 @@ if (isSupabaseEnabled) {
       } else {
         res.status(401).json({ error: "Username atau sandi administratif tidak cocok!" });
       }
+    });
+  });
+
+  // Rute Pengelolaan Pengguna (CRUD) untuk Local Mode
+  app.get('/api/admin/users', (req, res) => {
+    db.all(`SELECT username, role, fullname FROM users ORDER BY role`, (err, rows) => {
+      if (err) {
+        console.error("Gagal memuat users SQLite:", err);
+        return res.status(500).json({ error: "Gagal memuat daftar pengelola!" });
+      }
+      res.json(rows);
+    });
+  });
+
+  app.post('/api/admin/users', (req, res) => {
+    const { username, password, fullname, role } = req.body;
+    if (!username || !password || !fullname || !role) {
+      return res.status(400).json({ error: "Seluruh input wajib diisi!" });
+    }
+
+    db.get(`SELECT username FROM users WHERE username = ?`, [username], (err, row) => {
+      if (err) {
+        console.error("Gagal cek username SQLite:", err);
+        return res.status(500).json({ error: "Database error!" });
+      }
+      if (row) {
+        return res.status(400).json({ error: "Username sudah digunakan!" });
+      }
+
+      db.run(`INSERT INTO users (username, password, role, fullname) VALUES (?, ?, ?, ?)`, [username, password, role, fullname], (insertErr) => {
+        if (insertErr) {
+          console.error("Gagal insert user SQLite:", insertErr);
+          return res.status(500).json({ error: "Gagal menyimpan pengelola baru!" });
+        }
+        res.json({ success: true, message: "Akun pengelola berhasil dibuat!" });
+      });
+    });
+  });
+
+  app.delete('/api/admin/users', (req, res) => {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ error: "Username tidak valid!" });
+    }
+    if (username === 'superadmin') {
+      return res.status(400).json({ error: "Akun superadmin tidak boleh dihapus!" });
+    }
+
+    db.run(`DELETE FROM users WHERE username = ?`, [username], (err) => {
+      if (err) {
+        console.error("Gagal delete user SQLite:", err);
+        return res.status(500).json({ error: "Gagal menghapus akun pengelola!" });
+      }
+      res.json({ success: true, message: "Akun pengelola berhasil dihapus!" });
+    });
+  });
+
+  app.post('/api/admin/change-password', (req, res) => {
+    const { username, currentPassword, newPassword } = req.body;
+    if (!username || !currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Seluruh kolom kata sandi wajib diisi!" });
+    }
+
+    db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [username, currentPassword], (err, user) => {
+      if (err) {
+        console.error("Gagal verifikasi sandi SQLite:", err);
+        return res.status(500).json({ error: "Database error!" });
+      }
+      if (!user) {
+        return res.status(401).json({ error: "Kata sandi saat ini salah!" });
+      }
+
+      db.run(`UPDATE users SET password = ? WHERE username = ?`, [newPassword, username], (updateErr) => {
+        if (updateErr) {
+          console.error("Gagal update sandi SQLite:", updateErr);
+          return res.status(500).json({ error: "Gagal memperbarui kata sandi!" });
+        }
+        res.json({ success: true, message: "Kata sandi berhasil diperbarui!" });
+      });
     });
   });
 }

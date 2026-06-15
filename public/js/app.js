@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Inisialisasi Aplikasi Utama
 async function initApp() {
+  // Apply dynamic configurations from settings
+  applySettingsToDOM();
+
   // Mobile Nav Toggle
   setupMobileNav();
 
@@ -1712,7 +1715,7 @@ async function checkAdminRoute() {
       } else {
         // Cek hash URL untuk menentukan panel aktif
         const hash = window.location.hash.replace("#", "");
-        const validPanes = ["overview", "players", "standings", "events", "clubs", "boc", "event-detail", "athlete-detail", "club-detail"];
+        const validPanes = ["overview", "players", "standings", "events", "clubs", "boc", "event-detail", "athlete-detail", "club-detail", "settings", "docs"];
         
         if (validPanes.includes(hash)) {
           switchAdminPane(`pane-${hash}`, false);
@@ -1825,6 +1828,7 @@ window.switchAdminPane = function(paneId, updateHash = true) {
       if (paneId === "pane-athlete-detail") paneTitle.textContent = "Detail Profil Atlet";
       if (paneId === "pane-club-detail") paneTitle.textContent = "Detail Profil Klub";
       if (paneId === "pane-docs") paneTitle.textContent = "Kelola Surat Edaran";
+      if (paneId === "pane-settings") paneTitle.textContent = "Pengaturan Sistem";
     }
 
   // Bersihkan path ke /admin jika bukan halaman detail atlet atau detail klub
@@ -2166,10 +2170,7 @@ function setupAdminUIListeners() {
   if (actionDocs) {
     actionDocs.addEventListener("click", () => exitAdminToPublic("tab-docs"));
   }
-  const actionSettings = document.getElementById("sidebar-action-settings");
-  if (actionSettings) {
-    actionSettings.addEventListener("click", () => alert("Pengaturan Command Center POBSI: Fitur konfigurasi database utama dibatasi untuk superadmin. Sistem aman."));
-  }
+  // Settings click is handled by generic sidebar data-pane switcher
 
   // Quick Action transitions
   const quickDocs = document.getElementById("quick-btn-docs");
@@ -2221,6 +2222,7 @@ async function setupAdminPanel() {
   setupClubDetailActions();
   setupBocAdminListeners();
   setupDocManagement();
+  setupSystemSettings();
 
   // --- LOGIC DIRECT FILE UPLOAD AVATAR ---
   let currentUploadedAvatarBase64 = "";
@@ -8529,8 +8531,9 @@ window.showCustomToast = showCustomToast;
 // Dynamic Sirkuit Management Utilities
 async function recalculateAndSyncAllStandings() {
   const standings = appData.standings || [];
-  
-  for (const player of standings) {
+  const totalPlayers = standings.length;
+  for (let i = 0; i < totalPlayers; i++) {
+    const player = standings[i];
     const scores = getPlayerEventScores(player.name, player.points);
     let totalPoints = 0;
     let played = 0;
@@ -8552,7 +8555,9 @@ async function recalculateAndSyncAllStandings() {
     
     if (isServerOnline) {
       try {
-        await fetch('/api/standings', {
+        const isLastPlayer = i === totalPlayers - 1;
+        const url = `/api/standings${!isLastPlayer ? '?skipRank=true' : ''}`;
+        await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -8601,6 +8606,8 @@ function renderManageSirkuitList() {
           <button onclick="cancelSirkuitEdit(${idx})" class="pm-btn pm-btn-sm" style="padding: 4px 8px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;" title="Batal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
+          <button onclick="moveSirkuitUp(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Atas" ${idx === 0 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-up"></i></button>
+          <button onclick="moveSirkuitDown(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Bawah" ${idx === bocSirkuits.length - 1 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-down"></i></button>
           <button onclick="startSirkuitEdit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #60a5fa; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Ubah Nama"><i class="fa-solid fa-pen-to-square"></i></button>
           <button onclick="deleteSirkuit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #ef4444; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
@@ -8661,6 +8668,48 @@ window.deleteSirkuit = async function(idx) {
       await recalculateAndSyncAllStandings();
     }
   );
+};
+
+window.swapSirkuitIndices = async function(idx1, idx2) {
+  // Swap elements in global bocSirkuits array
+  const tempSirkuit = bocSirkuits[idx1];
+  bocSirkuits[idx1] = bocSirkuits[idx2];
+  bocSirkuits[idx2] = tempSirkuit;
+  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+
+  // Swap exactBocPoints scores for all players to maintain points alignment
+  Object.keys(exactBocPoints).forEach(pName => {
+    const pts = exactBocPoints[pName];
+    if (Array.isArray(pts)) {
+      while (pts.length < bocSirkuits.length) {
+        pts.push("");
+      }
+      const tempPt = pts[idx1];
+      pts[idx1] = pts[idx2];
+      pts[idx2] = tempPt;
+    }
+  });
+  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
+
+  // Recalculate and sync all player standings to the database server
+  await recalculateAndSyncAllStandings();
+
+  // Re-render UI views
+  renderManageSirkuitList();
+  renderStandings();
+  renderAdminBocConsole();
+};
+
+window.moveSirkuitUp = async function(idx) {
+  if (idx <= 0) return;
+  await window.swapSirkuitIndices(idx, idx - 1);
+  showCustomToast("Urutan seri sirkuit berhasil digeser ke atas!", "success");
+};
+
+window.moveSirkuitDown = async function(idx) {
+  if (idx >= bocSirkuits.length - 1) return;
+  await window.swapSirkuitIndices(idx, idx + 1);
+  showCustomToast("Urutan seri sirkuit berhasil digeser ke bawah!", "success");
 };
 
 // Show custom styled confirmation dialog
@@ -15238,4 +15287,390 @@ window.deleteAdminDoc = async function(id) {
 
 window.renderAdminDocsDashboard = renderAdminDocsDashboard;
 window.setupDocManagement = setupDocManagement;
+
+// 13. System Settings Logic
+function setupSystemSettings() {
+  const formOrg = document.getElementById("form-settings-org");
+  const formRules = document.getElementById("form-settings-rules");
+  const formPassword = document.getElementById("form-settings-password");
+  const formAddUser = document.getElementById("form-settings-add-user");
+  const btnAddUser = document.getElementById("btn-settings-add-user");
+  const modalAddUser = document.getElementById("settings-add-user-modal");
+  const btnCloseModal = document.getElementById("settings-user-modal-close");
+
+  const orgNameInput = document.getElementById("set-org-name");
+  const chairmanInput = document.getElementById("set-org-chairman");
+  const emailInput = document.getElementById("set-org-email");
+  const whatsappInput = document.getElementById("set-org-whatsapp");
+  const addressInput = document.getElementById("set-org-address");
+
+  const bocCutoffInput = document.getElementById("set-boc-cutoff");
+  const bocMaxhcInput = document.getElementById("set-boc-maxhc");
+  const bocYearInput = document.getElementById("set-boc-year");
+
+  const currentRole = localStorage.getItem("pobsi_admin_role") || "admin";
+  const currentUsername = localStorage.getItem("pobsi_admin_username") || "admin";
+
+  // Check RBAC limits: only super admin can change rules/org or manage admins
+  const isAdminOrSuper = currentRole === "admin" || currentRole === "super admin";
+  const isSuperAdmin = currentRole === "super admin";
+
+  // Settings Sub-menu Tab Switcher
+  const subLinks = document.querySelectorAll(".settings-sub-link");
+  const subPanes = document.querySelectorAll(".settings-pane-card");
+
+  subLinks.forEach(link => {
+    link.addEventListener("click", () => {
+      const targetSub = link.getAttribute("data-sub");
+      
+      subLinks.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+
+      subPanes.forEach(pane => {
+        pane.classList.remove("active");
+        if (pane.id === targetSub) {
+          pane.classList.add("active");
+        }
+      });
+    });
+  });
+
+  // Hide accounts menu if not super admin
+  const subUsersBtn = document.getElementById("settings-sub-users-btn");
+  if (!isSuperAdmin) {
+    if (subUsersBtn) subUsersBtn.style.display = "none";
+  }
+
+  // Initialize form fields from localStorage (or default hardcoded ones)
+  if (orgNameInput) orgNameInput.value = localStorage.getItem("pobsi_org_name") || "POBSI Kabupaten Banjarnegara";
+  if (chairmanInput) chairmanInput.value = localStorage.getItem("pobsi_chairman") || "H. Sugeng W., S.E.";
+  if (emailInput) emailInput.value = localStorage.getItem("pobsi_email") || "info@pobsibanjarnegara.or.id";
+  if (whatsappInput) whatsappInput.value = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
+  if (addressInput) addressInput.value = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
+
+  if (bocCutoffInput) bocCutoffInput.value = localStorage.getItem("boc_cutoff_limit") || "16";
+  if (bocMaxhcInput) bocMaxhcInput.value = localStorage.getItem("boc_max_hc") || "Bebas";
+  if (bocYearInput) bocYearInput.value = localStorage.getItem("currentBocYear") || "2026";
+
+
+  if (!isSuperAdmin) {
+    // Hide administrative users card
+    const usersCard = document.getElementById("settings-admin-users-card");
+    if (usersCard) usersCard.style.display = "none";
+  }
+
+  if (currentRole === "staff") {
+    // Disable inputs in rules and org profiles
+    if (formOrg) {
+      formOrg.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    }
+    if (formRules) {
+      formRules.querySelectorAll("input, select, button").forEach(el => el.disabled = true);
+    }
+  }
+
+  // Populate Database mode info
+  const dbModeEl = document.getElementById("settings-db-mode");
+  const dbDriverEl = document.getElementById("settings-db-driver");
+  if (dbModeEl) {
+    if (isServerOnline) {
+      dbModeEl.textContent = "ONLINE (CLOUD CONNECTED)";
+      dbModeEl.style.cssText = "font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);";
+      if (dbDriverEl) dbDriverEl.textContent = "Supabase PostgreSQL (Production Cloud)";
+    } else {
+      dbModeEl.textContent = "LURING (LOCAL DEMO DB)";
+      dbModeEl.style.cssText = "font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25);";
+      if (dbDriverEl) dbDriverEl.textContent = "SQLite 3 (Local API Mode)";
+    }
+  }
+
+  // Form Submit: Org profile
+  if (formOrg) {
+    formOrg.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah profil organisasi.", "error");
+        return;
+      }
+      localStorage.setItem("pobsi_org_name", orgNameInput.value.trim());
+      localStorage.setItem("pobsi_chairman", chairmanInput.value.trim());
+      localStorage.setItem("pobsi_email", emailInput.value.trim());
+      localStorage.setItem("pobsi_whatsapp", whatsappInput.value.trim());
+      localStorage.setItem("pobsi_address", addressInput.value.trim());
+
+      showCustomToast("Profil organisasi berhasil diperbarui!", "success");
+      
+      // Update public page texts immediately
+      applySettingsToDOM();
+    });
+  }
+
+  // Form Submit: BOC Rules
+  if (formRules) {
+    formRules.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi BOC.", "error");
+        return;
+      }
+      localStorage.setItem("boc_cutoff_limit", bocCutoffInput.value);
+      localStorage.setItem("boc_max_hc", bocMaxhcInput.value);
+      
+      const oldYear = localStorage.getItem("currentBocYear") || "2026";
+      const newYear = bocYearInput.value.trim();
+      localStorage.setItem("currentBocYear", newYear);
+
+      showCustomToast("Regulasi sirkuit BOC berhasil diperbarui!", "success");
+
+      if (oldYear !== newYear) {
+        window.currentBocYear = parseInt(newYear);
+        // Refresh standings & events
+        loadDataFromApi().then(() => {
+          renderStandings();
+          renderEvents("all");
+        });
+      } else {
+        // Just refresh standings display
+        renderStandings();
+      }
+    });
+  }
+
+  // Form Submit: Change Password
+  if (formPassword) {
+    formPassword.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const currentPwd = document.getElementById("set-pwd-current").value;
+      const newPwd = document.getElementById("set-pwd-new").value;
+      const confirmPwd = document.getElementById("set-pwd-confirm").value;
+
+      if (newPwd.length < 6) {
+        showCustomToast("Kata sandi baru minimal harus 6 karakter!", "error");
+        return;
+      }
+
+      if (newPwd !== confirmPwd) {
+        showCustomToast("Konfirmasi kata sandi baru tidak cocok!", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: currentUsername,
+            currentPassword: currentPwd,
+            newPassword: newPwd
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          showCustomToast("Kata sandi Anda berhasil diubah!", "success");
+          formPassword.reset();
+        } else {
+          showCustomToast(data.error || "Gagal mengubah kata sandi!", "error");
+        }
+      } catch (err) {
+        showCustomToast(`Koneksi error: ${err.message}`, "error");
+      }
+    });
+  }
+
+  // Modal actions for adding admin
+  if (btnAddUser && modalAddUser) {
+    btnAddUser.addEventListener("click", () => {
+      if (!isSuperAdmin) return;
+      modalAddUser.style.display = "flex";
+    });
+  }
+
+  if (btnCloseModal && modalAddUser) {
+    btnCloseModal.addEventListener("click", () => {
+      modalAddUser.style.display = "none";
+    });
+  }
+
+  // Form Submit: Add Admin User
+  if (formAddUser) {
+    formAddUser.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!isSuperAdmin) return;
+
+      const fullname = document.getElementById("set-user-fullname").value.trim();
+      const username = document.getElementById("set-user-username").value.trim().toLowerCase();
+      const password = document.getElementById("set-user-pwd").value;
+      const role = document.getElementById("set-user-role").value;
+
+      if (password.length < 6) {
+        showCustomToast("Kata sandi minimal harus 6 karakter!", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullname, username, password, role })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          showCustomToast("Akun pengelola berhasil didaftarkan!", "success");
+          formAddUser.reset();
+          if (modalAddUser) modalAddUser.style.display = "none";
+          renderAdminUsersList();
+        } else {
+          showCustomToast(data.error || "Gagal mendaftarkan pengelola!", "error");
+        }
+      } catch (err) {
+        showCustomToast(`Koneksi error: ${err.message}`, "error");
+      }
+    });
+  }
+
+  // Load and render users list for super admins
+  if (isSuperAdmin) {
+    renderAdminUsersList();
+  }
+}
+
+// Render administrative users list table
+async function renderAdminUsersList() {
+  const tableBody = document.getElementById("settings-users-table-body");
+  if (!tableBody) return;
+
+  try {
+    const res = await fetch('/api/admin/users');
+    if (res.ok) {
+      const users = await res.json();
+      const currentUsername = localStorage.getItem("pobsi_admin_username") || "";
+
+      tableBody.innerHTML = users.map((user, idx) => {
+        const isCurrent = user.username === currentUsername;
+        const isSuper = user.username === 'superadmin';
+        const deleteBtn = (isCurrent || isSuper) ? `
+          <span style="font-size:0.75rem; color:var(--text-muted); font-style:italic">Tidak bisa dihapus</span>
+        ` : `
+          <button type="button" class="doc-action-btn doc-action-btn-delete" onclick="deleteAdminUser('${user.username}')" title="Hapus Akun">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+
+        // Style role badge
+        let badgeColor = "rgba(59, 130, 246, 0.15)";
+        let textColor = "#3b82f6";
+        let borderColor = "rgba(59, 130, 246, 0.25)";
+        if (user.role === 'super admin') {
+          badgeColor = "rgba(251, 191, 36, 0.15)";
+          textColor = "#fbbf24";
+          borderColor = "rgba(251, 191, 36, 0.25)";
+        } else if (user.role === 'staff') {
+          badgeColor = "rgba(156, 163, 175, 0.15)";
+          textColor = "#9ca3af";
+          borderColor = "rgba(156, 163, 175, 0.25)";
+        }
+
+        return `
+          <tr>
+            <td class="text-center" style="font-weight:600; color:var(--text-muted);">${idx + 1}</td>
+            <td style="font-weight:700; color:#fff">${user.fullname} ${isCurrent ? ' <span style="font-size:0.7rem; color:#10b981; font-weight:600; border:1px solid rgba(16,185,129,0.2); background:rgba(16,185,129,0.05); padding:2px 6px; border-radius:4px; margin-left:6px">AKUN ANDA</span>' : ''}</td>
+            <td style="font-family:monospace; color:var(--text-dim)">@${user.username}</td>
+            <td class="text-center">
+              <span class="badge" style="font-size:0.72rem; font-weight:700; padding:4px 8px; border-radius:4px; background:${badgeColor}; color:${textColor}; border:1px solid ${borderColor}; text-transform:uppercase;">
+                ${user.role}
+              </span>
+            </td>
+            <td class="text-center">
+              ${deleteBtn}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      if (users.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:24px; color:var(--text-muted)">Tidak ada akun pengelola.</td></tr>`;
+      }
+    }
+  } catch (err) {
+    console.error("Error loading admin users list:", err);
+    tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:24px; color:#ef4444">Gagal memuat data dari server. Check koneksi.</td></tr>`;
+  }
+}
+
+// Delete Administrator User
+window.deleteAdminUser = function(username) {
+  const currentRole = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (currentRole !== "super admin") {
+    showCustomToast("Hak akses terbatas! Hanya Super Admin yang dapat mengelola akun pengelola.", "error");
+    return;
+  }
+
+  showCustomConfirm(
+    "Hapus Akun Pengelola",
+    `Apakah Anda yakin ingin menghapus akun pengelola "@${username}"? Akses administratif untuk akun ini akan segera dicabut secara permanen.`,
+    async () => {
+      try {
+        const res = await fetch(`/api/admin/users?username=${username}`, {
+          method: 'DELETE'
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          showCustomToast("Akun pengelola berhasil dihapus!", "success");
+          renderAdminUsersList();
+        } else {
+          showCustomToast(data.error || "Gagal menghapus pengelola!", "error");
+        }
+      } catch (err) {
+        showCustomToast(`Koneksi error: ${err.message}`, "error");
+      }
+    },
+    "Cabut Akses",
+    "danger"
+  );
+};
+
+// Apply profile configurations dynamically to the portals header, footer, etc.
+function applySettingsToDOM() {
+  const orgName = localStorage.getItem("pobsi_org_name") || "POBSI Kabupaten Banjarnegara";
+  const email = localStorage.getItem("pobsi_email") || "info@pobsibanjarnegara.or.id";
+  const whatsapp = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
+  const address = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
+
+  // Document Title
+  document.title = `${orgName} - Platform Digital Resmi Biliar`;
+
+  // Header logo text updates (splits first word and remainder)
+  const words = orgName.split(" ");
+  const firstWord = words[0] || "POBSI";
+  const remaining = words.slice(1).join(" ").toUpperCase() || "BANJARNEGARA";
+
+  document.querySelectorAll(".logo-title").forEach(el => {
+    el.textContent = firstWord;
+  });
+  document.querySelectorAll(".logo-subtitle").forEach(el => {
+    el.textContent = remaining;
+  });
+
+  // Sidebar branding check
+  const logoText = document.querySelector(".nav-logo span");
+  if (logoText) logoText.textContent = orgName;
+
+  // Footer organization texts
+  const footerOrgName = document.querySelector(".footer-left h3");
+  if (footerOrgName) footerOrgName.textContent = orgName;
+
+  const footerLogoText = document.querySelector(".footer-logo-text");
+  if (footerLogoText) footerLogoText.textContent = orgName.toUpperCase();
+
+  const footerCopyright = document.querySelector(".footer-bottom p");
+  if (footerCopyright) {
+    footerCopyright.innerHTML = `&copy; 2026 ${orgName}. Hak Cipta Dilindungi. Didukung oleh KONI Kabupaten Banjarnegara.`;
+  }
+}
+
+window.setupSystemSettings = setupSystemSettings;
+window.applySettingsToDOM = applySettingsToDOM;
 
