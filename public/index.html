@@ -5065,10 +5065,10 @@
 
         <!-- PANE 9: SYSTEM SETTINGS -->
         <div class="workspace-pane" id="pane-settings" style="display:none;">
-          <div class="pm-console" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+          <div class="settings-container" style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 600px;">
             
             <!-- Header -->
-            <div class="pm-header" style="margin-bottom: 24px;">
+            <div class="pm-header" style="margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 16px;">
               <div class="pm-title-section">
                 <h2 class="pm-title">Pengaturan Sistem</h2>
                 <p class="pm-subtitle">Kelola informasi organisasi, aturan sirkuit BOC, ubah kata sandi, dan pengelolaan hak akses administrator.</p>
@@ -5102,32 +5102,39 @@
                 
                 <!-- Sub-pane 1: Profil Organisasi -->
                 <div class="settings-pane-card active" id="sub-org">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-building text-gold" style="color: #fbbf24;"></i> Profil Organisasi POBSI
                     </h3>
                     
-                    <form id="form-settings-org" class="admin-form-element" style="display: flex; flex-direction: column; gap: 16px;">
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-org-name">Nama Organisasi Resmi</label>
-                        <input type="text" id="set-org-name" required placeholder="Contoh: POBSI Kabupaten Banjarnegara">
+                    <form id="form-settings-org" class="admin-form-element" style="display: flex; flex-direction: column; gap: 20px;">
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-name">Nama Organisasi Resmi</label>
+                          <input type="text" id="set-org-name" required placeholder="Contoh: POBSI Kabupaten Banjarnegara">
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-chairman">Ketua Umum POBSI</label>
+                          <input type="text" id="set-org-chairman" required placeholder="Contoh: H. Sugeng W., S.E.">
+                        </div>
                       </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-org-chairman">Ketua Umum POBSI</label>
-                        <input type="text" id="set-org-chairman" required placeholder="Contoh: H. Sugeng W., S.E.">
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-email">Email Humas / Kontak</label>
+                          <input type="email" id="set-org-email" required placeholder="Contoh: info@pobsibanjarnegara.or.id">
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-whatsapp">Nomor WhatsApp Resmi (Sekretariat)</label>
+                          <input type="text" id="set-org-whatsapp" required placeholder="Contoh: +62 812-3456-789">
+                        </div>
                       </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-org-email">Email Humas / Kontak</label>
-                        <input type="email" id="set-org-email" required placeholder="Contoh: info@pobsibanjarnegara.or.id">
-                      </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-org-whatsapp">Nomor WhatsApp Resmi (Sekretariat)</label>
-                        <input type="text" id="set-org-whatsapp" required placeholder="Contoh: +62 812-3456-789">
-                      </div>
+
                       <div class="form-group-item">
                         <label class="form-lbl" for="set-org-address">Alamat Sekretariat</label>
                         <input type="text" id="set-org-address" required placeholder="Contoh: Banjarnegara, Jawa Tengah">
                       </div>
+
                       <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
                       </button>
@@ -5137,40 +5144,43 @@
 
                 <!-- Sub-pane 2: Regulasi Sirkuit -->
                 <div class="settings-pane-card" id="sub-rules">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-trophy text-gold" style="color: #fbbf24;"></i> Regulasi Sirkuit BOC
                     </h3>
                     
-                    <form id="form-settings-rules" class="admin-form-element" style="display: flex; flex-direction: column; gap: 16px;">
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-boc-cutoff">Batas Zona Kelayakan Playoff (Cut-Off)</label>
-                        <select id="set-boc-cutoff" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
-                          <option value="8">8 Besar</option>
-                          <option value="12">12 Besar</option>
-                          <option value="16" selected>16 Besar</option>
-                          <option value="24">24 Besar</option>
-                          <option value="32">32 Besar</option>
-                        </select>
+                    <form id="form-settings-rules" class="admin-form-element" style="display: flex; flex-direction: column; gap: 20px;">
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-boc-cutoff">Batas Zona Kelayakan Playoff (Cut-Off)</label>
+                          <select id="set-boc-cutoff" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
+                            <option value="8">8 Besar</option>
+                            <option value="12">12 Besar</option>
+                            <option value="16" selected>16 Besar</option>
+                            <option value="24">24 Besar</option>
+                            <option value="32">32 Besar</option>
+                          </select>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-boc-maxhc">Batas Handicap Maksimal Sirkuit</label>
+                          <select id="set-boc-maxhc" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
+                            <option value="Bebas" selected>Bebas (Tanpa Batasan)</option>
+                            <option value="7">Handicap 7</option>
+                            <option value="6">Handicap 6</option>
+                            <option value="5">Handicap 5</option>
+                            <option value="4">Handicap 4</option>
+                          </select>
+                        </div>
                       </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-boc-maxhc">Batas Handicap Maksimal Sirkuit</label>
-                        <select id="set-boc-maxhc" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
-                          <option value="Bebas" selected>Bebas (Tanpa Batasan)</option>
-                          <option value="7">Handicap 7</option>
-                          <option value="6">Handicap 6</option>
-                          <option value="5">Handicap 5</option>
-                          <option value="4">Handicap 4</option>
-                        </select>
-                      </div>
-                      <div class="form-group-item">
+
+                      <div class="form-group-item" style="max-width: 50%;">
                         <label class="form-lbl" for="set-boc-year">Tahun Musim Sirkuit Berjalan</label>
                         <input type="number" id="set-boc-year" min="2020" max="2050" required placeholder="Contoh: 2026">
                       </div>
                       
-                      <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 12px; margin-top: 8px;">
-                        <span style="font-size: 0.78rem; color: #93c5fd; display: block; line-height: 1.45;">
-                          <i class="fa-solid fa-circle-info"></i> Aturan Kelayakan sirkuit digunakan untuk menghitung cut-off zona kualifikasi otomatis pada sirkuit klasemen publik.
+                      <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 16px;">
+                        <span style="font-size: 0.8rem; color: #93c5fd; display: block; line-height: 1.5;">
+                          <i class="fa-solid fa-circle-info"></i> Regulasi ini mengontrol sirkuit turnamen di seluruh sistem. Aturan batas cut-off menentukan jumlah pemain yang ditampilkan di zona kualifikasi papan klasemen sirkuit publik.
                         </span>
                       </div>
 
@@ -5183,24 +5193,28 @@
 
                 <!-- Sub-pane 3: Keamanan & Sandi -->
                 <div class="settings-pane-card" id="sub-pwd">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-key text-gold" style="color: #fbbf24;"></i> Ubah Kata Sandi Akun
                     </h3>
                     
-                    <form id="form-settings-password" class="admin-form-element" style="display: flex; flex-direction: column; gap: 16px;">
+                    <form id="form-settings-password" class="admin-form-element" style="display: flex; flex-direction: column; gap: 20px;">
                       <div class="form-group-item">
                         <label class="form-lbl" for="set-pwd-current">Kata Sandi Saat Ini</label>
                         <input type="password" id="set-pwd-current" required placeholder="Masukkan kata sandi lama">
                       </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-pwd-new">Kata Sandi Baru</label>
-                        <input type="password" id="set-pwd-new" required placeholder="Masukkan kata sandi baru (min. 6 karakter)">
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-pwd-new">Kata Sandi Baru</label>
+                          <input type="password" id="set-pwd-new" required placeholder="Masukkan kata sandi baru (min. 6 karakter)">
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-pwd-confirm">Konfirmasi Kata Sandi Baru</label>
+                          <input type="password" id="set-pwd-confirm" required placeholder="Ulangi kata sandi baru">
+                        </div>
                       </div>
-                      <div class="form-group-item">
-                        <label class="form-lbl" for="set-pwd-confirm">Konfirmasi Kata Sandi Baru</label>
-                        <input type="password" id="set-pwd-confirm" required placeholder="Ulangi kata sandi baru">
-                      </div>
+                      
                       <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
                         <i class="fa-solid fa-key"></i> Perbarui Sandi
                       </button>
@@ -5210,8 +5224,8 @@
 
                 <!-- Sub-pane 4: Akun Pengelola -->
                 <div class="settings-pane-card" id="sub-users">
-                  <div id="settings-admin-users-card" class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px; width: 100%; box-sizing: border-box;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                  <div id="settings-admin-users-card" class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px; width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
                       <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-user-shield text-gold" style="color: #fbbf24;"></i> Akun Pengelola Administratif
                       </h3>
@@ -5242,8 +5256,8 @@
 
                 <!-- Sub-pane 5: Status Koneksi -->
                 <div class="settings-pane-card" id="sub-db">
-                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                  <div class="pm-card" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 28px;">
+                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
                       <i class="fa-solid fa-database text-gold" style="color: #fbbf24;"></i> Sinkronisasi & Mode Database
                     </h3>
                     
