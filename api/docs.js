@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
        POST: Menambahkan Dokumen Baru
        ========================================================================== */
     if (req.method === 'POST') {
-      const { title, date, fileSize, fileType, fileData } = req.body;
+      const { title, date, fileSize, fileType, fileData, fileExtension } = req.body;
       if (!title || !date) {
         return res.status(400).json({ error: "Nama dokumen dan tanggal rilis wajib diisi!" });
       }
@@ -50,13 +50,21 @@ module.exports = async (req, res) => {
       if (fileData && fileData.includes(';base64,')) {
         const base64Data = fileData.split(';base64,').pop();
         const buffer = Buffer.from(base64Data, 'base64');
-        const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const ext = fileExtension || '.pdf';
+        const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}${ext}`;
+
+        let contentType = 'application/pdf';
+        if (fileType === 'WORD') {
+          contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        } else if (fileType === 'EXCEL') {
+          contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        }
 
         // Upload ke Supabase Storage (bucket 'documents')
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('documents')
           .upload(fileName, buffer, {
-            contentType: 'application/pdf',
+            contentType: contentType,
             duplex: 'half'
           });
 

@@ -13,7 +13,7 @@ exports.getDocs = async (req, res) => {
 };
 
 exports.addDoc = async (req, res) => {
-  const { title, date, fileSize, fileType, fileData } = req.body;
+  const { title, date, fileSize, fileType, fileData, fileExtension } = req.body;
   if (!title || !date) {
     return res.status(400).json({ error: "Nama dokumen dan tanggal rilis wajib diisi!" });
   }
@@ -32,7 +32,8 @@ exports.addDoc = async (req, res) => {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
       
-      const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const ext = fileExtension || '.pdf';
+      const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}${ext}`;
       const filePath = path.join(uploadDir, fileName);
       
       fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });

@@ -1378,6 +1378,29 @@ function setupEventsFilters() {
   });
 }
 
+// Helper untuk mendeteksi ikon dokumen secara dinamis
+function getFileIconClass(title, fileType) {
+  const lower = (title || "").toLowerCase();
+  const type = (fileType || "").toUpperCase();
+  if (lower.endsWith('.pdf') || type === 'PDF' || type.includes('PDF')) {
+    return 'fa-solid fa-file-pdf text-red';
+  } else if (lower.endsWith('.doc') || lower.endsWith('.docx') || type === 'DOC' || type === 'WORD' || type.includes('WORD') || type.includes('OFFICEDOCUMENT.WORDPROCESSINGML')) {
+    return 'fa-solid fa-file-word text-blue';
+  } else if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || type === 'EXCEL' || type === 'XLS' || type.includes('EXCEL') || type.includes('OFFICEDOCUMENT.SPREADSHEETML')) {
+    return 'fa-solid fa-file-excel text-green';
+  }
+  return 'fa-solid fa-file text-muted';
+}
+
+function getFileTypeLabel(title, fileType) {
+  const lower = (title || "").toLowerCase();
+  const type = (fileType || "").toUpperCase();
+  if (lower.endsWith('.pdf') || type === 'PDF' || type.includes('PDF')) return 'PDF';
+  if (lower.endsWith('.docx') || lower.endsWith('.doc') || type === 'DOC' || type === 'WORD' || type.includes('WORD')) return 'WORD';
+  if (lower.endsWith('.xlsx') || lower.endsWith('.xls') || type === 'EXCEL' || type === 'XLS' || type.includes('EXCEL')) return 'EXCEL';
+  return 'PDF';
+}
+
 // 11. Document Hub Logic
 function renderDocuments(searchQuery = "") {
   const tableBody = document.getElementById("docs-table-body");
@@ -1387,22 +1410,25 @@ function renderDocuments(searchQuery = "") {
     doc.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  tableBody.innerHTML = filtered.map(doc => `
-    <tr>
-      <td class="table-name-bold">
-        <i class="fa-solid fa-file-pdf text-red" style="margin-right:8px; font-size:1.1rem"></i>
-        ${doc.title}
-      </td>
-      <td style="color:var(--text-muted)">${doc.date}</td>
-      <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
-      <td class="text-center"><span class="player-hc-badge">${doc.fileType || 'PDF'}</span></td>
-      <td class="text-center">
-        <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
-          <i class="fa-solid fa-arrow-down-long"></i>
-        </a>
-      </td>
-    </tr>
-  `).join("");
+  tableBody.innerHTML = filtered.map(doc => {
+    const iconClass = getFileIconClass(doc.title, doc.fileType);
+    return `
+      <tr>
+        <td class="table-name-bold">
+          <i class="${iconClass}" style="margin-right:8px; font-size:1.1rem"></i>
+          ${doc.title}
+        </td>
+        <td style="color:var(--text-muted)">${doc.date}</td>
+        <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
+        <td class="text-center"><span class="player-hc-badge">${doc.fileType || 'PDF'}</span></td>
+        <td class="text-center">
+          <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
+            <i class="fa-solid fa-arrow-down-long"></i>
+          </a>
+        </td>
+      </tr>
+    `;
+  }).join("");
 
   if (filtered.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Dokumen resmi tidak ditemukan</td></tr>`;
@@ -14567,9 +14593,11 @@ function setupDatePickers() {
 }
 
 // ==========================================================================
-// 13. Kelola Surat Edaran Admin Logic (Upload PDF Base64 & CRUD)
+// 13. Kelola Surat Edaran Admin Logic (Upload PDF/Word/Excel Base64 & CRUD)
 // ==========================================================================
 let currentDocBase64 = "";
+let selectedFileExt = "";
+let selectedFileType = "";
 
 function renderAdminDocsDashboard(searchQuery = "") {
   const tableBody = document.getElementById("pm-doc-table-body");
@@ -14582,11 +14610,12 @@ function renderAdminDocsDashboard(searchQuery = "") {
 
   // Render Rows
   tableBody.innerHTML = filtered.map((doc, idx) => {
+    const iconClass = getFileIconClass(doc.title, doc.fileType);
     return `
       <tr>
         <td class="text-center" style="font-weight: 600; color: var(--text-muted);">${idx + 1}</td>
         <td class="table-name-bold">
-          <i class="fa-solid fa-file-pdf text-red" style="margin-right:8px; font-size:1.1rem"></i>
+          <i class="${iconClass}" style="margin-right:8px; font-size:1.1rem"></i>
           ${doc.title}
         </td>
         <td style="color:var(--text-muted)">${doc.date}</td>
@@ -14697,6 +14726,8 @@ function setupDocManagement() {
   // Reset form / upload state
   function resetUploadState() {
     currentDocBase64 = "";
+    selectedFileExt = "";
+    selectedFileType = "";
     if (fileInput) fileInput.value = "";
     if (dropZone) dropZone.style.display = "flex";
     if (previewContainer) previewContainer.style.display = "none";
@@ -14750,14 +14781,27 @@ function setupDocManagement() {
   }
 
   function handleDocFileSelection(file) {
-    if (file.type !== "application/pdf") {
-      alert("Format berkas tidak valid! Silakan unggah dokumen PDF.");
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ];
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".xls", ".xlsx"];
+    const fileExt = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExt)) {
+      alert("Format berkas tidak valid! Silakan unggah berkas PDF, Word, atau Excel.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       alert("Ukuran dokumen terlalu besar! Maksimal batas ukuran berkas adalah 5MB.");
       return;
     }
+
+    selectedFileExt = fileExt;
+    selectedFileType = getFileTypeLabel(file.name, file.type);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -14766,6 +14810,18 @@ function setupDocManagement() {
       // Update UI Previews
       if (previewFilename) {
         previewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      }
+
+      // Update Preview Icon dynamically
+      const previewIcon = document.getElementById("doc-preview-icon");
+      if (previewIcon) {
+        previewIcon.className = getFileIconClass(file.name, file.type);
+        previewIcon.style.fontSize = "2rem";
+      }
+
+      const filetypeLabel = document.getElementById("doc-preview-filetype-label");
+      if (filetypeLabel) {
+        filetypeLabel.textContent = `Format ${selectedFileType} Terverifikasi`;
       }
       
       if (dropZone) dropZone.style.display = "none";
@@ -14798,7 +14854,7 @@ function setupDocManagement() {
       }
 
       if (!currentDocBase64) {
-        alert("Silakan pilih berkas PDF untuk diunggah!");
+        alert("Silakan pilih berkas dokumen untuk diunggah!");
         return;
       }
 
@@ -14811,7 +14867,8 @@ function setupDocManagement() {
         title,
         date,
         fileSize,
-        fileType: "PDF",
+        fileType: selectedFileType || "PDF",
+        fileExtension: selectedFileExt || ".pdf",
         fileData: currentDocBase64
       };
 
@@ -14845,10 +14902,10 @@ function setupDocManagement() {
         const tempId = `D_TEMP_${(appData.documents || []).length + 1}`;
         const newDoc = {
           id: tempId,
-          title,
+          title: title + (title.toLowerCase().endsWith(selectedFileExt) ? "" : selectedFileExt),
           date,
           fileSize,
-          fileType: "PDF",
+          fileType: selectedFileType || "PDF",
           fileUrl: "" 
         };
 
