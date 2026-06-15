@@ -1426,7 +1426,7 @@ function renderDocuments(searchQuery = "", filterType = "ALL") {
         <td class="text-center" style="font-family:var(--font-headers); font-weight:600">${doc.fileSize}</td>
         <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
         <td class="text-center">
-          <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
+          <a href="${doc.fileUrl || '#'}" target="_blank" class="btn-download-icon" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="showCustomToast('Unduhan tidak tersedia untuk dokumen ini.', 'error'); return false;"`}>
             <i class="fa-solid fa-arrow-down-long"></i>
           </a>
         </td>
@@ -14640,7 +14640,7 @@ function renderAdminDocsDashboard(searchQuery = "", filterType = "ALL") {
         <td class="text-center"><span class="doc-badge doc-badge-${docType.toLowerCase()}">${docType}</span></td>
         <td class="text-center">
           <div style="display: flex; gap: 8px; justify-content: center;">
-            <a href="${doc.fileUrl || '#'}" target="_blank" class="doc-action-btn doc-action-btn-download" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="alert('Unduhan tidak tersedia untuk dokumen ini.'); return false;"`}>
+            <a href="${doc.fileUrl || '#'}" target="_blank" class="doc-action-btn doc-action-btn-download" aria-label="Unduh ${doc.title}" ${doc.fileUrl ? '' : `onclick="showCustomToast('Unduhan tidak tersedia untuk dokumen ini.', 'error'); return false;"`}>
               <i class="fa-solid fa-download"></i>
             </a>
             <button class="doc-action-btn doc-action-btn-delete" onclick="deleteAdminDoc('${doc.id}')" title="Hapus Dokumen">
@@ -14817,11 +14817,11 @@ function setupDocManagement() {
     const fileExt = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
 
     if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExt)) {
-      alert("Format berkas tidak valid! Silakan unggah berkas PDF, Word, atau Excel.");
+      showCustomToast("Format berkas tidak valid! Silakan unggah berkas PDF, Word, atau Excel.", "error");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("Ukuran dokumen terlalu besar! Maksimal batas ukuran berkas adalah 5MB.");
+      showCustomToast("Ukuran dokumen terlalu besar! Maksimal batas ukuran berkas adalah 5MB.", "error");
       return;
     }
 
@@ -14863,7 +14863,7 @@ function setupDocManagement() {
       // Role restrict check
       const role = localStorage.getItem("pobsi_admin_role") || "admin";
       if (role === "staff") {
-        alert("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat mengunggah berkas.");
+        showCustomToast("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat mengunggah berkas.", "error");
         return;
       }
 
@@ -14874,12 +14874,12 @@ function setupDocManagement() {
       const date = dateInput.value.trim();
 
       if (!title || !date) {
-        alert("Judul dokumen dan tanggal rilis wajib diisi!");
+        showCustomToast("Judul dokumen dan tanggal rilis wajib diisi!", "error");
         return;
       }
 
       if (!currentDocBase64) {
-        alert("Silakan pilih berkas dokumen untuk diunggah!");
+        showCustomToast("Silakan pilih berkas dokumen untuk diunggah!", "error");
         return;
       }
 
@@ -14906,7 +14906,7 @@ function setupDocManagement() {
           });
 
           if (res.ok) {
-            alert(`Berhasil mengunggah dokumen "${title}"!`);
+            showCustomToast(`Berhasil mengunggah dokumen "${title}"!`, "success");
             form.reset();
             resetUploadState();
             if (modal) modal.style.display = "none";
@@ -14921,10 +14921,10 @@ function setupDocManagement() {
             renderDocuments(); // Update public table too
           } else {
             const errJson = await res.json();
-            alert(`Gagal menyimpan berkas: ${errJson.error || 'Server error'}`);
+            showCustomToast(`Gagal menyimpan berkas: ${errJson.error || 'Server error'}`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi server: ${err.message}`);
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
         }
       } else {
         // Local mode fallback
@@ -14941,7 +14941,7 @@ function setupDocManagement() {
         if (!appData.documents) appData.documents = [];
         appData.documents.unshift(newDoc);
 
-        alert(`Mode Luring: Berkas "${title}" ditambahkan sementara di memori browser!`);
+        showCustomToast(`Mode Luring: Berkas "${title}" ditambahkan sementara di memori browser!`, "info");
         form.reset();
         resetUploadState();
         if (modal) modal.style.display = "none";
@@ -14961,56 +14961,60 @@ function setupDocManagement() {
 window.deleteAdminDoc = async function(id) {
   const role = localStorage.getItem("pobsi_admin_role") || "admin";
   if (role === "staff") {
-    alert("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat menghapus dokumen resmi.");
+    showCustomToast("Hak akses terbatas! Hanya Admin atau Super Admin yang dapat menghapus dokumen resmi.", "error");
     return;
   }
 
   const doc = (appData.documents || []).find(d => d.id === id);
   if (!doc) return;
 
-  if (!confirm(`Apakah Anda yakin ingin menghapus dokumen "${doc.title}"? Tindakan ini tidak dapat dibatalkan.`)) {
-    return;
-  }
+  showCustomConfirm(
+    "Konfirmasi Hapus Dokumen",
+    `Apakah Anda yakin ingin menghapus dokumen "${doc.title}"? Tindakan ini tidak dapat dibatalkan.`,
+    async () => {
+      if (isServerOnline) {
+        try {
+          const res = await fetch(`/api/docs/${id}`, {
+            method: 'DELETE'
+          });
 
-  if (isServerOnline) {
-    try {
-      const res = await fetch(`/api/docs/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (res.ok) {
-        alert("Dokumen berhasil dihapus!");
-        await loadDataFromApi();
-        renderAdminDocsDashboard();
-        renderDocuments();
+          if (res.ok) {
+            showCustomToast("Dokumen berhasil dihapus!", "success");
+            await loadDataFromApi();
+            renderAdminDocsDashboard();
+            renderDocuments();
+          } else {
+            // Try fallback to query param endpoint
+            const resQuery = await fetch(`/api/docs?id=${id}`, {
+              method: 'DELETE'
+            });
+            if (resQuery.ok) {
+              showCustomToast("Dokumen berhasil dihapus!", "success");
+              await loadDataFromApi();
+              renderAdminDocsDashboard();
+              renderDocuments();
+            } else {
+              const errJson = await resQuery.json().catch(() => ({}));
+              showCustomToast(`Gagal menghapus berkas: ${errJson.error || 'Server error'}`, "error");
+            }
+          }
+        } catch (err) {
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
+        }
       } else {
-        // Try fallback to query param endpoint
-        const resQuery = await fetch(`/api/docs?id=${id}`, {
-          method: 'DELETE'
-        });
-        if (resQuery.ok) {
-          alert("Dokumen berhasil dihapus!");
-          await loadDataFromApi();
+        // Local memory delete
+        const idx = (appData.documents || []).findIndex(d => d.id === id);
+        if (idx > -1) {
+          appData.documents.splice(idx, 1);
+          showCustomToast("Mode Luring: Berkas dihapus dari memori browser.", "info");
           renderAdminDocsDashboard();
           renderDocuments();
-        } else {
-          const errJson = await resQuery.json().catch(() => ({}));
-          alert(`Gagal menghapus berkas: ${errJson.error || 'Server error'}`);
         }
       }
-    } catch (err) {
-      alert(`Error koneksi server: ${err.message}`);
-    }
-  } else {
-    // Local memory delete
-    const idx = (appData.documents || []).findIndex(d => d.id === id);
-    if (idx > -1) {
-      appData.documents.splice(idx, 1);
-      alert("Mode Luring: Berkas dihapus dari memori browser.");
-      renderAdminDocsDashboard();
-      renderDocuments();
-    }
-  }
+    },
+    "Hapus",
+    "danger"
+  );
 };
 
 window.renderAdminDocsDashboard = renderAdminDocsDashboard;
