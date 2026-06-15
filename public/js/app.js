@@ -15264,6 +15264,36 @@ function setupSystemSettings() {
   const currentRole = localStorage.getItem("pobsi_admin_role") || "admin";
   const currentUsername = localStorage.getItem("pobsi_admin_username") || "admin";
 
+  // Check RBAC limits: only super admin can change rules/org or manage admins
+  const isAdminOrSuper = currentRole === "admin" || currentRole === "super admin";
+  const isSuperAdmin = currentRole === "super admin";
+
+  // Settings Sub-menu Tab Switcher
+  const subLinks = document.querySelectorAll(".settings-sub-link");
+  const subPanes = document.querySelectorAll(".settings-pane-card");
+
+  subLinks.forEach(link => {
+    link.addEventListener("click", () => {
+      const targetSub = link.getAttribute("data-sub");
+      
+      subLinks.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+
+      subPanes.forEach(pane => {
+        pane.classList.remove("active");
+        if (pane.id === targetSub) {
+          pane.classList.add("active");
+        }
+      });
+    });
+  });
+
+  // Hide accounts menu if not super admin
+  const subUsersBtn = document.getElementById("settings-sub-users-btn");
+  if (!isSuperAdmin) {
+    if (subUsersBtn) subUsersBtn.style.display = "none";
+  }
+
   // Initialize form fields from localStorage (or default hardcoded ones)
   if (orgNameInput) orgNameInput.value = localStorage.getItem("pobsi_org_name") || "POBSI Kabupaten Banjarnegara";
   if (chairmanInput) chairmanInput.value = localStorage.getItem("pobsi_chairman") || "H. Sugeng W., S.E.";
@@ -15275,9 +15305,6 @@ function setupSystemSettings() {
   if (bocMaxhcInput) bocMaxhcInput.value = localStorage.getItem("boc_max_hc") || "Bebas";
   if (bocYearInput) bocYearInput.value = localStorage.getItem("currentBocYear") || "2026";
 
-  // Check RBAC limits: only super admin can change rules/org or manage admins
-  const isAdminOrSuper = currentRole === "admin" || currentRole === "super admin";
-  const isSuperAdmin = currentRole === "super admin";
 
   if (!isSuperAdmin) {
     // Hide administrative users card
