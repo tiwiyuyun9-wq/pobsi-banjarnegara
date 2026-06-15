@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
        POST: Menambahkan Dokumen Baru
        ========================================================================== */
     if (req.method === 'POST') {
-      const { title, date, fileSize, fileType } = req.body;
+      const { title, date, fileSize, fileType, fileData } = req.body;
       if (!title || !date) {
         return res.status(400).json({ error: "Nama dokumen dan tanggal rilis wajib diisi!" });
       }
@@ -46,12 +46,39 @@ module.exports = async (req, res) => {
       const nextNum = (count || 0) + 1;
       const newId = `D${nextNum.toString().padStart(3, '0')}`;
 
+      let fileUrl = "";
+      if (fileData && fileData.includes(';base64,')) {
+        const base64Data = fileData.split(';base64,').pop();
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        // Upload ke Supabase Storage (bucket 'documents')
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(fileName, buffer, {
+            contentType: 'application/pdf',
+            duplex: 'half'
+          });
+
+        if (uploadError) {
+          console.error("Gagal mengunggah berkas ke Supabase Storage:", uploadError);
+          // Tetap lanjutkan tapi tanpa fileUrl, atau throw error jika wajib
+        } else {
+          // Ambil URL Publik
+          const { data: publicUrlData } = supabase.storage
+            .from('documents')
+            .getPublicUrl(fileName);
+          fileUrl = publicUrlData.publicUrl;
+        }
+      }
+
       const newDoc = {
         id: newId,
         title: title.trim(),
         date: date.trim(),
         fileSize: fileSize || "120 KB",
-        fileType: fileType || "PDF"
+        fileType: fileType || "PDF",
+        fileUrl: fileUrl
       };
 
       const { data, error } = await supabase
@@ -69,6 +96,26 @@ module.exports = async (req, res) => {
        ========================================================================== */
     if (req.method === 'DELETE') {
       if (!id) return res.status(400).json({ error: "ID dokumen wajib diberikan!" });
+
+      // Ambil data untuk mengecek fileUrl & menghapusnya dari storage
+      const { data: doc, error: getErr } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!getErr && doc && doc.fileUrl && doc.fileUrl.includes('/documents/')) {
+        const fileName = doc.fileUrl.split('/documents/').pop();
+        if (fileName) {
+          try {
+            await supabase.storage
+              .from('documents')
+              .remove([fileName]);
+          } catch (storageErr) {
+            console.error("Gagal menghapus file dari Supabase Storage:", storageErr);
+          }
+        }
+      }
 
       const { error } = await supabase
         .from('documents')

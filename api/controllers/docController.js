@@ -1,9 +1,11 @@
 // Document Controller - Mengelola Surat Edaran & Dokumen Resmi POBSI
+const fs = require('fs');
+const path = require('path');
 const { dbAll, dbGet, dbRun } = require('../config/db');
 
 exports.getDocs = async (req, res) => {
   try {
-    const docs = await dbAll(`SELECT * FROM documents`);
+    const docs = await dbAll(`SELECT * FROM documents ORDER BY date DESC`);
     res.json(docs);
   } catch (error) {
     res.status(500).json({ error: "Gagal mengambil berkas dokumen dari SQLite: " + error.message });
@@ -11,7 +13,7 @@ exports.getDocs = async (req, res) => {
 };
 
 exports.addDoc = async (req, res) => {
-  const { title, date, fileSize, fileType } = req.body;
+  const { title, date, fileSize, fileType, fileData } = req.body;
   if (!title || !date) {
     return res.status(400).json({ error: "Nama dokumen dan tanggal rilis wajib diisi!" });
   }
@@ -21,17 +23,34 @@ exports.addDoc = async (req, res) => {
     const nextNum = (countRow ? countRow.count : 0) + 1;
     const id = `D${nextNum.toString().padStart(3, '0')}`;
 
+    let fileUrl = "";
+    if (fileData && fileData.includes(';base64,')) {
+      const base64Data = fileData.split(';base64,').pop();
+      const uploadDir = path.join(__dirname, '../../public/uploads');
+      
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      const fileName = `${Date.now()}-${title.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const filePath = path.join(uploadDir, fileName);
+      
+      fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });
+      fileUrl = `/uploads/${fileName}`;
+    }
+
     const newDoc = {
       id,
-      title,
-      date,
+      title: title.trim(),
+      date: date.trim(),
       fileSize: fileSize || "120 KB",
-      fileType: fileType || "PDF"
+      fileType: fileType || "PDF",
+      fileUrl: fileUrl
     };
 
     await dbRun(
-      `INSERT INTO documents (id, title, date, fileSize, fileType) VALUES (?, ?, ?, ?, ?)`,
-      [newDoc.id, newDoc.title, newDoc.date, newDoc.fileSize, newDoc.fileType]
+      `INSERT INTO documents (id, title, date, "fileSize", "fileType", "fileUrl") VALUES (?, ?, ?, ?, ?, ?)`,
+      [newDoc.id, newDoc.title, newDoc.date, newDoc.fileSize, newDoc.fileType, newDoc.fileUrl]
     );
 
     res.status(201).json(newDoc);
@@ -39,3 +58,37 @@ exports.addDoc = async (req, res) => {
     res.status(500).json({ error: "Gagal menyimpan berkas ke SQLite: " + error.message });
   }
 };
+
+exports.deleteDoc = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: "ID dokumen wajib diberikan!" });
+  }
+
+  try {
+    // Ambil info dokumen untuk menghapus berkas fisik jika ada
+    const doc = await dbGet(`SELECT * FROM documents WHERE id = ?`, [id]);
+    if (!doc) {
+      return res.status(404).json({ error: "Dokumen tidak ditemukan!" });
+    }
+
+    // Jika ada file lokal, hapus fisiknya dari disk
+    if (doc.fileUrl && doc.fileUrl.startsWith('/uploads/')) {
+      const fileName = doc.fileUrl.replace('/uploads/', '');
+      const filePath = path.join(__dirname, '../../public/uploads', fileName);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (err) {
+          console.error("Gagal menghapus file fisik dokumen dari disk:", err);
+        }
+      }
+    }
+
+    await dbRun(`DELETE FROM documents WHERE id = ?`, [id]);
+    res.json({ success: true, message: "Dokumen berhasil dihapus." });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal menghapus berkas di SQLite: " + error.message });
+  }
+};
+

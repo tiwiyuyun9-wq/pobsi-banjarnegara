@@ -67,7 +67,8 @@ CREATE TABLE documents (
     title TEXT NOT NULL,
     date TEXT NOT NULL,
     "fileSize" TEXT,
-    "fileType" TEXT DEFAULT 'PDF'
+    "fileType" TEXT DEFAULT 'PDF',
+    "fileUrl" TEXT
 );
 
 -- 5. Buat Tabel Clubs

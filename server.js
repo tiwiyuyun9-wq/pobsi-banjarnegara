@@ -30,6 +30,12 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Buat folder uploads jika belum ada untuk menampung file offline
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Sajikan Aset Statis Frontend dari Folder 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -108,6 +114,10 @@ db.serialize(() => {
     fileSize TEXT,
     fileType TEXT DEFAULT 'PDF'
   )`);
+
+  // Safely add fileUrl column to support physical document downloads
+  db.run(`ALTER TABLE documents ADD COLUMN fileUrl TEXT`, () => {});
+
 
   // 5. Buat Tabel Clubs
   db.run(`CREATE TABLE IF NOT EXISTS clubs (

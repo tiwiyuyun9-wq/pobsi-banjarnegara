@@ -1643,7 +1643,7 @@
           <i class="fa-solid fa-building"></i> Kelola Klub
         </button>
 
-        <button class="sidebar-link" id="sidebar-action-docs">
+        <button class="sidebar-link" data-pane="pane-docs">
           <i class="fa-solid fa-file-invoice"></i> Surat Edaran
         </button>
         <button class="sidebar-link" id="sidebar-action-settings">
@@ -4714,6 +4714,134 @@
                     </div>
                   </div>
                   <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center; margin-top: 10px;"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 6: KELOLA SURAT EDARAN — Document Management Console -->
+        <div class="workspace-pane" id="pane-docs" style="display:none;">
+          <div class="pm-console">
+            <!-- LEFT: Main Content Area -->
+            <div class="pm-main">
+              <!-- Page Header -->
+              <div class="pm-header">
+                <div class="pm-header-left">
+                  <h2 class="pm-title">Kelola Surat Edaran</h2>
+                  <p class="pm-subtitle">Unggah, perbarui, dan kelola surat edaran resmi POBSI Kabupaten Banjarnegara</p>
+                </div>
+                <div class="pm-header-actions">
+                  <button class="pm-btn pm-btn-primary" id="btn-open-add-doc-modal">
+                    <i class="fa-solid fa-plus"></i> Tambah Dokumen
+                  </button>
+                </div>
+              </div>
+
+              <!-- Stats Summary Cards -->
+              <div class="pm-stats-row">
+                <div class="pm-stat-card">
+                  <div class="pm-stat-icon red"><i class="fa-solid fa-file-pdf"></i></div>
+                  <div class="pm-stat-info">
+                    <span class="pm-stat-value" id="pm-total-docs">0</span>
+                    <span class="pm-stat-label">Total Dokumen</span>
+                  </div>
+                </div>
+                <div class="pm-stat-card">
+                  <div class="pm-stat-icon blue"><i class="fa-solid fa-hard-drive"></i></div>
+                  <div class="pm-stat-info">
+                    <span class="pm-stat-value" id="pm-docs-size">0 KB</span>
+                    <span class="pm-stat-label">Ukuran Total</span>
+                  </div>
+                </div>
+                <div class="pm-stat-card">
+                  <div class="pm-stat-icon green"><i class="fa-solid fa-calendar-check"></i></div>
+                  <div class="pm-stat-info">
+                    <span class="pm-stat-value" id="pm-docs-latest-date">-</span>
+                    <span class="pm-stat-label">Rilis Terbaru</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filter / Search Bar -->
+              <div class="pm-filter-bar">
+                <div class="pm-search-box">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="pm-doc-search-input" placeholder="Cari surat edaran..." autocomplete="off">
+                </div>
+                <div class="pm-filter-group">
+                  <button class="pm-btn pm-btn-ghost" id="pm-doc-reset-filters">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                  </button>
+                </div>
+              </div>
+
+              <!-- Data Table -->
+              <div class="pm-table-container">
+                <table class="pm-table">
+                  <thead>
+                    <tr>
+                      <th class="text-center" style="width: 50px;">NO</th>
+                      <th>NAMA SURAT EDARAN</th>
+                      <th>TANGGAL RILIS</th>
+                      <th class="text-center">UKURAN BERKAS</th>
+                      <th class="text-center">TIPE</th>
+                      <th class="text-center">AKSI</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pm-doc-table-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Document Modal Overlay -->
+          <div class="pm-modal-overlay" id="pm-add-doc-modal" style="display:none;">
+            <div class="pm-modal" style="max-width: 500px;">
+              <div class="pm-modal-header">
+                <h3><i class="fa-solid fa-file-arrow-up text-accent"></i> Unggah Surat Edaran</h3>
+                <button class="pm-modal-close" id="pm-doc-modal-close"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="pm-modal-body">
+                <!-- Role Restriction Overlay for Staff -->
+                <div class="role-restriction-overlay" id="restrict-docs-overlay" style="display: none;">
+                  <div class="restriction-message">
+                    <i class="fa-solid fa-lock restriction-lock-icon"></i>
+                    <h3>Akses Terbatas (Staff)</h3>
+                    <p>Peran Anda hanya diizinkan untuk melihat dokumen. Penambahan atau penghapusan surat edaran dibatasi untuk Admin/Super Admin.</p>
+                  </div>
+                </div>
+                <form id="form-admin-add-doc" class="admin-form-element">
+                  <div class="form-group-item" style="margin-bottom: 16px;">
+                    <label class="form-lbl" for="adm-doc-title">Nama / Judul Surat Edaran</label>
+                    <input type="text" id="adm-doc-title" required placeholder="Contoh: Surat Edaran Rapat Pengurus POBSI">
+                  </div>
+                  <div class="form-group-item" style="margin-bottom: 16px;">
+                    <label class="form-lbl" for="adm-doc-date">Tanggal Rilis Dokumen</label>
+                    <input type="text" id="adm-doc-date" required placeholder="Contoh: 15 Juni 2026">
+                  </div>
+                  <div class="form-group-item" style="margin-bottom: 20px;">
+                    <label class="form-lbl">Unggah Dokumen Resmi (Khusus PDF)</label>
+                    <input type="file" id="adm-doc-file" accept="application/pdf" style="display: none;">
+                    <div class="avatar-upload-zone" id="doc-drop-zone" style="height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px dashed rgba(255,255,255,0.15); border-radius: var(--radius-sm); cursor: pointer; padding: 20px; text-align: center; transition: all 0.3s ease;">
+                      <i class="fa-solid fa-file-pdf upload-zone-icon" style="font-size: 1.8rem; margin-bottom: 8px; color: var(--text-muted);"></i>
+                      <span class="upload-zone-text" style="font-size: 0.85rem;">Tarik file PDF ke sini atau <strong>klik untuk upload</strong></span>
+                      <span class="upload-zone-sub" style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Maks. 5MB</span>
+                    </div>
+                    <div class="avatar-upload-preview" id="doc-preview-container" style="display: none; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
+                      <i class="fa-solid fa-file-pdf text-red" style="font-size: 2rem;"></i>
+                      <div style="flex: 1; min-width: 0;">
+                        <span id="doc-preview-filename" style="display: block; font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">-</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">Format PDF Terverifikasi</span>
+                      </div>
+                      <button type="button" class="btn btn-secondary" id="btn-clear-doc" style="padding: 6px 10px; font-size: 0.75rem;">
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                  <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center;"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan & Unggah Dokumen</button>
                 </form>
               </div>
             </div>
