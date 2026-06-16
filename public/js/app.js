@@ -8596,8 +8596,9 @@ function renderManageSirkuitList() {
   
   listEl.innerHTML = bocSirkuits.map((sirkuit, idx) => {
     return `
-      <li style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 4px; gap: 8px;">
+      <li draggable="true" data-sirkuit-idx="${idx}" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 4px; gap: 8px; cursor: grab; transition: opacity 0.2s, transform 0.2s, background 0.2s;">
         <div id="boc-sirkuit-display-${idx}" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+          <span class="sirkuit-drag-handle" style="color: rgba(255,255,255,0.25); font-size: 1.1rem; cursor: grab; flex-shrink: 0; user-select: none; line-height: 1;" title="Seret untuk mengubah urutan">⠿</span>
           <span style="font-size: 0.88rem; font-weight: 700; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${idx + 1}. ${sirkuit}</span>
         </div>
         <div id="boc-sirkuit-edit-box-${idx}" style="display: none; align-items: center; gap: 6px; flex: 1; min-width: 0;">
@@ -8606,15 +8607,129 @@ function renderManageSirkuitList() {
           <button onclick="cancelSirkuitEdit(${idx})" class="pm-btn pm-btn-sm" style="padding: 4px 8px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;" title="Batal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-          <button onclick="moveSirkuitUp(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Atas" ${idx === 0 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-up"></i></button>
-          <button onclick="moveSirkuitDown(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Bawah" ${idx === bocSirkuits.length - 1 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-down"></i></button>
           <button onclick="startSirkuitEdit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #60a5fa; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Ubah Nama"><i class="fa-solid fa-pen-to-square"></i></button>
           <button onclick="deleteSirkuit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #ef4444; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
       </li>
     `;
   }).join("");
+
+  // Attach drag & drop event listeners
+  initSirkuitDragAndDrop(listEl);
 }
+
+// Drag & Drop state
+let _sirkuitDragIdx = null;
+
+function initSirkuitDragAndDrop(listEl) {
+  const items = listEl.querySelectorAll("li[draggable='true']");
+  
+  items.forEach(item => {
+    item.addEventListener("dragstart", (e) => {
+      _sirkuitDragIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      item.style.opacity = "0.35";
+      item.style.transform = "scale(0.97)";
+      e.dataTransfer.effectAllowed = "move";
+      // Add a class marker to body so we can style drop targets
+      document.body.classList.add("sirkuit-dragging");
+    });
+
+    item.addEventListener("dragend", () => {
+      item.style.opacity = "1";
+      item.style.transform = "";
+      _sirkuitDragIdx = null;
+      document.body.classList.remove("sirkuit-dragging");
+      // Remove any lingering drop indicators
+      listEl.querySelectorAll("li").forEach(li => {
+        li.style.borderTop = "";
+        li.style.borderBottom = "";
+        li.style.background = "";
+      });
+    });
+
+    item.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const targetIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      if (targetIdx === _sirkuitDragIdx) return;
+
+      // Clear all indicators first
+      listEl.querySelectorAll("li").forEach(li => {
+        li.style.borderTop = "";
+        li.style.borderBottom = "";
+        li.style.background = "";
+      });
+
+      // Show drop indicator line
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY < midY) {
+        item.style.borderTop = "2px solid #3b82f6";
+      } else {
+        item.style.borderBottom = "2px solid #3b82f6";
+      }
+      item.style.background = "rgba(59,130,246,0.06)";
+    });
+
+    item.addEventListener("dragleave", () => {
+      item.style.borderTop = "";
+      item.style.borderBottom = "";
+      item.style.background = "";
+    });
+
+    item.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      const fromIdx = _sirkuitDragIdx;
+      let toIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      if (fromIdx === null || fromIdx === toIdx) return;
+
+      // Determine if drop is above or below midpoint
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY >= midY && toIdx < fromIdx) {
+        toIdx++;
+      } else if (e.clientY < midY && toIdx > fromIdx) {
+        toIdx--;
+      }
+
+      if (fromIdx !== toIdx) {
+        await window.reorderSirkuit(fromIdx, toIdx);
+      }
+    });
+  });
+}
+
+window.reorderSirkuit = async function(fromIdx, toIdx) {
+  if (fromIdx === toIdx) return;
+  
+  // Move sirkuit name in the array
+  const [movedSirkuit] = bocSirkuits.splice(fromIdx, 1);
+  bocSirkuits.splice(toIdx, 0, movedSirkuit);
+  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+
+  // Move exactBocPoints scores for all players to maintain alignment
+  Object.keys(exactBocPoints).forEach(pName => {
+    const pts = exactBocPoints[pName];
+    if (Array.isArray(pts)) {
+      while (pts.length < bocSirkuits.length) {
+        pts.push("");
+      }
+      const [movedPt] = pts.splice(fromIdx, 1);
+      pts.splice(toIdx, 0, movedPt);
+    }
+  });
+  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
+
+  // Recalculate and sync all player standings to the database server
+  await recalculateAndSyncAllStandings();
+
+  // Re-render UI views
+  renderManageSirkuitList();
+  renderStandings();
+  renderAdminBocConsole();
+  
+  showCustomToast("Urutan seri sirkuit berhasil diubah!", "success");
+};
 
 window.startSirkuitEdit = function(idx) {
   document.getElementById(`boc-sirkuit-display-${idx}`).style.display = "none";
@@ -8670,47 +8785,6 @@ window.deleteSirkuit = async function(idx) {
   );
 };
 
-window.swapSirkuitIndices = async function(idx1, idx2) {
-  // Swap elements in global bocSirkuits array
-  const tempSirkuit = bocSirkuits[idx1];
-  bocSirkuits[idx1] = bocSirkuits[idx2];
-  bocSirkuits[idx2] = tempSirkuit;
-  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
-
-  // Swap exactBocPoints scores for all players to maintain points alignment
-  Object.keys(exactBocPoints).forEach(pName => {
-    const pts = exactBocPoints[pName];
-    if (Array.isArray(pts)) {
-      while (pts.length < bocSirkuits.length) {
-        pts.push("");
-      }
-      const tempPt = pts[idx1];
-      pts[idx1] = pts[idx2];
-      pts[idx2] = tempPt;
-    }
-  });
-  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
-
-  // Recalculate and sync all player standings to the database server
-  await recalculateAndSyncAllStandings();
-
-  // Re-render UI views
-  renderManageSirkuitList();
-  renderStandings();
-  renderAdminBocConsole();
-};
-
-window.moveSirkuitUp = async function(idx) {
-  if (idx <= 0) return;
-  await window.swapSirkuitIndices(idx, idx - 1);
-  showCustomToast("Urutan seri sirkuit berhasil digeser ke atas!", "success");
-};
-
-window.moveSirkuitDown = async function(idx) {
-  if (idx >= bocSirkuits.length - 1) return;
-  await window.swapSirkuitIndices(idx, idx + 1);
-  showCustomToast("Urutan seri sirkuit berhasil digeser ke bawah!", "success");
-};
 
 // Show custom styled confirmation dialog
 function showCustomConfirm(title, message, onConfirm, confirmText = "Hapus", type = "danger") {
