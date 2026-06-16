@@ -270,6 +270,7 @@ function setupTabNavigation() {
       if (year && /^\d{4}$/.test(year)) {
         currentBocYear = year;
         localStorage.setItem("currentBocYear", currentBocYear);
+        bocSirkuits = loadBocSirkuitsForYear(year);
       }
       
       // Render standings for target year
@@ -362,6 +363,7 @@ function setupTabNavigation() {
     if (year && /^\d{4}$/.test(year)) {
       currentBocYear = year;
       localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(year);
     }
     
     // Render standings for targeted year first
@@ -572,22 +574,32 @@ try {
   console.error("Failed to load exactBocPoints from localStorage", e);
 }
 
-// Global sirkuit list variable
-let bocSirkuits = [
-  'RD HT', 'JP HT', 'LMS HT', 'SYP HT',
-  'RD HT (2)', 'JP HT (2)', 'LMS HT (2)', 'PLT HT',
-  'SYP HT (2)', 'RD HT (3)'
-];
+// Global sirkuit list variable — stored per-year as bocSirkuits_YEAR
+let bocSirkuits = [];
 let currentBocYear = localStorage.getItem("currentBocYear") || "2026";
 
-try {
-  const savedSirkuits = localStorage.getItem("bocSirkuits");
-  if (savedSirkuits) {
-    bocSirkuits = JSON.parse(savedSirkuits);
+// Helper: load sirkuits for a specific year from localStorage
+function loadBocSirkuitsForYear(year) {
+  try {
+    const saved = localStorage.getItem(`bocSirkuits_${year}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Migrate legacy key if exists and current year matches
+    const legacy = localStorage.getItem("bocSirkuits");
+    if (legacy && year === "2026") {
+      const parsed = JSON.parse(legacy);
+      localStorage.setItem(`bocSirkuits_${year}`, legacy);
+      localStorage.removeItem("bocSirkuits");
+      return parsed;
+    }
+  } catch (e) {
+    console.error(`Failed to load bocSirkuits for year ${year}`, e);
   }
-} catch (e) {
-  console.error("Failed to load bocSirkuits from localStorage", e);
+  return [];
 }
+
+bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
 
 function parseIndonesianDate(dateStr) {
   if (!dateStr) return null;
@@ -1029,6 +1041,7 @@ function setupStandingsSearch() {
     seasonSelect.addEventListener("change", (e) => {
       currentBocYear = e.target.value;
       localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
       
       // Update hash URL dynamically
       if (window.location.hash !== "#champions-" + currentBocYear) {
@@ -1724,6 +1737,7 @@ async function checkAdminRoute() {
           if (year && /^\d{4}$/.test(year)) {
             currentBocYear = year;
             localStorage.setItem("currentBocYear", currentBocYear);
+            bocSirkuits = loadBocSirkuitsForYear(year);
           }
           switchAdminPane("pane-boc", false);
         } else {
@@ -6262,6 +6276,10 @@ function setupBocAdminListeners() {
                   currentBocYear = String(nextYear);
                   localStorage.setItem("currentBocYear", currentBocYear);
 
+                  // Clear sirkuits for the new year (start fresh)
+                  bocSirkuits = [];
+                  // Don't save empty array — new year simply has no sirkuits yet
+
                   showCustomToast(`Klasemen sirkuit berhasil di-reset! Musim baru BOC ${currentBocYear} dimulai.`, "success");
 
                   await loadDataFromApi();
@@ -6295,7 +6313,7 @@ function setupBocAdminListeners() {
       }
       
       bocSirkuits.push(name);
-      localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+      localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
       
       // Append empty score for all players
       Object.keys(exactBocPoints).forEach(playerName => {
@@ -8705,7 +8723,7 @@ window.reorderSirkuit = async function(fromIdx, toIdx) {
   // Move sirkuit name in the array
   const [movedSirkuit] = bocSirkuits.splice(fromIdx, 1);
   bocSirkuits.splice(toIdx, 0, movedSirkuit);
-  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+  localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
 
   // Move exactBocPoints scores for all players to maintain alignment
   Object.keys(exactBocPoints).forEach(pName => {
@@ -8751,7 +8769,7 @@ window.saveSirkuitEdit = async function(idx) {
   }
   
   bocSirkuits[idx] = newName;
-  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+  localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
   
   showCustomToast(`Sirkuit berhasil diubah menjadi "${newName}"`, "success");
   renderManageSirkuitList();
@@ -8767,7 +8785,7 @@ window.deleteSirkuit = async function(idx) {
     `Apakah Anda yakin ingin menghapus sirkuit "${sirkuitName}"? Hal ini juga akan menghapus poin seluruh atlet di sirkuit ini secara permanen.`,
     async () => {
       bocSirkuits.splice(idx, 1);
-      localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+      localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
       
       // Clean up player points arrays
       Object.keys(exactBocPoints).forEach(name => {
@@ -15497,11 +15515,14 @@ function setupSystemSettings() {
       showCustomToast("Regulasi sirkuit BOC berhasil diperbarui!", "success");
 
       if (oldYear !== newYear) {
-        window.currentBocYear = parseInt(newYear);
+        currentBocYear = newYear;
+        // Reload sirkuits for the new year
+        bocSirkuits = loadBocSirkuitsForYear(newYear);
         // Refresh standings & events
         loadDataFromApi().then(() => {
           renderStandings();
           renderEvents("all");
+          renderAdminBocConsole();
         });
       } else {
         // Just refresh standings display
