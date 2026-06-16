@@ -16,14 +16,19 @@ module.exports = async (req, res) => {
        GET: Mengambil Klasemen Standings
        ========================================================================== */
     if (req.method === 'GET') {
-      const { data: standings, error } = await supabase
+      const { year } = req.query;
+      let query = supabase
         .from('standings')
-        .select('*')
-        .order('points', { ascending: false }); // Urutkan berdasarkan poin tertinggi
+        .select('*');
+
+      if (year) {
+        query = query.eq('year', year.toString());
+      }
+
+      const { data: standings, error } = await query.order('points', { ascending: false }); // Urutkan berdasarkan poin tertinggi
 
       if (error) throw error;
 
-      // Jika ada yang belum di-rank, kembalikan saja langsung
       return res.status(200).json(standings);
     }
 
@@ -31,13 +36,16 @@ module.exports = async (req, res) => {
        POST: Menambahkan/Mengupdate Klasemen (Upsert)
        ========================================================================== */
     if (req.method === 'POST') {
-      const { name, club, handicap, points, played, won, lost, boc_points } = req.body;
+      const { name, year, club, handicap, points, played, won, lost, boc_points } = req.body;
       if (!name || !club || !handicap || points === undefined) {
         return res.status(400).json({ error: "Nama, klub, handicap, dan poin wajib diisi!" });
       }
 
+      const standingYear = (year || '2026').toString().trim();
+
       const newStanding = {
         name: name.trim(),
+        year: standingYear,
         club: club.trim(),
         handicap: handicap.toString().trim(),
         points: parseInt(points, 10),
@@ -48,19 +56,20 @@ module.exports = async (req, res) => {
         boc_points: boc_points ? (typeof boc_points === 'object' ? JSON.stringify(boc_points) : boc_points) : null
       };
 
-      // Upsert ke Supabase menggunakan primary key 'name'
+      // Upsert ke Supabase menggunakan composite primary key 'name, year'
       const { error: upsertErr } = await supabase
         .from('standings')
-        .upsert([newStanding], { onConflict: 'name' });
+        .upsert([newStanding], { onConflict: 'name,year' });
 
       if (upsertErr) throw upsertErr;
 
       const skipRank = req.query.skipRank === 'true';
       if (!skipRank) {
-        // Hitung ulang peringkat (rank) untuk seluruh atlet berdasarkan poin tertinggi
+        // Hitung ulang peringkat (rank) untuk seluruh atlet berdasarkan poin tertinggi di tahun bersangkutan
         const { data: allStandings, error: fetchErr } = await supabase
           .from('standings')
           .select('*')
+          .eq('year', standingYear)
           .order('points', { ascending: false });
 
         if (fetchErr) throw fetchErr;
@@ -73,7 +82,8 @@ module.exports = async (req, res) => {
           await supabase
             .from('standings')
             .update({ rank })
-            .eq('name', playerName);
+            .eq('name', playerName)
+            .eq('year', standingYear);
         }
       }
 

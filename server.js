@@ -65,7 +65,8 @@ db.serialize(() => {
   // 2. Buat Tabel Standings
   db.run(`CREATE TABLE IF NOT EXISTS standings (
     rank INTEGER,
-    name TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    year TEXT NOT NULL DEFAULT '2026',
     club TEXT NOT NULL,
     handicap TEXT NOT NULL,
     points INTEGER NOT NULL,
@@ -73,11 +74,51 @@ db.serialize(() => {
     won INTEGER DEFAULT 0,
     lost INTEGER DEFAULT 0,
     trend TEXT DEFAULT 'stable',
-    boc_points TEXT
+    boc_points TEXT,
+    PRIMARY KEY (name, year)
   )`);
 
-  // Safely add boc_points column to standings for existing databases
-  db.run(`ALTER TABLE standings ADD COLUMN boc_points TEXT`, () => {});
+  // Jalankan migrasi SQLite jika tabel standings lama belum memiliki kolom year
+  db.all(`PRAGMA table_info(standings)`, (err, columns) => {
+    if (err) {
+      console.error("Gagal memeriksa informasi tabel standings SQLite:", err);
+      return;
+    }
+    const hasYear = columns && columns.some(col => col.name === 'year');
+    if (!hasYear && columns && columns.length > 0) {
+      console.log("⚠️ Mengupgrade tabel standings SQLite ke format multi-tahun...");
+      db.serialize(() => {
+        db.run(`ALTER TABLE standings RENAME TO standings_old`);
+        db.run(`CREATE TABLE standings (
+          rank INTEGER,
+          name TEXT NOT NULL,
+          year TEXT NOT NULL DEFAULT '2026',
+          club TEXT NOT NULL,
+          handicap TEXT NOT NULL,
+          points INTEGER NOT NULL,
+          played INTEGER DEFAULT 0,
+          won INTEGER DEFAULT 0,
+          lost INTEGER DEFAULT 0,
+          trend TEXT DEFAULT 'stable',
+          boc_points TEXT,
+          PRIMARY KEY (name, year)
+        )`);
+        db.run(`INSERT INTO standings (rank, name, year, club, handicap, points, played, won, lost, trend, boc_points)
+                SELECT rank, name, '2026', club, handicap, points, played, won, lost, trend, boc_points FROM standings_old`);
+        db.run(`DROP TABLE standings_old`);
+        console.log("✅ Tabel standings SQLite berhasil di-upgrade ke multi-tahun!");
+      });
+    }
+  });
+
+  // Buat Tabel Boc Sirkuits
+  db.run(`CREATE TABLE IF NOT EXISTS boc_sirkuits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    year TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sort_order INTEGER NOT NULL,
+    UNIQUE(year, name)
+  )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
@@ -260,6 +301,7 @@ if (isSupabaseEnabled) {
   const loginHandler = require('./api/admin/login');
   const usersHandler = require('./api/admin/users');
   const changePasswordHandler = require('./api/admin/change-password');
+  const bocSirkuitsHandler = require('./api/boc-sirkuits');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -283,6 +325,9 @@ if (isSupabaseEnabled) {
   // Standings
   app.all('/api/standings/reset', bridge(standingsResetHandler));
   app.all('/api/standings', bridge(standingsHandler));
+
+  // Sirkuits
+  app.all('/api/boc-sirkuits', bridge(bocSirkuitsHandler));
 
   // Events
   app.all('/api/events', bridge(eventsHandler));
@@ -308,6 +353,7 @@ if (isSupabaseEnabled) {
   app.use('/api/events', require('./api/routes/eventRoutes'));
   app.use('/api/docs', require('./api/routes/docRoutes'));
   app.use('/api/clubs', require('./api/routes/clubRoutes'));
+  app.use('/api/boc-sirkuits', require('./api/routes/bocSirkuitsRoutes'));
 
   // Rute Autentikasi Admin Rahasia (RBAC)
   app.post('/api/admin/login', (req, res) => {

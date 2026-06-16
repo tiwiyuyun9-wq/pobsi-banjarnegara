@@ -16,8 +16,13 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Reset seluruh kolom nilai klasemen di Supabase (menggunakan filter neq name dummy untuk mengupdate seluruh baris)
-    const { error } = await supabase
+    const { year } = req.body;
+    if (!year) {
+      return res.status(400).json({ error: "Tahun (year) wajib ditentukan untuk melakukan reset!" });
+    }
+
+    // Reset standings columns in Supabase for the specific year
+    const { error: resetErr } = await supabase
       .from('standings')
       .update({
         points: 0,
@@ -27,11 +32,19 @@ module.exports = async (req, res) => {
         rank: null,
         boc_points: null
       })
-      .neq('name', 'placeholder-value-to-update-all');
+      .eq('year', year.toString());
 
-    if (error) throw error;
+    if (resetErr) throw resetErr;
 
-    return res.status(200).json({ success: true, message: "Seluruh klasemen sirkuit BOC berhasil di-reset!" });
+    // Hapus seluruh sirkuit untuk tahun tersebut
+    const { error: deleteErr } = await supabase
+      .from('boc_sirkuits')
+      .delete()
+      .eq('year', year.toString());
+
+    if (deleteErr) throw deleteErr;
+
+    return res.status(200).json({ success: true, message: `Seluruh klasemen sirkuit BOC tahun ${year} berhasil di-reset!` });
   } catch (error) {
     console.error('Error resetting standings in Supabase:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
