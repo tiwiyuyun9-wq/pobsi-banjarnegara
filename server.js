@@ -474,3 +474,4 @@ app.listen(PORT, () => {
   console.log(`💾 Menggunakan Database SQL: ${DB_FILE}`);
   console.log(`===========================================================`);
 });
+// Trigger nodemon restart
