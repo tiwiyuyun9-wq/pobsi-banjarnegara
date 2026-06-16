@@ -12,6 +12,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Inisialisasi Aplikasi Utama
 async function initApp() {
+  // Ambil tahun dari hash URL di awal (sebelum loadDataFromApi) agar pemuatan API sesuai tahun sasaran
+  const initHash = window.location.hash.substring(1);
+  if (initHash.startsWith("champions-")) {
+    const raw = initHash.substring("champions-".length);
+    let year = raw;
+    if (raw.endsWith("-playoff")) {
+      year = raw.substring(0, raw.length - "-playoff".length);
+    }
+    if (year && /^\d{4}$/.test(year)) {
+      currentBocYear = year;
+      localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(year);
+    }
+  } else if (initHash.startsWith("boc-")) {
+    const year = initHash.substring("boc-".length);
+    if (year && /^\d{4}$/.test(year)) {
+      currentBocYear = year;
+      localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(year);
+    }
+  }
+
   // Apply dynamic configurations from settings
   applySettingsToDOM();
 
@@ -72,15 +94,16 @@ async function loadDataFromApi() {
       return;
     }
 
-    console.log("Menghubungkan ke Vercel Serverless API untuk memuat database terbaru...");
+    console.log(`Menghubungkan ke Vercel Serverless API untuk memuat database tahun ${currentBocYear}...`);
     
-    // Fetch keempat endpoint secara paralel untuk performa maksimal
-    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes] = await Promise.all([
+    // Fetch kelima endpoint dan sirkuit secara paralel untuk performa maksimal
+    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes] = await Promise.all([
       fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/standings', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`/api/standings?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/events', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/docs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/clubs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch('/api/clubs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`/api/boc-sirkuits?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
 
     // Update database runtime jika response API valid
@@ -88,9 +111,16 @@ async function loadDataFromApi() {
       appData.players = playersRes;
       console.log(`Loaded ${playersRes.length} players from API.`);
     }
-    if (standingsRes && Array.isArray(standingsRes) && standingsRes.length > 0) {
+
+    // Selalu bersihkan exactBocPoints dan standings lama
+    for (let name in exactBocPoints) {
+      delete exactBocPoints[name];
+    }
+    appData.standings = [];
+
+    if (standingsRes && Array.isArray(standingsRes)) {
       appData.standings = standingsRes;
-      console.log(`Loaded ${standingsRes.length} standings from API.`);
+      console.log(`Loaded ${standingsRes.length} standings from API for year ${currentBocYear}.`);
       
       // Sinkronisasi data poin sirkuit BOC ke memori lokal
       standingsRes.forEach(player => {
@@ -103,6 +133,16 @@ async function loadDataFromApi() {
         }
       });
     }
+
+    // Sinkronisasi sirkuit BOC untuk tahun berjalan
+    if (bocSirkuitsRes && Array.isArray(bocSirkuitsRes)) {
+      bocSirkuits = bocSirkuitsRes;
+      localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
+      console.log(`Loaded ${bocSirkuits.length} sirkuits from API for year ${currentBocYear}.`);
+    } else {
+      bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
+    }
+
     if (eventsRes && Array.isArray(eventsRes) && eventsRes.length > 0) {
       appData.events = eventsRes;
       console.log(`Loaded ${eventsRes.length} events from API.`);
@@ -118,6 +158,7 @@ async function loadDataFromApi() {
 
   } catch (error) {
     console.warn("Koneksi API gagal atau belum ter-deploy. Berhasil melakukan fallback ke data.js lokal. Error:", error);
+    bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
   }
 }
 
@@ -255,7 +296,7 @@ function setupTabNavigation() {
   });
 
   // Deteksi navigasi Back / Forward browser via hashchange
-  window.addEventListener("hashchange", () => {
+  window.addEventListener("hashchange", async () => {
     const hash = window.location.hash.substring(1);
     if (validTabs.includes(hash)) {
       switchTab("tab-" + hash, false);
@@ -270,13 +311,15 @@ function setupTabNavigation() {
       if (year && /^\d{4}$/.test(year)) {
         currentBocYear = year;
         localStorage.setItem("currentBocYear", currentBocYear);
+        bocSirkuits = loadBocSirkuitsForYear(year);
+        await loadDataFromApi();
       }
       
       // Render standings for target year
       renderStandings();
 
       if (isPlayoff) {
-        const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.name.includes(year) || e.description?.includes(year))) || (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+        const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(year) || e.description?.includes(year)));
         if (playoffEvent) {
           openPublicEventDetail(playoffEvent.id);
         } else {
@@ -362,13 +405,14 @@ function setupTabNavigation() {
     if (year && /^\d{4}$/.test(year)) {
       currentBocYear = year;
       localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(year);
     }
     
     // Render standings for targeted year first
     renderStandings();
 
     if (isPlayoff) {
-      const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.name.includes(year) || e.description?.includes(year))) || (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+      const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(year) || e.description?.includes(year)));
       if (playoffEvent) {
         openPublicEventDetail(playoffEvent.id);
       } else {
@@ -572,22 +616,50 @@ try {
   console.error("Failed to load exactBocPoints from localStorage", e);
 }
 
-// Global sirkuit list variable
-let bocSirkuits = [
-  'RD HT', 'JP HT', 'LMS HT', 'SYP HT',
-  'RD HT (2)', 'JP HT (2)', 'LMS HT (2)', 'PLT HT',
-  'SYP HT (2)', 'RD HT (3)'
-];
+// Global sirkuit list variable — stored per-year as bocSirkuits_YEAR
+let bocSirkuits = [];
 let currentBocYear = localStorage.getItem("currentBocYear") || "2026";
 
-try {
-  const savedSirkuits = localStorage.getItem("bocSirkuits");
-  if (savedSirkuits) {
-    bocSirkuits = JSON.parse(savedSirkuits);
+// Helper: load sirkuits for a specific year from localStorage
+function loadBocSirkuitsForYear(year) {
+  try {
+    const saved = localStorage.getItem(`bocSirkuits_${year}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Migrate legacy key if exists and current year matches
+    const legacy = localStorage.getItem("bocSirkuits");
+    if (legacy && year === "2026") {
+      const parsed = JSON.parse(legacy);
+      localStorage.setItem(`bocSirkuits_${year}`, legacy);
+      localStorage.removeItem("bocSirkuits");
+      return parsed;
+    }
+  } catch (e) {
+    console.error(`Failed to load bocSirkuits for year ${year}`, e);
   }
-} catch (e) {
-  console.error("Failed to load bocSirkuits from localStorage", e);
+  return [];
 }
+
+// Helper: save sirkuits for a specific year to the database server
+async function saveBocSirkuitsToServer(year, sirkuits) {
+  if (!isServerOnline) return;
+  try {
+    const res = await fetch('/api/boc-sirkuits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year, sirkuits })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Gagal menyimpan sirkuits ke server:", err.error);
+    }
+  } catch (err) {
+    console.error("Error koneksi menyimpan sirkuits:", err);
+  }
+}
+
+bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
 
 function parseIndonesianDate(dateStr) {
   if (!dateStr) return null;
@@ -730,7 +802,7 @@ function renderStandings(searchQuery = "") {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const publicPlayoffContainer = document.getElementById("boc-public-playoff-container");
   const publicStandingsContainer = document.getElementById("boc-public-standings-container");
   if (!playoffEventCheck) {
@@ -927,7 +999,7 @@ function renderStandings(searchQuery = "") {
   const playoffBanner = document.getElementById("boc-playoff-banner");
   const scheduleBanner = document.getElementById("boc-schedule-banner");
   if (playoffBanner && scheduleBanner) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
     updateBocBannersVisibility();
   }
@@ -939,7 +1011,7 @@ function updateBocBannersVisibility() {
   const scheduleBanner = document.getElementById("boc-schedule-banner");
   if (!playoffBanner || !scheduleBanner) return;
 
-  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
 
   // Inject Year dynamically to both banners
@@ -1026,16 +1098,22 @@ function setupStandingsSearch() {
   const seasonSelect = document.getElementById("boc-public-season-select");
   if (seasonSelect) {
     seasonSelect.value = currentBocYear;
-    seasonSelect.addEventListener("change", (e) => {
+    seasonSelect.addEventListener("change", async (e) => {
       currentBocYear = e.target.value;
       localStorage.setItem("currentBocYear", currentBocYear);
+      bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
       
       // Update hash URL dynamically
       if (window.location.hash !== "#champions-" + currentBocYear) {
         window.history.pushState({}, "", "/#champions-" + currentBocYear);
       }
 
+      // Fetch new database data from API for the selected year
+      await loadDataFromApi();
+
       // Re-render dashboard components
+      loadStatistics();
+      loadHomeHighlights();
       renderStandings(input ? input.value : "");
     });
   }
@@ -1724,6 +1802,7 @@ async function checkAdminRoute() {
           if (year && /^\d{4}$/.test(year)) {
             currentBocYear = year;
             localStorage.setItem("currentBocYear", currentBocYear);
+            bocSirkuits = loadBocSirkuitsForYear(year);
           }
           switchAdminPane("pane-boc", false);
         } else {
@@ -1784,7 +1863,7 @@ async function checkAdminRoute() {
 // B. Handler untuk pindah panel di sidebar admin workspace
 window.switchAdminPane = function(paneId, updateHash = true) {
   if (paneId === "pane-boc") {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const bocPlayoffContainer = document.getElementById("boc-playoff-container");
     if (playoffEvent && bocPlayoffContainer && bocPlayoffContainer.style.display !== "block") {
       setTimeout(() => {
@@ -5623,7 +5702,7 @@ window.renderAdminBocConsole = function() {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const bocPlayoffContainer = document.getElementById("boc-playoff-container");
   const bocStandingsContainer = document.getElementById("boc-standings-container");
   if (!playoffEventCheck) {
@@ -5643,7 +5722,7 @@ window.renderAdminBocConsole = function() {
   const adminScheduleText = document.getElementById("boc-admin-schedule-text");
   
   if (startPlayoffBtn) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled');
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
     
     if (playoffEvent) {
@@ -5970,6 +6049,7 @@ function setupBocAdminListeners() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name: topPlayer.name,
+              year: currentBocYear,
               club: topPlayer.club,
               handicap: topPlayer.handicap,
               points: topPlayer.points,
@@ -6249,7 +6329,8 @@ function setupBocAdminListeners() {
               try {
                 const res = await fetch('/api/standings/reset', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' }
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ year: currentBocYear })
                 });
                 if (res.ok) {
                   for (let name in exactBocPoints) {
@@ -6261,6 +6342,10 @@ function setupBocAdminListeners() {
                   const nextYear = parseInt(currentBocYear, 10) + 1;
                   currentBocYear = String(nextYear);
                   localStorage.setItem("currentBocYear", currentBocYear);
+
+                  // Clear sirkuits for the new year (start fresh)
+                  bocSirkuits = [];
+                  // Don't save empty array — new year simply has no sirkuits yet
 
                   showCustomToast(`Klasemen sirkuit berhasil di-reset! Musim baru BOC ${currentBocYear} dimulai.`, "success");
 
@@ -6295,7 +6380,8 @@ function setupBocAdminListeners() {
       }
       
       bocSirkuits.push(name);
-      localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+      localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
+      await saveBocSirkuitsToServer(currentBocYear, bocSirkuits);
       
       // Append empty score for all players
       Object.keys(exactBocPoints).forEach(playerName => {
@@ -6369,6 +6455,7 @@ function setupBocAdminListeners() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name,
+              year: currentBocYear,
               club: player.club,
               handicap,
               points: totalPoints,
@@ -6936,7 +7023,7 @@ function renderBocPlayoffConsole(event) {
       let defendingChamp = defendingChampions[currentBocYear];
       if (!defendingChamp) {
         // Try to find it dynamically from the previous year's event in appData.events
-        const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.name.includes(prevYear) || e.description?.includes(prevYear)));
+        const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.title.includes(prevYear) || e.description?.includes(prevYear)));
         if (prevEvent) {
           try {
             const prevBracket = JSON.parse(prevEvent.bracket || "{}");
@@ -8562,6 +8649,7 @@ async function recalculateAndSyncAllStandings() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: player.name,
+            year: currentBocYear,
             club: player.club,
             handicap: player.handicap,
             points: totalPoints,
@@ -8596,8 +8684,9 @@ function renderManageSirkuitList() {
   
   listEl.innerHTML = bocSirkuits.map((sirkuit, idx) => {
     return `
-      <li style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 4px; gap: 8px;">
+      <li draggable="true" data-sirkuit-idx="${idx}" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 4px; gap: 8px; cursor: grab; transition: opacity 0.2s, transform 0.2s, background 0.2s;">
         <div id="boc-sirkuit-display-${idx}" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+          <span class="sirkuit-drag-handle" style="color: rgba(255,255,255,0.25); font-size: 1.1rem; cursor: grab; flex-shrink: 0; user-select: none; line-height: 1;" title="Seret untuk mengubah urutan">⠿</span>
           <span style="font-size: 0.88rem; font-weight: 700; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${idx + 1}. ${sirkuit}</span>
         </div>
         <div id="boc-sirkuit-edit-box-${idx}" style="display: none; align-items: center; gap: 6px; flex: 1; min-width: 0;">
@@ -8606,15 +8695,130 @@ function renderManageSirkuitList() {
           <button onclick="cancelSirkuitEdit(${idx})" class="pm-btn pm-btn-sm" style="padding: 4px 8px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;" title="Batal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-          <button onclick="moveSirkuitUp(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Atas" ${idx === 0 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-up"></i></button>
-          <button onclick="moveSirkuitDown(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #fbbf24; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Pindah Ke Bawah" ${idx === bocSirkuits.length - 1 ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-down"></i></button>
           <button onclick="startSirkuitEdit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #60a5fa; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Ubah Nama"><i class="fa-solid fa-pen-to-square"></i></button>
           <button onclick="deleteSirkuit(${idx})" class="pm-btn pm-btn-ghost pm-btn-sm" style="color: #ef4444; padding: 4px; cursor: pointer; background: transparent; border: none;" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
       </li>
     `;
   }).join("");
+
+  // Attach drag & drop event listeners
+  initSirkuitDragAndDrop(listEl);
 }
+
+// Drag & Drop state
+let _sirkuitDragIdx = null;
+
+function initSirkuitDragAndDrop(listEl) {
+  const items = listEl.querySelectorAll("li[draggable='true']");
+  
+  items.forEach(item => {
+    item.addEventListener("dragstart", (e) => {
+      _sirkuitDragIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      item.style.opacity = "0.35";
+      item.style.transform = "scale(0.97)";
+      e.dataTransfer.effectAllowed = "move";
+      // Add a class marker to body so we can style drop targets
+      document.body.classList.add("sirkuit-dragging");
+    });
+
+    item.addEventListener("dragend", () => {
+      item.style.opacity = "1";
+      item.style.transform = "";
+      _sirkuitDragIdx = null;
+      document.body.classList.remove("sirkuit-dragging");
+      // Remove any lingering drop indicators
+      listEl.querySelectorAll("li").forEach(li => {
+        li.style.borderTop = "";
+        li.style.borderBottom = "";
+        li.style.background = "";
+      });
+    });
+
+    item.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const targetIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      if (targetIdx === _sirkuitDragIdx) return;
+
+      // Clear all indicators first
+      listEl.querySelectorAll("li").forEach(li => {
+        li.style.borderTop = "";
+        li.style.borderBottom = "";
+        li.style.background = "";
+      });
+
+      // Show drop indicator line
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY < midY) {
+        item.style.borderTop = "2px solid #3b82f6";
+      } else {
+        item.style.borderBottom = "2px solid #3b82f6";
+      }
+      item.style.background = "rgba(59,130,246,0.06)";
+    });
+
+    item.addEventListener("dragleave", () => {
+      item.style.borderTop = "";
+      item.style.borderBottom = "";
+      item.style.background = "";
+    });
+
+    item.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      const fromIdx = _sirkuitDragIdx;
+      let toIdx = parseInt(item.dataset.sirkuitIdx, 10);
+      if (fromIdx === null || fromIdx === toIdx) return;
+
+      // Determine if drop is above or below midpoint
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY >= midY && toIdx < fromIdx) {
+        toIdx++;
+      } else if (e.clientY < midY && toIdx > fromIdx) {
+        toIdx--;
+      }
+
+      if (fromIdx !== toIdx) {
+        await window.reorderSirkuit(fromIdx, toIdx);
+      }
+    });
+  });
+}
+
+window.reorderSirkuit = async function(fromIdx, toIdx) {
+  if (fromIdx === toIdx) return;
+  
+  // Move sirkuit name in the array
+  const [movedSirkuit] = bocSirkuits.splice(fromIdx, 1);
+  bocSirkuits.splice(toIdx, 0, movedSirkuit);
+  localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
+  await saveBocSirkuitsToServer(currentBocYear, bocSirkuits);
+
+  // Move exactBocPoints scores for all players to maintain alignment
+  Object.keys(exactBocPoints).forEach(pName => {
+    const pts = exactBocPoints[pName];
+    if (Array.isArray(pts)) {
+      while (pts.length < bocSirkuits.length) {
+        pts.push("");
+      }
+      const [movedPt] = pts.splice(fromIdx, 1);
+      pts.splice(toIdx, 0, movedPt);
+    }
+  });
+  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
+
+  // Recalculate and sync all player standings to the database server
+  await recalculateAndSyncAllStandings();
+
+  // Re-render UI views
+  renderManageSirkuitList();
+  renderStandings();
+  renderAdminBocConsole();
+  
+  showCustomToast("Urutan seri sirkuit berhasil diubah!", "success");
+};
 
 window.startSirkuitEdit = function(idx) {
   document.getElementById(`boc-sirkuit-display-${idx}`).style.display = "none";
@@ -8636,7 +8840,8 @@ window.saveSirkuitEdit = async function(idx) {
   }
   
   bocSirkuits[idx] = newName;
-  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+  localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
+  await saveBocSirkuitsToServer(currentBocYear, bocSirkuits);
   
   showCustomToast(`Sirkuit berhasil diubah menjadi "${newName}"`, "success");
   renderManageSirkuitList();
@@ -8652,7 +8857,8 @@ window.deleteSirkuit = async function(idx) {
     `Apakah Anda yakin ingin menghapus sirkuit "${sirkuitName}"? Hal ini juga akan menghapus poin seluruh atlet di sirkuit ini secara permanen.`,
     async () => {
       bocSirkuits.splice(idx, 1);
-      localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
+      localStorage.setItem(`bocSirkuits_${currentBocYear}`, JSON.stringify(bocSirkuits));
+      await saveBocSirkuitsToServer(currentBocYear, bocSirkuits);
       
       // Clean up player points arrays
       Object.keys(exactBocPoints).forEach(name => {
@@ -8670,47 +8876,6 @@ window.deleteSirkuit = async function(idx) {
   );
 };
 
-window.swapSirkuitIndices = async function(idx1, idx2) {
-  // Swap elements in global bocSirkuits array
-  const tempSirkuit = bocSirkuits[idx1];
-  bocSirkuits[idx1] = bocSirkuits[idx2];
-  bocSirkuits[idx2] = tempSirkuit;
-  localStorage.setItem("bocSirkuits", JSON.stringify(bocSirkuits));
-
-  // Swap exactBocPoints scores for all players to maintain points alignment
-  Object.keys(exactBocPoints).forEach(pName => {
-    const pts = exactBocPoints[pName];
-    if (Array.isArray(pts)) {
-      while (pts.length < bocSirkuits.length) {
-        pts.push("");
-      }
-      const tempPt = pts[idx1];
-      pts[idx1] = pts[idx2];
-      pts[idx2] = tempPt;
-    }
-  });
-  localStorage.setItem("exactBocPoints", JSON.stringify(exactBocPoints));
-
-  // Recalculate and sync all player standings to the database server
-  await recalculateAndSyncAllStandings();
-
-  // Re-render UI views
-  renderManageSirkuitList();
-  renderStandings();
-  renderAdminBocConsole();
-};
-
-window.moveSirkuitUp = async function(idx) {
-  if (idx <= 0) return;
-  await window.swapSirkuitIndices(idx, idx - 1);
-  showCustomToast("Urutan seri sirkuit berhasil digeser ke atas!", "success");
-};
-
-window.moveSirkuitDown = async function(idx) {
-  if (idx >= bocSirkuits.length - 1) return;
-  await window.swapSirkuitIndices(idx, idx + 1);
-  showCustomToast("Urutan seri sirkuit berhasil digeser ke bawah!", "success");
-};
 
 // Show custom styled confirmation dialog
 function showCustomConfirm(title, message, onConfirm, confirmText = "Hapus", type = "danger") {
@@ -15423,11 +15588,14 @@ function setupSystemSettings() {
       showCustomToast("Regulasi sirkuit BOC berhasil diperbarui!", "success");
 
       if (oldYear !== newYear) {
-        window.currentBocYear = parseInt(newYear);
+        currentBocYear = newYear;
+        // Reload sirkuits for the new year
+        bocSirkuits = loadBocSirkuitsForYear(newYear);
         // Refresh standings & events
         loadDataFromApi().then(() => {
           renderStandings();
           renderEvents("all");
+          renderAdminBocConsole();
         });
       } else {
         // Just refresh standings display

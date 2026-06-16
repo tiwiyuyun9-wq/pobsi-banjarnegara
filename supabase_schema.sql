@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS events CASCADE;
 DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS clubs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS boc_sirkuits CASCADE;
 
 -- 1. Buat Tabel Players
 CREATE TABLE players (
@@ -28,7 +29,8 @@ CREATE TABLE players (
 -- 2. Buat Tabel Standings
 CREATE TABLE standings (
     rank INTEGER,
-    name TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    year TEXT NOT NULL DEFAULT '2026',
     club TEXT NOT NULL,
     handicap TEXT NOT NULL,
     points INTEGER NOT NULL,
@@ -36,7 +38,8 @@ CREATE TABLE standings (
     won INTEGER DEFAULT 0,
     lost INTEGER DEFAULT 0,
     trend TEXT DEFAULT 'stable',
-    boc_points TEXT -- Disimpan sebagai JSON string
+    boc_points TEXT, -- Disimpan sebagai JSON string
+    PRIMARY KEY (name, year)
 );
 
 -- 3. Buat Tabel Events
@@ -90,6 +93,15 @@ CREATE TABLE users (
     fullname TEXT
 );
 
+-- 7. Buat Tabel Boc Sirkuits
+CREATE TABLE boc_sirkuits (
+    id SERIAL PRIMARY KEY,
+    year TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sort_order INTEGER NOT NULL,
+    CONSTRAINT unique_year_name UNIQUE (year, name)
+);
+
 -- Seed akun pengguna default (superadmin, admin, staff)
 INSERT INTO users (username, password, role, fullname) VALUES 
 ('superadmin', 'super-pobsi-2026', 'super admin', 'Super Admin POBSI'),
@@ -105,3 +117,4 @@ ALTER TABLE events DISABLE ROW LEVEL SECURITY;
 ALTER TABLE documents DISABLE ROW LEVEL SECURITY;
 ALTER TABLE clubs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE boc_sirkuits DISABLE ROW LEVEL SECURITY;
