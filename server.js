@@ -120,6 +120,17 @@ db.serialize(() => {
     UNIQUE(year, name)
   )`);
 
+  // Buat Tabel BOC Settings (Konfigurasi per Tahun)
+  db.run(`CREATE TABLE IF NOT EXISTS boc_settings (
+    year TEXT PRIMARY KEY,
+    cutoff_limit INTEGER DEFAULT 16,
+    max_handicap TEXT DEFAULT 'Bebas',
+    playoff_schedule TEXT,
+    prizes TEXT,
+    rules TEXT,
+    status TEXT DEFAULT 'active'
+  )`);
+
   db.run(`CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -302,6 +313,7 @@ if (isSupabaseEnabled) {
   const usersHandler = require('./api/admin/users');
   const changePasswordHandler = require('./api/admin/change-password');
   const bocSirkuitsHandler = require('./api/boc-sirkuits');
+  const bocSettingsHandler = require('./api/boc-settings');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -328,6 +340,7 @@ if (isSupabaseEnabled) {
 
   // Sirkuits
   app.all('/api/boc-sirkuits', bridge(bocSirkuitsHandler));
+  app.all('/api/boc-settings', bridge(bocSettingsHandler));
 
   // Events
   app.all('/api/events', bridge(eventsHandler));
@@ -354,6 +367,7 @@ if (isSupabaseEnabled) {
   app.use('/api/docs', require('./api/routes/docRoutes'));
   app.use('/api/clubs', require('./api/routes/clubRoutes'));
   app.use('/api/boc-sirkuits', require('./api/routes/bocSirkuitsRoutes'));
+  app.use('/api/boc-settings', require('./api/routes/bocSettingsRoutes'));
 
   // Rute Autentikasi Admin Rahasia (RBAC)
   app.post('/api/admin/login', (req, res) => {

@@ -155,28 +155,27 @@
               </a>
             </div>
 
-            <!-- Floating Card: Ranking 1 -->
             <!-- Floating Card: BOC Prize Pool Showcase -->
             <div class="hero-floating-card card-ranking" onclick="switchTab('tab-champions')" style="box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; justify-content: center; height: auto; min-height: 165px;">
-              <span class="floating-card-sub text-accent" style="font-weight: 800; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-crown text-gold"></i> BATTLE OF CHAMPION 2026</span>
+              <span class="floating-card-sub text-accent" style="font-weight: 800; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-crown text-gold"></i> BATTLE OF CHAMPION <span class="dynamic-boc-year">2026</span></span>
               
               <div style="display: flex; flex-direction: column; gap: 2px;">
                 <span style="font-size: 0.65rem; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL PRIZE POOL</span>
-                <span class="prize-pool-glorious-text" style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(251, 191, 36, 0.2); font-family: var(--font-headers);">RP 15.000.000</span>
+                <span id="hero-boc-prizepool-total" class="prize-pool-glorious-text" style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(251, 191, 36, 0.2); font-family: var(--font-headers);">RP 15.000.000</span>
               </div>
               
               <div style="display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #fbbf24; font-weight: 800; letter-spacing: 0.3px;">JUARA 1</span>
-                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 7,5 JT</span>
+                  <span id="hero-boc-prize-1" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 7,5 JT</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #e2e8f0; font-weight: 800; letter-spacing: 0.3px;">JUARA 2</span>
-                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 4,5 JT</span>
+                  <span id="hero-boc-prize-2" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 4,5 JT</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #f97316; font-weight: 800; letter-spacing: 0.3px;">JUARA 3</span>
-                  <span style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 3,0 JT</span>
+                  <span id="hero-boc-prize-3" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 3,0 JT</span>
                 </div>
               </div>
             </div>
@@ -339,6 +338,19 @@
           </div>
         </div>
 
+        <!-- Playoff Not Scheduled Banner -->
+        <div id="boc-not-scheduled-banner" class="overview-header-block-premium" style="display: none; margin-bottom: 24px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(239, 68, 68, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; color: #f87171; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);">
+              <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div>
+              <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Jadwal Grand Final belum dirilis. Turnamen puncak akan dijadwalkan setelah seluruh seri sirkuit utama selesai dilaksanakan. Pantau terus klasemen poin untuk melihat daftar atlet yang berpeluang lolos kualifikasi!</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Playoff Scheduled Banner (Under Tab Header) -->
         <div id="boc-schedule-banner" class="overview-header-block-premium" style="display: none; margin-bottom: 24px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(59, 130, 246, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
@@ -459,7 +471,7 @@
       <div class="boc-rules-grid" style="margin-top: 24px; margin-bottom: 24px;">
         <div class="rules-card border-gold">
           <h3 class="rules-card-title"><i class="fa-solid fa-circle-info text-gold"></i> Aturan Kelayakan & Poin BOC <span class="dynamic-boc-year">2026</span></h3>
-          <p class="rules-card-desc">Sesuai Surat Edaran Resmi POBSI Banjarnegara, 16 pemain teratas (Cut-off Zona BOC) pada akhir musim November <span class="dynamic-boc-year">2026</span> berhak tampil di babak final bergengsi. Poin diperoleh dari keikutsertaan turnamen resmi:</p>
+          <p class="rules-card-desc">Sesuai Surat Edaran Resmi POBSI Banjarnegara, <span class="dynamic-boc-cutoff">16</span> pemain teratas (Cut-off Zona BOC) pada akhir musim November <span class="dynamic-boc-year">2026</span> berhak tampil di babak final bergengsi. Poin diperoleh dari keikutsertaan turnamen resmi:</p>
           <ul class="rules-list-grid">
             <li><span class="badge-gold">Juara 1</span> 12 Pts</li>
             <li><span class="badge-silver">Juara 2</span> 9 Pts</li>
@@ -3087,6 +3099,10 @@
               <button class="pm-btn pm-btn-primary" id="btn-boc-start-playoff" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); display: flex; align-items: center; gap: 8px; font-weight: 700;">
                 <i class="fa-solid fa-play"></i> Mulai BOC
               </button>
+              <!-- BOC Settings Button -->
+              <button class="pm-btn pm-btn-outline" id="btn-admin-boc-settings-trigger" style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); color: #fbbf24; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-gear"></i> Settings
+              </button>
               <!-- Reset BOC Button -->
               <button class="pm-btn pm-btn-outline" id="btn-boc-reset-series" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #f87171; display: flex; align-items: center; gap: 8px; font-weight: 700;">
                 <i class="fa-solid fa-trash-can"></i> Reset
@@ -3342,6 +3358,102 @@
               <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
                 <button type="button" class="btn btn-secondary" id="boc-schedule-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); cursor: pointer;">Batal</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; cursor: pointer; background: var(--gradient-primary); color: #fff; font-weight: 700;">Simpan Jadwal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Dedicated BOC Settings Modal -->
+        <div class="pm-modal-overlay" id="boc-settings-modal" style="display: none; justify-content: center; align-items: center; z-index: 1100;">
+          <div class="pm-modal" style="width: 650px; max-width: 95%;">
+            <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+              <div>
+                <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <i class="fa-solid fa-gear text-gold" style="color: #fbbf24;"></i> Pengaturan Battle of Champions
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">Kelola konfigurasi musim sirkuit berjalan, kuota playoff, hadiah, dan regulasi.</p>
+              </div>
+              <button class="pm-modal-close" id="boc-settings-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="form-settings-rules" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; margin: 0; max-height: 70vh; overflow-y: auto;">
+              <!-- Section: Regulasi Sirkuit -->
+              <div>
+                <h4 style="font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <i class="fa-solid fa-trophy" style="color: #fbbf24; margin-right: 6px;"></i> Regulasi Sirkuit
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="form-group-item">
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-cutoff">Batas Zona Kelayakan Playoff (Cut-Off)</label>
+                    <select id="set-boc-cutoff" style="width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
+                      <option value="8">8 Besar</option>
+                      <option value="12">12 Besar</option>
+                      <option value="16" selected>16 Besar</option>
+                      <option value="24">24 Besar</option>
+                      <option value="32">32 Besar</option>
+                    </select>
+                  </div>
+                  <div class="form-group-item">
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-maxhc">Batas Handicap Maksimal Sirkuit</label>
+                    <select id="set-boc-maxhc" style="width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
+                      <option value="Bebas" selected>Bebas (Tanpa Batasan)</option>
+                      <option value="7">Handicap 7</option>
+                      <option value="6">Handicap 6</option>
+                      <option value="5">Handicap 5</option>
+                      <option value="4">Handicap 4</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="margin-top: 12px;">
+                  <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-year">Tahun Musim Sirkuit Berjalan</label>
+                  <input type="number" id="set-boc-year" min="2020" max="2050" required placeholder="Contoh: 2026" style="width: 100%; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; box-sizing: border-box;">
+                </div>
+              </div>
+
+              <!-- Section: Prizepool / Hadiah -->
+              <div>
+                <h4 style="font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <i class="fa-solid fa-gift" style="color: #60a5fa; margin-right: 6px;"></i> Hadiah Musim (Prize Pool)
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div>
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-prize1">Juara 1</label>
+                    <input type="text" id="set-boc-prize1" placeholder="Contoh: Rp 10.000.000" style="width: 100%; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; box-sizing: border-box;">
+                  </div>
+                  <div>
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-prize2">Juara 2</label>
+                    <input type="text" id="set-boc-prize2" placeholder="Contoh: Rp 5.000.000" style="width: 100%; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; box-sizing: border-box;">
+                  </div>
+                  <div>
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-prize3">Juara 3 bersama</label>
+                    <input type="text" id="set-boc-prize3" placeholder="Contoh: Rp 2.500.000" style="width: 100%; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; box-sizing: border-box;">
+                  </div>
+                  <div>
+                    <label class="form-lbl" style="margin-bottom: 8px; display: block;" for="set-boc-bestgame">Best Game / High Run</label>
+                    <input type="text" id="set-boc-bestgame" placeholder="Contoh: Rp 1.000.000" style="width: 100%; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; box-sizing: border-box;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section: Regulasi Tambahan -->
+              <div>
+                <h4 style="font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <i class="fa-solid fa-file-contract" style="color: #a78bfa; margin-right: 6px;"></i> Regulasi Tambahan & Keterangan
+                </h4>
+                <textarea id="set-boc-rules" placeholder="Tuliskan keterangan detail mengenai sistem regulasi, poin sirkuit, pembagian grup, dll." style="width: 100%; min-height: 100px; padding: 10px 14px; font-size: 0.88rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: #fff; resize: vertical; box-sizing: border-box; font-family: inherit;"></textarea>
+              </div>
+
+              <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 16px; margin-top: 4px;">
+                <span style="font-size: 0.8rem; color: #93c5fd; display: block; line-height: 1.5; margin: 0;">
+                  <i class="fa-solid fa-circle-info"></i> Regulasi ini mengontrol klasemen sirkuit musim berjalan. Perubahan Batas Cut-Off menentukan garis kualifikasi pada halaman papan klasemen publik.
+                </span>
+              </div>
+
+              <!-- Modal Footer -->
+              <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" id="boc-settings-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); cursor: pointer;">Batal</button>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; cursor: pointer; background: var(--gradient-primary); color: #fff; font-weight: 700;">Simpan Pengaturan</button>
               </div>
             </form>
           </div>
@@ -5084,9 +5196,6 @@
                 <button type="button" class="settings-sub-link active" data-sub="sub-org">
                   <i class="fa-solid fa-building" style="margin-right: 8px; width: 16px; text-align: center;"></i> Profil Organisasi
                 </button>
-                <button type="button" class="settings-sub-link" data-sub="sub-rules">
-                  <i class="fa-solid fa-trophy" style="margin-right: 8px; width: 16px; text-align: center;"></i> Regulasi Sirkuit
-                </button>
                 <button type="button" class="settings-sub-link" data-sub="sub-pwd">
                   <i class="fa-solid fa-key" style="margin-right: 8px; width: 16px; text-align: center;"></i> Keamanan & Sandi
                 </button>
@@ -5143,54 +5252,6 @@
                   </div>
                 </div>
 
-                <!-- Sub-pane 2: Regulasi Sirkuit -->
-                <div class="settings-pane-card" id="sub-rules">
-                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
-                      <i class="fa-solid fa-trophy text-gold" style="color: #fbbf24;"></i> Regulasi Sirkuit BOC
-                    </h3>
-                    
-                    <form id="form-settings-rules" class="admin-form-element" style="display: flex; flex-direction: column; gap: 20px;">
-                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="form-group-item">
-                          <label class="form-lbl" for="set-boc-cutoff">Batas Zona Kelayakan Playoff (Cut-Off)</label>
-                          <select id="set-boc-cutoff" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
-                            <option value="8">8 Besar</option>
-                            <option value="12">12 Besar</option>
-                            <option value="16" selected>16 Besar</option>
-                            <option value="24">24 Besar</option>
-                            <option value="32">32 Besar</option>
-                          </select>
-                        </div>
-                        <div class="form-group-item">
-                          <label class="form-lbl" for="set-boc-maxhc">Batas Handicap Maksimal Sirkuit</label>
-                          <select id="set-boc-maxhc" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-surface-solid); border: 1px solid var(--border-color); color: #fff; height: 40px; box-sizing: border-box;">
-                            <option value="Bebas" selected>Bebas (Tanpa Batasan)</option>
-                            <option value="7">Handicap 7</option>
-                            <option value="6">Handicap 6</option>
-                            <option value="5">Handicap 5</option>
-                            <option value="4">Handicap 4</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="form-group-item" style="max-width: 50%;">
-                        <label class="form-lbl" for="set-boc-year">Tahun Musim Sirkuit Berjalan</label>
-                        <input type="number" id="set-boc-year" min="2020" max="2050" required placeholder="Contoh: 2026">
-                      </div>
-                      
-                      <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 16px;">
-                        <span style="font-size: 0.8rem; color: #93c5fd; display: block; line-height: 1.5;">
-                          <i class="fa-solid fa-circle-info"></i> Regulasi ini mengontrol sirkuit turnamen di seluruh sistem. Aturan batas cut-off menentukan jumlah pemain yang ditampilkan di zona kualifikasi papan klasemen sirkuit publik.
-                        </span>
-                      </div>
-
-                      <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Regulasi
-                      </button>
-                    </form>
-                  </div>
-                </div>
 
                 <!-- Sub-pane 3: Keamanan & Sandi -->
                 <div class="settings-pane-card" id="sub-pwd">

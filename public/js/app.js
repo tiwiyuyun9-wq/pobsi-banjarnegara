@@ -46,6 +46,9 @@ async function initApp() {
   // Ambil data dinamis dari Vercel Serverless API jika tersedia
   await loadDataFromApi();
 
+  // Load BOC settings from database
+  await loadBocSettings(currentBocYear);
+
   // Load Statistics & Home Highlights
   loadStatistics();
   loadHomeHighlights();
@@ -620,6 +623,102 @@ try {
 let bocSirkuits = [];
 let currentBocYear = localStorage.getItem("currentBocYear") || "2026";
 
+// Global BOC Settings cache ΓÇö loaded from API, fallback to defaults
+let bocSettings = {
+  year: currentBocYear,
+  cutoff_limit: 16,
+  max_handicap: 'Bebas',
+  playoff_schedule: null,
+  prizes: null,
+  rules: null,
+  status: 'active'
+};
+
+// Load BOC settings from API for a given year
+async function loadBocSettings(year) {
+  try {
+    const res = await fetch(`/api/boc-settings?year=${year || currentBocYear}`);
+    if (res.ok) {
+      bocSettings = await res.json();
+      console.log(`✅ BOC Settings loaded for year ${year || currentBocYear}`, bocSettings);
+    }
+  } catch (e) {
+    console.warn("Failed to load BOC settings from API, using defaults.", e);
+  }
+  applyBocSettingsToDOM();
+  return bocSettings;
+}
+
+// Save BOC settings to API
+async function saveBocSettings(settingsObj) {
+  try {
+    const payload = { ...bocSettings, ...settingsObj, year: settingsObj.year || currentBocYear };
+    const res = await fetch('/api/boc-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      const result = await res.json();
+      bocSettings = { ...payload };
+      // Parse JSON fields if they came back as strings
+      if (typeof bocSettings.playoff_schedule === 'string') {
+        try { bocSettings.playoff_schedule = JSON.parse(bocSettings.playoff_schedule); } catch (e) {}
+      }
+      if (typeof bocSettings.prizes === 'string') {
+        try { bocSettings.prizes = JSON.parse(bocSettings.prizes); } catch (e) {}
+      }
+      applyBocSettingsToDOM();
+      return result;
+    }
+  } catch (e) {
+    console.error("Failed to save BOC settings to API:", e);
+  }
+  return null;
+}
+
+// Update DOM elements based on loaded/saved settings
+function applyBocSettingsToDOM() {
+  const prizes = bocSettings.prizes || {};
+  const totalPrizeEl = document.getElementById("hero-boc-prizepool-total");
+  const prize1El = document.getElementById("hero-boc-prize-1");
+  const prize2El = document.getElementById("hero-boc-prize-2");
+  const prize3El = document.getElementById("hero-boc-prize-3");
+
+  if (prize1El) prize1El.textContent = prizes.juara1 || "RP 7,5 JT";
+  if (prize2El) prize2El.textContent = prizes.juara2 || "RP 4,5 JT";
+  if (prize3El) prize3El.textContent = prizes.juara3 || "RP 3,0 JT";
+
+  if (totalPrizeEl) {
+    if (prizes.juara1 || prizes.juara2 || prizes.juara3) {
+      let total = 0;
+      const extractNumber = (str) => {
+        if (!str) return 0;
+        const clean = str.replace(/[^0-9]/g, "");
+        return parseInt(clean, 10) || 0;
+      };
+      const p1 = extractNumber(prizes.juara1);
+      const p2 = extractNumber(prizes.juara2);
+      const p3 = extractNumber(prizes.juara3);
+      const pb = extractNumber(prizes.best_game);
+      total = p1 + p2 + p3 + pb;
+      if (total > 0) {
+        totalPrizeEl.textContent = `RP ${total.toLocaleString('id-ID')}`;
+      } else {
+        totalPrizeEl.textContent = "RP 15.000.000";
+      }
+    } else {
+      totalPrizeEl.textContent = "RP 15.000.000";
+    }
+  }
+
+  // Update dynamic cutoff limit indicators in DOM
+  const dynamicCutoffs = document.querySelectorAll(".dynamic-boc-cutoff");
+  dynamicCutoffs.forEach(el => {
+    el.textContent = bocSettings.cutoff_limit || "16";
+  });
+}
+
 // Helper: load sirkuits for a specific year from localStorage
 function loadBocSirkuitsForYear(year) {
   try {
@@ -817,8 +916,9 @@ function renderStandings(searchQuery = "") {
   if (sectionSubtitle) sectionSubtitle.textContent = `Papan klasemen akumulasi poin atlet biliar Banjarnegara dalam seri sirkuit Battle of Champions ${currentBocYear} resmi.`;
   const ruleYearSpan = document.querySelector("#tab-champions .rules-card-title");
   if (ruleYearSpan) ruleYearSpan.innerHTML = `<i class="fa-solid fa-circle-info text-gold"></i> Aturan Kelayakan & Poin BOC ${currentBocYear}`;
+  const cutoffLimit = bocSettings.cutoff_limit || 16;
   const ruleYearDesc = document.querySelector("#tab-champions .rules-card-desc");
-  if (ruleYearDesc) ruleYearDesc.textContent = `Sesuai Surat Edaran Resmi POBSI Banjarnegara, 16 pemain teratas (Cut-off Zona BOC) pada akhir musim November ${currentBocYear} berhak tampil di babak final bergengsi. Poin diperoleh dari keikutsertaan turnamen resmi:`;
+  if (ruleYearDesc) ruleYearDesc.innerHTML = `Sesuai Surat Edaran Resmi POBSI Banjarnegara, <span class="dynamic-boc-cutoff">${cutoffLimit}</span> pemain teratas (Cut-off Zona BOC) pada akhir musim November ${currentBocYear} berhak tampil di babak final bergengsi. Poin diperoleh dari keikutsertaan turnamen resmi:`;
 
   // Update Year Selector dropdown selection if needed
   const seasonSelect = document.getElementById("boc-public-season-select");
@@ -837,8 +937,8 @@ function renderStandings(searchQuery = "") {
   if (seriesEl) seriesEl.textContent = `${bocSirkuits.length} Seri`;
   if (playersEl) playersEl.textContent = `${activeStandings.length} Atlet`;
   
-  const player16 = activeStandings.find(p => p.rank === 16) || activeStandings[activeStandings.length - 1];
-  const cutoffPoints = player16 ? player16.points : 0;
+  const playerCutoff = activeStandings.find(p => p.rank === cutoffLimit) || activeStandings[activeStandings.length - 1];
+  const cutoffPoints = playerCutoff ? playerCutoff.points : 0;
   if (cutoffEl) cutoffEl.textContent = `${cutoffPoints} Pts`;
   
   const estimatedPrize = activeStandings.length * 150000;
@@ -934,7 +1034,8 @@ function renderStandings(searchQuery = "") {
 
   // Render Table Rows
   tableBody.innerHTML = pagedItems.map((player, idx) => {
-    const isBocZone = player.rank <= 16;
+    const cutoffLimit = bocSettings.cutoff_limit || 16;
+    const isBocZone = player.rank <= cutoffLimit;
     const highlightClass = isBocZone ? 'boc-qualified-row' : '';
     
     // Get exact or deterministic event scores
@@ -969,10 +1070,10 @@ function renderStandings(searchQuery = "") {
       </tr>
     `;
 
-    const dividerHtml = (player.rank === 16) ? `
+    const dividerHtml = (player.rank === cutoffLimit) ? `
       <tr class="boc-cutoff-divider-row">
         <td colspan="${5 + bocSirkuits.length}">
-          <i class="fa-solid fa-triangle-exclamation"></i> Batas Kualifikasi Zona Merah BOC (Cut-Off Line 16 Besar) <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-triangle-exclamation"></i> Batas Kualifikasi Zona Merah BOC (Cut-Off Line ${cutoffLimit} Besar) <i class="fa-solid fa-triangle-exclamation"></i>
         </td>
       </tr>
     ` : '';
@@ -999,8 +1100,6 @@ function renderStandings(searchQuery = "") {
   const playoffBanner = document.getElementById("boc-playoff-banner");
   const scheduleBanner = document.getElementById("boc-schedule-banner");
   if (playoffBanner && scheduleBanner) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
-    const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
     updateBocBannersVisibility();
   }
 }
@@ -1009,12 +1108,13 @@ function renderStandings(searchQuery = "") {
 function updateBocBannersVisibility() {
   const playoffBanner = document.getElementById("boc-playoff-banner");
   const scheduleBanner = document.getElementById("boc-schedule-banner");
+  const notScheduledBanner = document.getElementById("boc-not-scheduled-banner");
   if (!playoffBanner || !scheduleBanner) return;
 
   const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
-  const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
+  const savedSchedule = bocSettings.playoff_schedule;
 
-  // Inject Year dynamically to both banners
+  // Inject Year dynamically to all banners
   const dynamicYears = document.querySelectorAll(".dynamic-boc-year");
   dynamicYears.forEach(span => {
     span.textContent = currentBocYear;
@@ -1023,6 +1123,7 @@ function updateBocBannersVisibility() {
   if (playoffEvent) {
     playoffBanner.style.display = "flex";
     scheduleBanner.style.display = "none";
+    if (notScheduledBanner) notScheduledBanner.style.display = "none";
     
     const viewBtn = document.getElementById("btn-view-boc-playoff");
     if (viewBtn) {
@@ -1035,19 +1136,17 @@ function updateBocBannersVisibility() {
   } else if (savedSchedule) {
     playoffBanner.style.display = "none";
     scheduleBanner.style.display = "flex";
+    if (notScheduledBanner) notScheduledBanner.style.display = "none";
     
-    try {
-      const schedule = JSON.parse(savedSchedule);
-      const bannerTextEl = document.getElementById("boc-schedule-banner-text");
-      if (bannerTextEl) {
-        bannerTextEl.innerHTML = `Grand Final BOC telah dijadwalkan pada <strong>${formatIndonesianDate(schedule.date)} pukul ${schedule.time} WIB</strong> di <strong>${schedule.venue}</strong>. ${schedule.notes || ''}`;
-      }
-    } catch (e) {
-      console.error("Failed to parse bocPlayoffSchedule", e);
+    const schedule = typeof savedSchedule === 'string' ? JSON.parse(savedSchedule) : savedSchedule;
+    const bannerTextEl = document.getElementById("boc-schedule-banner-text");
+    if (bannerTextEl) {
+      bannerTextEl.innerHTML = `Grand Final BOC telah dijadwalkan pada <strong>${formatIndonesianDate(schedule.date)} pukul ${schedule.time} WIB</strong> di <strong>${schedule.venue}</strong>. ${schedule.notes || ''}`;
     }
   } else {
     playoffBanner.style.display = "none";
     scheduleBanner.style.display = "none";
+    if (notScheduledBanner) notScheduledBanner.style.display = "flex";
   }
 }
 
@@ -1108,8 +1207,9 @@ function setupStandingsSearch() {
         window.history.pushState({}, "", "/#champions-" + currentBocYear);
       }
 
-      // Fetch new database data from API for the selected year
+      // Fetch new database data and settings from API for the selected year
       await loadDataFromApi();
+      await loadBocSettings(currentBocYear);
 
       // Re-render dashboard components
       loadStatistics();
@@ -5723,7 +5823,7 @@ window.renderAdminBocConsole = function() {
   
   if (startPlayoffBtn) {
     const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
-    const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
+    const savedSchedule = bocSettings.playoff_schedule;
     
     if (playoffEvent) {
       // State A: Active Playoff
@@ -5739,13 +5839,9 @@ window.renderAdminBocConsole = function() {
       
       if (adminScheduleStatus) {
         adminScheduleStatus.style.display = "flex";
-        try {
-          const schedule = JSON.parse(savedSchedule);
-          if (adminScheduleText) {
-            adminScheduleText.innerHTML = `Grand Final BOC Terjadwal: <strong>${formatIndonesianDate(schedule.date)} pukul ${schedule.time} WIB</strong> di <strong>${schedule.venue}</strong>. ${schedule.notes ? `<span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 6px;">(${schedule.notes})</span>` : ''}`;
-          }
-        } catch (e) {
-          console.error("Failed to parse schedule status", e);
+        const schedule = typeof savedSchedule === 'string' ? JSON.parse(savedSchedule) : savedSchedule;
+        if (adminScheduleText) {
+          adminScheduleText.innerHTML = `Grand Final BOC Terjadwal: <strong>${formatIndonesianDate(schedule.date)} pukul ${schedule.time} WIB</strong> di <strong>${schedule.venue}</strong>. ${schedule.notes ? `<span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 6px;">(${schedule.notes})</span>` : ''}`;
         }
       }
     } else {
@@ -6143,23 +6239,19 @@ function setupBocAdminListeners() {
       return;
     }
     
-    // Set defaults or prefill from localStorage if exists
-    const saved = localStorage.getItem("bocPlayoffSchedule");
+    // Set defaults or prefill from bocSettings
+    const saved = bocSettings.playoff_schedule;
     const inpDate = document.getElementById("inp-boc-schedule-date");
     const inpTime = document.getElementById("inp-boc-schedule-time");
     const inpVenue = document.getElementById("inp-boc-schedule-venue");
     const inpNotes = document.getElementById("inp-boc-schedule-notes");
 
     if (saved) {
-      try {
-        const schedule = JSON.parse(saved);
-        if (inpDate) inpDate.value = schedule.date || "";
-        if (inpTime) inpTime.value = schedule.time || "";
-        if (inpVenue) inpVenue.value = schedule.venue || "";
-        if (inpNotes) inpNotes.value = schedule.notes || "";
-      } catch (e) {
-        console.error("Failed to parse schedule for modal prefill", e);
-      }
+      const schedule = typeof saved === 'string' ? JSON.parse(saved) : saved;
+      if (inpDate) inpDate.value = schedule.date || "";
+      if (inpTime) inpTime.value = schedule.time || "";
+      if (inpVenue) inpVenue.value = schedule.venue || "";
+      if (inpNotes) inpNotes.value = schedule.notes || "";
     } else {
       if (inpDate) inpDate.value = getDefaultBocScheduleDate();
       if (inpTime) inpTime.value = "10:00";
@@ -6186,15 +6278,70 @@ function setupBocAdminListeners() {
     editScheduleBtn.addEventListener("click", openBocScheduleModal);
   }
 
+  // --- BOC Settings Modal Listeners ---
+  const bocSettingsModal = document.getElementById("boc-settings-modal");
+  const bocSettingsModalClose = document.getElementById("boc-settings-modal-close");
+  const bocSettingsModalBtnCancel = document.getElementById("boc-settings-modal-btn-cancel");
+  const bocSettingsTrigger = document.getElementById("btn-admin-boc-settings-trigger");
+
+  const openBocSettingsModal = () => {
+    if (!bocSettingsModal) return;
+    const role = localStorage.getItem("pobsi_admin_role") || "admin";
+    if (role === "staff") {
+      showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi BOC.", "error");
+      return;
+    }
+
+    // Prefill form inputs from current bocSettings Cache
+    const bocCutoffInput = document.getElementById("set-boc-cutoff");
+    const bocMaxhcInput = document.getElementById("set-boc-maxhc");
+    const bocYearInput = document.getElementById("set-boc-year");
+    const bocPrize1Input = document.getElementById("set-boc-prize1");
+    const bocPrize2Input = document.getElementById("set-boc-prize2");
+    const bocPrize3Input = document.getElementById("set-boc-prize3");
+    const bocBestGameInput = document.getElementById("set-boc-bestgame");
+    const bocRulesInput = document.getElementById("set-boc-rules");
+
+    if (bocCutoffInput) bocCutoffInput.value = bocSettings.cutoff_limit || "16";
+    if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
+    if (bocYearInput) bocYearInput.value = currentBocYear || "2026";
+
+    const prizes = bocSettings.prizes || {};
+    if (bocPrize1Input) bocPrize1Input.value = prizes.juara1 || "";
+    if (bocPrize2Input) bocPrize2Input.value = prizes.juara2 || "";
+    if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
+    if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
+    if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
+
+    bocSettingsModal.style.display = "flex";
+  };
+
+  const closeBocSettingsModal = () => {
+    if (bocSettingsModal) bocSettingsModal.style.display = "none";
+  };
+
+  window.closeBocSettingsModal = closeBocSettingsModal; // Make accessible to setupSystemSettings
+
+  if (bocSettingsTrigger) {
+    bocSettingsTrigger.addEventListener("click", openBocSettingsModal);
+  }
+  if (bocSettingsModalClose) bocSettingsModalClose.addEventListener("click", closeBocSettingsModal);
+  if (bocSettingsModalBtnCancel) bocSettingsModalBtnCancel.addEventListener("click", closeBocSettingsModal);
+  if (bocSettingsModal) {
+    bocSettingsModal.addEventListener("click", (e) => {
+      if (e.target === bocSettingsModal) closeBocSettingsModal();
+    });
+  }
+
   if (formBocSchedule) {
-    formBocSchedule.addEventListener("submit", (e) => {
+    formBocSchedule.addEventListener("submit", async (e) => {
       e.preventDefault();
       const date = document.getElementById("inp-boc-schedule-date").value;
       const time = document.getElementById("inp-boc-schedule-time").value;
       const venue = document.getElementById("inp-boc-schedule-venue").value;
       const notes = document.getElementById("inp-boc-schedule-notes").value;
 
-      localStorage.setItem("bocPlayoffSchedule", JSON.stringify({ date, time, venue, notes }));
+      await saveBocSettings({ playoff_schedule: { date, time, venue, notes } });
       closeBocScheduleModal();
       showCustomToast("Jadwal Grand Final BOC berhasil disimpan!", "success");
       renderAdminBocConsole();
@@ -6212,14 +6359,19 @@ function setupBocAdminListeners() {
         return;
       }
 
-      const existingBocEvent = appData.events.find(e => e.elimination_type === "boc" && e.status !== "Cancelled" && e.status !== "Selesai");
+      const existingBocEvent = appData.events.find(e => 
+        e.elimination_type === "boc" && 
+        e.status !== "Cancelled" && 
+        e.status !== "Selesai" &&
+        (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear))
+      );
       if (existingBocEvent) {
         // Button already says "Kelola Playoff" — directly open event detail
         openEventDetail(existingBocEvent.id);
         return;
       }
 
-      const savedSchedule = localStorage.getItem("bocPlayoffSchedule");
+      const savedSchedule = bocSettings.playoff_schedule;
       if (!savedSchedule) {
         // Button says "Jadwalkan BOC" — open schedule settings modal
         openBocScheduleModal();
@@ -6228,25 +6380,26 @@ function setupBocAdminListeners() {
 
       // Button says "Mulai BOC" — proceed to eligibility check & event creation
       const standings = appData.standings || [];
+      const cutoffLimit = bocSettings.cutoff_limit || 16;
       let tiedCount = 0;
       let cutoffPoints = 0;
-      if (standings.length >= 16) {
-        cutoffPoints = standings[15].points;
+      if (standings.length >= cutoffLimit) {
+        cutoffPoints = standings[cutoffLimit - 1].points;
         tiedCount = standings.filter(p => p.points === cutoffPoints).length;
       }
 
       const executeCreateEvent = async () => {
-        const top16 = standings.slice(0, 16).map(p => p.name);
+        const topPlayers = standings.slice(0, cutoffLimit).map(p => p.name);
 
-        if (top16.length < 16) {
-          showCustomToast("Jumlah atlet di klasemen kurang dari 16! Daftarkan atlet terlebih dahulu.", "error");
+        if (topPlayers.length < cutoffLimit) {
+          showCustomToast(`Jumlah atlet di klasemen kurang dari ${cutoffLimit}! Daftarkan atlet terlebih dahulu.`, "error");
           return;
         }
 
         let scheduleObj = {
           date: new Date().toISOString().split('T')[0],
           venue: "Midnight Arena (Banjarnegara)",
-          notes: "Grand Final kualifikasi 16 atlet terbaik."
+          notes: `Grand Final kualifikasi ${cutoffLimit} atlet terbaik.`
         };
         try {
           scheduleObj = JSON.parse(savedSchedule);
@@ -6264,11 +6417,11 @@ function setupBocAdminListeners() {
           entryFee: "Rp 150.000",
           contact: "POBSI Committee",
           status: "Daftar",
-          description: `Turnamen Puncak Grand Final Battle of Champions musim sirkuit ${currentBocYear}. Diikuti oleh 16 pemain kualifikasi terbaik. ${scheduleObj.notes || ''}`,
+          description: `Turnamen Puncak Grand Final Battle of Champions musim sirkuit ${currentBocYear}. Diikuti oleh ${cutoffLimit} pemain kualifikasi terbaik. ${scheduleObj.notes || ''}`,
           type: "Battle of Champions (BOC)",
           elimination_type: "boc",
-          bracket_size: "16",
-          participants: JSON.stringify(top16)
+          bracket_size: String(cutoffLimit),
+          participants: JSON.stringify(topPlayers)
         };
 
         try {
@@ -6298,7 +6451,7 @@ function setupBocAdminListeners() {
       if (tiedCount > 1) {
         showCustomConfirm(
           "Grand Final Terkunci",
-          `⚠️ Terdeteksi Sengketa Kelayakan Playoff: Ada <strong>${tiedCount} atlet</strong> memiliki poin yang sama (${cutoffPoints} Pts) pada batas peringkat kelayakan 16 besar kualifikasi.<br><br>Grand Final BOC tidak dapat dimulai sebelum sengketa kelayakan ini diselesaikan (tidak boleh ada atlet dengan poin kembar pada batas cut-off peringkat 16).`,
+          `⚠️ Terdeteksi Sengketa Kelayakan Playoff: Ada <strong>${tiedCount} atlet</strong> memiliki poin yang sama (${cutoffPoints} Pts) pada batas peringkat kelayakan ${cutoffLimit} besar kualifikasi.<br><br>Grand Final BOC tidak dapat dimulai sebelum sengketa kelayakan ini diselesaikan (tidak boleh ada atlet dengan poin kembar pada batas cut-off peringkat ${cutoffLimit}).`,
           null,
           "Tutup",
           "danger"
@@ -6337,7 +6490,8 @@ function setupBocAdminListeners() {
                     delete exactBocPoints[name];
                   }
                   localStorage.removeItem("exactBocPoints");
-                  localStorage.removeItem("bocPlayoffSchedule");
+                  // Clear playoff schedule in DB
+                  await saveBocSettings({ playoff_schedule: null });
 
                   const nextYear = parseInt(currentBocYear, 10) + 1;
                   currentBocYear = String(nextYear);
@@ -15472,6 +15626,11 @@ function setupSystemSettings() {
   const bocCutoffInput = document.getElementById("set-boc-cutoff");
   const bocMaxhcInput = document.getElementById("set-boc-maxhc");
   const bocYearInput = document.getElementById("set-boc-year");
+  const bocPrize1Input = document.getElementById("set-boc-prize1");
+  const bocPrize2Input = document.getElementById("set-boc-prize2");
+  const bocPrize3Input = document.getElementById("set-boc-prize3");
+  const bocBestGameInput = document.getElementById("set-boc-bestgame");
+  const bocRulesInput = document.getElementById("set-boc-rules");
 
   const currentRole = localStorage.getItem("pobsi_admin_role") || "admin";
   const currentUsername = localStorage.getItem("pobsi_admin_username") || "admin";
@@ -15513,9 +15672,17 @@ function setupSystemSettings() {
   if (whatsappInput) whatsappInput.value = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
   if (addressInput) addressInput.value = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
 
-  if (bocCutoffInput) bocCutoffInput.value = localStorage.getItem("boc_cutoff_limit") || "16";
-  if (bocMaxhcInput) bocMaxhcInput.value = localStorage.getItem("boc_max_hc") || "Bebas";
+  if (bocCutoffInput) bocCutoffInput.value = bocSettings.cutoff_limit || "16";
+  if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
   if (bocYearInput) bocYearInput.value = localStorage.getItem("currentBocYear") || "2026";
+
+  // Populate prizes from bocSettings
+  const prizes = bocSettings.prizes || {};
+  if (bocPrize1Input) bocPrize1Input.value = prizes.juara1 || "";
+  if (bocPrize2Input) bocPrize2Input.value = prizes.juara2 || "";
+  if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
+  if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
+  if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
 
 
   if (!isSuperAdmin) {
@@ -15572,23 +15739,39 @@ function setupSystemSettings() {
 
   // Form Submit: BOC Rules
   if (formRules) {
-    formRules.addEventListener("submit", (e) => {
+    formRules.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (currentRole === "staff") {
         showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi BOC.", "error");
         return;
       }
-      localStorage.setItem("boc_cutoff_limit", bocCutoffInput.value);
-      localStorage.setItem("boc_max_hc", bocMaxhcInput.value);
+
+      // Save settings to database
+      await saveBocSettings({
+        cutoff_limit: parseInt(bocCutoffInput.value),
+        max_handicap: bocMaxhcInput.value,
+        prizes: {
+          juara1: bocPrize1Input ? bocPrize1Input.value.trim() : '',
+          juara2: bocPrize2Input ? bocPrize2Input.value.trim() : '',
+          juara3: bocPrize3Input ? bocPrize3Input.value.trim() : '',
+          best_game: bocBestGameInput ? bocBestGameInput.value.trim() : ''
+        },
+        rules: bocRulesInput ? bocRulesInput.value.trim() : ''
+      });
       
       const oldYear = localStorage.getItem("currentBocYear") || "2026";
       const newYear = bocYearInput.value.trim();
       localStorage.setItem("currentBocYear", newYear);
 
       showCustomToast("Regulasi sirkuit BOC berhasil diperbarui!", "success");
+      if (typeof closeBocSettingsModal === "function") {
+        closeBocSettingsModal();
+      }
 
       if (oldYear !== newYear) {
         currentBocYear = newYear;
+        // Load settings for the new year
+        await loadBocSettings(newYear);
         // Reload sirkuits for the new year
         bocSirkuits = loadBocSirkuitsForYear(newYear);
         // Refresh standings & events
