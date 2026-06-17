@@ -4146,13 +4146,15 @@ tr:hover td.sticky-col {
     overflow: visible !important;
   }
 
-  /* Admin BOC table: show all rows (no max-height), horizontal scroll only */
+  /* Admin BOC table: show all rows, horizontal scroll only.
+     overflow-y: clip does NOT create a scroll container (unlike auto/hidden),
+     so sticky headers propagate to .workspace-body which IS the scroll container. */
   .workspace-body .table-card {
-    overflow: visible !important;
+    overflow: clip !important;
   }
   .workspace-body .table-wrapper {
     overflow-x: auto !important;
-    overflow-y: visible !important;
+    overflow-y: clip !important;
   }
   .workspace-body .premium-table thead th {
     position: sticky !important;
@@ -4166,6 +4168,7 @@ tr:hover td.sticky-col {
     background: #0d1527 !important;
   }
 }
+
 
 
 
