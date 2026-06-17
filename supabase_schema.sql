@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS clubs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS boc_sirkuits CASCADE;
+DROP TABLE IF EXISTS boc_settings CASCADE;
 
 -- 1. Buat Tabel Players
 CREATE TABLE players (
@@ -102,6 +103,17 @@ CREATE TABLE boc_sirkuits (
     CONSTRAINT unique_year_name UNIQUE (year, name)
 );
 
+-- 8. Buat Tabel BOC Settings (Konfigurasi per Tahun)
+CREATE TABLE boc_settings (
+    year TEXT PRIMARY KEY,
+    cutoff_limit INTEGER DEFAULT 16,
+    max_handicap TEXT DEFAULT 'Bebas',
+    playoff_schedule TEXT,
+    prizes TEXT,
+    rules TEXT,
+    status TEXT DEFAULT 'active'
+);
+
 -- Seed akun pengguna default (superadmin, admin, staff)
 INSERT INTO users (username, password, role, fullname) VALUES 
 ('superadmin', 'super-pobsi-2026', 'super admin', 'Super Admin POBSI'),
@@ -118,3 +130,4 @@ ALTER TABLE documents DISABLE ROW LEVEL SECURITY;
 ALTER TABLE clubs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE boc_sirkuits DISABLE ROW LEVEL SECURITY;
+ALTER TABLE boc_settings DISABLE ROW LEVEL SECURITY;
