@@ -4135,14 +4135,38 @@ tr:hover td.sticky-col {
 }
 
 @media (min-width: 769px) {
-  /* Allow vertical sticky headers to bind to browser window viewport on desktop */
-  .table-card {
+  /* Allow vertical sticky headers to bind to browser window viewport on desktop (public pages only).
+     Public tables live inside section.section, NOT inside .workspace-body (admin). */
+  section .table-card,
+  .section-content > .table-card {
     overflow: visible !important;
   }
-  .table-wrapper {
+  section .table-wrapper,
+  .section-content > .table-wrapper {
     overflow: visible !important;
+  }
+
+  /* Admin BOC table: contained scroll with sticky headers at top of wrapper */
+  .workspace-body .table-card {
+    overflow: hidden !important;
+  }
+  .workspace-body .table-wrapper {
+    overflow: auto !important;
+    max-height: calc(100vh - 280px);
+  }
+  .workspace-body .premium-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    background: #0d1527 !important;
+  }
+  .workspace-body .premium-table thead th.sticky-col {
+    z-index: 4 !important;
+    top: 0 !important;
+    background: #0d1527 !important;
   }
 }
+
 
 /* Premium Athlete Avatar File Upload Zone */
 .avatar-upload-zone {
