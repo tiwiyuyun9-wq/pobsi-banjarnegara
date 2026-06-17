@@ -1124,8 +1124,62 @@ function updateBocBannersVisibility() {
     playoffBanner.style.display = "flex";
     scheduleBanner.style.display = "none";
     if (notScheduledBanner) notScheduledBanner.style.display = "none";
-    
+
+    const descEl = document.getElementById("boc-playoff-banner-desc");
+    const iconBgEl = document.getElementById("boc-playoff-banner-icon-bg");
+    const iconEl = document.getElementById("boc-playoff-banner-icon");
     const viewBtn = document.getElementById("btn-view-boc-playoff");
+
+    if (playoffEvent.status === 'Selesai') {
+      // Completed State style (Green Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(16, 185, 129, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(16, 185, 129, 0.03)";
+      
+      if (iconBgEl) {
+        iconBgEl.style.background = "rgba(16, 185, 129, 0.15)";
+        iconBgEl.style.borderColor = "rgba(16, 185, 129, 0.2)";
+        iconBgEl.style.color = "#10b981";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.2)";
+      }
+      if (iconEl) {
+        iconEl.className = "fa-solid fa-award";
+      }
+      if (descEl) {
+        descEl.textContent = "Turnamen puncak Grand Final Battle of Champions telah selesai dilaksanakan! Klik tombol di samping untuk melihat bagan pertandingan, hasil skor akhir, dan sang juara utama.";
+      }
+      if (viewBtn) {
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil Turnamen';
+        viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+        viewBtn.style.color = "#fff";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
+      }
+    } else {
+      // Ongoing/default State style (Gold/Yellow Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(251, 191, 36, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(251, 191, 36, 0.03)";
+      
+      if (iconBgEl) {
+        iconBgEl.style.background = "rgba(251, 191, 36, 0.15)";
+        iconBgEl.style.borderColor = "rgba(251, 191, 36, 0.2)";
+        iconBgEl.style.color = "#fbbf24";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(251, 191, 36, 0.2)";
+      }
+      if (iconEl) {
+        iconEl.className = "fa-solid fa-trophy";
+      }
+      if (descEl) {
+        descEl.textContent = "Fase playoff sedang berlangsung! Pantau perjuangan 16 atlet kualifikasi terbaik memperebutkan mahkota juara utama secara langsung.";
+      }
+      if (viewBtn) {
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff';
+        viewBtn.style.background = "linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)";
+        viewBtn.style.color = "#0f172a";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(251, 191, 36, 0.3)";
+      }
+    }
+    
     if (viewBtn) {
       const newViewBtn = viewBtn.cloneNode(true);
       viewBtn.parentNode.replaceChild(newViewBtn, viewBtn);
