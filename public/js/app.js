@@ -623,7 +623,7 @@ try {
 let bocSirkuits = [];
 let currentBocYear = localStorage.getItem("currentBocYear") || "2026";
 
-// Global BOC Settings cache ΓÇö loaded from API, fallback to defaults
+// Global BOC Settings cache — loaded from API, fallback to defaults
 let bocSettings = {
   year: currentBocYear,
   cutoff_limit: 16,
@@ -631,7 +631,14 @@ let bocSettings = {
   playoff_schedule: null,
   prizes: null,
   rules: null,
+  point_rules: null,
   status: 'active'
+};
+
+const defaultPointRules = {
+  circuit_points: { champion: 12, runnerUp: 9, top4: 7, top8: 5, top16: 3, top32: 1 },
+  hc_points: { champion: 30, runnerUp: 20, top4: 10, others: 0 },
+  hc_thresholds: { "3B": 30, "3N": 60, "3A": 150, "4B": 200, "4A": 300, "5B": 400, "5A": 500, "6": 600 }
 };
 
 // Load BOC settings from API for a given year
@@ -667,6 +674,9 @@ async function saveBocSettings(settingsObj) {
       }
       if (typeof bocSettings.prizes === 'string') {
         try { bocSettings.prizes = JSON.parse(bocSettings.prizes); } catch (e) {}
+      }
+      if (typeof bocSettings.point_rules === 'string') {
+        try { bocSettings.point_rules = JSON.parse(bocSettings.point_rules); } catch (e) {}
       }
       applyBocSettingsToDOM();
       return result;
@@ -717,6 +727,36 @@ function applyBocSettingsToDOM() {
   dynamicCutoffs.forEach(el => {
     el.textContent = bocSettings.cutoff_limit || "16";
   });
+
+  // Populate Point & Handicap settings form if present
+  const ptsCircuitChampion = document.getElementById("pts-circuit-champion");
+  if (ptsCircuitChampion) {
+    const rules = bocSettings.point_rules || defaultPointRules;
+    const cp = rules.circuit_points || defaultPointRules.circuit_points;
+    const hp = rules.hc_points || defaultPointRules.hc_points;
+    const ht = rules.hc_thresholds || defaultPointRules.hc_thresholds;
+
+    ptsCircuitChampion.value = cp.champion ?? 12;
+    document.getElementById("pts-circuit-runnerUp").value = cp.runnerUp ?? 9;
+    document.getElementById("pts-circuit-top4").value = cp.top4 ?? 7;
+    document.getElementById("pts-circuit-top8").value = cp.top8 ?? 5;
+    document.getElementById("pts-circuit-top16").value = cp.top16 ?? 3;
+    document.getElementById("pts-circuit-top32").value = cp.top32 ?? 1;
+
+    document.getElementById("pts-hc-champion").value = hp.champion ?? 30;
+    document.getElementById("pts-hc-runnerUp").value = hp.runnerUp ?? 20;
+    document.getElementById("pts-hc-top4").value = hp.top4 ?? 10;
+    document.getElementById("pts-hc-others").value = hp.others ?? 0;
+
+    document.getElementById("th-hc-3b").value = ht["3B"] ?? 30;
+    document.getElementById("th-hc-3n").value = ht["3N"] ?? 60;
+    document.getElementById("th-hc-3a").value = ht["3A"] ?? 150;
+    document.getElementById("th-hc-4b").value = ht["4B"] ?? 200;
+    document.getElementById("th-hc-4a").value = ht["4A"] ?? 300;
+    document.getElementById("th-hc-5b").value = ht["5B"] ?? 400;
+    document.getElementById("th-hc-5a").value = ht["5A"] ?? 500;
+    document.getElementById("th-hc-6").value = ht["6"] ?? 600;
+  }
 }
 
 // Helper: load sirkuits for a specific year from localStorage
@@ -901,7 +941,7 @@ function renderStandings(searchQuery = "") {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const publicPlayoffContainer = document.getElementById("boc-public-playoff-container");
   const publicStandingsContainer = document.getElementById("boc-public-standings-container");
   if (!playoffEventCheck) {
@@ -1111,7 +1151,7 @@ function updateBocBannersVisibility() {
   const notScheduledBanner = document.getElementById("boc-not-scheduled-banner");
   if (!playoffBanner || !scheduleBanner) return;
 
-  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const savedSchedule = bocSettings.playoff_schedule;
 
   // Inject Year dynamically to all banners
@@ -5852,7 +5892,7 @@ window.renderAdminBocConsole = function() {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const bocPlayoffContainer = document.getElementById("boc-playoff-container");
   const bocStandingsContainer = document.getElementById("boc-standings-container");
   if (!playoffEventCheck) {
@@ -5872,7 +5912,7 @@ window.renderAdminBocConsole = function() {
   const adminScheduleText = document.getElementById("boc-admin-schedule-text");
   
   if (startPlayoffBtn) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const savedSchedule = bocSettings.playoff_schedule;
     
     if (playoffEvent) {
@@ -6573,6 +6613,109 @@ function setupBocAdminListeners() {
         "Ya, Lanjutkan",
         "warning"
       );
+    });
+  }
+
+  // --- DEV RESET BOC LISTENERS (Localhost only) ---
+  const devResetBtn = document.getElementById("btn-boc-dev-reset");
+  if (devResetBtn) {
+    // Show only on localhost/127.0.0.1
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      devResetBtn.style.display = "flex";
+    }
+
+    devResetBtn.addEventListener("click", () => {
+      const role = localStorage.getItem("pobsi_admin_role") || "admin";
+      if (role === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan melakukan reset.", "error");
+        return;
+      }
+
+      const modal = document.getElementById("boc-dev-reset-modal");
+      if (modal) {
+        const label = document.getElementById("dev-reset-year-label");
+        if (label) {
+          label.textContent = `Target: BOC ${currentBocYear}`;
+        }
+        modal.style.display = "flex";
+      }
+    });
+  }
+
+  const devResetModalClose = document.getElementById("boc-dev-reset-modal-close");
+  if (devResetModalClose) {
+    devResetModalClose.addEventListener("click", () => {
+      const modal = document.getElementById("boc-dev-reset-modal");
+      if (modal) modal.style.display = "none";
+    });
+  }
+
+  const devResetModalCancel = document.getElementById("boc-dev-reset-modal-cancel");
+  if (devResetModalCancel) {
+    devResetModalCancel.addEventListener("click", () => {
+      const modal = document.getElementById("boc-dev-reset-modal");
+      if (modal) modal.style.display = "none";
+    });
+  }
+
+  const devResetExecute = document.getElementById("boc-dev-reset-execute");
+  if (devResetExecute) {
+    devResetExecute.addEventListener("click", async () => {
+      const clearEvents = document.getElementById("dev-reset-opt-events").checked;
+      const clearSchedule = document.getElementById("dev-reset-opt-schedule").checked;
+      const clearSirkuits = document.getElementById("dev-reset-opt-sirkuits").checked;
+      const reseed = document.getElementById("dev-reset-opt-reseed").checked;
+
+      const modal = document.getElementById("boc-dev-reset-modal");
+      if (modal) modal.style.display = "none";
+
+      showCustomToast("Menjalankan Dev Reset...", "info");
+
+      try {
+        const res = await fetch("/api/boc/reset", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            year: currentBocYear,
+            clearEvents,
+            clearSchedule,
+            clearSirkuits,
+            reseed
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          
+          // Clear exactBocPoints locally if reseeded or sirkuit cleared
+          if (reseed || clearSirkuits) {
+            for (let name in exactBocPoints) {
+              delete exactBocPoints[name];
+            }
+            localStorage.removeItem("exactBocPoints");
+          }
+
+          if (clearSirkuits) {
+            bocSirkuits = [];
+            localStorage.removeItem(`bocSirkuits_${currentBocYear}`);
+          }
+
+          console.log("Dev Reset Summary:", data.summary);
+          showCustomToast(data.message || "BOC state berhasil di-reset!", "success");
+
+          // Reload all data from API and re-render
+          await loadDataFromApi();
+          renderAdminBocConsole();
+          if (typeof renderStandings === "function") renderStandings();
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          showCustomToast(`Gagal: ${errData.error || res.statusText}`, "error");
+        }
+      } catch (err) {
+        showCustomToast(`Error koneksi reset: ${err.message}`, "error");
+      }
     });
   }
 
@@ -11193,6 +11336,10 @@ function openEventDetail(eventId, updateUrl = true) {
       eventDetail.classList.add("active");
     }
 
+    // Hide sidebar for BOC events — BOC is a final event, not a circuit event
+    const sidebar = document.getElementById("event-detail-sidebar");
+    if (sidebar) sidebar.style.display = "none";
+
     // 2. Keep the URL hash as #boc-[year] and switch to pane-boc
     switchAdminPane("pane-boc", false, true);
     if (window.location.pathname !== "/admin" || window.location.hash !== "#boc-" + currentBocYear) {
@@ -11236,6 +11383,10 @@ function openEventDetail(eventId, updateUrl = true) {
     if (bocStandingsContainer) {
       bocStandingsContainer.style.display = "block";
     }
+
+    // Show sidebar for non-BOC events
+    const sidebar = document.getElementById("event-detail-sidebar");
+    if (sidebar) sidebar.style.display = "flex";
 
     // 2. Switch pane normally to pane-event-detail
     switchAdminPane("pane-event-detail", false);
@@ -13350,6 +13501,509 @@ window.generateBocMainBracket = async function(eventId) {
   );
 };
 
+// --- BOC MANUAL SEEDING & BRACKET LOGIC ---
+function updateGroupSelectOptions() {
+  const selects = Array.from(document.querySelectorAll(".boc-manual-group-select"));
+  const selectedValues = new Set();
+  
+  selects.forEach(sel => {
+    if (sel.value) {
+      selectedValues.add(sel.value);
+    }
+  });
+  
+  selects.forEach(sel => {
+    const currentVal = sel.value;
+    const options = sel.querySelectorAll("option");
+    options.forEach(opt => {
+      const optVal = opt.value;
+      if (!optVal) return;
+      if (optVal !== currentVal && selectedValues.has(optVal)) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+  });
+  
+  let hasDuplicate = false;
+  const uniqueVals = new Set();
+  let filledCount = 0;
+  selects.forEach(sel => {
+    if (sel.value) {
+      filledCount++;
+      if (uniqueVals.has(sel.value)) {
+        hasDuplicate = true;
+      }
+      uniqueVals.add(sel.value);
+    }
+  });
+  
+  const alertEl = document.getElementById("boc-manual-group-alert");
+  const submitBtn = document.getElementById("boc-manual-group-submit");
+  
+  if (hasDuplicate) {
+    if (alertEl) {
+      alertEl.style.display = "block";
+      alertEl.textContent = "Duplikasi Terdeteksi: Beberapa atlet dipilih lebih dari satu kali!";
+    }
+    if (submitBtn) submitBtn.disabled = true;
+  } else if (filledCount < 16) {
+    if (alertEl) {
+      alertEl.style.display = "block";
+      alertEl.textContent = `Semua slot harus diisi! (${filledCount} dari 16 terisi)`;
+    }
+    if (submitBtn) submitBtn.disabled = true;
+  } else {
+    if (alertEl) alertEl.style.display = "none";
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+function updateBracketSelectOptions() {
+  const selects = Array.from(document.querySelectorAll(".boc-manual-bracket-select"));
+  const selectedValues = new Set();
+  
+  selects.forEach(sel => {
+    if (sel.value) {
+      selectedValues.add(sel.value);
+    }
+  });
+  
+  selects.forEach(sel => {
+    const currentVal = sel.value;
+    const options = sel.querySelectorAll("option");
+    options.forEach(opt => {
+      const optVal = opt.value;
+      if (!optVal) return;
+      if (optVal !== currentVal && selectedValues.has(optVal)) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+  });
+  
+  let hasDuplicate = false;
+  const uniqueVals = new Set();
+  let filledCount = 0;
+  selects.forEach(sel => {
+    if (sel.value) {
+      filledCount++;
+      if (uniqueVals.has(sel.value)) {
+        hasDuplicate = true;
+      }
+      uniqueVals.add(sel.value);
+    }
+  });
+  
+  const alertEl = document.getElementById("boc-manual-bracket-alert");
+  const submitBtn = document.getElementById("boc-manual-bracket-submit");
+  
+  if (hasDuplicate) {
+    if (alertEl) {
+      alertEl.style.display = "block";
+      alertEl.textContent = "Duplikasi Terdeteksi: Beberapa atlet dipilih lebih dari satu kali!";
+    }
+    if (submitBtn) submitBtn.disabled = true;
+  } else if (filledCount < 8) {
+    if (alertEl) {
+      alertEl.style.display = "block";
+      alertEl.textContent = `Semua slot harus diisi! (${filledCount} dari 8 terisi)`;
+    }
+    if (submitBtn) submitBtn.disabled = true;
+  } else {
+    if (alertEl) alertEl.style.display = "none";
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+window.openBocManualGroupModal = async function(eventId) {
+  const event = appData.events.find(evt => evt.id === eventId);
+  if (!event) return;
+
+  const role = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (role === "staff") {
+    showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengatur grup.", "error");
+    return;
+  }
+
+  let participants = [];
+  try {
+    participants = JSON.parse(event.participants || "[]");
+  } catch (ex) {}
+  if (participants.length === 0) {
+    const sortedStandings = [...(appData.standings || [])].sort((a, b) => (b.points || 0) - (a.points || 0));
+    participants = sortedStandings.slice(0, 16).map(p => p.name);
+  }
+  if (participants.length !== 16) {
+    showCustomToast(`BOC memerlukan tepat 16 peserta!`, "error");
+    return;
+  }
+
+  const seedOrder = [
+    ["A", "B", "C", "D"],
+    ["D", "C", "B", "A"],
+    ["A", "B", "C", "D"],
+    ["D", "C", "B", "A"]
+  ];
+  const initialGroups = { A: [], B: [], C: [], D: [] };
+  for (let pot = 0; pot < 4; pot++) {
+    for (let slot = 0; slot < 4; slot++) {
+      const playerIdx = pot * 4 + slot;
+      const groupKey = seedOrder[pot][slot];
+      initialGroups[groupKey].push(participants[playerIdx]);
+    }
+  }
+
+  const selects = Array.from(document.querySelectorAll(".boc-manual-group-select"));
+  selects.forEach(sel => {
+    const parts = sel.id.split("-");
+    const gkey = parts[2].toUpperCase();
+    const slotIdx = parseInt(parts[3], 10);
+    
+    const initialPlayer = initialGroups[gkey]?.[slotIdx] || "";
+    
+    sel.innerHTML = `<option value="">-- Pilih Atlet --</option>` +
+      participants.map(p => `<option value="${p}">${p}</option>`).join("");
+      
+    sel.value = initialPlayer;
+    
+    sel.removeEventListener("change", updateGroupSelectOptions);
+    sel.addEventListener("change", updateGroupSelectOptions);
+  });
+
+  const submitBtn = document.getElementById("boc-manual-group-submit");
+  if (submitBtn) {
+    submitBtn.dataset.eventId = eventId;
+    submitBtn.onclick = () => window.saveBocManualGroup(eventId);
+  }
+
+  const closeGroupModal = () => {
+    document.getElementById("boc-manual-group-modal").style.display = "none";
+  };
+  
+  const closeBtn = document.getElementById("boc-manual-group-modal-close");
+  if (closeBtn) closeBtn.onclick = closeGroupModal;
+  
+  const cancelBtn = document.getElementById("boc-manual-group-modal-btn-cancel");
+  if (cancelBtn) cancelBtn.onclick = closeGroupModal;
+
+  updateGroupSelectOptions();
+  document.getElementById("boc-manual-group-modal").style.display = "flex";
+};
+
+window.saveBocManualGroup = async function(eventId) {
+  const event = appData.events.find(evt => evt.id === eventId);
+  if (!event) return;
+
+  const role = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (role === "staff") {
+    showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengatur grup.", "error");
+    return;
+  }
+
+  const groupNames = ["A", "B", "C", "D"];
+  const groups = {
+    A: { players: [], matches: {}, standings: [] },
+    B: { players: [], matches: {}, standings: [] },
+    C: { players: [], matches: {}, standings: [] },
+    D: { players: [], matches: {}, standings: [] }
+  };
+
+  const selectedValues = [];
+  for (const gk of groupNames) {
+    const gkey = gk.toLowerCase();
+    for (let slot = 0; slot < 4; slot++) {
+      const val = document.getElementById(`boc-mgs-${gkey}-${slot}`).value;
+      if (!val) {
+        showCustomToast("Semua slot grup harus diisi!", "error");
+        return;
+      }
+      groups[gk].players.push(val);
+      selectedValues.push(val);
+    }
+  }
+
+  const uniqueVals = new Set(selectedValues);
+  if (uniqueVals.size !== 16) {
+    showCustomToast("Terdapat atlet ganda yang dipilih!", "error");
+    return;
+  }
+
+  const rrPairs = [[0,1,2,3], [0,2,1,3], [0,3,1,2]];
+  groupNames.forEach(gk => {
+    const p = groups[gk].players;
+    let matchIdx = 0;
+    rrPairs.forEach(pairs => {
+      groups[gk].matches[matchIdx] = { p1: p[pairs[0]], p2: p[pairs[1]], s1: "", s2: "", winner: "", raceTo: 4 };
+      matchIdx++;
+      groups[gk].matches[matchIdx] = { p1: p[pairs[2]], p2: p[pairs[3]], s1: "", s2: "", winner: "", raceTo: 4 };
+      matchIdx++;
+    });
+
+    groups[gk].standings = p.map(name => ({
+      name, played: 0, won: 0, lost: 0, scoreFor: 0, scoreAgainst: 0, points: 0
+    }));
+  });
+
+  const bracketData = {
+    phase: "qualification",
+    groups: groups,
+    mainBracket: {},
+    thirdPlace: { p1: "", p2: "", s1: "", s2: "", winner: "", raceTo: 6 }
+  };
+
+  event.bracket = JSON.stringify(bracketData);
+  event.results = "{}";
+  event.status = "Ongoing";
+  event.bracket_size = "16";
+
+  showCustomConfirm(
+    "Mulai Turnamen BOC (Grup Manual)",
+    "Apakah Anda yakin ingin memulai turnamen dengan pembagian grup ini?",
+    async () => {
+      try {
+        await saveEventDetails(event);
+        showCustomToast("Battle of Champions berhasil dimulai dengan grup manual!", "success");
+        document.getElementById("boc-manual-group-modal").style.display = "none";
+        openEventDetail(event.id);
+      } catch (ex) {
+        showCustomToast(`Gagal memulai turnamen: ${ex.message}`, "error");
+      }
+    },
+    "Mulai",
+    "primary"
+  );
+};
+
+window.openBocManualBracketModal = async function(eventId) {
+  const event = appData.events.find(evt => evt.id === eventId);
+  if (!event) return;
+
+  const role = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (role === "staff") {
+    showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan membuat bracket.", "error");
+    return;
+  }
+
+  let bracket = {};
+  try {
+    bracket = JSON.parse(event.bracket || "{}");
+  } catch (e) {}
+
+  const groupNames = ["A", "B", "C", "D"];
+  for (const gk of groupNames) {
+    const grp = bracket.groups?.[gk];
+    for (let i = 0; i < 6; i++) {
+      if (!grp?.matches?.[i]?.winner) {
+        showCustomToast(`Grup ${gk} Match ${i + 1} belum selesai!`, "error");
+        return;
+      }
+    }
+  }
+
+  const rank1Players = [];
+  const rank2Players = [];
+  const all8Players = [];
+
+  groupNames.forEach(gk => {
+    const standings = bracket.groups[gk].standings;
+    recalculateGroupStandings(bracket.groups[gk]);
+    
+    const p1 = { name: standings[0].name, group: gk, rank: 1 };
+    const p2 = { name: standings[1].name, group: gk, rank: 2 };
+    rank1Players.push(p1);
+    rank2Players.push(p2);
+    all8Players.push(p1, p2);
+  });
+
+  let attempts = 0;
+  let success = false;
+  let finalPairs = [];
+
+  while (attempts < 1000 && !success) {
+    attempts++;
+    const r1 = [...rank1Players].sort(() => Math.random() - 0.5);
+    const r2 = [...rank2Players].sort(() => Math.random() - 0.5);
+    
+    let valid = true;
+    const pairs = [];
+    for (let i = 0; i < 4; i++) {
+      if (r1[i].group === r2[i].group) {
+        valid = false;
+        break;
+      }
+      pairs.push([r1[i], r2[i]]);
+    }
+    if (!valid) continue;
+
+    const upperGroups = new Set([pairs[0][0].group, pairs[0][1].group, pairs[1][0].group, pairs[1][1].group]);
+    const lowerGroups = new Set([pairs[2][0].group, pairs[2][1].group, pairs[3][0].group, pairs[3][1].group]);
+
+    if (upperGroups.size === 4 && lowerGroups.size === 4) {
+      finalPairs = pairs;
+      success = true;
+    }
+  }
+
+  if (!success) {
+    finalPairs = [];
+    for (let i = 0; i < 4; i++) {
+      finalPairs.push([rank1Players[i], rank2Players[(i + 1) % 4]]);
+    }
+  }
+
+  const selects = Array.from(document.querySelectorAll(".boc-manual-bracket-select"));
+  selects.forEach(sel => {
+    const parts = sel.id.split("-");
+    const matchIdx = parseInt(parts[2], 10);
+    const pKey = parts[3];
+    
+    const initialPlayer = pKey === "p1" ? finalPairs[matchIdx]?.[0]?.name : finalPairs[matchIdx]?.[1]?.name;
+    
+    sel.innerHTML = `<option value="">-- Pilih Atlet --</option>` +
+      all8Players.map(p => `<option value="${p.name}">${p.name} (Grup ${p.group} - Rank ${p.rank})</option>`).join("");
+      
+    sel.value = initialPlayer || "";
+    
+    sel.removeEventListener("change", updateBracketSelectOptions);
+    sel.addEventListener("change", updateBracketSelectOptions);
+  });
+
+  const submitBtn = document.getElementById("boc-manual-bracket-submit");
+  if (submitBtn) {
+    submitBtn.dataset.eventId = eventId;
+    submitBtn.onclick = () => window.saveBocManualBracket(eventId);
+  }
+
+  const closeBracketModal = () => {
+    document.getElementById("boc-manual-bracket-modal").style.display = "none";
+  };
+  
+  const closeBtn = document.getElementById("boc-manual-bracket-modal-close");
+  if (closeBtn) closeBtn.onclick = closeBracketModal;
+  
+  const cancelBtn = document.getElementById("boc-manual-bracket-modal-btn-cancel");
+  if (cancelBtn) cancelBtn.onclick = closeBracketModal;
+
+  updateBracketSelectOptions();
+  document.getElementById("boc-manual-bracket-modal").style.display = "flex";
+};
+
+window.saveBocManualBracket = async function(eventId) {
+  const event = appData.events.find(evt => evt.id === eventId);
+  if (!event) return;
+
+  const role = localStorage.getItem("pobsi_admin_role") || "admin";
+  if (role === "staff") {
+    showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan membuat bracket.", "error");
+    return;
+  }
+
+  let bracket = {};
+  try {
+    bracket = JSON.parse(event.bracket || "{}");
+  } catch (e) {}
+
+  const p0_1 = document.getElementById("boc-mbs-0-p1").value;
+  const p0_2 = document.getElementById("boc-mbs-0-p2").value;
+  const p1_1 = document.getElementById("boc-mbs-1-p1").value;
+  const p1_2 = document.getElementById("boc-mbs-1-p2").value;
+  const p2_1 = document.getElementById("boc-mbs-2-p1").value;
+  const p2_2 = document.getElementById("boc-mbs-2-p2").value;
+  const p3_1 = document.getElementById("boc-mbs-3-p1").value;
+  const p3_2 = document.getElementById("boc-mbs-3-p2").value;
+
+  const players = [p0_1, p0_2, p1_1, p1_2, p2_1, p2_2, p3_1, p3_2];
+  if (players.some(p => !p)) {
+    showCustomToast("Semua slot perempat final harus diisi!", "error");
+    return;
+  }
+  const uniquePlayers = new Set(players);
+  if (uniquePlayers.size !== 8) {
+    showCustomToast("Terdapat atlet ganda yang dipilih!", "error");
+    return;
+  }
+
+  const startBracketManual = async () => {
+    try {
+      bracket.mainBracket = {
+        "0": { p1: p0_1, p2: p0_2, s1: "", s2: "", winner: "", raceTo: 5 },
+        "1": { p1: p1_1, p2: p1_2, s1: "", s2: "", winner: "", raceTo: 5 },
+        "2": { p1: p2_1, p2: p2_2, s1: "", s2: "", winner: "", raceTo: 5 },
+        "3": { p1: p3_1, p2: p3_2, s1: "", s2: "", winner: "", raceTo: 5 },
+        "4": { p1: "", p2: "", s1: "", s2: "", winner: "", raceTo: 6 },
+        "5": { p1: "", p2: "", s1: "", s2: "", winner: "", raceTo: 6 },
+        "6": { p1: "", p2: "", s1: "", s2: "", winner: "", raceTo: 7 }
+      };
+      bracket.thirdPlace = { p1: "", p2: "", s1: "", s2: "", winner: "", raceTo: 6 };
+      bracket.phase = "main";
+
+      event.bracket = JSON.stringify(bracket);
+      await saveEventDetails(event);
+      showCustomToast("Bracket Babak Utama berhasil dibuat secara manual!", "success");
+      document.getElementById("boc-manual-bracket-modal").style.display = "none";
+      openEventDetail(event.id);
+    } catch (ex) {
+      showCustomToast(`Gagal menyimpan bracket: ${ex.message}`, "error");
+    }
+  };
+
+  showCustomConfirm(
+    "Simpan & Buat Bracket Utama?",
+    "Apakah Anda yakin ingin membuat bracket perempat final dengan pasangan yang Anda tentukan?",
+    startBracketManual,
+    "Buat Bracket",
+    "primary"
+  );
+};
+
+// Dev helper to automatically finish all 24 group matches for testing manual bracket flow
+window.simulateFinishAllBocGroupMatches = async function() {
+  const event = appData.events.find(evt => evt.elimination_type === 'boc');
+  if (!event) {
+    showCustomToast("Event BOC tidak ditemukan!", "error");
+    return;
+  }
+  let bracket = {};
+  try {
+    bracket = JSON.parse(event.bracket || "{}");
+  } catch (e) {}
+  if (!bracket.groups) {
+    showCustomToast("Grup BOC belum diinisialisasi!", "error");
+    return;
+  }
+  
+  const groupNames = ["A", "B", "C", "D"];
+  groupNames.forEach(gk => {
+    const grp = bracket.groups[gk];
+    if (!grp) return;
+    for (let i = 0; i < 6; i++) {
+      const match = grp.matches?.[i];
+      if (!match) continue;
+      match.raceTo = 4;
+      if (i % 2 === 0) {
+        match.s1 = 4;
+        match.s2 = 2;
+        match.winner = match.p1;
+      } else {
+        match.s1 = 1;
+        match.s2 = 4;
+        match.winner = match.p2;
+      }
+      match.status = "completed";
+    }
+    recalculateGroupStandings(grp);
+  });
+  
+  event.bracket = JSON.stringify(bracket);
+  await saveEventDetails(event);
+  showCustomToast("Semua 24 pertandingan grup berhasil diselesaikan secara otomatis!", "success");
+  openEventDetail(event.id);
+};
+
+
 // Clean downstream matches in BOC main bracket when a result is changed/reset
 function clearDownstreamBocMainMatches(bracket, matchIdx) {
   if (matchIdx === 0 || matchIdx === 1) {
@@ -13448,20 +14102,30 @@ function renderBocBracketContent(simEl, bannerEl, event, bracket, participants, 
     let buttonHtml = "";
     let messageHtml = "";
     
-    if (currentCount === requiredPlayers) {
-      messageHtml = `<div style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Partisipan sudah terisi lengkap (${currentCount} dari ${requiredPlayers} atlet). Anda dapat membagi grup secara otomatis (Serpentine seeding) dan memulai turnamen BOC sekarang.</div>`;
-      buttonHtml = `
-        <button class="pm-btn pm-btn-primary" onclick="window.initializeBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-play"></i> Mulai Turnamen BOC
-        </button>
-      `;
+    if (isAdmin) {
+      if (currentCount === requiredPlayers) {
+        messageHtml = `<div style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Partisipan sudah terisi lengkap (${currentCount} dari ${requiredPlayers} atlet). Anda dapat membagi grup secara otomatis (Serpentine seeding) atau mengatur grup secara manual untuk memulai turnamen BOC.</div>`;
+        buttonHtml = `
+          <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; justify-content: center;">
+            <button class="pm-btn pm-btn-primary" onclick="window.initializeBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+              <i class="fa-solid fa-play"></i> Seeding Otomatis (Serpentine)
+            </button>
+            <button class="pm-btn pm-btn-outline" onclick="window.openBocManualGroupModal('${event.id}')" style="border-color: #c084fc; color: #c084fc; padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+              <i class="fa-solid fa-users-gear"></i> Atur Grup Manual
+            </button>
+          </div>
+        `;
+      } else {
+        messageHtml = `<div style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Pendaftaran belum lengkap (Saat ini: ${currentCount} dari ${requiredPlayers} atlet). Silakan daftarkan atlet terlebih dahulu di tab <strong>Partisipan</strong>.</div>`;
+        buttonHtml = `
+          <button class="pm-btn pm-btn-outline" onclick="document.querySelector('#pane-event-detail .pm-stab[data-event-tab=\\'participants\\']').click()" style="padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-users"></i> Kelola Partisipan
+          </button>
+        `;
+      }
     } else {
-      messageHtml = `<div style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Pendaftaran belum lengkap (Saat ini: ${currentCount} dari ${requiredPlayers} atlet). Silakan daftarkan atlet terlebih dahulu di tab <strong>Partisipan</strong>.</div>`;
-      buttonHtml = `
-        <button class="pm-btn pm-btn-outline" onclick="document.querySelector('#pane-event-detail .pm-stab[data-event-tab=\\'participants\\']').click()" style="padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-users"></i> Kelola Partisipan
-        </button>
-      `;
+      messageHtml = `<div style="color: var(--text-muted); font-size: 0.95rem;">Turnamen Battle of Champions belum dimulai oleh panitia. Jadwal dan pembagian grup babak penyisihan akan muncul di sini setelah turnamen resmi dimulai.</div>`;
+      buttonHtml = "";
     }
 
     simEl.innerHTML = `
@@ -13617,9 +14281,14 @@ function renderBocBracketContent(simEl, bannerEl, event, bracket, participants, 
       let btnHtml = "";
       if (allDone && isAdmin) {
         btnHtml = `
-          <button class="pm-btn pm-btn-primary" onclick="window.generateBocMainBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;">
-            <i class="fa-solid fa-network-wired"></i> Generate Bracket Babak Utama
-          </button>
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center;">
+            <button class="pm-btn pm-btn-primary" onclick="window.generateBocMainBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+              <i class="fa-solid fa-network-wired"></i> Seeding Otomatis
+            </button>
+            <button class="pm-btn pm-btn-outline" onclick="window.openBocManualBracketModal('${event.id}')" style="border-color: #c084fc; color: #c084fc; padding: 12px 24px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+              <i class="fa-solid fa-users-gear"></i> Atur Bracket Manual
+            </button>
+          </div>
         `;
       }
 
@@ -14304,12 +14973,15 @@ function getPointsForPlayer(event, playerName) {
     results = JSON.parse(event.results || "{}");
   } catch (e) {}
 
-  if (playerName === results.champion) return 12;
-  if (playerName === results.runnerUp) return 9;
-  if (results.top4 && results.top4.includes(playerName)) return 7;
-  if (results.top8 && results.top8.includes(playerName)) return 5;
-  if (results.top16 && results.top16.includes(playerName)) return 3;
-  if (results.top32 && results.top32.includes(playerName)) return 1;
+  const rules = bocSettings.point_rules || defaultPointRules;
+  const cp = rules.circuit_points || defaultPointRules.circuit_points;
+
+  if (playerName === results.champion) return cp.champion ?? 12;
+  if (playerName === results.runnerUp) return cp.runnerUp ?? 9;
+  if (results.top4 && results.top4.includes(playerName)) return cp.top4 ?? 7;
+  if (results.top8 && results.top8.includes(playerName)) return cp.top8 ?? 5;
+  if (results.top16 && results.top16.includes(playerName)) return cp.top16 ?? 3;
+  if (results.top32 && results.top32.includes(playerName)) return cp.top32 ?? 1;
 
   const B = event.bracket_size || "16";
   if (B !== "manual") {
@@ -14847,22 +15519,31 @@ async function publishPointsSequence(event, sirkuitIdx) {
   await saveEventDetails(event);
 
   // Update handicap points (+30, +20, +10) and manage automatic promotions in players table
+  const rules = bocSettings.point_rules || defaultPointRules;
+  const cp = rules.circuit_points || defaultPointRules.circuit_points;
+  const hp = rules.hc_points || defaultPointRules.hc_points;
+  const ht = rules.hc_thresholds || defaultPointRules.hc_thresholds;
+
   for (const pName of participants) {
     const player = (appData.players || []).find(p => p.name === pName);
     if (player) {
       const pts = getPointsForPlayer(event, pName);
-      const hcPts = (pts === 12) ? 30 : ((pts === 9) ? 20 : ((pts === 7) ? 10 : 0));
+      let hcPts = hp.others ?? 0;
+      if (pts === (cp.champion ?? 12)) hcPts = hp.champion ?? 30;
+      else if (pts === (cp.runnerUp ?? 9)) hcPts = hp.runnerUp ?? 20;
+      else if (pts === (cp.top4 ?? 7)) hcPts = hp.top4 ?? 10;
+
       if (hcPts > 0) {
         const currentHC = player.handicap.toString().trim();
         const hcThresholds = {
-          "3B": { next: "3N", pts: 30 },
-          "3N": { next: "3A", pts: 60 },
-          "3A": { next: "4B", pts: 150 },
-          "4B": { next: "4A", pts: 200 },
-          "4A": { next: "5B", pts: 300 },
-          "5B": { next: "5A", pts: 400 },
-          "5A": { next: "6", pts: 500 },
-          "6": { next: "7", pts: 600 }
+          "3B": { next: "3N", pts: ht["3B"] ?? 30 },
+          "3N": { next: "3A", pts: ht["3N"] ?? 60 },
+          "3A": { next: "4B", pts: ht["3A"] ?? 150 },
+          "4B": { next: "4A", pts: ht["4B"] ?? 200 },
+          "4A": { next: "5B", pts: ht["4A"] ?? 300 },
+          "5B": { next: "5A", pts: ht["5B"] ?? 400 },
+          "5A": { next: "6", pts: ht["5A"] ?? 500 },
+          "6": { next: "7", pts: ht["6"] ?? 600 }
         };
 
         const newPoints = parseFloat(player.points || 0) + hcPts;
@@ -15667,6 +16348,7 @@ function setupSystemSettings() {
   const formRules = document.getElementById("form-settings-rules");
   const formPassword = document.getElementById("form-settings-password");
   const formAddUser = document.getElementById("form-settings-add-user");
+  const formPoints = document.getElementById("form-settings-points");
   const btnAddUser = document.getElementById("btn-settings-add-user");
   const modalAddUser = document.getElementById("settings-add-user-modal");
   const btnCloseModal = document.getElementById("settings-user-modal-close");
@@ -15753,6 +16435,9 @@ function setupSystemSettings() {
     if (formRules) {
       formRules.querySelectorAll("input, select, button").forEach(el => el.disabled = true);
     }
+    if (formPoints) {
+      formPoints.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    }
   }
 
   // Populate Database mode info
@@ -15837,6 +16522,55 @@ function setupSystemSettings() {
       } else {
         // Just refresh standings display
         renderStandings();
+      }
+    });
+  }
+
+  // Form Submit: Points & Handicap rules
+  if (formPoints) {
+    formPoints.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah aturan poin.", "error");
+        return;
+      }
+
+      const updatedRules = {
+        circuit_points: {
+          champion: parseInt(document.getElementById("pts-circuit-champion").value, 10),
+          runnerUp: parseInt(document.getElementById("pts-circuit-runnerUp").value, 10),
+          top4: parseInt(document.getElementById("pts-circuit-top4").value, 10),
+          top8: parseInt(document.getElementById("pts-circuit-top8").value, 10),
+          top16: parseInt(document.getElementById("pts-circuit-top16").value, 10),
+          top32: parseInt(document.getElementById("pts-circuit-top32").value, 10)
+        },
+        hc_points: {
+          champion: parseInt(document.getElementById("pts-hc-champion").value, 10),
+          runnerUp: parseInt(document.getElementById("pts-hc-runnerUp").value, 10),
+          top4: parseInt(document.getElementById("pts-hc-top4").value, 10),
+          others: parseInt(document.getElementById("pts-hc-others").value, 10)
+        },
+        hc_thresholds: {
+          "3B": parseInt(document.getElementById("th-hc-3b").value, 10),
+          "3N": parseInt(document.getElementById("th-hc-3n").value, 10),
+          "3A": parseInt(document.getElementById("th-hc-3a").value, 10),
+          "4B": parseInt(document.getElementById("th-hc-4b").value, 10),
+          "4A": parseInt(document.getElementById("th-hc-4a").value, 10),
+          "5B": parseInt(document.getElementById("th-hc-5b").value, 10),
+          "5A": parseInt(document.getElementById("th-hc-5a").value, 10),
+          "6": parseInt(document.getElementById("th-hc-6").value, 10)
+        }
+      };
+
+      const year = localStorage.getItem("currentBocYear") || "2026";
+      try {
+        await saveBocSettings({
+          year: year,
+          point_rules: updatedRules
+        });
+        showCustomToast("Konfigurasi aturan poin & handicap berhasil diperbarui!", "success");
+      } catch (err) {
+        showCustomToast(`Gagal menyimpan aturan: ${err.message}`, "error");
       }
     });
   }
