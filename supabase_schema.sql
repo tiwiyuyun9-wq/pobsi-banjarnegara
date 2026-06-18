@@ -111,6 +111,7 @@ CREATE TABLE boc_settings (
     playoff_schedule TEXT,
     prizes TEXT,
     rules TEXT,
+    point_rules TEXT,
     status TEXT DEFAULT 'active'
 );
 

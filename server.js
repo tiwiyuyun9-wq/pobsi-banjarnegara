@@ -131,6 +131,9 @@ db.serialize(() => {
     status TEXT DEFAULT 'active'
   )`);
 
+  // Safely add point_rules column to support custom point calculations
+  db.run(`ALTER TABLE boc_settings ADD COLUMN point_rules TEXT`, () => {});
+
   db.run(`CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -342,6 +345,10 @@ if (isSupabaseEnabled) {
   app.all('/api/boc-sirkuits', bridge(bocSirkuitsHandler));
   app.all('/api/boc-settings', bridge(bocSettingsHandler));
 
+  // BOC Dev Reset (Testing)
+  const bocResetHandler = require('./api/controllers/bocResetController');
+  app.post('/api/boc/reset', async (req, res) => { try { await bocResetHandler.resetBoc(req, res); } catch(err) { res.status(500).json({ error: err.message }); } });
+
   // Events
   app.all('/api/events', bridge(eventsHandler));
   app.all('/api/events/:id', bridge(eventsHandler, 'id'));
@@ -368,6 +375,7 @@ if (isSupabaseEnabled) {
   app.use('/api/clubs', require('./api/routes/clubRoutes'));
   app.use('/api/boc-sirkuits', require('./api/routes/bocSirkuitsRoutes'));
   app.use('/api/boc-settings', require('./api/routes/bocSettingsRoutes'));
+  app.use('/api/boc/reset', require('./api/routes/bocResetRoutes'));
 
   // Rute Autentikasi Admin Rahasia (RBAC)
   app.post('/api/admin/login', (req, res) => {

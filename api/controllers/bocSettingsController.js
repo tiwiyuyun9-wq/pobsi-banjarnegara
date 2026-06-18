@@ -16,6 +16,7 @@ exports.getSettings = async (req, res) => {
       // Parse JSON fields
       try { row.playoff_schedule = row.playoff_schedule ? JSON.parse(row.playoff_schedule) : null; } catch (e) {}
       try { row.prizes = row.prizes ? JSON.parse(row.prizes) : null; } catch (e) {}
+      try { row.point_rules = row.point_rules ? JSON.parse(row.point_rules) : null; } catch (e) {}
       res.json(row);
     } else {
       // Return defaults
@@ -26,6 +27,7 @@ exports.getSettings = async (req, res) => {
         playoff_schedule: null,
         prizes: null,
         rules: null,
+        point_rules: null,
         status: 'active'
       });
     }
@@ -35,7 +37,7 @@ exports.getSettings = async (req, res) => {
 };
 
 exports.saveSettings = async (req, res) => {
-  const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status } = req.body;
+  const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules } = req.body;
   if (!year) {
     return res.status(400).json({ error: "Parameter year wajib disertakan!" });
   }
@@ -43,18 +45,20 @@ exports.saveSettings = async (req, res) => {
   try {
     const playoffStr = playoff_schedule ? (typeof playoff_schedule === 'object' ? JSON.stringify(playoff_schedule) : playoff_schedule) : null;
     const prizesStr = prizes ? (typeof prizes === 'object' ? JSON.stringify(prizes) : prizes) : null;
+    const pointRulesStr = point_rules ? (typeof point_rules === 'object' ? JSON.stringify(point_rules) : point_rules) : null;
 
     // UPSERT: Insert or replace
     await dbRun(
-      `INSERT INTO boc_settings (year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO boc_settings (year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(year) DO UPDATE SET
          cutoff_limit = excluded.cutoff_limit,
          max_handicap = excluded.max_handicap,
          playoff_schedule = excluded.playoff_schedule,
          prizes = excluded.prizes,
          rules = excluded.rules,
-         status = excluded.status`,
+         status = excluded.status,
+         point_rules = excluded.point_rules`,
       [
         year.toString(),
         cutoff_limit != null ? parseInt(cutoff_limit) : 16,
@@ -62,7 +66,8 @@ exports.saveSettings = async (req, res) => {
         playoffStr,
         prizesStr,
         rules || null,
-        status || 'active'
+        status || 'active',
+        pointRulesStr
       ]
     );
 

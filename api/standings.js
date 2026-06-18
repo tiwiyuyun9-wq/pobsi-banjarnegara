@@ -74,17 +74,26 @@ module.exports = async (req, res) => {
 
         if (fetchErr) throw fetchErr;
 
-        // Update rank secara asinkron di database
-        for (let i = 0; i < allStandings.length; i++) {
-          const rank = i + 1;
-          const playerName = allStandings[i].name;
-          
-          await supabase
-            .from('standings')
-            .update({ rank })
-            .eq('name', playerName)
-            .eq('year', standingYear);
-        }
+        // Update rank secara massal (bulk upsert) untuk performa instan
+        const rankUpdates = allStandings.map((player, idx) => ({
+          name: player.name,
+          year: standingYear,
+          club: player.club,
+          handicap: player.handicap,
+          points: player.points,
+          played: player.played,
+          won: player.won,
+          lost: player.lost,
+          trend: player.trend,
+          boc_points: player.boc_points,
+          rank: idx + 1
+        }));
+
+        const { error: updateErr } = await supabase
+          .from('standings')
+          .upsert(rankUpdates, { onConflict: 'name,year' });
+
+        if (updateErr) throw updateErr;
       }
 
       return res.status(201).json(newStanding);

@@ -35,6 +35,7 @@ module.exports = async (req, res) => {
         const result = { ...data };
         try { result.playoff_schedule = result.playoff_schedule ? JSON.parse(result.playoff_schedule) : null; } catch (e) {}
         try { result.prizes = result.prizes ? JSON.parse(result.prizes) : null; } catch (e) {}
+        try { result.point_rules = result.point_rules ? JSON.parse(result.point_rules) : null; } catch (e) {}
         return res.status(200).json(result);
       } else {
         // Return defaults
@@ -45,6 +46,7 @@ module.exports = async (req, res) => {
           playoff_schedule: null,
           prizes: null,
           rules: null,
+          point_rules: null,
           status: 'active'
         });
       }
@@ -54,7 +56,7 @@ module.exports = async (req, res) => {
        POST: Menyimpan / Memperbarui Settings BOC untuk Tahun Tertentu
        ========================================================================== */
     if (req.method === 'POST') {
-      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status } = req.body;
+      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules } = req.body;
       if (!year) {
         return res.status(400).json({ error: "Parameter year wajib disertakan!" });
       }
@@ -65,6 +67,7 @@ module.exports = async (req, res) => {
         max_handicap: max_handicap || 'Bebas',
         playoff_schedule: playoff_schedule ? (typeof playoff_schedule === 'object' ? JSON.stringify(playoff_schedule) : playoff_schedule) : null,
         prizes: prizes ? (typeof prizes === 'object' ? JSON.stringify(prizes) : prizes) : null,
+        point_rules: point_rules ? (typeof point_rules === 'object' ? JSON.stringify(point_rules) : point_rules) : null,
         rules: rules || null,
         status: status || 'active'
       };
