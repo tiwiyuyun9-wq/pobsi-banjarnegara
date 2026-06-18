@@ -3206,7 +3206,6 @@ tr:hover td.sticky-col {
 .workspace-body {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 40px;
   position: relative;
 }
 
@@ -3214,13 +3213,14 @@ tr:hover td.sticky-col {
   display: none;
   flex-direction: column;
   gap: 30px;
+  padding: 40px;
   animation: paneFadeIn 0.35s ease-out forwards;
 }
 .workspace-pane.active { display: flex; }
 
 @keyframes paneFadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 /* Admin Stats Grid */
@@ -3747,7 +3747,7 @@ tr:hover td.sticky-col {
   .sidebar-footer { display: none; }
   .workspace-header { height: 70px; padding: 0 20px; }
   .workspace-title { font-size: 1.4rem; }
-  .workspace-body { padding: 20px; }
+  .workspace-pane { padding: 20px; }
   .admin-stats-grid { grid-template-columns: 1fr; gap: 16px; }
   .shortcut-grid { grid-template-columns: 1fr; gap: 16px; }
 
@@ -4135,14 +4135,51 @@ tr:hover td.sticky-col {
 }
 
 @media (min-width: 769px) {
-  /* Allow vertical sticky headers to bind to browser window viewport on desktop */
-  .table-card {
+  /* Allow vertical sticky headers to bind to browser window viewport on desktop (public pages only).
+     Public tables live inside section.section, NOT inside .workspace-body (admin). */
+  section .table-card,
+  .section-content > .table-card {
     overflow: visible !important;
   }
-  .table-wrapper {
+  section .table-wrapper,
+  .section-content > .table-wrapper {
     overflow: visible !important;
+  }
+
+  /* Admin BOC table: mirror public page approach — overflow: visible everywhere
+     so sticky headers propagate to .workspace-body (the scroll container).
+     Horizontal scroll, if needed, happens on workspace-body level. */
+  .workspace-body .table-card {
+    overflow: visible !important;
+  }
+  .workspace-body .table-wrapper {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    max-width: 100% !important;
+  }
+  /* CRITICAL: border-collapse: collapse breaks position: sticky on <th> in Chromium.
+     Use border-collapse: separate + border-spacing: 0 which is visually identical. */
+  .workspace-body .premium-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+  .workspace-body .premium-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: #0d1527 !important;
+  }
+  .workspace-body .premium-table thead th.sticky-col {
+    z-index: 11 !important;
+    top: 0 !important;
+    background: #0d1527 !important;
   }
 }
+
+
+
+
+
 
 /* Premium Athlete Avatar File Upload Zone */
 .avatar-upload-zone {
@@ -4407,9 +4444,11 @@ tr:hover td.sticky-col {
   background-size: cover;
   background-position: right top;
   background-repeat: no-repeat;
-  padding: 10px 24px 24px 24px;
-  margin: -24px -24px 0 -24px;
+  padding: 10px 40px 40px 40px;
+  margin: -40px -40px 0 -40px;
   border-radius: var(--radius-md);
+  max-width: calc(100% + 80px);
+  box-sizing: border-box;
 }
 
 /* Premium Header Block positioned inside pane-overview */
@@ -6620,7 +6659,7 @@ tr:hover td.sticky-col {
 @media (max-width: 1480px) {
   .pm-console { grid-template-columns: 1fr 340px; }
   .pm-stats-row { grid-template-columns: repeat(2, 1fr); }
-  .workspace-body { padding: 24px; }
+  .workspace-pane { padding: 24px; }
   .workspace-header { height: 80px; padding: 0 24px; }
 }
 
@@ -9900,7 +9939,7 @@ tr:hover td.sticky-col {
 
 .add-event-step-pane {
   display: none;
-  animation: paneFadeIn 0.3s ease-in-out;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
 }
 
 .add-event-step-pane.active {
@@ -9909,14 +9948,14 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
-@keyframes paneFadeIn {
+@keyframes stepPaneFadeIn {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 

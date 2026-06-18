@@ -1124,8 +1124,62 @@ function updateBocBannersVisibility() {
     playoffBanner.style.display = "flex";
     scheduleBanner.style.display = "none";
     if (notScheduledBanner) notScheduledBanner.style.display = "none";
-    
+
+    const descEl = document.getElementById("boc-playoff-banner-desc");
+    const iconBgEl = document.getElementById("boc-playoff-banner-icon-bg");
+    const iconEl = document.getElementById("boc-playoff-banner-icon");
     const viewBtn = document.getElementById("btn-view-boc-playoff");
+
+    if (playoffEvent.status === 'Selesai') {
+      // Completed State style (Green Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(16, 185, 129, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(16, 185, 129, 0.03)";
+      
+      if (iconBgEl) {
+        iconBgEl.style.background = "rgba(16, 185, 129, 0.15)";
+        iconBgEl.style.borderColor = "rgba(16, 185, 129, 0.2)";
+        iconBgEl.style.color = "#10b981";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.2)";
+      }
+      if (iconEl) {
+        iconEl.className = "fa-solid fa-award";
+      }
+      if (descEl) {
+        descEl.textContent = "Turnamen puncak Grand Final Battle of Champions telah selesai dilaksanakan! Klik tombol di samping untuk melihat bagan pertandingan, hasil skor akhir, dan sang juara utama.";
+      }
+      if (viewBtn) {
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil Turnamen';
+        viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+        viewBtn.style.color = "#fff";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
+      }
+    } else {
+      // Ongoing/default State style (Gold/Yellow Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(251, 191, 36, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(251, 191, 36, 0.03)";
+      
+      if (iconBgEl) {
+        iconBgEl.style.background = "rgba(251, 191, 36, 0.15)";
+        iconBgEl.style.borderColor = "rgba(251, 191, 36, 0.2)";
+        iconBgEl.style.color = "#fbbf24";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(251, 191, 36, 0.2)";
+      }
+      if (iconEl) {
+        iconEl.className = "fa-solid fa-trophy";
+      }
+      if (descEl) {
+        descEl.textContent = "Fase playoff sedang berlangsung! Pantau perjuangan 16 atlet kualifikasi terbaik memperebutkan mahkota juara utama secara langsung.";
+      }
+      if (viewBtn) {
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff';
+        viewBtn.style.background = "linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)";
+        viewBtn.style.color = "#0f172a";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(251, 191, 36, 0.3)";
+      }
+    }
+    
     if (viewBtn) {
       const newViewBtn = viewBtn.cloneNode(true);
       viewBtn.parentNode.replaceChild(newViewBtn, viewBtn);
@@ -5875,6 +5929,8 @@ window.renderAdminBocConsole = function() {
         <th class="sticky-col" style="padding: 14px 10px; width: 160px; font-weight: 800; text-align: left; left: 45px;">NAMA</th>
         <th class="text-center sticky-col" style="padding: 14px 4px; width: 65px; font-weight: 800; left: 205px;">HC</th>
         ${sirkuitHeaders}
+        <!-- Spacer Column to absorb extra width on wide screens -->
+        <th style="width: auto; padding: 0; background: #0d1527 !important; border-bottom: 2px solid rgba(255, 255, 255, 0.06);"></th>
         <th class="text-center text-gold sticky-col" style="padding: 14px 6px; font-weight: 900; width: 85px; background: rgba(251, 191, 36, 0.05); right: 200px;">TOTAL</th>
         <th class="sticky-col" style="padding: 14px 10px; width: 120px; text-align: left; right: 80px;">KETERANGAN</th>
         <th class="text-center sticky-col" style="padding: 14px 6px; width: 80px; right: 0;">AKSI</th>
@@ -5993,6 +6049,8 @@ window.renderAdminBocConsole = function() {
         </td>
         <td class="text-center sticky-col" style="padding: 12px 4px; white-space: nowrap; left: 205px; width: 65px;"><span class="table-badge-hc ${hcClass}">HC ${player.handicap}</span></td>
         ${scoresHtml}
+        <!-- Spacer Column to absorb extra width on wide screens -->
+        <td style="width: auto; padding: 0;"></td>
         <td class="text-center text-gold sticky-col" style="font-weight:900; padding: 12px 6px; font-size: 0.82rem; background: rgba(251, 191, 36, 0.03); white-space: nowrap; right: 200px; width: 85px;">${player.points}</td>
         <td class="sticky-col" style="padding: 12px 10px; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; text-align: left; overflow: hidden; text-overflow: ellipsis; right: 80px; width: 120px;">
           ${isBocZone ? '<span style="color: #fbbf24; font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-crown"></i> Lolos BOC</span>' : '-'}
@@ -6005,7 +6063,7 @@ window.renderAdminBocConsole = function() {
   }).join("");
 
   if (totalItems === 0) {
-    tableBody.innerHTML = `<tr><td colspan="16" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-folder-open" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Atlet klasemen tidak ditemukan</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="17" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-folder-open" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Atlet klasemen tidak ditemukan</td></tr>`;
   }
 
   // Update Pagination Info
