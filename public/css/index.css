@@ -3220,7 +3220,7 @@ tr:hover td.sticky-col {
 
 @keyframes paneFadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 /* Admin Stats Grid */
@@ -4146,28 +4146,35 @@ tr:hover td.sticky-col {
     overflow: visible !important;
   }
 
-  /* Admin BOC table: show all rows, horizontal scroll only.
-     overflow-y: clip does NOT create a scroll container (unlike auto/hidden),
-     so sticky headers propagate to .workspace-body which IS the scroll container. */
+  /* Admin BOC table: mirror public page approach — overflow: visible everywhere
+     so sticky headers propagate to .workspace-body (the scroll container).
+     Horizontal scroll, if needed, happens on workspace-body level. */
   .workspace-body .table-card {
-    overflow: clip !important;
+    overflow: visible !important;
   }
   .workspace-body .table-wrapper {
-    overflow-x: auto !important;
-    overflow-y: clip !important;
+    overflow: visible !important;
+  }
+  /* CRITICAL: border-collapse: collapse breaks position: sticky on <th> in Chromium.
+     Use border-collapse: separate + border-spacing: 0 which is visually identical. */
+  .workspace-body .premium-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
   }
   .workspace-body .premium-table thead th {
     position: sticky !important;
     top: 0 !important;
-    z-index: 3 !important;
+    z-index: 10 !important;
     background: #0d1527 !important;
   }
   .workspace-body .premium-table thead th.sticky-col {
-    z-index: 4 !important;
+    z-index: 11 !important;
     top: 0 !important;
     background: #0d1527 !important;
   }
 }
+
+
 
 
 
