@@ -5929,6 +5929,8 @@ window.renderAdminBocConsole = function() {
         <th class="sticky-col" style="padding: 14px 10px; width: 160px; font-weight: 800; text-align: left; left: 45px;">NAMA</th>
         <th class="text-center sticky-col" style="padding: 14px 4px; width: 65px; font-weight: 800; left: 205px;">HC</th>
         ${sirkuitHeaders}
+        <!-- Spacer Column to absorb extra width on wide screens -->
+        <th style="width: auto; padding: 0; background: #0d1527 !important; border-bottom: 2px solid rgba(255, 255, 255, 0.06);"></th>
         <th class="text-center text-gold sticky-col" style="padding: 14px 6px; font-weight: 900; width: 85px; background: rgba(251, 191, 36, 0.05); right: 200px;">TOTAL</th>
         <th class="sticky-col" style="padding: 14px 10px; width: 120px; text-align: left; right: 80px;">KETERANGAN</th>
         <th class="text-center sticky-col" style="padding: 14px 6px; width: 80px; right: 0;">AKSI</th>
@@ -6047,6 +6049,8 @@ window.renderAdminBocConsole = function() {
         </td>
         <td class="text-center sticky-col" style="padding: 12px 4px; white-space: nowrap; left: 205px; width: 65px;"><span class="table-badge-hc ${hcClass}">HC ${player.handicap}</span></td>
         ${scoresHtml}
+        <!-- Spacer Column to absorb extra width on wide screens -->
+        <td style="width: auto; padding: 0;"></td>
         <td class="text-center text-gold sticky-col" style="font-weight:900; padding: 12px 6px; font-size: 0.82rem; background: rgba(251, 191, 36, 0.03); white-space: nowrap; right: 200px; width: 85px;">${player.points}</td>
         <td class="sticky-col" style="padding: 12px 10px; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; text-align: left; overflow: hidden; text-overflow: ellipsis; right: 80px; width: 120px;">
           ${isBocZone ? '<span style="color: #fbbf24; font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-crown"></i> Lolos BOC</span>' : '-'}
@@ -6059,7 +6063,7 @@ window.renderAdminBocConsole = function() {
   }).join("");
 
   if (totalItems === 0) {
-    tableBody.innerHTML = `<tr><td colspan="16" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-folder-open" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Atlet klasemen tidak ditemukan</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="17" class="text-center" style="padding:40px; color:var(--text-muted)"><i class="fa-solid fa-folder-open" style="font-size:1.8rem; margin-bottom:12px; display:block"></i> Atlet klasemen tidak ditemukan</td></tr>`;
   }
 
   // Update Pagination Info

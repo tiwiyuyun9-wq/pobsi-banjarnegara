@@ -3206,7 +3206,6 @@ tr:hover td.sticky-col {
 .workspace-body {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 40px;
   position: relative;
 }
 
@@ -3214,6 +3213,7 @@ tr:hover td.sticky-col {
   display: none;
   flex-direction: column;
   gap: 30px;
+  padding: 40px;
   animation: paneFadeIn 0.35s ease-out forwards;
 }
 .workspace-pane.active { display: flex; }
@@ -3747,7 +3747,7 @@ tr:hover td.sticky-col {
   .sidebar-footer { display: none; }
   .workspace-header { height: 70px; padding: 0 20px; }
   .workspace-title { font-size: 1.4rem; }
-  .workspace-body { padding: 20px; }
+  .workspace-pane { padding: 20px; }
   .admin-stats-grid { grid-template-columns: 1fr; gap: 16px; }
   .shortcut-grid { grid-template-columns: 1fr; gap: 16px; }
 
@@ -4153,7 +4153,9 @@ tr:hover td.sticky-col {
     overflow: visible !important;
   }
   .workspace-body .table-wrapper {
-    overflow: visible !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    max-width: 100% !important;
   }
   /* CRITICAL: border-collapse: collapse breaks position: sticky on <th> in Chromium.
      Use border-collapse: separate + border-spacing: 0 which is visually identical. */
@@ -4442,9 +4444,11 @@ tr:hover td.sticky-col {
   background-size: cover;
   background-position: right top;
   background-repeat: no-repeat;
-  padding: 10px 24px 24px 24px;
-  margin: -24px -24px 0 -24px;
+  padding: 10px 40px 40px 40px;
+  margin: -40px -40px 0 -40px;
   border-radius: var(--radius-md);
+  max-width: calc(100% + 80px);
+  box-sizing: border-box;
 }
 
 /* Premium Header Block positioned inside pane-overview */
@@ -6655,7 +6659,7 @@ tr:hover td.sticky-col {
 @media (max-width: 1480px) {
   .pm-console { grid-template-columns: 1fr 340px; }
   .pm-stats-row { grid-template-columns: repeat(2, 1fr); }
-  .workspace-body { padding: 24px; }
+  .workspace-pane { padding: 24px; }
   .workspace-header { height: 80px; padding: 0 24px; }
 }
 
@@ -9935,7 +9939,7 @@ tr:hover td.sticky-col {
 
 .add-event-step-pane {
   display: none;
-  animation: paneFadeIn 0.3s ease-in-out;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
 }
 
 .add-event-step-pane.active {
@@ -9944,14 +9948,14 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
-@keyframes paneFadeIn {
+@keyframes stepPaneFadeIn {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
