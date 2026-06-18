@@ -2015,16 +2015,12 @@ async function checkAdminRoute() {
 }
 
 // B. Handler untuk pindah panel di sidebar admin workspace
-window.switchAdminPane = function(paneId, updateHash = true) {
-  if (paneId === "pane-boc") {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+window.switchAdminPane = function(paneId, updateHash = true, keepPlayoff = false) {
+  if (paneId === "pane-boc" && !keepPlayoff) {
     const bocPlayoffContainer = document.getElementById("boc-playoff-container");
-    if (playoffEvent && bocPlayoffContainer && bocPlayoffContainer.style.display !== "block") {
-      setTimeout(() => {
-        openEventDetail(playoffEvent.id, false);
-      }, 0);
-      return;
-    }
+    const bocStandingsContainer = document.getElementById("boc-standings-container");
+    if (bocPlayoffContainer) bocPlayoffContainer.style.display = "none";
+    if (bocStandingsContainer) bocStandingsContainer.style.display = "block";
   }
 
   const panes = document.querySelectorAll(".workspace-pane");
@@ -11198,7 +11194,7 @@ function openEventDetail(eventId, updateUrl = true) {
     }
 
     // 2. Keep the URL hash as #boc-[year] and switch to pane-boc
-    switchAdminPane("pane-boc", false);
+    switchAdminPane("pane-boc", false, true);
     if (window.location.pathname !== "/admin" || window.location.hash !== "#boc-" + currentBocYear) {
       window.history.replaceState({}, "", "/admin#boc-" + currentBocYear);
     }
