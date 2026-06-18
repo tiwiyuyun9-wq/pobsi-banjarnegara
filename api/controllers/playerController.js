@@ -17,8 +17,17 @@ exports.addPlayer = async (req, res) => {
   }
 
   try {
-    const countRow = await dbGet(`SELECT COUNT(*) as count FROM players`);
-    const nextNum = (countRow ? countRow.count : 0) + 1;
+    const allPlayers = await dbAll(`SELECT id FROM players`);
+    let maxNum = 0;
+    if (allPlayers && allPlayers.length > 0) {
+      allPlayers.forEach(p => {
+        const num = parseInt(p.id.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      });
+    }
+    const nextNum = maxNum + 1;
     const id = `P${nextNum.toString().padStart(3, '0')}`;
 
     const defaultAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`;

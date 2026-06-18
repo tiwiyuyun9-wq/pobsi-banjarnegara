@@ -19,8 +19,17 @@ exports.addDoc = async (req, res) => {
   }
 
   try {
-    const countRow = await dbGet(`SELECT COUNT(*) as count FROM documents`);
-    const nextNum = (countRow ? countRow.count : 0) + 1;
+    const allDocs = await dbAll(`SELECT id FROM documents`);
+    let maxNum = 0;
+    if (allDocs && allDocs.length > 0) {
+      allDocs.forEach(d => {
+        const num = parseInt(d.id.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      });
+    }
+    const nextNum = maxNum + 1;
     const id = `D${nextNum.toString().padStart(3, '0')}`;
 
     let fileUrl = "";

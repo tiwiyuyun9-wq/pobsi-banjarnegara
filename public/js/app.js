@@ -110,7 +110,7 @@ async function loadDataFromApi() {
     ]);
 
     // Update database runtime jika response API valid
-    if (playersRes && Array.isArray(playersRes) && playersRes.length > 0) {
+    if (playersRes && Array.isArray(playersRes)) {
       appData.players = playersRes;
       console.log(`Loaded ${playersRes.length} players from API.`);
     }
@@ -146,15 +146,15 @@ async function loadDataFromApi() {
       bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
     }
 
-    if (eventsRes && Array.isArray(eventsRes) && eventsRes.length > 0) {
+    if (eventsRes && Array.isArray(eventsRes)) {
       appData.events = eventsRes;
       console.log(`Loaded ${eventsRes.length} events from API.`);
     }
-    if (docsRes && Array.isArray(docsRes) && docsRes.length > 0) {
+    if (docsRes && Array.isArray(docsRes)) {
       appData.documents = docsRes;
       console.log(`Loaded ${docsRes.length} documents from API.`);
     }
-    if (clubsRes && Array.isArray(clubsRes) && clubsRes.length > 0) {
+    if (clubsRes && Array.isArray(clubsRes)) {
       appData.clubs = clubsRes;
       console.log(`Loaded ${clubsRes.length} clubs from API.`);
     }
@@ -941,7 +941,7 @@ function renderStandings(searchQuery = "") {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const publicPlayoffContainer = document.getElementById("boc-public-playoff-container");
   const publicStandingsContainer = document.getElementById("boc-public-standings-container");
   if (!playoffEventCheck) {
@@ -1151,7 +1151,7 @@ function updateBocBannersVisibility() {
   const notScheduledBanner = document.getElementById("boc-not-scheduled-banner");
   if (!playoffBanner || !scheduleBanner) return;
 
-  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const savedSchedule = bocSettings.playoff_schedule;
 
   // Inject Year dynamically to all banners
@@ -1186,10 +1186,10 @@ function updateBocBannersVisibility() {
         iconEl.className = "fa-solid fa-award";
       }
       if (descEl) {
-        descEl.textContent = "Turnamen puncak Grand Final Battle of Champions telah selesai dilaksanakan! Klik tombol di samping untuk melihat bagan pertandingan, hasil skor akhir, dan sang juara utama.";
+        descEl.textContent = `Turnamen puncak Grand Final Battle of Champions ${currentBocYear} telah selesai diselenggarakan! Lihat siapa yang berhasil merebut mahkota juara utama musim ini.`;
       }
       if (viewBtn) {
-        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil Turnamen';
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil BOC';
         viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
         viewBtn.style.color = "#fff";
         viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
@@ -5892,7 +5892,7 @@ window.renderAdminBocConsole = function() {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const bocPlayoffContainer = document.getElementById("boc-playoff-container");
   const bocStandingsContainer = document.getElementById("boc-standings-container");
   if (!playoffEventCheck) {
@@ -5912,7 +5912,7 @@ window.renderAdminBocConsole = function() {
   const adminScheduleText = document.getElementById("boc-admin-schedule-text");
   
   if (startPlayoffBtn) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const savedSchedule = bocSettings.playoff_schedule;
     
     if (playoffEvent) {

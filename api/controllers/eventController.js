@@ -17,8 +17,17 @@ exports.addEvent = async (req, res) => {
   }
 
   try {
-    const countRow = await dbGet(`SELECT COUNT(*) as count FROM events`);
-    const nextNum = (countRow ? countRow.count : 0) + 1;
+    const allEvents = await dbAll(`SELECT id FROM events`);
+    let maxNum = 0;
+    if (allEvents && allEvents.length > 0) {
+      allEvents.forEach(e => {
+        const num = parseInt(e.id.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      });
+    }
+    const nextNum = maxNum + 1;
     const id = `E${nextNum.toString().padStart(3, '0')}`;
 
     const newEvent = {

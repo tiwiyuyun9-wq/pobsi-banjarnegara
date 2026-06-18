@@ -17,8 +17,17 @@ exports.addClub = async (req, res) => {
   }
 
   try {
-    const countRow = await dbGet(`SELECT COUNT(*) as count FROM clubs`);
-    const nextNum = (countRow ? countRow.count : 0) + 1;
+    const allClubs = await dbAll(`SELECT id FROM clubs`);
+    let maxNum = 0;
+    if (allClubs && allClubs.length > 0) {
+      allClubs.forEach(c => {
+        const num = parseInt(c.id.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      });
+    }
+    const nextNum = maxNum + 1;
     const id = `C${nextNum.toString().padStart(3, '0')}`;
 
     const newClub = {
