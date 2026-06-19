@@ -85,3 +85,36 @@ exports.resetStandings = async (req, res) => {
   }
 };
 
+exports.reindexStandings = async (req, res) => {
+  const { year } = req.body;
+  if (!year) {
+    return res.status(400).json({ error: "Tahun (year) wajib ditentukan untuk melakukan re-index!" });
+  }
+
+  const standingYear = year.toString().trim();
+
+  try {
+    const allStandings = await dbAll(
+      `SELECT * FROM standings WHERE year = ? ORDER BY points DESC`,
+      [standingYear]
+    );
+
+    if (allStandings.length === 0) {
+      return res.json({ success: true, message: `Tidak ada data klasemen untuk tahun ${standingYear} yang perlu di-reindex.` });
+    }
+
+    for (let i = 0; i < allStandings.length; i++) {
+      const rank = i + 1;
+      const player_name = allStandings[i].name;
+      await dbRun(
+        `UPDATE standings SET rank = ? WHERE name = ? AND year = ?`,
+        [rank, player_name, standingYear]
+      );
+    }
+
+    res.json({ success: true, message: `Peringkat klasemen tahun ${standingYear} berhasil di-reindex di database SQLite.` });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal melakukan re-index klasemen di SQLite: " + error.message });
+  }
+};
+

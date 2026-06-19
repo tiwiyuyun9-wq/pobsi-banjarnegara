@@ -5,6 +5,7 @@ const standingController = require('../controllers/standingController');
 
 router.get('/', standingController.getStandings);
 router.post('/reset', standingController.resetStandings);
+router.post('/reindex', standingController.reindexStandings);
 router.post('/', standingController.updateStanding);
 
 module.exports = router;

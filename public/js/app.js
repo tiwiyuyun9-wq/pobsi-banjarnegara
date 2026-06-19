@@ -6299,48 +6299,48 @@ function setupBocAdminListeners() {
     reindexBtn.addEventListener("click", async () => {
       const role = localStorage.getItem("pobsi_admin_role") || "admin";
       if (role === "staff") {
-        alert("Akses Dibatasi: Peran Anda (Staff) tidak diizinkan untuk mengolah ulang data peringkat klasemen.");
+        showCustomToast("Akses Dibatasi: Peran Anda (Staff) tidak diizinkan untuk mengolah ulang data peringkat klasemen.", "error");
         return;
       }
       
       reindexBtn.disabled = true;
       reindexBtn.innerHTML = `<i class="fa-solid fa-arrows-spin fa-spin"></i> Re-indexing...`;
       
-      // We can trigger a save for the first player to force a ranking re-index on the backend
-      const standings = appData.standings || [];
-      if (standings.length > 0 && isServerOnline) {
+      // Determine active database type (Supabase or SQLite) dynamically from backend
+      let dbType = "SQLite";
+      if (isServerOnline) {
         try {
-          const topPlayer = standings[0];
-          const res = await fetch('/api/standings', {
+          const statusRes = await fetch('/api/db-status').then(r => r.ok ? r.json() : null).catch(() => null);
+          if (statusRes && statusRes.database) {
+            dbType = statusRes.database;
+          }
+        } catch (e) {}
+      }
+
+      if (isServerOnline) {
+        try {
+          const res = await fetch('/api/standings/reindex', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: topPlayer.name,
-              year: currentBocYear,
-              club: topPlayer.club,
-              handicap: topPlayer.handicap,
-              points: topPlayer.points,
-              played: topPlayer.played,
-              won: topPlayer.won,
-              lost: topPlayer.lost
-            })
+            body: JSON.stringify({ year: currentBocYear })
           });
           if (res.ok) {
             await loadDataFromApi();
             renderAdminBocConsole();
-            alert("✅ Re-indexing Sukses: Peringkat dan index klasemen seluruh atlet berhasil diselaraskan di database SQLite.");
+            showCustomToast(`Re-indexing Sukses: Peringkat dan index klasemen seluruh atlet berhasil diselaraskan di database ${dbType}.`, "success");
           } else {
-            alert("Gagal melakukan sinkronisasi re-index ke SQLite.");
+            showCustomToast(`Gagal melakukan sinkronisasi re-index ke database ${dbType}.`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi re-index: ${err.message}`);
+          showCustomToast(`Error koneksi re-index: ${err.message}`, "error");
         }
       } else {
         // Local mode sorting
+        const standings = appData.standings || [];
         standings.sort((a, b) => b.points - a.points);
         standings.forEach((p, idx) => p.rank = idx + 1);
         renderAdminBocConsole();
-        alert("✅ Luring Re-indexing Sukses: Peringkat dan indeks diurutkan di memori browser.");
+        showCustomToast("Luring Re-indexing Sukses: Peringkat dan indeks diurutkan di memori browser.", "success");
       }
       
       reindexBtn.disabled = false;
