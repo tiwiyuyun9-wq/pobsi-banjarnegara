@@ -1,4 +1,5 @@
 const { supabase } = require('./_supabase');
+const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -47,7 +48,8 @@ module.exports = async (req, res) => {
           prizes: null,
           rules: null,
           point_rules: null,
-          status: 'active'
+          status: 'active',
+          cover: null
         });
       }
     }
@@ -56,9 +58,14 @@ module.exports = async (req, res) => {
        POST: Menyimpan / Memperbarui Settings BOC untuk Tahun Tertentu
        ========================================================================== */
     if (req.method === 'POST') {
-      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules } = req.body;
+      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover } = req.body;
       if (!year) {
         return res.status(400).json({ error: "Parameter year wajib disertakan!" });
+      }
+
+      let coverUrl = cover || null;
+      if (cover) {
+        coverUrl = await uploadMedia(cover, `boc-cover-${year}`, 'covers');
       }
 
       const upsertData = {
@@ -69,7 +76,8 @@ module.exports = async (req, res) => {
         prizes: prizes ? (typeof prizes === 'object' ? JSON.stringify(prizes) : prizes) : null,
         point_rules: point_rules ? (typeof point_rules === 'object' ? JSON.stringify(point_rules) : point_rules) : null,
         rules: rules || null,
-        status: status || 'active'
+        status: status || 'active',
+        cover: coverUrl
       };
 
       const { data, error } = await supabase

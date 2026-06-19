@@ -110,7 +110,7 @@ async function loadDataFromApi() {
     ]);
 
     // Update database runtime jika response API valid
-    if (playersRes && Array.isArray(playersRes) && playersRes.length > 0) {
+    if (playersRes && Array.isArray(playersRes)) {
       appData.players = playersRes;
       console.log(`Loaded ${playersRes.length} players from API.`);
     }
@@ -146,22 +146,93 @@ async function loadDataFromApi() {
       bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
     }
 
-    if (eventsRes && Array.isArray(eventsRes) && eventsRes.length > 0) {
+    if (eventsRes && Array.isArray(eventsRes)) {
       appData.events = eventsRes;
       console.log(`Loaded ${eventsRes.length} events from API.`);
     }
-    if (docsRes && Array.isArray(docsRes) && docsRes.length > 0) {
+    if (docsRes && Array.isArray(docsRes)) {
       appData.documents = docsRes;
       console.log(`Loaded ${docsRes.length} documents from API.`);
     }
-    if (clubsRes && Array.isArray(clubsRes) && clubsRes.length > 0) {
+    if (clubsRes && Array.isArray(clubsRes)) {
       appData.clubs = clubsRes;
       console.log(`Loaded ${clubsRes.length} clubs from API.`);
     }
 
+    // Populate season/year selectors dynamically
+    updateBocSeasonDropdown();
+    updateEventFilterYearDropdown();
+
   } catch (error) {
     console.warn("Koneksi API gagal atau belum ter-deploy. Berhasil melakukan fallback ke data.js lokal. Error:", error);
     bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
+    
+    // Fallback population
+    updateBocSeasonDropdown();
+    updateEventFilterYearDropdown();
+  }
+}
+
+// Helper to dynamically populate public BOC season dropdown list
+function updateBocSeasonDropdown() {
+  const seasonSelect = document.getElementById("boc-public-season-select");
+  if (!seasonSelect) return;
+
+  const years = new Set(["2026", currentBocYear]);
+  
+  // Extract years from events
+  (appData.events || []).forEach(e => {
+    const mDate = e.date?.match(/\b(20\d{2})\b/);
+    if (mDate) years.add(mDate[1]);
+    const mTitle = e.title?.match(/\b(20\d{2})\b/);
+    if (mTitle) years.add(mTitle[1]);
+  });
+
+  const sortedYears = Array.from(years).sort((a, b) => parseInt(a) - parseInt(b));
+  
+  const currentVal = seasonSelect.value || currentBocYear;
+  
+  seasonSelect.innerHTML = "";
+  sortedYears.forEach(year => {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = `Musim ${year}`;
+    seasonSelect.appendChild(opt);
+  });
+  
+  if (sortedYears.includes(currentVal)) {
+    seasonSelect.value = currentVal;
+  } else {
+    seasonSelect.value = currentBocYear;
+  }
+}
+
+// Helper to dynamically populate admin events filter year selector
+function updateEventFilterYearDropdown() {
+  const filterYear = document.getElementById("event-filter-year");
+  if (!filterYear) return;
+
+  const years = new Set(["2026", "2025", currentBocYear]);
+  (appData.events || []).forEach(e => {
+    const mDate = e.date?.match(/\b(20\d{2})\b/);
+    if (mDate) years.add(mDate[1]);
+    const mTitle = e.title?.match(/\b(20\d{2})\b/);
+    if (mTitle) years.add(mTitle[1]);
+  });
+
+  const sortedYears = Array.from(years).sort((a, b) => parseInt(b) - parseInt(a)); // Descending
+  
+  const currentVal = filterYear.value;
+  filterYear.innerHTML = '<option value="">Semua Tahun</option>';
+  sortedYears.forEach(year => {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = year;
+    filterYear.appendChild(opt);
+  });
+
+  if (currentVal && sortedYears.includes(currentVal)) {
+    filterYear.value = currentVal;
   }
 }
 
@@ -699,6 +770,38 @@ function applyBocSettingsToDOM() {
   if (prize2El) prize2El.textContent = prizes.juara2 || "RP 4,5 JT";
   if (prize3El) prize3El.textContent = prizes.juara3 || "RP 3,0 JT";
 
+  // Update cover backgrounds across tabs
+  const publicCover = document.getElementById("boc-public-hero-cover");
+  if (publicCover) {
+    if (bocSettings.cover) {
+      publicCover.style.backgroundImage = `url('${bocSettings.cover}')`;
+      publicCover.style.display = "block";
+    } else {
+      publicCover.style.backgroundImage = "none";
+    }
+  }
+
+  const playoffCover = document.getElementById("boc-playoff-hero-bg");
+  if (playoffCover) {
+    if (bocSettings.cover) {
+      playoffCover.style.backgroundImage = `url('${bocSettings.cover}')`;
+      playoffCover.style.opacity = "0.22"; // slightly higher opacity for custom covers
+    } else {
+      playoffCover.style.backgroundImage = "none";
+      playoffCover.style.opacity = "0.18";
+    }
+  }
+
+  const adminCover = document.getElementById("boc-admin-header-bg");
+  if (adminCover) {
+    if (bocSettings.cover) {
+      adminCover.style.backgroundImage = `url('${bocSettings.cover}')`;
+      adminCover.style.display = "block";
+    } else {
+      adminCover.style.backgroundImage = "none";
+    }
+  }
+
   if (totalPrizeEl) {
     if (prizes.juara1 || prizes.juara2 || prizes.juara3) {
       let total = 0;
@@ -941,7 +1044,7 @@ function renderStandings(searchQuery = "") {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const publicPlayoffContainer = document.getElementById("boc-public-playoff-container");
   const publicStandingsContainer = document.getElementById("boc-public-standings-container");
   if (!playoffEventCheck) {
@@ -1151,7 +1254,7 @@ function updateBocBannersVisibility() {
   const notScheduledBanner = document.getElementById("boc-not-scheduled-banner");
   if (!playoffBanner || !scheduleBanner) return;
 
-  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const savedSchedule = bocSettings.playoff_schedule;
 
   // Inject Year dynamically to all banners
@@ -1186,10 +1289,10 @@ function updateBocBannersVisibility() {
         iconEl.className = "fa-solid fa-award";
       }
       if (descEl) {
-        descEl.textContent = "Turnamen puncak Grand Final Battle of Champions telah selesai dilaksanakan! Klik tombol di samping untuk melihat bagan pertandingan, hasil skor akhir, dan sang juara utama.";
+        descEl.textContent = `Turnamen puncak Grand Final Battle of Champions ${currentBocYear} telah selesai diselenggarakan! Lihat siapa yang berhasil merebut mahkota juara utama musim ini.`;
       }
       if (viewBtn) {
-        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil Turnamen';
+        viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil BOC';
         viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
         viewBtn.style.color = "#fff";
         viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
@@ -1994,9 +2097,15 @@ async function checkAdminRoute() {
         } else if (hash.startsWith("boc-")) {
           const year = hash.split("boc-")[1];
           if (year && /^\d{4}$/.test(year)) {
+            const oldYear = currentBocYear;
             currentBocYear = year;
             localStorage.setItem("currentBocYear", currentBocYear);
             bocSirkuits = loadBocSirkuitsForYear(year);
+            if (oldYear !== year) {
+              loadDataFromApi().then(() => {
+                renderAdminBocConsole();
+              });
+            }
           }
           switchAdminPane("pane-boc", false);
         } else {
@@ -5892,7 +6001,7 @@ window.renderAdminBocConsole = function() {
   if (!tableBody) return;
 
   // Hide playoff and restore standings if playoff event is missing/removed
-  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+  const playoffEventCheck = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
   const bocPlayoffContainer = document.getElementById("boc-playoff-container");
   const bocStandingsContainer = document.getElementById("boc-standings-container");
   if (!playoffEventCheck) {
@@ -5912,7 +6021,7 @@ window.renderAdminBocConsole = function() {
   const adminScheduleText = document.getElementById("boc-admin-schedule-text");
   
   if (startPlayoffBtn) {
-    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && e.status !== 'Selesai' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+    const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
     const savedSchedule = bocSettings.playoff_schedule;
     
     if (playoffEvent) {
@@ -6222,48 +6331,48 @@ function setupBocAdminListeners() {
     reindexBtn.addEventListener("click", async () => {
       const role = localStorage.getItem("pobsi_admin_role") || "admin";
       if (role === "staff") {
-        alert("Akses Dibatasi: Peran Anda (Staff) tidak diizinkan untuk mengolah ulang data peringkat klasemen.");
+        showCustomToast("Akses Dibatasi: Peran Anda (Staff) tidak diizinkan untuk mengolah ulang data peringkat klasemen.", "error");
         return;
       }
       
       reindexBtn.disabled = true;
       reindexBtn.innerHTML = `<i class="fa-solid fa-arrows-spin fa-spin"></i> Re-indexing...`;
       
-      // We can trigger a save for the first player to force a ranking re-index on the backend
-      const standings = appData.standings || [];
-      if (standings.length > 0 && isServerOnline) {
+      // Determine active database type (Supabase or SQLite) dynamically from backend
+      let dbType = "SQLite";
+      if (isServerOnline) {
         try {
-          const topPlayer = standings[0];
-          const res = await fetch('/api/standings', {
+          const statusRes = await fetch('/api/db-status').then(r => r.ok ? r.json() : null).catch(() => null);
+          if (statusRes && statusRes.database) {
+            dbType = statusRes.database;
+          }
+        } catch (e) {}
+      }
+
+      if (isServerOnline) {
+        try {
+          const res = await fetch('/api/standings/reindex', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: topPlayer.name,
-              year: currentBocYear,
-              club: topPlayer.club,
-              handicap: topPlayer.handicap,
-              points: topPlayer.points,
-              played: topPlayer.played,
-              won: topPlayer.won,
-              lost: topPlayer.lost
-            })
+            body: JSON.stringify({ year: currentBocYear })
           });
           if (res.ok) {
             await loadDataFromApi();
             renderAdminBocConsole();
-            alert("✅ Re-indexing Sukses: Peringkat dan index klasemen seluruh atlet berhasil diselaraskan di database SQLite.");
+            showCustomToast(`Re-indexing Sukses: Peringkat dan index klasemen seluruh atlet berhasil diselaraskan di database ${dbType}.`, "success");
           } else {
-            alert("Gagal melakukan sinkronisasi re-index ke SQLite.");
+            showCustomToast(`Gagal melakukan sinkronisasi re-index ke database ${dbType}.`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi re-index: ${err.message}`);
+          showCustomToast(`Error koneksi re-index: ${err.message}`, "error");
         }
       } else {
         // Local mode sorting
+        const standings = appData.standings || [];
         standings.sort((a, b) => b.points - a.points);
         standings.forEach((p, idx) => p.rank = idx + 1);
         renderAdminBocConsole();
-        alert("✅ Luring Re-indexing Sukses: Peringkat dan indeks diurutkan di memori browser.");
+        showCustomToast("Luring Re-indexing Sukses: Peringkat dan indeks diurutkan di memori browser.", "success");
       }
       
       reindexBtn.disabled = false;
@@ -6378,6 +6487,74 @@ function setupBocAdminListeners() {
   const bocSettingsModalBtnCancel = document.getElementById("boc-settings-modal-btn-cancel");
   const bocSettingsTrigger = document.getElementById("btn-admin-boc-settings-trigger");
 
+  // wizard state
+  window.currentBocSettingsStep = 1;
+  window.currentUploadedBocCoverBase64 = "";
+
+  window.updateBocSettingsWizardUI = function() {
+    const step = window.currentBocSettingsStep;
+    const panes = document.querySelectorAll(".boc-settings-step-pane");
+    panes.forEach(pane => {
+      const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+      if (paneStep === step) {
+        pane.classList.add("active");
+        pane.removeAttribute("style");
+      } else {
+        pane.classList.remove("active");
+        pane.removeAttribute("style");
+      }
+    });
+
+    const steps = document.querySelectorAll("#boc-settings-wizard-stepper .wizard-step");
+    steps.forEach(s => {
+      const sStep = parseInt(s.getAttribute("data-step"), 10);
+      const circle = s.querySelector(".wizard-step-circle");
+      s.classList.remove("active", "completed");
+      if (sStep === step) {
+        s.classList.add("active");
+        if (circle) circle.innerHTML = sStep;
+      } else if (sStep < step) {
+        s.classList.add("completed");
+        if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+      } else {
+        if (circle) circle.innerHTML = sStep;
+      }
+    });
+
+    const progress = document.getElementById("boc-settings-wizard-progress");
+    if (progress && steps.length > 1) {
+      const percent = ((step - 1) / (steps.length - 1)) * 100;
+      progress.style.width = `${percent}%`;
+    }
+
+    const btnCancel = document.getElementById("boc-settings-modal-btn-cancel");
+    const btnPrev = document.getElementById("boc-settings-modal-btn-prev");
+    const btnNext = document.getElementById("boc-settings-modal-btn-next");
+    const btnSubmit = document.getElementById("boc-settings-modal-btn-submit");
+
+    if (step === 1) {
+      if (btnCancel) btnCancel.style.display = "inline-block";
+      if (btnPrev) btnPrev.style.display = "none";
+      if (btnNext) btnNext.style.display = "inline-block";
+      if (btnSubmit) btnSubmit.style.display = "none";
+    } else if (step === 2) {
+      if (btnCancel) btnCancel.style.display = "none";
+      if (btnPrev) btnPrev.style.display = "inline-block";
+      if (btnNext) btnNext.style.display = "inline-block";
+      if (btnSubmit) btnSubmit.style.display = "none";
+    } else if (step === 3) {
+      if (btnCancel) btnCancel.style.display = "none";
+      if (btnPrev) btnPrev.style.display = "inline-block";
+      if (btnNext) btnNext.style.display = "none";
+      if (btnSubmit) btnSubmit.style.display = "inline-block";
+    }
+  };
+
+  window.resetBocSettingsWizard = function() {
+    window.currentBocSettingsStep = 1;
+    window.updateBocSettingsWizardUI();
+  };
+
   const openBocSettingsModal = () => {
     if (!bocSettingsModal) return;
     const role = localStorage.getItem("pobsi_admin_role") || "admin";
@@ -6407,6 +6584,29 @@ function setupBocAdminListeners() {
     if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
     if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
 
+    // Reset settings wizard
+    window.resetBocSettingsWizard();
+
+    // Prefill cover image preview if it exists in DB
+    const bocCoverDropZone = document.getElementById("boc-cover-drop-zone");
+    const bocCoverPreviewContainer = document.getElementById("boc-cover-preview-container");
+    const bocCoverPreviewImg = document.getElementById("boc-cover-preview-img");
+    const bocCoverPreviewFilename = document.getElementById("boc-cover-preview-filename");
+    const bocCoverFileInput = document.getElementById("set-boc-cover-file");
+
+    if (bocSettings.cover) {
+      window.currentUploadedBocCoverBase64 = bocSettings.cover;
+      if (bocCoverPreviewImg) bocCoverPreviewImg.src = bocSettings.cover;
+      if (bocCoverPreviewFilename) bocCoverPreviewFilename.textContent = "boc_cover.png";
+      if (bocCoverDropZone) bocCoverDropZone.style.display = "none";
+      if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "flex";
+    } else {
+      window.currentUploadedBocCoverBase64 = "";
+      if (bocCoverFileInput) bocCoverFileInput.value = "";
+      if (bocCoverDropZone) bocCoverDropZone.style.display = "flex";
+      if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
+    }
+
     bocSettingsModal.style.display = "flex";
   };
 
@@ -6425,6 +6625,104 @@ function setupBocAdminListeners() {
     bocSettingsModal.addEventListener("click", (e) => {
       if (e.target === bocSettingsModal) closeBocSettingsModal();
     });
+  }
+
+  const btnBocPrev = document.getElementById("boc-settings-modal-btn-prev");
+  const btnBocNext = document.getElementById("boc-settings-modal-btn-next");
+
+  if (btnBocPrev) {
+    btnBocPrev.onclick = function() {
+      if (window.currentBocSettingsStep > 1) {
+        window.currentBocSettingsStep--;
+        window.updateBocSettingsWizardUI();
+      }
+    };
+  }
+
+  if (btnBocNext) {
+    btnBocNext.onclick = function() {
+      if (window.currentBocSettingsStep === 1) {
+        const year = document.getElementById("set-boc-year").value.trim();
+        if (!year) {
+          showCustomToast("Tahun Musim Sirkuit wajib diisi!", "error");
+          document.getElementById("set-boc-year").focus();
+          return;
+        }
+      }
+      if (window.currentBocSettingsStep < 3) {
+        window.currentBocSettingsStep++;
+        window.updateBocSettingsWizardUI();
+      }
+    };
+  }
+
+  const bocCoverDropZone = document.getElementById("boc-cover-drop-zone");
+  const bocCoverFileInput = document.getElementById("set-boc-cover-file");
+  const bocCoverPreviewContainer = document.getElementById("boc-cover-preview-container");
+  const bocCoverPreviewImg = document.getElementById("boc-cover-preview-img");
+  const bocCoverPreviewFilename = document.getElementById("boc-cover-preview-filename");
+  const btnClearBocCover = document.getElementById("btn-clear-boc-cover");
+
+  if (bocCoverDropZone && bocCoverFileInput) {
+    bocCoverDropZone.onclick = () => bocCoverFileInput.click();
+
+    bocCoverDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      bocCoverDropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      bocCoverDropZone.addEventListener(eventName, () => {
+        bocCoverDropZone.classList.remove("dragover");
+      });
+    });
+
+    bocCoverDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleBocCoverFileSelection(files[0]);
+      }
+    });
+
+    bocCoverFileInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (files.length > 0) {
+        handleBocCoverFileSelection(files[0]);
+      }
+    });
+  }
+
+  function handleBocCoverFileSelection(file) {
+    if (!file.type.startsWith("image/")) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showCustomToast("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      window.currentUploadedBocCoverBase64 = e.target.result;
+      
+      if (bocCoverPreviewImg) bocCoverPreviewImg.src = window.currentUploadedBocCoverBase64;
+      if (bocCoverPreviewFilename) bocCoverPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      
+      if (bocCoverDropZone) bocCoverDropZone.style.display = "none";
+      if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (btnClearBocCover) {
+    btnClearBocCover.onclick = () => {
+      window.currentUploadedBocCoverBase64 = "";
+      if (bocCoverFileInput) bocCoverFileInput.value = "";
+      if (bocCoverDropZone) bocCoverDropZone.style.display = "flex";
+      if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
+    };
   }
 
   if (formBocSchedule) {
@@ -6599,6 +6897,9 @@ function setupBocAdminListeners() {
 
                   await loadDataFromApi();
                   renderAdminBocConsole();
+
+                  // Update URL hash to sync with the new year
+                  window.location.hash = "boc-" + currentBocYear;
                 } else {
                   showCustomToast("Gagal mereset klasemen di database SQLite.", "error");
                 }
@@ -16495,7 +16796,8 @@ function setupSystemSettings() {
           juara3: bocPrize3Input ? bocPrize3Input.value.trim() : '',
           best_game: bocBestGameInput ? bocBestGameInput.value.trim() : ''
         },
-        rules: bocRulesInput ? bocRulesInput.value.trim() : ''
+        rules: bocRulesInput ? bocRulesInput.value.trim() : '',
+        cover: window.currentUploadedBocCoverBase64 || null
       });
       
       const oldYear = localStorage.getItem("currentBocYear") || "2026";

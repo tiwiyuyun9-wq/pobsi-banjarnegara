@@ -112,7 +112,8 @@ CREATE TABLE boc_settings (
     prizes TEXT,
     rules TEXT,
     point_rules TEXT,
-    status TEXT DEFAULT 'active'
+    status TEXT DEFAULT 'active',
+    cover TEXT
 );
 
 -- Seed akun pengguna default (superadmin, admin, staff)

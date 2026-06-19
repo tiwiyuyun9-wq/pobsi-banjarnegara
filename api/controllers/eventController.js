@@ -1,5 +1,6 @@
 // Event Controller - Mengelola Agenda Turnamen / Acara POBSI
 const { dbAll, dbGet, dbRun } = require('../config/db');
+const { uploadMedia } = require('../_media-upload');
 
 exports.getEvents = async (req, res) => {
   try {
@@ -17,9 +18,23 @@ exports.addEvent = async (req, res) => {
   }
 
   try {
-    const countRow = await dbGet(`SELECT COUNT(*) as count FROM events`);
-    const nextNum = (countRow ? countRow.count : 0) + 1;
+    const allEvents = await dbAll(`SELECT id FROM events`);
+    let maxNum = 0;
+    if (allEvents && allEvents.length > 0) {
+      allEvents.forEach(e => {
+        const num = parseInt(e.id.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      });
+    }
+    const nextNum = maxNum + 1;
     const id = `E${nextNum.toString().padStart(3, '0')}`;
+
+    let posterUrl = poster || "images/event-poster.png";
+    if (poster && poster.includes(';base64,')) {
+      posterUrl = await uploadMedia(poster, `event-poster-${id}`, 'posters');
+    }
 
     const newEvent = {
       id,
@@ -31,7 +46,7 @@ exports.addEvent = async (req, res) => {
       contact,
       status: status || "Daftar",
       description: description || "",
-      poster: poster || "images/event-poster.png",
+      poster: posterUrl,
       participants: participants || "[]",
       bracket: bracket || "{}",
       results: results || "{}",
@@ -59,11 +74,23 @@ exports.updateEvent = async (req, res) => {
   const { title, date, venue, prizePool, entryFee, contact, description, status, poster, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc } = req.body;
 
   try {
+    const event = await dbGet(`SELECT poster FROM events WHERE id = ?`, [id]);
+    const currentPoster = event ? event.poster : "images/event-poster.png";
+
+    let posterUrl = currentPoster;
+    if (poster !== undefined) {
+      if (poster && poster.includes(';base64,')) {
+        posterUrl = await uploadMedia(poster, `event-poster-${id}`, 'posters');
+      } else {
+        posterUrl = poster || "images/event-poster.png";
+      }
+    }
+
     await dbRun(
       `UPDATE events 
        SET title = ?, date = ?, venue = ?, prizePool = ?, entryFee = ?, contact = ?, description = ?, status = ?, poster = ?, participants = ?, bracket = ?, results = ?, points_published = ?, type = ?, bracket_size = ?, elimination_type = ?, max_hc = ?
        WHERE id = ?`,
-      [title, date, venue, prizePool, entryFee, contact, description, status, poster, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc, id]
+      [title, date, venue, prizePool, entryFee, contact, description, status, posterUrl, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc, id]
     );
     res.json({ success: true, message: "Event updated successfully!" });
   } catch (error) {

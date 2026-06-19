@@ -1,4 +1,5 @@
 const { supabase } = require('./_supabase');
+const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -49,17 +50,31 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Judul, tanggal, lokasi, dan kontak panitia wajib diisi!" });
       }
 
-      // Hitung jumlah baris untuk generate ID
-      const { count, error: countErr } = await supabase
+      // Ambil ID terbesar untuk generate ID berikutnya
+      const { data: allEvents, error: fetchErr } = await supabase
         .from('events')
-        .select('*', { count: 'exact', head: true });
+        .select('id');
 
-      if (countErr) throw countErr;
+      if (fetchErr) throw fetchErr;
 
-      const nextNum = (count || 0) + 1;
+      let maxNum = 0;
+      if (allEvents && allEvents.length > 0) {
+        allEvents.forEach(e => {
+          const num = parseInt(e.id.substring(1), 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        });
+      }
+      const nextNum = maxNum + 1;
       const newId = `E${nextNum.toString().padStart(3, '0')}`;
 
       const serialize = (val, fallback) => val ? (typeof val === 'object' ? JSON.stringify(val) : val) : fallback;
+
+      let posterUrl = poster || "images/event-poster.png";
+      if (poster && poster.includes(';base64,')) {
+        posterUrl = await uploadMedia(poster, `event-poster-${newId}`, 'posters');
+      }
 
       const newEvent = {
         id: newId,
@@ -71,7 +86,7 @@ module.exports = async (req, res) => {
         contact: contact.trim(),
         status: status || "Daftar",
         description: description || "",
-        poster: poster || "images/event-poster.png",
+        poster: posterUrl,
         participants: serialize(participants, "[]"),
         bracket: serialize(bracket, "{}"),
         results: serialize(results, "{}"),
@@ -112,6 +127,15 @@ module.exports = async (req, res) => {
 
       const serialize = (val, current) => val !== undefined ? (typeof val === 'object' ? JSON.stringify(val) : val) : current;
 
+      let posterUrl = event.poster;
+      if (poster !== undefined) {
+        if (poster && poster.includes(';base64,')) {
+          posterUrl = await uploadMedia(poster, `event-poster-${id}`, 'posters');
+        } else {
+          posterUrl = poster || "images/event-poster.png";
+        }
+      }
+
       const updated = {
         title: title !== undefined ? title.trim() : event.title,
         date: date !== undefined ? date.trim() : event.date,
@@ -121,7 +145,7 @@ module.exports = async (req, res) => {
         contact: contact !== undefined ? contact.trim() : event.contact,
         description: description !== undefined ? description : event.description,
         status: status !== undefined ? status : event.status,
-        poster: poster !== undefined ? poster : event.poster,
+        poster: posterUrl,
         participants: serialize(participants, event.participants),
         bracket: serialize(bracket, event.bracket),
         results: serialize(results, event.results),

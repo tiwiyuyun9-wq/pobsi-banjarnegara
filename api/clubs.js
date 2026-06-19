@@ -49,14 +49,23 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
 
-      // Hitung jumlah baris untuk generate ID
-      const { count, error: countErr } = await supabase
+      // Ambil ID terbesar untuk generate ID berikutnya
+      const { data: allClubs, error: fetchErr } = await supabase
         .from('clubs')
-        .select('*', { count: 'exact', head: true });
+        .select('id');
 
-      if (countErr) throw countErr;
+      if (fetchErr) throw fetchErr;
 
-      const nextNum = (count || 0) + 1;
+      let maxNum = 0;
+      if (allClubs && allClubs.length > 0) {
+        allClubs.forEach(c => {
+          const num = parseInt(c.id.substring(1), 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        });
+      }
+      const nextNum = maxNum + 1;
       const newId = `C${nextNum.toString().padStart(3, '0')}`;
 
       const newClub = {
