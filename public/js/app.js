@@ -159,9 +159,82 @@ async function loadDataFromApi() {
       console.log(`Loaded ${clubsRes.length} clubs from API.`);
     }
 
+    // Populate season/year selectors dynamically
+    updateBocSeasonDropdown();
+    updateEventFilterYearDropdown();
+
   } catch (error) {
     console.warn("Koneksi API gagal atau belum ter-deploy. Berhasil melakukan fallback ke data.js lokal. Error:", error);
     bocSirkuits = loadBocSirkuitsForYear(currentBocYear);
+    
+    // Fallback population
+    updateBocSeasonDropdown();
+    updateEventFilterYearDropdown();
+  }
+}
+
+// Helper to dynamically populate public BOC season dropdown list
+function updateBocSeasonDropdown() {
+  const seasonSelect = document.getElementById("boc-public-season-select");
+  if (!seasonSelect) return;
+
+  const years = new Set(["2026", currentBocYear]);
+  
+  // Extract years from events
+  (appData.events || []).forEach(e => {
+    if (e.elimination_type === 'boc' || e.type === 'BOC Playoff') {
+      const mDate = e.date?.match(/\b(20\d{2})\b/);
+      if (mDate) years.add(mDate[1]);
+      const mTitle = e.title?.match(/\b(20\d{2})\b/);
+      if (mTitle) years.add(mTitle[1]);
+    }
+  });
+
+  const sortedYears = Array.from(years).sort((a, b) => parseInt(a) - parseInt(b));
+  
+  const currentVal = seasonSelect.value || currentBocYear;
+  
+  seasonSelect.innerHTML = "";
+  sortedYears.forEach(year => {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = `Musim ${year}`;
+    seasonSelect.appendChild(opt);
+  });
+  
+  if (sortedYears.includes(currentVal)) {
+    seasonSelect.value = currentVal;
+  } else {
+    seasonSelect.value = currentBocYear;
+  }
+}
+
+// Helper to dynamically populate admin events filter year selector
+function updateEventFilterYearDropdown() {
+  const filterYear = document.getElementById("event-filter-year");
+  if (!filterYear) return;
+
+  const years = new Set(["2026", "2025", currentBocYear]);
+  (appData.events || []).forEach(e => {
+    const mDate = e.date?.match(/\b(20\d{2})\b/);
+    if (mDate) years.add(mDate[1]);
+    const mTitle = e.title?.match(/\b(20\d{2})\b/);
+    if (mTitle) years.add(mTitle[1]);
+  });
+
+  const sortedYears = Array.from(years).sort((a, b) => parseInt(b) - parseInt(a)); // Descending
+  
+  const currentVal = filterYear.value;
+  filterYear.innerHTML = '<option value="">Semua Tahun</option>';
+  sortedYears.forEach(year => {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = year;
+    filterYear.appendChild(opt);
+  });
+
+  if (currentVal && sortedYears.includes(currentVal)) {
+    filterYear.value = currentVal;
   }
 }
 
@@ -1994,9 +2067,15 @@ async function checkAdminRoute() {
         } else if (hash.startsWith("boc-")) {
           const year = hash.split("boc-")[1];
           if (year && /^\d{4}$/.test(year)) {
+            const oldYear = currentBocYear;
             currentBocYear = year;
             localStorage.setItem("currentBocYear", currentBocYear);
             bocSirkuits = loadBocSirkuitsForYear(year);
+            if (oldYear !== year) {
+              loadDataFromApi().then(() => {
+                renderAdminBocConsole();
+              });
+            }
           }
           switchAdminPane("pane-boc", false);
         } else {
@@ -6599,6 +6678,9 @@ function setupBocAdminListeners() {
 
                   await loadDataFromApi();
                   renderAdminBocConsole();
+
+                  // Update URL hash to sync with the new year
+                  window.location.hash = "boc-" + currentBocYear;
                 } else {
                   showCustomToast("Gagal mereset klasemen di database SQLite.", "error");
                 }
