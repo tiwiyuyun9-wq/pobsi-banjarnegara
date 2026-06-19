@@ -9948,6 +9948,17 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
+.boc-settings-step-pane {
+  display: none;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
+}
+
+.boc-settings-step-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @keyframes stepPaneFadeIn {
   from {
     opacity: 0;

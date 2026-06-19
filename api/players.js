@@ -1,4 +1,5 @@
 const { supabase } = require('./_supabase');
+const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -71,6 +72,21 @@ module.exports = async (req, res) => {
       const newId = `P${nextNum.toString().padStart(3, '0')}`;
       const defaultAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`;
 
+      let avatarUrl = avatar && avatar.trim() ? avatar.trim() : defaultAvatar;
+      if (avatar && avatar.includes(';base64,')) {
+        avatarUrl = await uploadMedia(avatar, `player-avatar-${newId}`, 'avatars');
+      }
+
+      let coverUrl = cover && cover.trim() ? cover.trim() : "";
+      if (cover && cover.includes(';base64,')) {
+        coverUrl = await uploadMedia(cover, `player-cover-${newId}`, 'covers');
+      }
+
+      let ktpUrl = ktp && ktp.trim() ? ktp.trim() : "";
+      if (ktp && ktp.includes(';base64,')) {
+        ktpUrl = await uploadMedia(ktp, `player-ktp-${newId}`, 'ktp');
+      }
+
       const newPlayer = {
         id: newId,
         name: name.trim(),
@@ -78,13 +94,13 @@ module.exports = async (req, res) => {
         handicap: handicap.toString().trim(),
         status: "Aktif",
         points: parseFloat(points || 0.0),
-        avatar: avatar && avatar.trim() ? avatar.trim() : defaultAvatar,
+        avatar: avatarUrl,
         gender: gender || "Laki-laki",
         age: age ? parseInt(age, 10) : 24,
         phone: phone && phone.trim() ? phone.trim() : "0812-XXXX-XXXX",
         address: address && address.trim() ? address.trim() : "Kabupaten Banjarnegara",
-        cover: cover && cover.trim() ? cover.trim() : "",
-        ktp: ktp && ktp.trim() ? ktp.trim() : ""
+        cover: coverUrl,
+        ktp: ktpUrl
       };
 
       const { data, error } = await supabase
@@ -115,19 +131,46 @@ module.exports = async (req, res) => {
       if (checkErr) throw checkErr;
       if (!player) return res.status(404).json({ error: "Atlet tidak ditemukan!" });
 
+      let avatarUrl = player.avatar;
+      if (avatar !== undefined) {
+        if (avatar && avatar.includes(';base64,')) {
+          avatarUrl = await uploadMedia(avatar, `player-avatar-${id}`, 'avatars');
+        } else {
+          avatarUrl = avatar;
+        }
+      }
+
+      let coverUrl = player.cover;
+      if (cover !== undefined) {
+        if (cover && cover.includes(';base64,')) {
+          coverUrl = await uploadMedia(cover, `player-cover-${id}`, 'covers');
+        } else {
+          coverUrl = cover;
+        }
+      }
+
+      let ktpUrl = player.ktp;
+      if (ktp !== undefined) {
+        if (ktp && ktp.includes(';base64,')) {
+          ktpUrl = await uploadMedia(ktp, `player-ktp-${id}`, 'ktp');
+        } else {
+          ktpUrl = ktp;
+        }
+      }
+
       const updated = {
         name: name !== undefined ? name.trim() : player.name,
         club: club !== undefined ? club.trim() : player.club,
         handicap: handicap !== undefined ? handicap.toString().trim() : player.handicap,
         points: points !== undefined ? parseFloat(points) : player.points,
-        avatar: avatar !== undefined ? avatar.trim() : player.avatar,
+        avatar: avatarUrl,
         gender: gender !== undefined ? gender : player.gender,
         age: age !== undefined ? parseInt(age, 10) : player.age,
         phone: phone !== undefined ? phone.trim() : player.phone,
         address: address !== undefined ? address.trim() : player.address,
         status: status !== undefined ? status : player.status,
-        cover: cover !== undefined ? cover.trim() : player.cover,
-        ktp: ktp !== undefined ? ktp.trim() : player.ktp
+        cover: coverUrl,
+        ktp: ktpUrl
       };
 
       const { error: updateErr } = await supabase

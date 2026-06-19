@@ -1,4 +1,5 @@
 const { supabase } = require('./_supabase');
+const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -70,6 +71,11 @@ module.exports = async (req, res) => {
 
       const serialize = (val, fallback) => val ? (typeof val === 'object' ? JSON.stringify(val) : val) : fallback;
 
+      let posterUrl = poster || "images/event-poster.png";
+      if (poster && poster.includes(';base64,')) {
+        posterUrl = await uploadMedia(poster, `event-poster-${newId}`, 'posters');
+      }
+
       const newEvent = {
         id: newId,
         title: title.trim(),
@@ -80,7 +86,7 @@ module.exports = async (req, res) => {
         contact: contact.trim(),
         status: status || "Daftar",
         description: description || "",
-        poster: poster || "images/event-poster.png",
+        poster: posterUrl,
         participants: serialize(participants, "[]"),
         bracket: serialize(bracket, "{}"),
         results: serialize(results, "{}"),
@@ -121,6 +127,15 @@ module.exports = async (req, res) => {
 
       const serialize = (val, current) => val !== undefined ? (typeof val === 'object' ? JSON.stringify(val) : val) : current;
 
+      let posterUrl = event.poster;
+      if (poster !== undefined) {
+        if (poster && poster.includes(';base64,')) {
+          posterUrl = await uploadMedia(poster, `event-poster-${id}`, 'posters');
+        } else {
+          posterUrl = poster || "images/event-poster.png";
+        }
+      }
+
       const updated = {
         title: title !== undefined ? title.trim() : event.title,
         date: date !== undefined ? date.trim() : event.date,
@@ -130,7 +145,7 @@ module.exports = async (req, res) => {
         contact: contact !== undefined ? contact.trim() : event.contact,
         description: description !== undefined ? description : event.description,
         status: status !== undefined ? status : event.status,
-        poster: poster !== undefined ? poster : event.poster,
+        poster: posterUrl,
         participants: serialize(participants, event.participants),
         bracket: serialize(bracket, event.bracket),
         results: serialize(results, event.results),
