@@ -182,12 +182,10 @@ function updateBocSeasonDropdown() {
   
   // Extract years from events
   (appData.events || []).forEach(e => {
-    if (e.elimination_type === 'boc' || e.type === 'BOC Playoff') {
-      const mDate = e.date?.match(/\b(20\d{2})\b/);
-      if (mDate) years.add(mDate[1]);
-      const mTitle = e.title?.match(/\b(20\d{2})\b/);
-      if (mTitle) years.add(mTitle[1]);
-    }
+    const mDate = e.date?.match(/\b(20\d{2})\b/);
+    if (mDate) years.add(mDate[1]);
+    const mTitle = e.title?.match(/\b(20\d{2})\b/);
+    if (mTitle) years.add(mTitle[1]);
   });
 
   const sortedYears = Array.from(years).sort((a, b) => parseInt(a) - parseInt(b));
