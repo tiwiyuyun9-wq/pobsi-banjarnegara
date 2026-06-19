@@ -309,8 +309,6 @@ if (isSupabaseEnabled) {
   // Require Serverless Handlers
   const playersHandler = require('./api/players');
   const standingsHandler = require('./api/standings');
-  const standingsResetHandler = require('./api/standings/reset');
-  const standingsReindexHandler = require('./api/standings/reindex');
   const dbStatusHandler = require('./api/db-status');
   const eventsHandler = require('./api/events');
   const docsHandler = require('./api/docs');
@@ -341,9 +339,10 @@ if (isSupabaseEnabled) {
   app.all('/api/players/:id', bridge(playersHandler, 'id'));
 
   // Standings
-  app.all('/api/standings/reset', bridge(standingsResetHandler));
-  app.all('/api/standings/reindex', bridge(standingsReindexHandler));
+  app.all('/api/standings/reset', bridge(standingsHandler));
+  app.all('/api/standings/reindex', bridge(standingsHandler));
   app.all('/api/standings', bridge(standingsHandler));
+
 
   // DB Status
   app.all('/api/db-status', bridge(dbStatusHandler));

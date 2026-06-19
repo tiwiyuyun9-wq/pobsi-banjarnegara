@@ -4,6 +4,8 @@
     { "source": "/api/players/:id", "destination": "/api/players.js?id=:id" },
     { "source": "/api/events/:id", "destination": "/api/events.js?id=:id" },
     { "source": "/api/clubs/:id", "destination": "/api/clubs.js?id=:id" },
+    { "source": "/api/standings/reset", "destination": "/api/standings.js?action=reset" },
+    { "source": "/api/standings/reindex", "destination": "/api/standings.js?action=reindex" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
