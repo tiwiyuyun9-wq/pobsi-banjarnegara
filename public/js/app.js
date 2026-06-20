@@ -788,9 +788,9 @@ function applyBocSettingsToDOM() {
   const publicHero = document.getElementById("boc-public-hero-section");
   if (publicHero) {
     if (bocSettings.cover) {
-      publicHero.style.backgroundImage = `url('${bocSettings.cover}')`;
+      publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('${bocSettings.cover}')`;
     } else {
-      publicHero.style.backgroundImage = "none";
+      publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('/images/hero-player.png')`;
     }
   }
 
