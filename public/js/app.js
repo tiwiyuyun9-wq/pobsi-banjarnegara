@@ -808,12 +808,7 @@ function applyBocSettingsToDOM() {
 
   const adminCover = document.getElementById("boc-admin-header-bg");
   if (adminCover) {
-    if (bocSettings.cover) {
-      adminCover.style.backgroundImage = `url('${bocSettings.cover}')`;
-      adminCover.style.display = "block";
-    } else {
-      adminCover.style.backgroundImage = "none";
-    }
+    adminCover.style.backgroundImage = "none";
   }
 
   if (totalPrizeEl) {
