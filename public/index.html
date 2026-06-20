@@ -315,92 +315,105 @@
          ============================================== -->
     <section class="tab-pane" id="tab-champions">
       <div id="boc-public-standings-container">
-        <!-- New Flex Header with Year Dropdown -->
-        <div class="boc-header-flex">
-          <div class="section-header" style="margin-bottom: 0; padding-bottom: 0; flex: 1; width: 100%;">
-            <div class="boc-tag-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; width: 100%;">
-              <span class="section-tag" style="margin-bottom: 0;"><i class="fa-solid fa-trophy"></i> Turnamen Bergengsi</span>
-              <!-- Year Selector dropdown -->
+        <!-- Premium BOC Hero Section (Unified) -->
+        <div class="boc-hero-section" id="boc-public-hero-section" style="position: relative; border-radius: var(--radius-md); padding: 40px; margin-bottom: 28px; background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); box-shadow: var(--shadow-lg);">
+          <!-- Radial gradient background overlay for readable text -->
+          <div class="boc-hero-overlay" style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(251, 191, 36, 0.03) 0%, rgba(6, 11, 24, 0.95) 100%); z-index: 0; pointer-events: none;"></div>
+          
+          <!-- Content layout wrapper -->
+          <div class="boc-hero-content" style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Tag, Title, Subtitle & Dropdown selector -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; width: 100%;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                  <span class="section-tag" style="margin: 0; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 0.72rem; padding: 4px 10px; border-radius: 100px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;"><i class="fa-solid fa-trophy"></i> Turnamen Bergengsi</span>
+                </div>
+                <h1 class="section-title" style="font-size: 2.2rem; font-family: var(--font-headers); font-weight: 900; color: #fff; margin: 0 0 10px 0; letter-spacing: -0.5px;">Battle Of Champions <span class="dynamic-boc-year">2026</span></h1>
+                <p class="section-subtitle" style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.7); margin: 0; max-width: 800px; line-height: 1.5;">Papan klasemen akumulasi poin atlet biliar Banjarnegara dalam seri sirkuit Battle of Champions <span class="dynamic-boc-year">2026</span> resmi.</p>
+              </div>
+              
+              <!-- Year Selector Dropdown -->
               <div class="boc-season-select-wrapper" style="margin: 0; display: flex; align-items: center; gap: 8px;">
-                <div class="select-wrapper" style="margin: 0; min-width: 100px; position: relative;">
-                  <select id="boc-public-season-select" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 28px 6px 10px; border-radius: var(--radius-sm); color: #fff; font-family: var(--font-headers); font-weight: 700; font-size: 0.75rem; width: 100%; cursor: pointer; appearance: none; -webkit-appearance: none;">
+                <div class="select-wrapper" style="margin: 0; min-width: 120px; position: relative;">
+                  <select id="boc-public-season-select" style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 32px 8px 12px; border-radius: var(--radius-sm); color: #fff; font-family: var(--font-headers); font-weight: 700; font-size: 0.8rem; width: 100%; cursor: pointer; appearance: none; -webkit-appearance: none; transition: border-color 0.2s;">
                     <option value="2026">Musim 2026</option>
                   </select>
-                  <i class="fa-solid fa-chevron-down" style="position: absolute; right: 10px; color: rgba(255, 255, 255, 0.6); font-size: 0.65rem; pointer-events: none;"></i>
+                  <i class="fa-solid fa-chevron-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.6); font-size: 0.7rem; pointer-events: none;"></i>
                 </div>
               </div>
             </div>
-            <h1 class="section-title">Battle Of Champions <span class="dynamic-boc-year">2026</span></h1>
-            <p class="section-subtitle">Papan klasemen akumulasi poin atlet biliar Banjarnegara dalam seri sirkuit Battle of Champions <span class="dynamic-boc-year">2026</span> resmi.</p>
-          </div>
-        </div>
 
-        <!-- Playoff Not Scheduled Banner -->
-        <div id="boc-not-scheduled-banner" class="overview-header-block-premium" style="display: none; margin-bottom: 24px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(239, 68, 68, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
-            <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; color: #f87171; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);">
-              <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Jadwal Grand Final belum dirilis. Turnamen puncak akan dijadwalkan setelah seluruh seri sirkuit utama selesai dilaksanakan. Pantau terus klasemen poin untuk melihat daftar atlet yang berpeluang lolos kualifikasi!</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Playoff Scheduled Banner (Under Tab Header) -->
-        <div id="boc-schedule-banner" class="overview-header-block-premium" style="display: none; margin-bottom: 24px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(59, 130, 246, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
-            <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);">
-              <i class="fa-solid fa-calendar-days"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-              <p id="boc-schedule-banner-text" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Grand Final BOC telah dijadwalkan pada <strong>-</strong> di <strong>-</strong>. Pantau terus klasemen untuk info kualifikasi terupdate.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Playoff Ongoing Banner (Under Tab Header) -->
-        <div id="boc-playoff-banner" class="overview-header-block-premium" style="display: none; margin-bottom: 24px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(251, 191, 36, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
-            <div id="boc-playoff-banner-icon-bg" style="width: 50px; height: 50px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.2); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);">
-              <i id="boc-playoff-banner-icon" class="fa-solid fa-trophy"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-              <p id="boc-playoff-banner-desc" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Fase playoff sedang berlangsung! Pantau perjuangan 16 atlet kualifikasi terbaik memperebutkan mahkota juara utama secara langsung.</p>
-            </div>
-          </div>
-          <button id="btn-view-boc-playoff" class="pm-btn pm-btn-primary" style="background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); color: #0f172a; font-weight: 800; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
-            <i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff
-          </button>
-        </div>
-
-        <!-- Premium BOC Hero Card -->
-        <div class="boc-public-hero-card" style="margin-bottom: 24px; position: relative;">
-          <div class="boc-public-hero-cover" id="boc-public-hero-cover" style="position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: 0; opacity: 0.15; pointer-events: none;"></div>
-          <div class="boc-hero-stats-content" style="position: relative; z-index: 1;">
-            <h2 class="boc-hero-card-title">Kualifikasi Seri Sirkuit Utama</h2>
-            <p class="boc-hero-card-desc">Sistem klasemen berjalan terakumulasi untuk mendelegasikan 16 atlet kualifikasi terbaik ke ajang prestisius Grand Final POBSI Banjarnegara.</p>
-            <div class="boc-hero-stats-grid">
-              <div class="boc-hero-stat-box">
-                <span class="boc-hero-stat-val" id="boc-hero-stat-series">10 Seri</span>
-                <span class="boc-hero-stat-lbl">Total Agenda Sirkuit</span>
+            <!-- Playoff Announcement Banners -->
+            <div id="boc-hero-banners-container" style="width: 100%;">
+              <!-- Playoff Not Scheduled Banner -->
+              <div id="boc-not-scheduled-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(239, 68, 68, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
+                  <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; color: #f87171; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Jadwal Grand Final belum dirilis. Turnamen puncak akan dijadwalkan setelah seluruh seri sirkuit utama selesai dilaksanakan. Pantau terus klasemen poin untuk melihat daftar atlet yang berpeluang lolos kualifikasi!</p>
+                  </div>
+                </div>
               </div>
-              <div class="boc-hero-stat-box">
-                <span class="boc-hero-stat-val text-accent" id="boc-hero-stat-players">-</span>
-                <span class="boc-hero-stat-lbl">Atlet Bersaing</span>
+
+              <!-- Playoff Scheduled Banner -->
+              <div id="boc-schedule-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(59, 130, 246, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
+                  <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);">
+                    <i class="fa-solid fa-calendar-days"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
+                    <p id="boc-schedule-banner-text" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Grand Final BOC telah dijadwalkan pada <strong>-</strong> di <strong>-</strong>. Pantau terus klasemen untuk info kualifikasi terupdate.</p>
+                  </div>
+                </div>
               </div>
-              <div class="boc-hero-stat-box">
-                <span class="boc-hero-stat-val text-gold" id="boc-hero-stat-cutoff">-</span>
-                <span class="boc-hero-stat-lbl">Poin Cut-Off (Peringkat 16)</span>
-              </div>
-              <div class="boc-hero-stat-box">
-                <span class="boc-hero-stat-val text-green" id="boc-hero-stat-prizepool">Rp 15.000.000</span>
-                <span class="boc-hero-stat-lbl">Estimasi Prize Pool</span>
+
+              <!-- Playoff Ongoing Banner -->
+              <div id="boc-playoff-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(251, 191, 36, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 280px;">
+                  <div id="boc-playoff-banner-icon-bg" style="width: 50px; height: 50px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.2); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);">
+                    <i id="boc-playoff-banner-icon" class="fa-solid fa-trophy"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 4px 0; font-size: 1.15rem; letter-spacing: 0.5px;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
+                    <p id="boc-playoff-banner-desc" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Fase playoff sedang berlangsung! Pantau perjuangan 16 atlet kualifikasi terbaik memperebutkan mahkota juara utama secara langsung.</p>
+                  </div>
+                </div>
+                <button id="btn-view-boc-playoff" class="pm-btn pm-btn-primary" style="background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); color: #0f172a; font-weight: 800; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                  <i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff
+                </button>
               </div>
             </div>
+
+            <!-- Stats Grid Section (contained inside the Hero) -->
+            <div class="boc-public-hero-card-v2" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 24px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+              <h2 class="boc-hero-card-title" style="font-size: 1.15rem; font-weight: 800; font-family: var(--font-headers); color: #fff; margin: 0 0 6px 0;">Kualifikasi Seri Sirkuit Utama</h2>
+              <p class="boc-hero-card-desc" style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin: 0 0 20px 0; line-height: 1.45;">Sistem klasemen berjalan terakumulasi untuk mendelegasikan 16 atlet kualifikasi terbaik ke ajang prestisius Grand Final POBSI Banjarnegara.</p>
+              
+              <div class="boc-hero-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div class="boc-hero-stat-box" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; transition: transform 0.2s, background 0.2s;">
+                  <span class="boc-hero-stat-val" id="boc-hero-stat-series" style="font-size: 1.5rem; font-weight: 900; font-family: var(--font-headers); color: #fff;">10 Seri</span>
+                  <span class="boc-hero-stat-lbl" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); font-weight: 700;">Total Agenda Sirkuit</span>
+                </div>
+                <div class="boc-hero-stat-box" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; transition: transform 0.2s, background 0.2s;">
+                  <span class="boc-hero-stat-val text-accent" id="boc-hero-stat-players" style="font-size: 1.5rem; font-weight: 900; font-family: var(--font-headers); color: var(--color-accent);">-</span>
+                  <span class="boc-hero-stat-lbl" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); font-weight: 700;">Atlet Bersaing</span>
+                </div>
+                <div class="boc-hero-stat-box" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; transition: transform 0.2s, background 0.2s;">
+                  <span class="boc-hero-stat-val text-gold" id="boc-hero-stat-cutoff" style="font-size: 1.5rem; font-weight: 900; font-family: var(--font-headers); color: var(--color-gold);">-</span>
+                  <span class="boc-hero-stat-lbl" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); font-weight: 700;">Poin Cut-Off (Peringkat 16)</span>
+                </div>
+                <div class="boc-hero-stat-box" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; transition: transform 0.2s, background 0.2s;">
+                  <span class="boc-hero-stat-val text-green" id="boc-hero-stat-prizepool" style="font-size: 1.5rem; font-weight: 900; font-family: var(--font-headers); color: var(--color-green);">Rp 15.000.000</span>
+                  <span class="boc-hero-stat-lbl" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); font-weight: 700;">Estimasi Prize Pool</span>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
 

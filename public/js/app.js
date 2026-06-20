@@ -785,9 +785,13 @@ function applyBocSettingsToDOM() {
   if (prize3El) prize3El.textContent = prizes.juara3 || "RP 3,0 JT";
 
   // Update cover backgrounds across tabs
-  const publicCover = document.getElementById("boc-public-hero-cover");
-  if (publicCover) {
-    publicCover.style.backgroundImage = "none";
+  const publicHero = document.getElementById("boc-public-hero-section");
+  if (publicHero) {
+    if (bocSettings.cover) {
+      publicHero.style.backgroundImage = `url('${bocSettings.cover}')`;
+    } else {
+      publicHero.style.backgroundImage = "none";
+    }
   }
 
   const playoffCover = document.getElementById("boc-playoff-hero-bg");
