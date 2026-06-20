@@ -787,12 +787,7 @@ function applyBocSettingsToDOM() {
   // Update cover backgrounds across tabs
   const publicCover = document.getElementById("boc-public-hero-cover");
   if (publicCover) {
-    if (bocSettings.cover) {
-      publicCover.style.backgroundImage = `url('${bocSettings.cover}')`;
-      publicCover.style.display = "block";
-    } else {
-      publicCover.style.backgroundImage = "none";
-    }
+    publicCover.style.backgroundImage = "none";
   }
 
   const playoffCover = document.getElementById("boc-playoff-hero-bg");
