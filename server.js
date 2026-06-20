@@ -365,10 +365,7 @@ if (isSupabaseEnabled) {
   const changePasswordHandler = require('./api/admin/change-password');
   const bocSirkuitsHandler = require('./api/boc-sirkuits');
   const bocSettingsHandler = require('./api/boc-settings');
-  const matchesHandler = require('./api/matches');
-  const tournamentHistoryHandler = require('./api/tournament-history');
-  const handicapHistoryHandler = require('./api/handicap-history');
-  const rankingHistoryHandler = require('./api/ranking-history');
+  const athleteDataHandler = require('./api/athlete-data');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -422,13 +419,15 @@ if (isSupabaseEnabled) {
   app.all('/api/admin/users', bridge(usersHandler));
   app.all('/api/admin/change-password', bridge(changePasswordHandler));
 
-  // Matches & Tournament History
-  app.all('/api/matches', bridge(matchesHandler));
-  app.all('/api/tournament-history', bridge(tournamentHistoryHandler));
-
-  // Handicap & Ranking History
-  app.all('/api/handicap-history', bridge(handicapHistoryHandler));
-  app.all('/api/ranking-history', bridge(rankingHistoryHandler));
+  // Athlete Detail Data (matches, tournament-history, handicap-history, ranking-history)
+  const athleteDataBridge = (type) => bridge((req, res) => {
+    req.query = { ...req.query, type };
+    return athleteDataHandler(req, res);
+  });
+  app.all('/api/matches', athleteDataBridge('matches'));
+  app.all('/api/tournament-history', athleteDataBridge('tournament-history'));
+  app.all('/api/handicap-history', athleteDataBridge('handicap-history'));
+  app.all('/api/ranking-history', athleteDataBridge('ranking-history'));
 
 } else {
   console.log('💾 SQLite Local Mode is ACTIVE! Using SQLite database handlers...');

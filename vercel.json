@@ -6,6 +6,10 @@
     { "source": "/api/clubs/:id", "destination": "/api/clubs.js?id=:id" },
     { "source": "/api/standings/reset", "destination": "/api/standings.js?action=reset" },
     { "source": "/api/standings/reindex", "destination": "/api/standings.js?action=reindex" },
+    { "source": "/api/matches", "destination": "/api/athlete-data.js?type=matches" },
+    { "source": "/api/tournament-history", "destination": "/api/athlete-data.js?type=tournament-history" },
+    { "source": "/api/handicap-history", "destination": "/api/athlete-data.js?type=handicap-history" },
+    { "source": "/api/ranking-history", "destination": "/api/athlete-data.js?type=ranking-history" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
