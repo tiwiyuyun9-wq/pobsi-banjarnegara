@@ -88,6 +88,14 @@ module.exports = async (req, res) => {
 
       if (error) throw error;
 
+      if (coverUrl) {
+        await supabase
+          .from('events')
+          .update({ poster: coverUrl })
+          .eq('elimination_type', 'boc')
+          .like('title', `%${year}%`);
+      }
+
       return res.status(200).json({ success: true, message: `Settings BOC tahun ${year} berhasil disimpan!`, data });
     }
 

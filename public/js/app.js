@@ -1714,9 +1714,13 @@ function renderEvents(filter = "all") {
       </div>
     `;
 
+    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
+      ? event.poster 
+      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+
     return `
       <div class="event-premium-card" onclick="openPublicEventDetail('${event.id}')" style="cursor: pointer;">
-        <div class="event-card-banner" style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('${event.poster || 'images/event-poster.png'}'); background-size: cover; background-position: center;">
+        <div class="event-card-banner" style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('${posterUrl}'); background-size: cover; background-position: center;">
           <div class="event-date-block">
             <span class="date-day">${day}</span>
             <span class="date-month">${month}</span>
@@ -2095,19 +2099,48 @@ async function checkAdminRoute() {
         if (validPanes.includes(hash)) {
           switchAdminPane(`pane-${hash}`, false);
         } else if (hash.startsWith("boc-")) {
-          const year = hash.split("boc-")[1];
+          const raw = hash.split("boc-")[1];
+          let year = raw;
+          let isPlayoff = false;
+          if (raw.endsWith("-playoff")) {
+            year = raw.substring(0, raw.length - "-playoff".length);
+            isPlayoff = true;
+          }
           if (year && /^\d{4}$/.test(year)) {
             const oldYear = currentBocYear;
             currentBocYear = year;
             localStorage.setItem("currentBocYear", currentBocYear);
             bocSirkuits = loadBocSirkuitsForYear(year);
-            if (oldYear !== year) {
+            if (oldYear !== year || isPlayoff) {
               loadDataFromApi().then(() => {
-                renderAdminBocConsole();
+                if (isPlayoff) {
+                  const playoffEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(year) || e.description?.includes(year)));
+                  if (playoffEvent) {
+                    openEventDetail(playoffEvent.id, false);
+                  } else {
+                    renderAdminBocConsole();
+                    switchAdminPane("pane-boc", false);
+                  }
+                } else {
+                  const bocPlayoffContainer = document.getElementById("boc-playoff-container");
+                  const bocStandingsContainer = document.getElementById("boc-standings-container");
+                  if (bocPlayoffContainer) bocPlayoffContainer.style.display = "none";
+                  if (bocStandingsContainer) bocStandingsContainer.style.display = "block";
+                  renderAdminBocConsole();
+                  switchAdminPane("pane-boc", false);
+                }
               });
+            } else {
+              const bocPlayoffContainer = document.getElementById("boc-playoff-container");
+              const bocStandingsContainer = document.getElementById("boc-standings-container");
+              if (bocPlayoffContainer) bocPlayoffContainer.style.display = "none";
+              if (bocStandingsContainer) bocStandingsContainer.style.display = "block";
+              renderAdminBocConsole();
+              switchAdminPane("pane-boc", false);
             }
+          } else {
+            switchAdminPane("pane-boc", false);
           }
-          switchAdminPane("pane-boc", false);
         } else {
           // Tampilkan title dan pane aktif default
           const activeLink = document.querySelector(".sidebar-link.active");
@@ -7585,7 +7618,10 @@ function renderBocPlayoffConsole(event) {
   // Set background image
   const heroBg = document.getElementById("boc-playoff-hero-bg");
   if (heroBg) {
-    heroBg.style.backgroundImage = `url('${event.poster || 'images/dashboard-hero.png'}')`;
+    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png' && event.poster !== 'images/dashboard-hero.png') 
+      ? event.poster 
+      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/dashboard-hero.png');
+    heroBg.style.backgroundImage = `url('${posterUrl}')`;
   }
 
   // Set status & winner badges
@@ -8013,7 +8049,10 @@ function renderPublicEventDetail(event) {
 
   const heroBgEl = document.getElementById("pub-event-hero-bg");
   if (heroBgEl) {
-    heroBgEl.style.backgroundImage = `url('${event.poster || 'images/event-poster.png'}')`;
+    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
+      ? event.poster 
+      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+    heroBgEl.style.backgroundImage = `url('${posterUrl}')`;
   }
 
   // Set fullscreen title and live badges
@@ -9686,11 +9725,15 @@ function renderEventCard(e, isList = false) {
   const isCompleted = e.status === "Selesai" || e.status === "Cancelled";
   const actionText = isCompleted ? "Lihat Hasil" : "Kelola Event";
   
+  const posterUrl = (e.poster && e.poster !== 'images/event-poster.png') 
+    ? e.poster 
+    : ((e.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+
   if (isList) {
     return `
       <div class="evt-list-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(15, 23, 50, 0.45); border: 1px solid var(--border-color); border-radius: 8px; gap: 16px; transition: all 0.2s;">
         <div style="display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1;">
-          <div style="width: 70px; height: 50px; border-radius: 6px; background-image: url('${e.poster || 'images/event-poster.png'}'); background-size: cover; background-position: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.06);"></div>
+          <div style="width: 70px; height: 50px; border-radius: 6px; background-image: url('${posterUrl}'); background-size: cover; background-position: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.06);"></div>
           <div style="min-width: 0; flex: 1;">
             <h4 style="font-family: var(--font-headers); font-size: 0.95rem; font-weight: 800; color: #fff; margin: 0; line-height: 1.3; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${e.title}</h4>
             <div style="display: flex; gap: 14px; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; flex-wrap: wrap;">
@@ -9710,7 +9753,7 @@ function renderEventCard(e, isList = false) {
   
   return `
     <div class="admin-event-card" style="background: rgba(11, 17, 32, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s;">
-      <div class="admin-event-card-banner" style="height: 140px; position: relative; background-size: cover; background-position: center; background-image: linear-gradient(180deg, rgba(6, 11, 24, 0.1) 0%, rgba(6, 11, 24, 0.8) 100%), url('${e.poster || 'images/event-poster.png'}');">
+      <div class="admin-event-card-banner" style="height: 140px; position: relative; background-size: cover; background-position: center; background-image: linear-gradient(180deg, rgba(6, 11, 24, 0.1) 0%, rgba(6, 11, 24, 0.8) 100%), url('${posterUrl}');">
         ${getEventStatusBadge(e.status)}
       </div>
       <div class="admin-event-card-body" style="padding: 16px 20px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
@@ -11641,10 +11684,11 @@ function openEventDetail(eventId, updateUrl = true) {
     const sidebar = document.getElementById("event-detail-sidebar");
     if (sidebar) sidebar.style.display = "none";
 
-    // 2. Keep the URL hash as #boc-[year] and switch to pane-boc
+    // 2. Keep the URL hash as #boc-[year]-playoff and switch to pane-boc
     switchAdminPane("pane-boc", false, true);
-    if (window.location.pathname !== "/admin" || window.location.hash !== "#boc-" + currentBocYear) {
-      window.history.replaceState({}, "", "/admin#boc-" + currentBocYear);
+    const playoffHash = "#boc-" + currentBocYear + "-playoff";
+    if (window.location.pathname !== "/admin" || window.location.hash !== playoffHash) {
+      window.history.replaceState({}, "", "/admin" + playoffHash);
     }
 
     // 3. Customize crumbs & back button click bindings for BOC
@@ -11657,8 +11701,9 @@ function openEventDetail(eventId, updateUrl = true) {
         if (bocPlayoffContainer) bocPlayoffContainer.style.display = "none";
         if (bocStandingsContainer) bocStandingsContainer.style.display = "block";
         renderAdminBocConsole();
-        if (window.location.hash !== "#boc-" + currentBocYear) {
-          window.history.replaceState({}, "", "/admin#boc-" + currentBocYear);
+        const standingsHash = "#boc-" + currentBocYear;
+        if (window.location.hash !== standingsHash) {
+          window.history.replaceState({}, "", "/admin" + standingsHash);
         }
       };
     }
@@ -11668,8 +11713,9 @@ function openEventDetail(eventId, updateUrl = true) {
         if (bocPlayoffContainer) bocPlayoffContainer.style.display = "none";
         if (bocStandingsContainer) bocStandingsContainer.style.display = "block";
         renderAdminBocConsole();
-        if (window.location.hash !== "#boc-" + currentBocYear) {
-          window.history.replaceState({}, "", "/admin#boc-" + currentBocYear);
+        const standingsHash = "#boc-" + currentBocYear;
+        if (window.location.hash !== standingsHash) {
+          window.history.replaceState({}, "", "/admin" + standingsHash);
         }
       };
     }
@@ -11784,7 +11830,10 @@ function openEventDetail(eventId, updateUrl = true) {
   // Update Hero Banner Background image
   const heroBannerBg = document.getElementById("event-detail-hero-banner-bg");
   if (heroBannerBg) {
-    heroBannerBg.style.backgroundImage = `url('${event.poster || 'images/event-poster.png'}')`;
+    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
+      ? event.poster 
+      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+    heroBannerBg.style.backgroundImage = `url('${posterUrl}')`;
   }
 
   // Preserve active tab state if updating the same event
