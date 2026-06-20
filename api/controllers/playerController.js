@@ -165,6 +165,19 @@ exports.updatePlayer = async (req, res) => {
       ]
     );
 
+    // Catat di handicap_history jika handicap berubah
+    const isHandicapChanged = handicap !== undefined && handicap.toString().trim() !== player.handicap;
+    if (isHandicapChanged) {
+      const { hcChangeReason, hcChangeAdmin } = req.body;
+      const currentDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      const reasonText = hcChangeReason || "Kenaikan tingkat handicap otomatis";
+      const adminName = hcChangeAdmin || "Super Admin POBSI";
+      await dbRun(
+        `INSERT INTO handicap_history (player_id, date, from_hc, to_hc, reason, admin_name) VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, currentDate, player.handicap, updated.handicap, reasonText, adminName]
+      ).catch(e => console.error("Gagal mencatat sejarah handicap SQLite:", e.message));
+    }
+
     // Also update standings if name changed or club changed or handicap changed
     if (name || club || handicap) {
       await dbRun(

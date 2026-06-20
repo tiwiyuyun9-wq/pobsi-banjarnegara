@@ -4796,7 +4796,7 @@ function setup3DTiltCards() {
 // ============================================================================
 let adActivePlayerId = null;
 
-function renderAthleteDetail(playerId) {
+async function renderAthleteDetail(playerId) {
   const player = appData.players.find(p => p.id === playerId);
   if (!player) {
     alert("Atlet tidak ditemukan!");
@@ -4805,6 +4805,14 @@ function renderAthleteDetail(playerId) {
   }
 
   adActivePlayerId = playerId;
+
+  // Fetch matches, tournament history, handicap history & ranking history dynamically from the database
+  const [matches, tourneys, hcHistory, rankHistory] = await Promise.all([
+    fetch(`/api/matches?playerId=${playerId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`/api/tournament-history?playerId=${playerId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`/api/handicap-history?playerId=${playerId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`/api/ranking-history?playerId=${playerId}`).then(r => r.ok ? r.json() : [])
+  ]);
 
   // 1. Populate basic profile info
   const avatarEl = document.getElementById("ad-detail-avatar");
@@ -4892,7 +4900,7 @@ function renderAthleteDetail(playerId) {
         ktpStatusTag.textContent = "Belum Diunggah";
         ktpStatusTag.className = "ad-tag red";
       }
-    } else if (player.ktp.startsWith("data:application/pdf")) {
+    } else if (player.ktp.startsWith("data:application/pdf") || player.ktp.toLowerCase().includes(".pdf")) {
       // PDF document
       ktpPreview.style.display = "none";
       ktpFallback.style.display = "flex";
@@ -4970,16 +4978,16 @@ function renderAthleteDetail(playerId) {
 
   // Draw Charts
   drawTrendWinRateChart(standing);
-  drawPerkembanganRankingChart(rankVal);
+  drawPerkembanganRankingChart(rankVal, rankHistory);
 
   // Load matches
-  renderADMatches(player, standing);
+  renderADMatches(player, standing, matches);
 
   // Load tournament history
-  renderADTournaments(player);
+  renderADTournaments(player, tourneys);
 
   // Load handicap history
-  renderADHandicapHistory(player);
+  renderADHandicapHistory(player, hcHistory);
 
   // Load timeline
   renderADTimeline(player);
@@ -5047,27 +5055,47 @@ function drawTrendWinRateChart(standing) {
   container.innerHTML = svgHtml;
 }
 
-function drawPerkembanganRankingChart(currentRank) {
+function drawPerkembanganRankingChart(currentRank, dbRankHistory) {
   const container = document.getElementById("ad-ranking-chart-container");
   if (!container) return;
 
   const rBase = currentRank || 15;
-  // Simulated ranks from 12 months ago to now
-  const months = ["Jul", "Sep", "Nov", "Jan", "Mar", "Mei"];
-  const ranks = [
-    Math.min(24, rBase + 12),
-    Math.min(20, rBase + 8),
-    Math.min(16, rBase + 5),
-    Math.min(10, rBase + 3),
-    Math.min(7, rBase + 1),
-    rBase
-  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+  let months, ranks;
+
+  if (dbRankHistory && dbRankHistory.length > 0) {
+    // Use real database data
+    months = dbRankHistory.map(r => {
+      const parts = r.date.split('-');
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      return monthNames[monthIdx] || r.date;
+    });
+    ranks = dbRankHistory.map(r => r.rank);
+  } else {
+    // Fallback: simulated ranks from 12 months ago to now
+    months = ["Jul", "Sep", "Nov", "Jan", "Mar", "Mei"];
+    ranks = [
+      Math.min(24, rBase + 12),
+      Math.min(20, rBase + 8),
+      Math.min(16, rBase + 5),
+      Math.min(10, rBase + 3),
+      Math.min(7, rBase + 1),
+      rBase
+    ];
+  }
+
+  const numPoints = ranks.length;
+  const chartWidth = 410;
+  const xPadding = 30;
+  const spacing = numPoints > 1 ? (chartWidth - xPadding) / (numPoints - 1) : 0;
+  const maxRank = Math.max(...ranks, 24);
 
   // In ranking, lower y value means higher rank (closer to #1)
   const points = ranks.map((r, idx) => {
-    const x = 30 + idx * 75;
-    // Map rank 1 to y=20 and rank 24 to y=140
-    const y = 20 + ((r - 1) / 23) * 120;
+    const x = xPadding + idx * spacing;
+    // Map rank 1 to y=20 and maxRank to y=140
+    const y = 20 + ((r - 1) / (maxRank - 1 || 1)) * 120;
     return { x, y, val: r, m: months[idx] };
   });
 
@@ -5109,28 +5137,33 @@ function drawPerkembanganRankingChart(currentRank) {
 }
 
 // 3. Render list widgets
-function renderADMatches(player, standing) {
+function renderADMatches(player, standing, dbMatches) {
   const container = document.getElementById("ad-match-list");
   if (!container) return;
 
-  const matches = [
-    { date: "10 Jun 2025", name: "Arif Setiawan", club: "Star Billiard", score: "7 - 4", outcome: "W" },
-    { date: "8 Jun 2025", name: "Dimas Andika", club: "Champion Billiard", score: "7 - 3", outcome: "W" },
-    { date: "6 Jun 2025", name: "Fajar Maulana", club: "Victory Billiard", score: "4 - 7", outcome: "L" },
-    { date: "3 Jun 2025", name: "Bima Satria", club: "Star Billiard", score: "7 - 5", outcome: "W" },
-    { date: "1 Jun 2025", name: "Hendra Saputra", club: "Master Billiard", score: "7 - 2", outcome: "W" }
-  ];
+  const matches = (dbMatches && dbMatches.length > 0) ? dbMatches : [];
+
+  if (matches.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 30px; text-align: center; color: var(--text-dim); font-size: 0.85rem;">
+        <i class="fa-solid fa-gamepad" style="font-size: 1.8rem; margin-bottom: 8px; display: block; opacity: 0.4;"></i>
+        Belum ada catatan pertandingan resmi.
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = matches.map(m => {
     const isWin = m.outcome === "W";
+    const opponentAvatar = m.opponent_avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(m.opponent_name)}`;
     return `
       <div class="ad-match-item">
         <div class="ad-match-left">
           <span class="ad-match-date">${m.date}</span>
-          <img class="ad-match-opp-avatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(m.name)}" alt="Avatar">
+          <img class="ad-match-opp-avatar" src="${opponentAvatar}" alt="Avatar" onerror="this.src='images/player-avatar.png';">
           <div class="ad-match-opp-meta">
-            <span class="ad-match-opp-name">${m.name}</span>
-            <span class="ad-match-opp-club">${m.club}</span>
+            <span class="ad-match-opp-name">${m.opponent_name}</span>
+            <span class="ad-match-opp-club">${m.opponent_club}</span>
           </div>
         </div>
         <div class="ad-match-right">
@@ -5142,59 +5175,62 @@ function renderADMatches(player, standing) {
   }).join("");
 }
 
-function renderADTournaments(player) {
+function renderADTournaments(player, dbTourneys) {
   const container = document.getElementById("ad-tourney-list");
   if (!container) return;
 
-  const tourneys = [
-    { title: "BOC Series #4", date: "10 Mei 2025 &bull; Victory Billiard", badge: "Juara 1", cls: "juara1", icon: "🥇" },
-    { title: "Handicap Challenge Cup", date: "20 Apr 2025 &bull; Star Billiard", badge: "Semi Final", cls: "semifinal", icon: "🥈" },
-    { title: "BOC Series #3", date: "15 Mar 2025 &bull; Champion Billiard", badge: "Runner Up", cls: "runnerup", icon: "🥈" },
-    { title: "BOC Series #2", date: "10 Feb 2025 &bull; Victory Billiard", badge: "Top 8", cls: "top8", icon: "🥉" },
-    { title: "New Year Open Tournament", date: "5 Jan 2025 &bull; Star Billiard", badge: "Top 16", cls: "top16", icon: "🏆" }
-  ];
+  const tourneys = (dbTourneys && dbTourneys.length > 0) ? dbTourneys : [];
+
+  if (tourneys.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 30px; text-align: center; color: var(--text-dim); font-size: 0.85rem;">
+        <i class="fa-solid fa-trophy" style="font-size: 1.8rem; margin-bottom: 8px; display: block; opacity: 0.4;"></i>
+        Belum ada riwayat keikutsertaan turnamen.
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = tourneys.map(t => `
     <div class="ad-tourney-item">
       <div class="ad-tourney-left">
-        <span class="ad-tourney-icon">${t.icon}</span>
+        <span class="ad-tourney-icon">${t.icon || "🏆"}</span>
         <div class="ad-tourney-meta">
           <span class="ad-tourney-name">${t.title}</span>
-          <span class="ad-tourney-date-club">${t.date}</span>
+          <span class="ad-tourney-date-club">${t.date} &bull; ${t.venue}</span>
         </div>
       </div>
-      <span class="ad-tourney-badge ${t.cls}">${t.badge}</span>
+      <span class="ad-tourney-badge ${t.class_name || "top16"}">${t.badge}</span>
     </div>
   `).join("");
 }
 
-function renderADHandicapHistory(player) {
+function renderADHandicapHistory(player, dbHistory) {
   const container = document.getElementById("ad-hc-history-body");
   if (!container) return;
 
-  // Deriving handicap progression from current HC
-  const currentHC = player.handicap || "4B";
   let steps = [];
-  if (currentHC === "7" || currentHC === "6A" || currentHC === "6B" || currentHC.startsWith("5")) {
-    steps = [
-      { date: "18 Mei 2025", from: "6", to: "7", reason: "Konsisten Top 8 di Turnamen Sirkuit POBSI", admin: "Admin POBSI" },
-      { date: "12 Mar 2025", from: "5", to: "6", reason: "Juara BOC Series #3", admin: "Admin POBSI" },
-      { date: "20 Jan 2025", from: "4", to: "5", reason: "Peningkatan Performa & Evaluasi Tim Teknis", admin: "Admin POBSI" },
-      { date: "12 Jan 2025", from: "-", to: "4", reason: "Registrasi & Pendaftaran Awal Atlet", admin: "Admin POBSI" }
-    ];
-  } else {
-    steps = [
-      { date: "12 Mar 2025", from: "3A", to: currentHC, reason: "Peningkatan konsistensi di Series", admin: "Admin POBSI" },
-      { date: "20 Jan 2025", from: "3B", to: "3A", reason: "Evaluasi tim pelatih & performa turnamen", admin: "Admin POBSI" },
-      { date: "12 Jan 2025", from: "-", to: "3B", reason: "Registrasi & Pendaftaran Awal Atlet", admin: "Admin POBSI" }
-    ];
-  }
 
-  // Prepend session audit logs
-  window.sessionHandicapLogs = window.sessionHandicapLogs || {};
-  const pId = player.id;
-  if (window.sessionHandicapLogs[pId]) {
-    steps = [...window.sessionHandicapLogs[pId], ...steps];
+  if (dbHistory && dbHistory.length > 0) {
+    // Use real database data — map DB columns to UI fields
+    steps = dbHistory.map(h => ({
+      date: h.date,
+      from: h.from_hc,
+      to: h.to_hc,
+      reason: h.reason,
+      admin: h.admin_name
+    }));
+  } else {
+    // Empty state
+    container.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-dim); font-size: 0.85rem;">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size: 1.5rem; margin-bottom: 6px; display: block; opacity: 0.4;"></i>
+          Belum ada riwayat perubahan handicap.
+        </td>
+      </tr>
+    `;
+    return;
   }
 
   container.innerHTML = steps.map(s => `
@@ -5278,7 +5314,7 @@ function updateEditUploadZone(areaId, base64Value, type) {
         </div>
       `;
     } else {
-      if (base64Value.startsWith("data:application/pdf")) {
+      if (base64Value.startsWith("data:application/pdf") || base64Value.toLowerCase().includes(".pdf")) {
         area.innerHTML = `
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fa-solid fa-file-pdf" style="font-size: 1.4rem; color: #ef4444; filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.2));"></i>
@@ -5489,7 +5525,7 @@ function setupAthleteDetailActions() {
   // Update handicap action (Overhauled to highly premium audit trail popup modal)
   const btnHCTop = document.getElementById("ad-btn-hc-top");
   const btnHCFooter = document.getElementById("ad-fbtn-hc");
-  function triggerHCUpdate() {
+  async function triggerHCUpdate() {
     const player = appData.players.find(p => p.id === adActivePlayerId);
     if (!player) return;
 
@@ -5520,26 +5556,21 @@ function setupAthleteDetailActions() {
       newBadge.textContent = selectNew.value;
     };
 
-    // Render Recent Changes History snapshot in the modal
-    const currentHC = player.handicap || "4B";
+    // Render Recent Changes History snapshot in the modal — fetch from DB
     let steps = [];
-    if (currentHC === "7" || currentHC === "6A" || currentHC === "6B" || currentHC.startsWith("5")) {
-      steps = [
-        { date: "18 Mei 2025", from: "6", to: "7", reason: "Konsisten Top 8 di Turnamen Sirkuit POBSI" },
-        { date: "12 Mar 2025", from: "5", to: "6", reason: "Juara BOC Series #3" },
-        { date: "20 Jan 2025", from: "4", to: "5", reason: "Peningkatan Performa & Evaluasi Tim Teknis" }
-      ];
-    } else {
-      steps = [
-        { date: "12 Mar 2025", from: "3A", to: currentHC, reason: "Peningkatan konsistensi di Series" },
-        { date: "20 Jan 2025", from: "3B", to: "3A", reason: "Evaluasi tim pelatih & performa turnamen" }
-      ];
-    }
-
-    // Merge session logs
-    window.sessionHandicapLogs = window.sessionHandicapLogs || {};
-    if (window.sessionHandicapLogs[player.id]) {
-      steps = [...window.sessionHandicapLogs[player.id], ...steps];
+    try {
+      const hcRes = await fetch(`/api/handicap-history?playerId=${player.id}`);
+      if (hcRes.ok) {
+        const hcData = await hcRes.json();
+        steps = hcData.map(h => ({
+          date: h.date,
+          from: h.from_hc,
+          to: h.to_hc,
+          reason: h.reason
+        })).slice(0, 5);
+      }
+    } catch(e) {
+      console.warn('Gagal memuat riwayat HC untuk modal:', e);
     }
 
     if (steps.length > 0) {
@@ -5611,7 +5642,8 @@ function setupAthleteDetailActions() {
       const oldIndex = hcOrder.indexOf(oldHC);
       const newIndex = hcOrder.indexOf(newHC);
       
-      const payload = { handicap: newHC };
+      const fullReason = reason ? `${source} — ${reason}` : source;
+      const payload = { handicap: newHC, hcChangeReason: fullReason, hcChangeAdmin: "Super Admin POBSI" };
       let pointsReset = false;
       
       if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1) {
@@ -5626,20 +5658,6 @@ function setupAthleteDetailActions() {
           body: JSON.stringify(payload)
         }).then(res => {
           if (res.ok) {
-            // Append change record in session logs
-            const currentDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-            window.sessionHandicapLogs = window.sessionHandicapLogs || {};
-            if (!window.sessionHandicapLogs[playerId]) {
-               window.sessionHandicapLogs[playerId] = [];
-            }
-            window.sessionHandicapLogs[playerId].unshift({
-              date: currentDate,
-              from: oldHC,
-              to: newHC,
-              reason: `${source} — ${reason}`,
-              admin: "Super Admin POBSI"
-            });
-
             if (pointsReset) {
               alert(`Handicap berhasil diperbarui menjadi HC ${newHC}! Poin handicap otomatis di-reset ke 0 karena atlet naik tingkat.`);
             } else {

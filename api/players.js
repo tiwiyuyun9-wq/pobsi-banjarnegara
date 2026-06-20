@@ -180,6 +180,22 @@ module.exports = async (req, res) => {
 
       if (updateErr) throw updateErr;
 
+      // Catat di handicap_history jika handicap berubah
+      const isHandicapChanged = handicap !== undefined && handicap.toString().trim() !== player.handicap;
+      if (isHandicapChanged) {
+        const { hcChangeReason, hcChangeAdmin } = req.body;
+        const currentDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        const historyLog = {
+          player_id: id,
+          date: currentDate,
+          from_hc: player.handicap,
+          to_hc: updated.handicap,
+          reason: hcChangeReason || "Kenaikan tingkat handicap otomatis",
+          admin_name: hcChangeAdmin || "Super Admin POBSI"
+        };
+        await supabase.from('handicap_history').insert([historyLog]);
+      }
+
       // Perbarui juga data di tabel standings jika nama, klub, atau handicap berubah
       if (name || club || handicap) {
         await supabase

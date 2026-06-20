@@ -133,3 +133,54 @@ ALTER TABLE clubs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE boc_sirkuits DISABLE ROW LEVEL SECURITY;
 ALTER TABLE boc_settings DISABLE ROW LEVEL SECURITY;
+
+-- 9. Buat Tabel Matches
+CREATE TABLE matches (
+    id SERIAL PRIMARY KEY,
+    player_id TEXT REFERENCES players(id) ON DELETE CASCADE,
+    opponent_name TEXT NOT NULL,
+    opponent_club TEXT NOT NULL,
+    opponent_avatar TEXT,
+    score TEXT NOT NULL,
+    outcome TEXT NOT NULL,
+    date TEXT NOT NULL
+);
+
+-- 10. Buat Tabel Tournament History
+CREATE TABLE tournament_history (
+    id SERIAL PRIMARY KEY,
+    player_id TEXT REFERENCES players(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    date TEXT NOT NULL,
+    venue TEXT NOT NULL,
+    badge TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    icon TEXT NOT NULL
+);
+
+ALTER TABLE matches DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tournament_history DISABLE ROW LEVEL SECURITY;
+
+-- 11. Buat Tabel Handicap History
+CREATE TABLE handicap_history (
+    id SERIAL PRIMARY KEY,
+    player_id TEXT REFERENCES players(id) ON DELETE CASCADE,
+    date TEXT NOT NULL,
+    from_hc TEXT NOT NULL,
+    to_hc TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    admin_name TEXT NOT NULL
+);
+
+-- 12. Buat Tabel Ranking History
+CREATE TABLE ranking_history (
+    id SERIAL PRIMARY KEY,
+    player_id TEXT REFERENCES players(id) ON DELETE CASCADE,
+    date TEXT NOT NULL,
+    rank INTEGER NOT NULL
+);
+
+ALTER TABLE handicap_history DISABLE ROW LEVEL SECURITY;
+ALTER TABLE ranking_history DISABLE ROW LEVEL SECURITY;
+
+

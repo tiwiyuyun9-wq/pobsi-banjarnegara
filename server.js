@@ -194,6 +194,53 @@ db.serialize(() => {
     fullname TEXT
   )`);
 
+  // 6. Buat Tabel Matches
+  db.run(`CREATE TABLE IF NOT EXISTS matches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    opponent_name TEXT NOT NULL,
+    opponent_club TEXT NOT NULL,
+    opponent_avatar TEXT,
+    score TEXT NOT NULL,
+    outcome TEXT NOT NULL,
+    date TEXT NOT NULL,
+    FOREIGN KEY(player_id) REFERENCES players(id) ON DELETE CASCADE
+  )`);
+
+  // 7. Buat Tabel Tournament History
+  db.run(`CREATE TABLE IF NOT EXISTS tournament_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    title TEXT NOT NULL,
+    date TEXT NOT NULL,
+    venue TEXT NOT NULL,
+    badge TEXT NOT NULL,
+    class_name TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    FOREIGN KEY(player_id) REFERENCES players(id) ON DELETE CASCADE
+  )`);
+
+  // 8. Buat Tabel Handicap History
+  db.run(`CREATE TABLE IF NOT EXISTS handicap_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    date TEXT NOT NULL,
+    from_hc TEXT NOT NULL,
+    to_hc TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    admin_name TEXT NOT NULL,
+    FOREIGN KEY(player_id) REFERENCES players(id) ON DELETE CASCADE
+  )`);
+
+  // 9. Buat Tabel Ranking History
+  db.run(`CREATE TABLE IF NOT EXISTS ranking_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    date TEXT NOT NULL,
+    rank INTEGER NOT NULL,
+    FOREIGN KEY(player_id) REFERENCES players(id) ON DELETE CASCADE
+  )`);
+
   // Lakukan Seeding Otomatis Akun Pengguna jika tabel users kosong
   db.get(`SELECT COUNT(*) as count FROM users`, (err, row) => {
     if (err) {
@@ -318,6 +365,10 @@ if (isSupabaseEnabled) {
   const changePasswordHandler = require('./api/admin/change-password');
   const bocSirkuitsHandler = require('./api/boc-sirkuits');
   const bocSettingsHandler = require('./api/boc-settings');
+  const matchesHandler = require('./api/matches');
+  const tournamentHistoryHandler = require('./api/tournament-history');
+  const handicapHistoryHandler = require('./api/handicap-history');
+  const rankingHistoryHandler = require('./api/ranking-history');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -371,6 +422,14 @@ if (isSupabaseEnabled) {
   app.all('/api/admin/users', bridge(usersHandler));
   app.all('/api/admin/change-password', bridge(changePasswordHandler));
 
+  // Matches & Tournament History
+  app.all('/api/matches', bridge(matchesHandler));
+  app.all('/api/tournament-history', bridge(tournamentHistoryHandler));
+
+  // Handicap & Ranking History
+  app.all('/api/handicap-history', bridge(handicapHistoryHandler));
+  app.all('/api/ranking-history', bridge(rankingHistoryHandler));
+
 } else {
   console.log('💾 SQLite Local Mode is ACTIVE! Using SQLite database handlers...');
   
@@ -382,6 +441,10 @@ if (isSupabaseEnabled) {
   app.use('/api/boc-sirkuits', require('./api/routes/bocSirkuitsRoutes'));
   app.use('/api/boc-settings', require('./api/routes/bocSettingsRoutes'));
   app.use('/api/boc/reset', require('./api/routes/bocResetRoutes'));
+  app.use('/api/matches', require('./api/routes/matchRoutes'));
+  app.use('/api/tournament-history', require('./api/routes/tournamentHistoryRoutes'));
+  app.use('/api/handicap-history', require('./api/routes/handicapHistoryRoutes'));
+  app.use('/api/ranking-history', require('./api/routes/rankingHistoryRoutes'));
   
   app.get('/api/db-status', (req, res) => {
     res.json({ database: 'SQLite' });
