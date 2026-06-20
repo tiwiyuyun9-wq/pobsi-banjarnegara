@@ -4341,7 +4341,9 @@ tr:hover td.sticky-col {
   border-radius: var(--radius-sm);
   overflow: visible;
 }
-#event-poster-preview-img {
+#event-poster-preview-img,
+#edit-event-poster-preview-img,
+#boc-cover-preview-img {
   width: 100%;
   height: 100%;
   border-radius: var(--radius-sm);
@@ -4349,6 +4351,7 @@ tr:hover td.sticky-col {
   border: 2px solid var(--primary-light);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
+
 
 /* ==========================================================================
    SUPERADMIN DASHBOARD OVERHAUL - PREMIUM GLASSMORPHISM V3 DESIGN SYSTEM
@@ -11965,5 +11968,20 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
   -webkit-text-fill-color: var(--text-main) !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Public BOC Hero Section styling (One-Screen Layout) */
+#boc-public-hero-section {
+  min-height: calc(100vh - 72px) !important;
+  padding: 32px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+@media (max-width: 768px) {
+  #boc-public-hero-section {
+    min-height: auto !important;
+    padding: 24px 0 !important;
+  }
 }
 

@@ -80,6 +80,13 @@ exports.saveSettings = async (req, res) => {
       ]
     );
 
+    if (coverUrl) {
+      await dbRun(
+        `UPDATE events SET poster = ? WHERE elimination_type = 'boc' AND title LIKE ?`,
+        [coverUrl, `%${year}%`]
+      );
+    }
+
     res.json({ success: true, message: `Settings BOC tahun ${year} berhasil disimpan!` });
   } catch (error) {
     res.status(500).json({ error: "Gagal menyimpan settings BOC ke SQLite: " + error.message });
