@@ -86,6 +86,11 @@ async function initApp() {
 
   // Load Admin Panel Control
   setupAdminPanel();
+
+  // Jalankan routing hash awal setelah semua data API dan pengaturan BOC termuat
+  if (typeof window.checkInitialRoute === 'function') {
+    window.checkInitialRoute();
+  }
 }
 
 // 2. Fetch Data dari Vercel Serverless API (dengan Fallback Cerdas ke data.js)
@@ -464,7 +469,13 @@ function setupTabNavigation() {
     });
   }
 
-  // Jalankan routing hash saat halaman pertama kali dibuka/direfresh
+  // Jalankan routing hash saat halaman pertama kali dibuka/direfresh (Akan dijalankan setelah data API termuat)
+  // checkInitialRoute() dipanggil di akhir initApp()
+}
+
+// 4b. Initial Hash Routing Logic (to prevent race conditions on page refresh)
+window.checkInitialRoute = function() {
+  const validTabs = ["home", "champions", "handicap", "events", "docs", "clubs", "about", "privacy", "terms"];
   const initialHash = window.location.hash.substring(1);
   if (validTabs.includes(initialHash)) {
     switchTab("tab-" + initialHash, false);
@@ -504,9 +515,12 @@ function setupTabNavigation() {
       switchTab("tab-champions", false);
     }
   } else {
-    switchTab("tab-home", false);
+    // Only switch to home if there is no other tab or hash
+    if (!initialHash) {
+      switchTab("tab-home", false);
+    }
   }
-}
+};
 
 // 5. Load Statistics
 function loadStatistics() {
@@ -1714,9 +1728,9 @@ function renderEvents(filter = "all") {
       </div>
     `;
 
-    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
-      ? event.poster 
-      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+    const posterUrl = (event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) 
+      ? bocSettings.cover 
+      : (event.poster && event.poster !== 'images/event-poster.png' ? event.poster : 'images/event-poster.png');
 
     return `
       <div class="event-premium-card" onclick="openPublicEventDetail('${event.id}')" style="cursor: pointer;">
@@ -2179,7 +2193,8 @@ async function checkAdminRoute() {
     if (profilePage) profilePage.style.display = "none";
 
     const eventPage = document.getElementById('public-event-detail-page');
-    if (eventPage) eventPage.style.display = "none";
+    const isPlayoffHash = window.location.hash.startsWith("#champions-") && window.location.hash.endsWith("-playoff");
+    if (eventPage && !isPlayoffHash) eventPage.style.display = "none";
 
     // Kembalikan ke tab aktif yang sesuai (misalnya saat klik tombol back browser dari halaman profil)
     const activeLink = document.querySelector(".nav-link.active");
@@ -7618,9 +7633,9 @@ function renderBocPlayoffConsole(event) {
   // Set background image
   const heroBg = document.getElementById("boc-playoff-hero-bg");
   if (heroBg) {
-    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png' && event.poster !== 'images/dashboard-hero.png') 
-      ? event.poster 
-      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/dashboard-hero.png');
+    const posterUrl = (event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) 
+      ? bocSettings.cover 
+      : (event.poster && event.poster !== 'images/event-poster.png' && event.poster !== 'images/dashboard-hero.png' ? event.poster : 'images/dashboard-hero.png');
     heroBg.style.backgroundImage = `url('${posterUrl}')`;
   }
 
@@ -8049,9 +8064,9 @@ function renderPublicEventDetail(event) {
 
   const heroBgEl = document.getElementById("pub-event-hero-bg");
   if (heroBgEl) {
-    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
-      ? event.poster 
-      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+    const posterUrl = (event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) 
+      ? bocSettings.cover 
+      : (event.poster && event.poster !== 'images/event-poster.png' ? event.poster : 'images/event-poster.png');
     heroBgEl.style.backgroundImage = `url('${posterUrl}')`;
   }
 
@@ -9725,9 +9740,9 @@ function renderEventCard(e, isList = false) {
   const isCompleted = e.status === "Selesai" || e.status === "Cancelled";
   const actionText = isCompleted ? "Lihat Hasil" : "Kelola Event";
   
-  const posterUrl = (e.poster && e.poster !== 'images/event-poster.png') 
-    ? e.poster 
-    : ((e.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+  const posterUrl = (e.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) 
+    ? bocSettings.cover 
+    : (e.poster && e.poster !== 'images/event-poster.png' ? e.poster : 'images/event-poster.png');
 
   if (isList) {
     return `
@@ -11830,9 +11845,9 @@ function openEventDetail(eventId, updateUrl = true) {
   // Update Hero Banner Background image
   const heroBannerBg = document.getElementById("event-detail-hero-banner-bg");
   if (heroBannerBg) {
-    const posterUrl = (event.poster && event.poster !== 'images/event-poster.png') 
-      ? event.poster 
-      : ((event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) ? bocSettings.cover : 'images/event-poster.png');
+    const posterUrl = (event.elimination_type === 'boc' && typeof bocSettings !== 'undefined' && bocSettings.cover) 
+      ? bocSettings.cover 
+      : (event.poster && event.poster !== 'images/event-poster.png' ? event.poster : 'images/event-poster.png');
     heroBannerBg.style.backgroundImage = `url('${posterUrl}')`;
   }
 
