@@ -320,63 +320,18 @@
           <!-- Inner layout container matching home page hero grid -->
           <div class="hero-inner-container">
             
-            <!-- Left Column: Tag, Title, Subtitle, Playoff Banners -->
-            <div class="hero-left-content" style="display: flex; flex-direction: column; gap: 20px; align-items: flex-start; text-align: left;">
-              <span class="badge-premium" style="margin: 0; font-size: 0.75rem; letter-spacing: 0.5px;"><i class="fa-solid fa-trophy text-gold"></i> TURNAMEN BERGENGSI</span>
+            <!-- Left Column: Tag, Title, Subtitle & Interactive Buttons -->
+            <div class="hero-left-content" style="display: flex; flex-direction: column; gap: 24px; align-items: flex-start; text-align: left;">
+              <span class="badge-premium" style="margin: 0; font-size: 0.78rem; letter-spacing: 1.5px;"><i class="fa-solid fa-trophy text-gold"></i> KLASEMEN SIRKUIT</span>
               
               <div style="width: 100%;">
-                <h1 class="hero-title" style="margin: 0 0 12px 0;">Battle Of Champions <span class="dynamic-boc-year">2026</span></h1>
-                <p class="hero-description" style="margin: 0; max-width: 680px; font-size: 1.05rem; color: rgba(255, 255, 255, 0.7); line-height: 1.55;">Papan klasemen akumulasi poin sirkuit resmi biliar POBSI Kabupaten Banjarnegara. Perebutan sengit tiket Grand Final.</p>
-              </div>
-
-              <!-- Playoff Announcement Banners -->
-              <div id="boc-hero-banners-container" style="width: 100%;">
-                <!-- Playoff Not Scheduled Banner -->
-                <div id="boc-not-scheduled-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(239, 68, 68, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                  <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 280px;">
-                    <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; color: #f87171; font-size: 1.3rem; flex-shrink: 0;">
-                      <i class="fa-solid fa-hourglass-half"></i>
-                    </div>
-                    <div>
-                      <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 2px 0; font-size: 1.05rem;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-                      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Jadwal Grand Final belum dirilis. Turnamen puncak akan dijadwalkan setelah seluruh seri selesai.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Playoff Scheduled Banner -->
-                <div id="boc-schedule-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(59, 130, 246, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                  <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 280px;">
-                    <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.3rem; flex-shrink: 0;">
-                      <i class="fa-solid fa-calendar-days"></i>
-                    </div>
-                    <div>
-                      <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 2px 0; font-size: 1.05rem;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-                      <p id="boc-schedule-banner-text" style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Grand Final BOC telah dijadwalkan pada - di -.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Playoff Ongoing Banner -->
-                <div id="boc-playoff-banner" class="overview-header-block-premium" style="display: none; background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-lg), 0 0 35px rgba(251, 191, 36, 0.03); align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                  <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 280px;">
-                    <div id="boc-playoff-banner-icon-bg" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.2); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.3rem; flex-shrink: 0;">
-                      <i id="boc-playoff-banner-icon" class="fa-solid fa-trophy"></i>
-                    </div>
-                    <div>
-                      <h3 style="font-family: var(--font-headers); font-weight: 800; color: #fff; margin: 0 0 2px 0; font-size: 1.05rem;">Grand Final Battle of Champions <span class="dynamic-boc-year">2026</span></h3>
-                      <p id="boc-playoff-banner-desc" style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Fase playoff sedang berlangsung! Tonton live sirkuit.</p>
-                    </div>
-                  </div>
-                  <button id="btn-view-boc-playoff" class="pm-btn pm-btn-primary" style="background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); color: #0f172a; font-weight: 800; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); border: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer; height: 38px;">
-                    <i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff
-                  </button>
-                </div>
+                <h1 class="hero-title" style="margin: 0 0 12px 0;">Battle Of Champions <br><span class="hero-title-gradient">Musim <span class="dynamic-boc-year">2026</span></span></h1>
+                <p class="hero-description" style="margin: 0; max-width: 540px; font-size: 1.05rem; color: var(--text-muted); line-height: 1.7;">Papan klasemen akumulasi poin sirkuit resmi biliar POBSI Kabupaten Banjarnegara. Perebutan sengit tiket kualifikasi menuju ajang prestisius Grand Final.</p>
               </div>
             </div>
             
-            <!-- Right Column: Year Dropdown & Stats Card -->
-            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+            <!-- Right Column: Year Dropdown, Playoff Status Card & Stats Box -->
+            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; align-items: flex-end;">
               <!-- Season Select Row -->
               <div style="display: flex; justify-content: flex-end; width: 100%;">
                 <div class="select-wrapper" style="margin: 0; min-width: 140px; position: relative; z-index: 10;">
@@ -387,30 +342,98 @@
                 </div>
               </div>
 
+              <!-- Playoff Not Scheduled Card -->
+              <div id="boc-not-scheduled-banner" class="hero-floating-card" style="display: none; width: 100%; border-color: rgba(239, 68, 68, 0.2); background: rgba(220, 38, 38, 0.05); cursor: default; transform: none; box-shadow: var(--shadow-lg);">
+                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #f87171; flex-shrink: 0;">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                  </div>
+                  <div style="flex: 1;">
+                    <span class="floating-card-sub" style="color: #f87171; font-weight: 700; font-size: 10px; letter-spacing: 0.8px;">GRAND FINAL</span>
+                    <h4 style="font-size: 0.9rem; font-weight: 800; color: #fff; margin: 0; font-family: var(--font-headers);">Jadwal Belum Dirilis</h4>
+                  </div>
+                </div>
+                <p style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.55); margin: 8px 0 0 0; line-height: 1.4;">Jadwal Grand Final akan dirilis setelah seluruh seri sirkuit utama selesai dilaksanakan.</p>
+              </div>
+
+              <!-- Playoff Scheduled Card -->
+              <div id="boc-schedule-banner" class="hero-floating-card" style="display: none; width: 100%; border-color: rgba(59, 130, 246, 0.25); background: rgba(37, 99, 235, 0.05); cursor: default; transform: none; box-shadow: var(--shadow-lg);">
+                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; color: #60a5fa; flex-shrink: 0;">
+                    <i class="fa-solid fa-calendar-days"></i>
+                  </div>
+                  <div style="flex: 1;">
+                    <span class="floating-card-sub" style="color: #60a5fa; font-weight: 700; font-size: 10px; letter-spacing: 0.8px;">JADWAL GRAND FINAL</span>
+                    <h4 style="font-size: 0.9rem; font-weight: 800; color: #fff; margin: 0; font-family: var(--font-headers);">Telah Dijadwalkan</h4>
+                  </div>
+                </div>
+                <p id="boc-schedule-banner-text" style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.6); margin: 8px 0 0 0; line-height: 1.4;">Grand Final BOC telah dijadwalkan pada - di -.</p>
+              </div>
+
+              <!-- Playoff Ongoing Card -->
+              <div id="boc-playoff-banner" class="hero-floating-card" style="display: none; width: 100%; border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.06); cursor: default; transform: none; box-shadow: var(--shadow-lg); padding: 18px 20px;">
+                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                  <div id="boc-playoff-banner-icon-bg" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1rem; flex-shrink: 0;">
+                    <i id="boc-playoff-banner-icon" class="fa-solid fa-trophy"></i>
+                  </div>
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span class="live-badge-dot" style="background: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse-live-dot 1.5s infinite alternate; width: 6px; height: 6px; border-radius: 50%;"></span>
+                      <span class="floating-card-sub" style="color: #fbbf24; font-weight: 800; margin: 0; font-size: 10px; letter-spacing: 0.8px;">PLAYOFF LIVE</span>
+                    </div>
+                    <h4 style="font-size: 0.9rem; font-weight: 800; color: #fff; margin: 2px 0 0 0; font-family: var(--font-headers);">Grand Final BOC <span class="dynamic-boc-year">2026</span></h4>
+                  </div>
+                </div>
+                <p id="boc-playoff-banner-desc" style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.6); margin: 8px 0 12px 0; line-height: 1.4;">Fase playoff sedang berlangsung! Tonton live sirkuit.</p>
+                <button id="btn-view-boc-playoff" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.78rem; border-radius: var(--radius-sm); font-weight: 800; width: 100%; height: auto; justify-content: center; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">
+                  <i class="fa-solid fa-square-poll-vertical"></i> Lihat Live Bracket & Playoff
+                </button>
+              </div>
+
               <!-- Premium Stats Box -->
-              <div class="hero-floating-card" style="width: 100%; height: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); cursor: default; transform: none; box-shadow: var(--shadow-lg);">
+              <div class="hero-floating-card" style="width: 100%; height: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; cursor: default; transform: none; box-shadow: var(--shadow-lg);">
                 <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
-                  <h4 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin: 0 0 2px 0; font-family: var(--font-headers); letter-spacing: 0.5px;">Kualifikasi Seri Sirkuit Utama</h4>
-                  <p style="font-size: 0.72rem; color: rgba(255,255,255,0.5); margin: 0; line-height: 1.3;">Akumulasi sirkuit perebutan tiket 16 besar.</p>
+                  <span class="floating-card-sub" style="color: var(--primary-light); font-weight: 800; font-size: 10px; letter-spacing: 0.8px;"><i class="fa-solid fa-chart-simple"></i> DATA KUALIFIKASI SIRKUIT</span>
+                  <h4 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin: 2px 0 0 0; font-family: var(--font-headers); letter-spacing: 0.5px;">Kualifikasi Seri Sirkuit Utama</h4>
                 </div>
                 
                 <!-- 2x2 Grid for Stats -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.6rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">TOTAL SERI</span>
-                    <span id="boc-hero-stat-series" style="font-size: 1.15rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">10 Seri</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; color: #60a5fa; flex-shrink: 0;">
+                      <i class="fa-solid fa-calendar-check" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-size: 0.56rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.5px;">TOTAL SERI</span>
+                      <span id="boc-hero-stat-series" style="font-size: 1.05rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">10 Seri</span>
+                    </div>
                   </div>
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.6rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">ATLET BERSAING</span>
-                    <span id="boc-hero-stat-players" style="font-size: 1.15rem; color: var(--color-accent); font-weight: 800; font-family: var(--font-headers);">-</span>
+                  <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: center; color: #22d3ee; flex-shrink: 0;">
+                      <i class="fa-solid fa-users" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-size: 0.56rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.5px;">ATLET BERSAING</span>
+                      <span id="boc-hero-stat-players" style="font-size: 1.05rem; color: var(--color-accent); font-weight: 800; font-family: var(--font-headers);">-</span>
+                    </div>
                   </div>
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.6rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">CUT-OFF (P16)</span>
-                    <span id="boc-hero-stat-cutoff" style="font-size: 1.15rem; color: var(--color-gold); font-weight: 800; font-family: var(--font-headers);">-</span>
+                  <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: #fbbf24; flex-shrink: 0;">
+                      <i class="fa-solid fa-circle-nodes" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-size: 0.56rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.5px;">CUT-OFF (P16)</span>
+                      <span id="boc-hero-stat-cutoff" style="font-size: 1.05rem; color: var(--color-gold); font-weight: 800; font-family: var(--font-headers);">-</span>
+                    </div>
                   </div>
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.6rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">ESTIMASI PRIZE POOL</span>
-                    <span id="boc-hero-stat-prizepool" style="font-size: 1.15rem; color: var(--color-green); font-weight: 800; font-family: var(--font-headers);">Rp 15.000.000</span>
+                  <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: #34d399; flex-shrink: 0;">
+                      <i class="fa-solid fa-sack-dollar" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-size: 0.56rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.5px;">ESTIMASI PRIZE</span>
+                      <span id="boc-hero-stat-prizepool" style="font-size: 1.05rem; color: var(--color-green); font-weight: 800; font-family: var(--font-headers);">Rp 15.000.000</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -480,34 +503,6 @@
         </div>
       </div>
 
-      <!-- Premium BOC Rules Reference (Below Standings Table) -->
-      <div class="boc-rules-grid" style="margin-top: 24px; margin-bottom: 24px;">
-        <div class="rules-card border-gold">
-          <h3 class="rules-card-title"><i class="fa-solid fa-circle-info text-gold"></i> Aturan Kelayakan & Poin BOC <span class="dynamic-boc-year">2026</span></h3>
-          <p class="rules-card-desc">Sesuai Surat Edaran Resmi POBSI Banjarnegara, <span class="dynamic-boc-cutoff">16</span> pemain teratas (Cut-off Zona BOC) pada akhir musim November <span class="dynamic-boc-year">2026</span> berhak tampil di babak final bergengsi. Poin diperoleh dari keikutsertaan turnamen resmi:</p>
-          <ul class="rules-list-grid">
-            <li><span class="badge-gold">Juara 1</span> 12 Pts</li>
-            <li><span class="badge-silver">Juara 2</span> 9 Pts</li>
-            <li><span class="badge-bronze">Semifinalis</span> 7 Pts</li>
-            <li><span class="badge-blue">Perempatfinalis</span> 5 Pts</li>
-            <li><span class="badge-gray">16 Besar</span> 3 Pts</li>
-            <li><span class="badge-purple">32 Besar</span> 1 Pts</li>
-          </ul>
-        </div>
-        
-        <div class="rules-card border-accent">
-          <h3 class="rules-card-title"><i class="fa-solid fa-scale-balanced text-accent"></i> Aturan Khusus HC 4A & Playoff</h3>
-          <ul class="rules-bullet-list">
-            <li><strong>Ketentuan Khusus HC 4A:</strong> Penilaian poin diambil dari keikutsertaan atlet pada turnamen luar kota Banjarnegara yang waktunya bersamaan dengan Home Tournament lokal.</li>
-            <li><strong>Sistem Playoff Kuota Terakhir:</strong> Jika terjadi poin yang sama pada akhir musim:
-              <ul>
-                <li><strong>Lebih dari 4 orang:</strong> Dipertandingkan dengan sistem gugur (Single Elimination).</li>
-                <li><strong>Kurang dari 4 orang:</strong> Dipertandingkan dengan sistem setengah kompetisi (Setengah Kompetisi).</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
       </div>
       <div id="boc-public-playoff-container" style="display: none;"></div>
     </section>
