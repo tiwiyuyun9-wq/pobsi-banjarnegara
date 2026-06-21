@@ -1137,9 +1137,40 @@ function renderStandings(searchQuery = "") {
   
   // Find completed/active sirkuits that have already run/completed
   const completedSirkuits = (bocSirkuits || []).map((s, idx) => ({ name: s, index: idx })).filter(item => {
-    // 1. Check if matching event is completed & points published
-    const matchEvent = (appData.events || []).find(e => e.title && e.title.toUpperCase().includes(item.name.toUpperCase()) && e.status === "Selesai" && e.points_published === 1);
-    if (matchEvent) return true;
+    // 1. Check if matching event is completed (status "Selesai")
+    const sName = item.name.toUpperCase().trim();
+    let sKeyword = sName.split(" ")[0];
+    const keywordMap = {
+      "LMS": "LUMINOUS",
+      "SYP": "SURYA",
+      "PLT": "PLATINUM"
+    };
+    sKeyword = keywordMap[sKeyword] || sKeyword;
+
+    let sSeries = "1";
+    const sMatch = sName.match(/\((\d+)\)/);
+    if (sMatch) {
+      sSeries = sMatch[1];
+    } else if (sName.includes(" 2")) {
+      sSeries = "2";
+    } else if (sName.includes(" 3")) {
+      sSeries = "3";
+    }
+
+    const matches = (appData.events || []).filter(e => {
+      if (!e.title) return false;
+      const eTitle = e.title.toUpperCase();
+      const words = eTitle.split(/[^A-Z0-9]+/);
+      if (!words.includes(sKeyword)) return false;
+      const isHtEvent = eTitle.includes("HOME") || eTitle.includes("HT") || eTitle.includes("CLUB");
+      const isHtSirkuit = sName.includes("HT");
+      if (isHtSirkuit && !isHtEvent) return false;
+      return true;
+    }).sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+
+    const seriesIdx = parseInt(sSeries, 10) - 1;
+    const matchEvent = matches[seriesIdx];
+    if (matchEvent && matchEvent.status === "Selesai") return true;
 
     // 2. Check if anyone has points in exactBocPoints for this sirkuit index
     for (let pName in exactBocPoints) {
