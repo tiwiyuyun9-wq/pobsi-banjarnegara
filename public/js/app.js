@@ -6631,7 +6631,6 @@ function setupBocAdminListeners() {
     const inpDate = document.getElementById("inp-boc-schedule-date");
     const inpTime = document.getElementById("inp-boc-schedule-time");
     const inpVenue = document.getElementById("inp-boc-schedule-venue");
-    const inpNotes = document.getElementById("inp-boc-schedule-notes");
     const scheduleDatePicker = document.getElementById("inp-boc-schedule-date-wrapper")?._flatpickr;
 
     if (saved) {
@@ -6643,7 +6642,6 @@ function setupBocAdminListeners() {
       }
       if (inpTime) inpTime.value = schedule.time || "";
       if (inpVenue) inpVenue.value = schedule.venue || "";
-      if (inpNotes) inpNotes.value = schedule.notes || "";
     } else {
       const defaultDate = getDefaultBocScheduleDate();
       if (scheduleDatePicker) {
@@ -6653,7 +6651,6 @@ function setupBocAdminListeners() {
       }
       if (inpTime) inpTime.value = "10:00";
       if (inpVenue) inpVenue.value = "Midnight Arena (Banjarnegara)";
-      if (inpNotes) inpNotes.value = "Grand Final puncak perebutan juara sirkuit utama.";
     }
 
     // Prefill settings fields too
@@ -6836,7 +6833,6 @@ function setupBocAdminListeners() {
       const date = document.getElementById("inp-boc-schedule-date").value;
       const time = document.getElementById("inp-boc-schedule-time").value;
       const venue = document.getElementById("inp-boc-schedule-venue").value;
-      const notes = document.getElementById("inp-boc-schedule-notes").value;
 
       const cutoffVal = parseInt(document.getElementById("set-boc-cutoff").value, 10);
       const maxhcVal = document.getElementById("set-boc-maxhc").value;
@@ -6853,7 +6849,7 @@ function setupBocAdminListeners() {
         cutoff_limit: cutoffVal,
         max_handicap: maxhcVal,
         year: newYear,
-        playoff_schedule: { date, time, venue, notes },
+        playoff_schedule: { date, time, venue },
         prizes: {
           juara1: prize1,
           juara2: prize2,
@@ -7717,20 +7713,15 @@ function renderBocPlayoffConsole(event) {
   });
 
   // Populate dynamic information tab fields
-  const infoNotesEl = document.getElementById("boc-playoff-info-notes");
-  const infoRulesEl = document.getElementById("boc-playoff-info-rules");
+  const infoDescEl = document.getElementById("boc-playoff-info-description");
   const infoVenueEl = document.getElementById("boc-playoff-info-venue");
   const infoDateEl = document.getElementById("boc-playoff-info-date");
 
   const savedSchedule = (typeof bocSettings !== "undefined") ? bocSettings.playoff_schedule : null;
-  const notesVal = savedSchedule ? savedSchedule.notes : "";
   const rulesVal = (typeof bocSettings !== "undefined") ? bocSettings.rules : "";
 
-  if (infoNotesEl) {
-    infoNotesEl.textContent = notesVal || "Grand Final puncak perebutan juara sirkuit utama.";
-  }
-  if (infoRulesEl) {
-    infoRulesEl.textContent = rulesVal || "Aturan poin standar POBSI Banjarnegara.";
+  if (infoDescEl) {
+    infoDescEl.textContent = rulesVal || event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
   }
 
   // Use schedule date, time, and venue if present in settings, otherwise fallback to event
