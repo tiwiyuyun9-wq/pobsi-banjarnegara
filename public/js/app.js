@@ -6558,15 +6558,13 @@ function setupBocAdminListeners() {
 
   window.updateBocScheduleWizardUI = function() {
     const step = window.currentBocScheduleStep;
-    const panes = document.querySelectorAll(".boc-schedule-step-pane");
+    const panes = document.querySelectorAll(".boc-settings-step-pane");
     panes.forEach(pane => {
       const paneStep = parseInt(pane.getAttribute("data-step"), 10);
       if (paneStep === step) {
         pane.classList.add("active");
-        pane.style.display = "flex";
       } else {
         pane.classList.remove("active");
-        pane.style.display = "none";
       }
     });
 
