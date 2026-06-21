@@ -7810,6 +7810,7 @@ function renderBocPlayoffConsole(event) {
   // Dynamic Champion Card Showcase
   const dynamicCardContainer = document.getElementById("boc-playoff-hero-dynamic-card-container");
   if (dynamicCardContainer) {
+    const heroRight = dynamicCardContainer.parentElement;
     const prevYear = (parseInt(currentBocYear) - 1).toString();
     const defendingChampions = {
       "2028": { name: "Didon", club: "Platinum Billiard", year: "2027" },
@@ -7818,6 +7819,7 @@ function renderBocPlayoffConsole(event) {
     };
 
     if (isCompleted && winnerName) {
+      if (heroRight) heroRight.style.display = "flex";
       // Find winner details
       const winnerPlayer = (appData.players || []).find(p => p.name === winnerName) || (appData.standings || []).find(s => s.name === winnerName);
       const winnerClub = winnerPlayer ? winnerPlayer.club : "-";
@@ -7838,47 +7840,53 @@ function renderBocPlayoffConsole(event) {
         </div>
       `;
     } else {
-      // Find defending champion details
-      let defendingChamp = defendingChampions[currentBocYear];
-      if (!defendingChamp) {
-        // Try to find it dynamically from the previous year's event in appData.events
-        const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.title.includes(prevYear) || e.description?.includes(prevYear)));
-        if (prevEvent) {
-          try {
-            const prevBracket = JSON.parse(prevEvent.bracket || "{}");
-            const prevWinner = prevBracket.mainBracket && prevBracket.mainBracket[6] && prevBracket.mainBracket[6].winner;
-            if (prevWinner) {
-              const prevWinnerPlayer = (appData.players || []).find(p => p.name === prevWinner) || (appData.standings || []).find(s => s.name === prevWinner);
-              defendingChamp = {
-                name: prevWinner,
-                club: prevWinnerPlayer ? prevWinnerPlayer.club : "-",
-                year: prevYear
-              };
-            }
-          } catch (e) {}
+      if (currentBocYear === "2026") {
+        dynamicCardContainer.innerHTML = "";
+        if (heroRight) heroRight.style.display = "none";
+      } else {
+        if (heroRight) heroRight.style.display = "flex";
+        // Find defending champion details
+        let defendingChamp = defendingChampions[currentBocYear];
+        if (!defendingChamp) {
+          // Try to find it dynamically from the previous year's event in appData.events
+          const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.title.includes(prevYear) || e.description?.includes(prevYear)));
+          if (prevEvent) {
+            try {
+              const prevBracket = JSON.parse(prevEvent.bracket || "{}");
+              const prevWinner = prevBracket.mainBracket && prevBracket.mainBracket[6] && prevBracket.mainBracket[6].winner;
+              if (prevWinner) {
+                const prevWinnerPlayer = (appData.players || []).find(p => p.name === prevWinner) || (appData.standings || []).find(s => s.name === prevWinner);
+                defendingChamp = {
+                  name: prevWinner,
+                  club: prevWinnerPlayer ? prevWinnerPlayer.club : "-",
+                  year: prevYear
+                };
+              }
+            } catch (e) {}
+          }
         }
-      }
-      if (!defendingChamp) {
-        defendingChamp = { name: "Didon", club: "Platinum Billiard", year: prevYear };
-      }
+        if (!defendingChamp) {
+          defendingChamp = { name: "Didon", club: "Platinum Billiard", year: prevYear };
+        }
 
-      // Retrieve player data for defending champ to get avatar
-      const defPlayer = (appData.players || []).find(p => p.name === defendingChamp.name) || (appData.standings || []).find(s => s.name === defendingChamp.name);
-      const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.png';
+        // Retrieve player data for defending champ to get avatar
+        const defPlayer = (appData.players || []).find(p => p.name === defendingChamp.name) || (appData.standings || []).find(s => s.name === defendingChamp.name);
+        const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.png';
 
-      dynamicCardContainer.innerHTML = `
-        <div class="boc-finalist-profile-card" onclick="openAthleteProfile('${generateSlug(defendingChamp.name)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; backdrop-filter: blur(12px);">
-          <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); transition: border-color 0.2s;">
-            <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+        dynamicCardContainer.innerHTML = `
+          <div class="boc-finalist-profile-card" onclick="openAthleteProfile('${generateSlug(defendingChamp.name)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; backdrop-filter: blur(12px);">
+            <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); transition: border-color 0.2s;">
+              <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+            </div>
+            <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">DEFENDING CHAMPION</span>
+            <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${defendingChamp.name}</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> ${defendingChamp.club}</span>
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; width: 100%; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+              BOC ${defendingChamp.year} Winner
+            </div>
           </div>
-          <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">DEFENDING CHAMPION</span>
-          <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${defendingChamp.name}</h3>
-          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> ${defendingChamp.club}</span>
-          <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; width: 100%; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
-            BOC ${defendingChamp.year} Winner
-          </div>
-        </div>
-      `;
+        `;
+      }
     }
   }
 
