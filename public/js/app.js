@@ -10406,10 +10406,13 @@ function setupEventManagement() {
     mcWoP1.addEventListener("click", () => {
       const s1Input = document.getElementById("mc-s1-input");
       const s2Input = document.getElementById("mc-s2-input");
+      const raceToInput = document.getElementById("mc-raceto-input");
+      const raceToVal = raceToInput ? parseInt(raceToInput.value, 10) : 4;
+      const raceTo = isNaN(raceToVal) || raceToVal < 1 ? 4 : raceToVal;
       if (s1Input && s2Input) {
-        s1Input.value = "7";
+        s1Input.value = raceTo.toString();
         s2Input.value = "0";
-        showCustomToast("Skor WO Pemain 1 terisi (7-0)! Klik Simpan Skor untuk menyimpan.", "success");
+        showCustomToast(`Skor WO Pemain 1 terisi (${raceTo}-0)! Klik Simpan Skor untuk menyimpan.`, "success");
       }
     });
   }
@@ -10419,10 +10422,13 @@ function setupEventManagement() {
     mcWoP2.addEventListener("click", () => {
       const s1Input = document.getElementById("mc-s1-input");
       const s2Input = document.getElementById("mc-s2-input");
+      const raceToInput = document.getElementById("mc-raceto-input");
+      const raceToVal = raceToInput ? parseInt(raceToInput.value, 10) : 4;
+      const raceTo = isNaN(raceToVal) || raceToVal < 1 ? 4 : raceToVal;
       if (s1Input && s2Input) {
         s1Input.value = "0";
-        s2Input.value = "7";
-        showCustomToast("Skor WO Pemain 2 terisi (0-7)! Klik Simpan Skor untuk menyimpan.", "success");
+        s2Input.value = raceTo.toString();
+        showCustomToast(`Skor WO Pemain 2 terisi (0-${raceTo})! Klik Simpan Skor untuk menyimpan.`, "success");
       }
     });
   }
