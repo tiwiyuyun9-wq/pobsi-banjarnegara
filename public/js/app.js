@@ -7713,15 +7713,20 @@ function renderBocPlayoffConsole(event) {
   });
 
   // Populate dynamic information tab fields
-  const infoDescEl = document.getElementById("boc-playoff-info-description");
+  const infoNotesEl = document.getElementById("boc-playoff-info-notes");
+  const infoRulesEl = document.getElementById("boc-playoff-info-rules");
   const infoVenueEl = document.getElementById("boc-playoff-info-venue");
   const infoDateEl = document.getElementById("boc-playoff-info-date");
 
   const savedSchedule = (typeof bocSettings !== "undefined") ? bocSettings.playoff_schedule : null;
   const rulesVal = (typeof bocSettings !== "undefined") ? bocSettings.rules : "";
 
-  if (infoDescEl) {
-    infoDescEl.textContent = rulesVal || event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
+  const displayVal = rulesVal || event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
+  if (infoNotesEl) {
+    infoNotesEl.textContent = displayVal;
+  }
+  if (infoRulesEl) {
+    infoRulesEl.textContent = displayVal;
   }
 
   // Use schedule date, time, and venue if present in settings, otherwise fallback to event
