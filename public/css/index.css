@@ -11997,4 +11997,9 @@ input:-webkit-autofill:active {
   z-index: 99999 !important;
 }
 
+/* Eliminate nested padding on BOC playoff details view inside pane-boc */
+#boc-playoff-container #pane-event-detail {
+  padding: 0 !important;
+}
+
 
