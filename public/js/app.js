@@ -6552,78 +6552,23 @@ function setupBocAdminListeners() {
   const formBocSchedule = document.getElementById("form-boc-schedule");
   const editScheduleBtn = document.getElementById("btn-boc-edit-schedule");
 
-  const openBocScheduleModal = () => {
-    if (!scheduleModal) return;
-    const role = localStorage.getItem("pobsi_admin_role") || "admin";
-    if (role === "staff") {
-      showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengatur jadwal BOC.", "error");
-      return;
-    }
-    
-    // Set defaults or prefill from bocSettings
-    const saved = bocSettings.playoff_schedule;
-    const inpDate = document.getElementById("inp-boc-schedule-date");
-    const inpTime = document.getElementById("inp-boc-schedule-time");
-    const inpVenue = document.getElementById("inp-boc-schedule-venue");
-    const inpNotes = document.getElementById("inp-boc-schedule-notes");
-
-    if (saved) {
-      const schedule = typeof saved === 'string' ? JSON.parse(saved) : saved;
-      if (inpDate) inpDate.value = schedule.date || "";
-      if (inpTime) inpTime.value = schedule.time || "";
-      if (inpVenue) inpVenue.value = schedule.venue || "";
-      if (inpNotes) inpNotes.value = schedule.notes || "";
-    } else {
-      if (inpDate) inpDate.value = getDefaultBocScheduleDate();
-      if (inpTime) inpTime.value = "10:00";
-      if (inpVenue) inpVenue.value = "Midnight Arena (Banjarnegara)";
-      if (inpNotes) inpNotes.value = "Grand Final puncak perebutan juara sirkuit utama.";
-    }
-
-    scheduleModal.style.display = "flex";
-  };
-
-  const closeBocScheduleModal = () => {
-    if (scheduleModal) scheduleModal.style.display = "none";
-  };
-
-  if (scheduleModalClose) scheduleModalClose.addEventListener("click", closeBocScheduleModal);
-  if (scheduleModalBtnCancel) scheduleModalBtnCancel.addEventListener("click", closeBocScheduleModal);
-  if (scheduleModal) {
-    scheduleModal.addEventListener("click", (e) => {
-      if (e.target === scheduleModal) closeBocScheduleModal();
-    });
-  }
-
-  if (editScheduleBtn) {
-    editScheduleBtn.addEventListener("click", openBocScheduleModal);
-  }
-
-  // --- BOC Settings Modal Listeners ---
-  const bocSettingsModal = document.getElementById("boc-settings-modal");
-  const bocSettingsModalClose = document.getElementById("boc-settings-modal-close");
-  const bocSettingsModalBtnCancel = document.getElementById("boc-settings-modal-btn-cancel");
-  const bocSettingsTrigger = document.getElementById("btn-admin-boc-settings-trigger");
-
-  // wizard state
-  window.currentBocSettingsStep = 1;
+  // consolidated wizard state for schedule/settings
+  window.currentBocScheduleStep = 1;
   window.currentUploadedBocCoverBase64 = "";
 
-  window.updateBocSettingsWizardUI = function() {
-    const step = window.currentBocSettingsStep;
+  window.updateBocScheduleWizardUI = function() {
+    const step = window.currentBocScheduleStep;
     const panes = document.querySelectorAll(".boc-settings-step-pane");
     panes.forEach(pane => {
       const paneStep = parseInt(pane.getAttribute("data-step"), 10);
       if (paneStep === step) {
         pane.classList.add("active");
-        pane.removeAttribute("style");
       } else {
         pane.classList.remove("active");
-        pane.removeAttribute("style");
       }
     });
 
-    const steps = document.querySelectorAll("#boc-settings-wizard-stepper .wizard-step");
+    const steps = document.querySelectorAll("#boc-schedule-wizard-stepper .wizard-step");
     steps.forEach(s => {
       const sStep = parseInt(s.getAttribute("data-step"), 10);
       const circle = s.querySelector(".wizard-step-circle");
@@ -6639,16 +6584,16 @@ function setupBocAdminListeners() {
       }
     });
 
-    const progress = document.getElementById("boc-settings-wizard-progress");
+    const progress = document.getElementById("boc-schedule-wizard-progress");
     if (progress && steps.length > 1) {
       const percent = ((step - 1) / (steps.length - 1)) * 100;
       progress.style.width = `${percent}%`;
     }
 
-    const btnCancel = document.getElementById("boc-settings-modal-btn-cancel");
-    const btnPrev = document.getElementById("boc-settings-modal-btn-prev");
-    const btnNext = document.getElementById("boc-settings-modal-btn-next");
-    const btnSubmit = document.getElementById("boc-settings-modal-btn-submit");
+    const btnCancel = document.getElementById("boc-schedule-modal-btn-cancel");
+    const btnPrev = document.getElementById("boc-schedule-modal-btn-prev");
+    const btnNext = document.getElementById("boc-schedule-modal-btn-next");
+    const btnSubmit = document.getElementById("boc-schedule-modal-btn-submit");
 
     if (step === 1) {
       if (btnCancel) btnCancel.style.display = "inline-block";
@@ -6668,20 +6613,47 @@ function setupBocAdminListeners() {
     }
   };
 
-  window.resetBocSettingsWizard = function() {
-    window.currentBocSettingsStep = 1;
-    window.updateBocSettingsWizardUI();
+  window.resetBocScheduleWizard = function() {
+    window.currentBocScheduleStep = 1;
+    window.updateBocScheduleWizardUI();
   };
 
-  const openBocSettingsModal = () => {
-    if (!bocSettingsModal) return;
+  const openBocScheduleModal = () => {
+    if (!scheduleModal) return;
     const role = localStorage.getItem("pobsi_admin_role") || "admin";
     if (role === "staff") {
-      showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi BOC.", "error");
+      showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengatur jadwal & regulasi BOC.", "error");
       return;
     }
+    
+    // Set defaults or prefill from bocSettings
+    const saved = bocSettings.playoff_schedule;
+    const inpDate = document.getElementById("inp-boc-schedule-date");
+    const inpTime = document.getElementById("inp-boc-schedule-time");
+    const inpVenue = document.getElementById("inp-boc-schedule-venue");
+    const scheduleDatePicker = document.getElementById("inp-boc-schedule-date-wrapper")?._flatpickr;
 
-    // Prefill form inputs from current bocSettings Cache
+    if (saved) {
+      const schedule = typeof saved === 'string' ? JSON.parse(saved) : saved;
+      if (scheduleDatePicker) {
+        scheduleDatePicker.setDate(schedule.date || "");
+      } else if (inpDate) {
+        inpDate.value = schedule.date || "";
+      }
+      if (inpTime) inpTime.value = schedule.time || "";
+      if (inpVenue) inpVenue.value = schedule.venue || "";
+    } else {
+      const defaultDate = getDefaultBocScheduleDate();
+      if (scheduleDatePicker) {
+        scheduleDatePicker.setDate(defaultDate);
+      } else if (inpDate) {
+        inpDate.value = defaultDate;
+      }
+      if (inpTime) inpTime.value = "10:00";
+      if (inpVenue) inpVenue.value = "Midnight Arena (Banjarnegara)";
+    }
+
+    // Prefill settings fields too
     const bocCutoffInput = document.getElementById("set-boc-cutoff");
     const bocMaxhcInput = document.getElementById("set-boc-maxhc");
     const bocYearInput = document.getElementById("set-boc-year");
@@ -6701,9 +6673,6 @@ function setupBocAdminListeners() {
     if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
     if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
     if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
-
-    // Reset settings wizard
-    window.resetBocSettingsWizard();
 
     // Prefill cover image preview if it exists in DB
     const bocCoverDropZone = document.getElementById("boc-cover-drop-zone");
@@ -6725,51 +6694,59 @@ function setupBocAdminListeners() {
       if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
     }
 
-    bocSettingsModal.style.display = "flex";
+    // Reset settings wizard
+    window.resetBocScheduleWizard();
+
+    scheduleModal.style.display = "flex";
   };
 
-  const closeBocSettingsModal = () => {
-    if (bocSettingsModal) bocSettingsModal.style.display = "none";
+  const closeBocScheduleModal = () => {
+    if (scheduleModal) scheduleModal.style.display = "none";
   };
 
-  window.closeBocSettingsModal = closeBocSettingsModal; // Make accessible to setupSystemSettings
-
-  if (bocSettingsTrigger) {
-    bocSettingsTrigger.addEventListener("click", openBocSettingsModal);
-  }
-  if (bocSettingsModalClose) bocSettingsModalClose.addEventListener("click", closeBocSettingsModal);
-  if (bocSettingsModalBtnCancel) bocSettingsModalBtnCancel.addEventListener("click", closeBocSettingsModal);
-  if (bocSettingsModal) {
-    bocSettingsModal.addEventListener("click", (e) => {
-      if (e.target === bocSettingsModal) closeBocSettingsModal();
+  if (scheduleModalClose) scheduleModalClose.addEventListener("click", closeBocScheduleModal);
+  if (scheduleModalBtnCancel) scheduleModalBtnCancel.addEventListener("click", closeBocScheduleModal);
+  if (scheduleModal) {
+    scheduleModal.addEventListener("click", (e) => {
+      if (e.target === scheduleModal) closeBocScheduleModal();
     });
   }
 
-  const btnBocPrev = document.getElementById("boc-settings-modal-btn-prev");
-  const btnBocNext = document.getElementById("boc-settings-modal-btn-next");
+  if (editScheduleBtn) {
+    editScheduleBtn.addEventListener("click", openBocScheduleModal);
+  }
+
+  // --- BOC Consolidated Schedule & Settings Wizard Navigation ---
+  const btnBocPrev = document.getElementById("boc-schedule-modal-btn-prev");
+  const btnBocNext = document.getElementById("boc-schedule-modal-btn-next");
+
 
   if (btnBocPrev) {
     btnBocPrev.onclick = function() {
-      if (window.currentBocSettingsStep > 1) {
-        window.currentBocSettingsStep--;
-        window.updateBocSettingsWizardUI();
+      if (window.currentBocScheduleStep > 1) {
+        window.currentBocScheduleStep--;
+        window.updateBocScheduleWizardUI();
       }
     };
   }
 
   if (btnBocNext) {
     btnBocNext.onclick = function() {
-      if (window.currentBocSettingsStep === 1) {
-        const year = document.getElementById("set-boc-year").value.trim();
-        if (!year) {
-          showCustomToast("Tahun Musim Sirkuit wajib diisi!", "error");
-          document.getElementById("set-boc-year").focus();
+      if (window.currentBocScheduleStep === 1) {
+        // Validate required inputs on Step 1
+        const dateVal = document.getElementById("inp-boc-schedule-date").value;
+        const timeVal = document.getElementById("inp-boc-schedule-time").value;
+        const venueVal = document.getElementById("inp-boc-schedule-venue").value;
+        const yearVal = document.getElementById("set-boc-year").value.trim();
+
+        if (!dateVal || !timeVal || !venueVal || !yearVal) {
+          showCustomToast("Mohon lengkapi semua bidang bertanda bintang (*) dan Tahun Musim!", "error");
           return;
         }
       }
-      if (window.currentBocSettingsStep < 3) {
-        window.currentBocSettingsStep++;
-        window.updateBocSettingsWizardUI();
+      if (window.currentBocScheduleStep < 3) {
+        window.currentBocScheduleStep++;
+        window.updateBocScheduleWizardUI();
       }
     };
   }
@@ -6846,16 +6823,65 @@ function setupBocAdminListeners() {
   if (formBocSchedule) {
     formBocSchedule.addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      const role = localStorage.getItem("pobsi_admin_role") || "admin";
+      if (role === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi/jadwal BOC.", "error");
+        return;
+      }
+
       const date = document.getElementById("inp-boc-schedule-date").value;
       const time = document.getElementById("inp-boc-schedule-time").value;
       const venue = document.getElementById("inp-boc-schedule-venue").value;
-      const notes = document.getElementById("inp-boc-schedule-notes").value;
 
-      await saveBocSettings({ playoff_schedule: { date, time, venue, notes } });
+      const cutoffVal = parseInt(document.getElementById("set-boc-cutoff").value, 10);
+      const maxhcVal = document.getElementById("set-boc-maxhc").value;
+      const newYear = document.getElementById("set-boc-year").value.trim();
+
+      const prize1 = document.getElementById("set-boc-prize1").value.trim();
+      const prize2 = document.getElementById("set-boc-prize2").value.trim();
+      const prize3 = document.getElementById("set-boc-prize3").value.trim();
+      const bestgame = document.getElementById("set-boc-bestgame").value.trim();
+      const rulesVal = document.getElementById("set-boc-rules").value.trim();
+
+      // Save settings to database
+      await saveBocSettings({
+        cutoff_limit: cutoffVal,
+        max_handicap: maxhcVal,
+        year: newYear,
+        playoff_schedule: { date, time, venue },
+        prizes: {
+          juara1: prize1,
+          juara2: prize2,
+          juara3: prize3,
+          best_game: bestgame
+        },
+        rules: rulesVal,
+        cover: window.currentUploadedBocCoverBase64 || null
+      });
+
+      const oldYear = localStorage.getItem("currentBocYear") || "2026";
+      localStorage.setItem("currentBocYear", newYear);
+
       closeBocScheduleModal();
-      showCustomToast("Jadwal Grand Final BOC berhasil disimpan!", "success");
-      renderAdminBocConsole();
-      renderStandings();
+      showCustomToast("Pengaturan & Jadwal BOC berhasil disimpan!", "success");
+
+      if (oldYear !== newYear) {
+        currentBocYear = newYear;
+        // Load settings for the new year
+        await loadBocSettings(newYear);
+        // Reload sirkuits for the new year
+        bocSirkuits = loadBocSirkuitsForYear(newYear);
+        // Refresh standings & events
+        loadDataFromApi().then(() => {
+          renderStandings();
+          renderEvents("all");
+          renderAdminBocConsole();
+        });
+      } else {
+        renderAdminBocConsole();
+        renderStandings();
+      }
     });
   }
 
@@ -7687,17 +7713,37 @@ function renderBocPlayoffConsole(event) {
   });
 
   // Populate dynamic information tab fields
-  const infoDescEl = document.getElementById("boc-playoff-info-description");
+  const infoNotesEl = document.getElementById("boc-playoff-info-notes");
+  const infoRulesEl = document.getElementById("boc-playoff-info-rules");
   const infoVenueEl = document.getElementById("boc-playoff-info-venue");
   const infoDateEl = document.getElementById("boc-playoff-info-date");
-  if (infoDescEl) {
-    infoDescEl.textContent = event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
+
+  const savedSchedule = (typeof bocSettings !== "undefined") ? bocSettings.playoff_schedule : null;
+  const rulesVal = (typeof bocSettings !== "undefined") ? bocSettings.rules : "";
+
+  const displayVal = rulesVal || event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
+  if (infoNotesEl) {
+    infoNotesEl.textContent = displayVal;
   }
+  if (infoRulesEl) {
+    infoRulesEl.textContent = displayVal;
+  }
+
+  // Use schedule date, time, and venue if present in settings, otherwise fallback to event
+  const scheduleDate = savedSchedule ? savedSchedule.date : "";
+  const scheduleTime = savedSchedule ? savedSchedule.time : "";
+  const scheduleVenue = savedSchedule ? savedSchedule.venue : "";
+
+  let displayDate = scheduleDate || event.date || "-";
+  if (scheduleDate && scheduleTime) {
+    displayDate = `${scheduleDate} (Pukul ${scheduleTime} WIB)`;
+  }
+
   if (infoVenueEl) {
-    infoVenueEl.innerHTML = `<i class="fa-solid fa-location-dot text-accent" style="margin-right: 6px;"></i> ${event.venue || "POBSI BANJARNEGARA"}`;
+    infoVenueEl.innerHTML = `<i class="fa-solid fa-location-dot text-accent" style="margin-right: 6px;"></i> ${scheduleVenue || event.venue || "POBSI BANJARNEGARA"}`;
   }
   if (infoDateEl) {
-    infoDateEl.innerHTML = `<i class="fa-solid fa-calendar text-gold" style="margin-right: 6px;"></i> ${event.date || "-"}`;
+    infoDateEl.innerHTML = `<i class="fa-solid fa-calendar text-gold" style="margin-right: 6px;"></i> ${displayDate}`;
   }
 
   // Set background image
@@ -7764,6 +7810,7 @@ function renderBocPlayoffConsole(event) {
   // Dynamic Champion Card Showcase
   const dynamicCardContainer = document.getElementById("boc-playoff-hero-dynamic-card-container");
   if (dynamicCardContainer) {
+    const heroRight = dynamicCardContainer.parentElement;
     const prevYear = (parseInt(currentBocYear) - 1).toString();
     const defendingChampions = {
       "2028": { name: "Didon", club: "Platinum Billiard", year: "2027" },
@@ -7772,6 +7819,7 @@ function renderBocPlayoffConsole(event) {
     };
 
     if (isCompleted && winnerName) {
+      if (heroRight) heroRight.style.display = "flex";
       // Find winner details
       const winnerPlayer = (appData.players || []).find(p => p.name === winnerName) || (appData.standings || []).find(s => s.name === winnerName);
       const winnerClub = winnerPlayer ? winnerPlayer.club : "-";
@@ -7792,47 +7840,53 @@ function renderBocPlayoffConsole(event) {
         </div>
       `;
     } else {
-      // Find defending champion details
-      let defendingChamp = defendingChampions[currentBocYear];
-      if (!defendingChamp) {
-        // Try to find it dynamically from the previous year's event in appData.events
-        const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.title.includes(prevYear) || e.description?.includes(prevYear)));
-        if (prevEvent) {
-          try {
-            const prevBracket = JSON.parse(prevEvent.bracket || "{}");
-            const prevWinner = prevBracket.mainBracket && prevBracket.mainBracket[6] && prevBracket.mainBracket[6].winner;
-            if (prevWinner) {
-              const prevWinnerPlayer = (appData.players || []).find(p => p.name === prevWinner) || (appData.standings || []).find(s => s.name === prevWinner);
-              defendingChamp = {
-                name: prevWinner,
-                club: prevWinnerPlayer ? prevWinnerPlayer.club : "-",
-                year: prevYear
-              };
-            }
-          } catch (e) {}
+      if (currentBocYear === "2026") {
+        dynamicCardContainer.innerHTML = "";
+        if (heroRight) heroRight.style.display = "none";
+      } else {
+        if (heroRight) heroRight.style.display = "flex";
+        // Find defending champion details
+        let defendingChamp = defendingChampions[currentBocYear];
+        if (!defendingChamp) {
+          // Try to find it dynamically from the previous year's event in appData.events
+          const prevEvent = (appData.events || []).find(e => e.elimination_type === 'boc' && e.status === 'Selesai' && (e.title.includes(prevYear) || e.description?.includes(prevYear)));
+          if (prevEvent) {
+            try {
+              const prevBracket = JSON.parse(prevEvent.bracket || "{}");
+              const prevWinner = prevBracket.mainBracket && prevBracket.mainBracket[6] && prevBracket.mainBracket[6].winner;
+              if (prevWinner) {
+                const prevWinnerPlayer = (appData.players || []).find(p => p.name === prevWinner) || (appData.standings || []).find(s => s.name === prevWinner);
+                defendingChamp = {
+                  name: prevWinner,
+                  club: prevWinnerPlayer ? prevWinnerPlayer.club : "-",
+                  year: prevYear
+                };
+              }
+            } catch (e) {}
+          }
         }
-      }
-      if (!defendingChamp) {
-        defendingChamp = { name: "Didon", club: "Platinum Billiard", year: prevYear };
-      }
+        if (!defendingChamp) {
+          defendingChamp = { name: "Didon", club: "Platinum Billiard", year: prevYear };
+        }
 
-      // Retrieve player data for defending champ to get avatar
-      const defPlayer = (appData.players || []).find(p => p.name === defendingChamp.name) || (appData.standings || []).find(s => s.name === defendingChamp.name);
-      const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.png';
+        // Retrieve player data for defending champ to get avatar
+        const defPlayer = (appData.players || []).find(p => p.name === defendingChamp.name) || (appData.standings || []).find(s => s.name === defendingChamp.name);
+        const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.png';
 
-      dynamicCardContainer.innerHTML = `
-        <div class="boc-finalist-profile-card" onclick="openAthleteProfile('${generateSlug(defendingChamp.name)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; backdrop-filter: blur(12px);">
-          <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); transition: border-color 0.2s;">
-            <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+        dynamicCardContainer.innerHTML = `
+          <div class="boc-finalist-profile-card" onclick="openAthleteProfile('${generateSlug(defendingChamp.name)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; backdrop-filter: blur(12px);">
+            <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); transition: border-color 0.2s;">
+              <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+            </div>
+            <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">DEFENDING CHAMPION</span>
+            <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${defendingChamp.name}</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> ${defendingChamp.club}</span>
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; width: 100%; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+              BOC ${defendingChamp.year} Winner
+            </div>
           </div>
-          <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">DEFENDING CHAMPION</span>
-          <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${defendingChamp.name}</h3>
-          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> ${defendingChamp.club}</span>
-          <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; width: 100%; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
-            BOC ${defendingChamp.year} Winner
-          </div>
-        </div>
-      `;
+        `;
+      }
     }
   }
 
@@ -10352,10 +10406,13 @@ function setupEventManagement() {
     mcWoP1.addEventListener("click", () => {
       const s1Input = document.getElementById("mc-s1-input");
       const s2Input = document.getElementById("mc-s2-input");
+      const raceToInput = document.getElementById("mc-raceto-input");
+      const raceToVal = raceToInput ? parseInt(raceToInput.value, 10) : 4;
+      const raceTo = isNaN(raceToVal) || raceToVal < 1 ? 4 : raceToVal;
       if (s1Input && s2Input) {
-        s1Input.value = "7";
+        s1Input.value = raceTo.toString();
         s2Input.value = "0";
-        showCustomToast("Skor WO Pemain 1 terisi (7-0)! Klik Simpan Skor untuk menyimpan.", "success");
+        showCustomToast(`Skor WO Pemain 1 terisi (${raceTo}-0)! Klik Simpan Skor untuk menyimpan.`, "success");
       }
     });
   }
@@ -10365,10 +10422,13 @@ function setupEventManagement() {
     mcWoP2.addEventListener("click", () => {
       const s1Input = document.getElementById("mc-s1-input");
       const s2Input = document.getElementById("mc-s2-input");
+      const raceToInput = document.getElementById("mc-raceto-input");
+      const raceToVal = raceToInput ? parseInt(raceToInput.value, 10) : 4;
+      const raceTo = isNaN(raceToVal) || raceToVal < 1 ? 4 : raceToVal;
       if (s1Input && s2Input) {
         s1Input.value = "0";
-        s2Input.value = "7";
-        showCustomToast("Skor WO Pemain 2 terisi (0-7)! Klik Simpan Skor untuk menyimpan.", "success");
+        s2Input.value = raceTo.toString();
+        showCustomToast(`Skor WO Pemain 2 terisi (0-${raceTo})! Klik Simpan Skor untuk menyimpan.`, "success");
       }
     });
   }
@@ -16244,10 +16304,23 @@ function setupDatePickers() {
       mode: "range",
       dateFormat: "j F Y",
       locale: "id",
-      disableMobile: true
+      disableMobile: true,
+      static: true
     };
     flatpickr("#adm-evt-date-wrapper", config);
     flatpickr("#edit-evt-date-wrapper", config);
+
+    // Flatpickr for BOC Schedule (Single Date)
+    const singleConfig = {
+      wrap: true,
+      allowInput: true,
+      clickOpens: false,
+      dateFormat: "j F Y",
+      locale: "id",
+      disableMobile: true,
+      static: true
+    };
+    flatpickr("#inp-boc-schedule-date-wrapper", singleConfig);
   }
 }
 

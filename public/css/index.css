@@ -11985,3 +11985,21 @@ input:-webkit-autofill:active {
   }
 }
 
+/* Flatpickr Calendar & Static Wrapper Styling Overrides */
+.flatpickr-wrapper {
+  display: block !important;
+  width: 100% !important;
+}
+.flatpickr-calendar.static {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: var(--bg-surface-solid) !important;
+  z-index: 99999 !important;
+}
+
+/* Eliminate nested padding on BOC playoff details view inside pane-boc */
+#boc-playoff-container #pane-event-detail {
+  padding: 0 !important;
+}
+
+
