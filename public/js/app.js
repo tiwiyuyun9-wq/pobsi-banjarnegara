@@ -1134,14 +1134,63 @@ function renderStandings(searchQuery = "") {
 
   // Render Table Headers Dynamically
   const table = document.getElementById("standings-table");
+  
+  // Find completed/active sirkuits that have already run/completed
+  const completedSirkuits = (bocSirkuits || []).map((s, idx) => ({ name: s, index: idx })).filter(item => {
+    // 1. Check if matching event is completed (status "Selesai")
+    const sName = item.name.toUpperCase().trim();
+    let sKeyword = sName.split(" ")[0];
+    const keywordMap = {
+      "LMS": "LUMINOUS",
+      "SYP": "SURYA",
+      "PLT": "PLATINUM"
+    };
+    sKeyword = keywordMap[sKeyword] || sKeyword;
+
+    let sSeries = "1";
+    const sMatch = sName.match(/\((\d+)\)/);
+    if (sMatch) {
+      sSeries = sMatch[1];
+    } else if (sName.includes(" 2")) {
+      sSeries = "2";
+    } else if (sName.includes(" 3")) {
+      sSeries = "3";
+    }
+
+    const matches = (appData.events || []).filter(e => {
+      if (!e.title) return false;
+      const eTitle = e.title.toUpperCase();
+      const words = eTitle.split(/[^A-Z0-9]+/);
+      if (!words.includes(sKeyword)) return false;
+      const isHtEvent = eTitle.includes("HOME") || eTitle.includes("HT") || eTitle.includes("CLUB");
+      const isHtSirkuit = sName.includes("HT");
+      if (isHtSirkuit && !isHtEvent) return false;
+      return true;
+    }).sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+
+    const seriesIdx = parseInt(sSeries, 10) - 1;
+    const matchEvent = matches[seriesIdx];
+    if (matchEvent && matchEvent.status === "Selesai") return true;
+
+    // 2. Check if anyone has points in exactBocPoints for this sirkuit index
+    for (let pName in exactBocPoints) {
+      if (exactBocPoints[pName] && exactBocPoints[pName][item.index] !== undefined && exactBocPoints[pName][item.index] !== "") {
+        return true;
+      }
+    }
+    return false;
+  });
+
   if (table) {
-    const minTableWidth = 550 + (bocSirkuits.length * 80);
+    const minTableWidth = 550 + (completedSirkuits.length * 80);
     table.style.minWidth = `${minTableWidth}px`;
   }
 
   const thead = document.querySelector("#standings-table thead");
   if (thead) {
-    const sirkuitHeaders = bocSirkuits.map((sirkuit, idx) => {
+    const sirkuitHeaders = completedSirkuits.map((item) => {
+      const idx = item.index;
+      const sirkuit = item.name;
       let color = "#60a5fa";
       if (idx >= 4 && idx < 8) color = "#fbbf24";
       else if (idx >= 8) color = "#ef4444";
@@ -1165,6 +1214,14 @@ function renderStandings(searchQuery = "") {
     if (pts <= 0) return false;
     return p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
            p.club.toLowerCase().includes(searchQuery.toLowerCase());
+  }).sort((a, b) => {
+    const ptsA = parseInt(a.points || 0, 10);
+    const ptsB = parseInt(b.points || 0, 10);
+    if (ptsB !== ptsA) return ptsB - ptsA;
+    // Secondary sort by rank ascending
+    const rankA = parseInt(a.rank || 999, 10);
+    const rankB = parseInt(b.rank || 999, 10);
+    return rankA - rankB;
   });
 
   // Pagination Configuration (20 per page)
@@ -1192,8 +1249,9 @@ function renderStandings(searchQuery = "") {
     // Get exact or deterministic event scores
     const eventScores = getPlayerEventScores(player.name, player.points);
     
-    const scoresHtml = eventScores.map(score => {
-      if (score !== "") {
+    const scoresHtml = completedSirkuits.map(item => {
+      const score = eventScores[item.index];
+      if (score !== undefined && score !== "") {
         let colorClass = "boc-score-gold";
         if (score === 12) colorClass = "boc-score-champion";
         else if (score >= 7) colorClass = "boc-score-podium";
@@ -1223,7 +1281,7 @@ function renderStandings(searchQuery = "") {
 
     const dividerHtml = (player.rank === cutoffLimit) ? `
       <tr class="boc-cutoff-divider-row">
-        <td colspan="${5 + bocSirkuits.length}">
+        <td colspan="${5 + completedSirkuits.length}">
           <i class="fa-solid fa-triangle-exclamation"></i> Batas Kualifikasi Zona Merah BOC (Cut-Off Line ${cutoffLimit} Besar) <i class="fa-solid fa-triangle-exclamation"></i>
         </td>
       </tr>
