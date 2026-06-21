@@ -7717,17 +7717,37 @@ function renderBocPlayoffConsole(event) {
   });
 
   // Populate dynamic information tab fields
-  const infoDescEl = document.getElementById("boc-playoff-info-description");
+  const infoNotesEl = document.getElementById("boc-playoff-info-notes");
+  const infoRulesEl = document.getElementById("boc-playoff-info-rules");
   const infoVenueEl = document.getElementById("boc-playoff-info-venue");
   const infoDateEl = document.getElementById("boc-playoff-info-date");
-  if (infoDescEl) {
-    infoDescEl.textContent = event.description || "Turnamen Grand Final Battle of Champions POBSI Banjarnegara.";
+
+  const savedSchedule = (typeof bocSettings !== "undefined") ? bocSettings.playoff_schedule : null;
+  const notesVal = savedSchedule ? savedSchedule.notes : "";
+  const rulesVal = (typeof bocSettings !== "undefined") ? bocSettings.rules : "";
+
+  if (infoNotesEl) {
+    infoNotesEl.textContent = notesVal || "Grand Final puncak perebutan juara sirkuit utama.";
   }
+  if (infoRulesEl) {
+    infoRulesEl.textContent = rulesVal || "Aturan poin standar POBSI Banjarnegara.";
+  }
+
+  // Use schedule date, time, and venue if present in settings, otherwise fallback to event
+  const scheduleDate = savedSchedule ? savedSchedule.date : "";
+  const scheduleTime = savedSchedule ? savedSchedule.time : "";
+  const scheduleVenue = savedSchedule ? savedSchedule.venue : "";
+
+  let displayDate = scheduleDate || event.date || "-";
+  if (scheduleDate && scheduleTime) {
+    displayDate = `${scheduleDate} (Pukul ${scheduleTime} WIB)`;
+  }
+
   if (infoVenueEl) {
-    infoVenueEl.innerHTML = `<i class="fa-solid fa-location-dot text-accent" style="margin-right: 6px;"></i> ${event.venue || "POBSI BANJARNEGARA"}`;
+    infoVenueEl.innerHTML = `<i class="fa-solid fa-location-dot text-accent" style="margin-right: 6px;"></i> ${scheduleVenue || event.venue || "POBSI BANJARNEGARA"}`;
   }
   if (infoDateEl) {
-    infoDateEl.innerHTML = `<i class="fa-solid fa-calendar text-gold" style="margin-right: 6px;"></i> ${event.date || "-"}`;
+    infoDateEl.innerHTML = `<i class="fa-solid fa-calendar text-gold" style="margin-right: 6px;"></i> ${displayDate}`;
   }
 
   // Set background image
