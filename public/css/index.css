@@ -12886,7 +12886,7 @@ input:-webkit-autofill:active {
   overflow: hidden;
   min-height: 380px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   aspect-ratio: 16 / 9;
 }
 .boc-recap-grid {
