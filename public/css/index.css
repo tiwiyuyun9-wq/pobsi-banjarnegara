@@ -12127,6 +12127,8 @@ input:-webkit-autofill:active {
   transition: all 0.2s ease !important;
   cursor: pointer !important;
   z-index: 10 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
 .flatpickr-calendar .flatpickr-prev-month:hover,
 .flatpickr-calendar .flatpickr-next-month:hover {
@@ -12144,16 +12146,25 @@ input:-webkit-autofill:active {
 /* Days / Weeks Header Row (Grid Aligned) */
 .flatpickr-weekdays {
   width: 100% !important;
-  display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
+  display: flex !important;
   padding: 8px 12px !important;
   box-sizing: border-box !important;
   background: rgba(255, 255, 255, 0.02) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  height: auto !important;
+}
+.flatpickr-weekdaycontainer,
+.flatpickr-weekdays:not(:has(.flatpickr-weekdaycontainer)) {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 4px !important;
+  width: 100% !important;
+  flex: 1 !important;
 }
 span.flatpickr-weekday {
   display: block !important;
   text-align: center !important;
+  margin: 0 !important;
   color: var(--text-muted) !important;
   font-weight: 700 !important;
   font-size: 0.72rem !important;
