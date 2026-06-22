@@ -8020,9 +8020,12 @@ function renderBocPlayoffConsole(event) {
     return matchesYear && e.status !== 'Cancelled';
   });
 
-  // Calculate unique participants across all these events (no duplicates: 1 name = 1 count)
+  // Filter sirkuit events (excluding the Grand Final playoff itself)
+  const sirkuitEvents = currentYearEvents.filter(e => e.elimination_type !== 'boc');
+
+  // Calculate unique participants across sirkuit events (no duplicates: 1 name = 1 count)
   const uniqueParticipants = new Set();
-  currentYearEvents.forEach(e => {
+  sirkuitEvents.forEach(e => {
     let parts = [];
     try {
       parts = typeof e.participants === 'string' ? JSON.parse(e.participants || '[]') : (e.participants || []);
@@ -8036,9 +8039,9 @@ function renderBocPlayoffConsole(event) {
     }
   });
 
-  // Calculate matches count in completed events
+  // Calculate matches count in sirkuit events
   let totalMatchesCount = 0;
-  currentYearEvents.forEach(e => {
+  sirkuitEvents.forEach(e => {
     let bracketData = null;
     try {
       bracketData = typeof e.bracket === 'string' ? JSON.parse(e.bracket || '{}') : (e.bracket || {});
