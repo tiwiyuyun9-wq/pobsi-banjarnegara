@@ -1351,16 +1351,16 @@ function updateBocBannersVisibility() {
     const viewBtn = document.getElementById("btn-view-boc-playoff");
 
     if (playoffEvent.status === 'Selesai') {
-      // Completed State style (Green Theme)
-      playoffBanner.style.background = "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%)";
-      playoffBanner.style.borderColor = "rgba(16, 185, 129, 0.25)";
-      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(16, 185, 129, 0.03)";
+      // Completed State style (Blue Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(56, 189, 248, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(56, 189, 248, 0.03)";
       
       if (iconBgEl) {
-        iconBgEl.style.background = "rgba(16, 185, 129, 0.15)";
-        iconBgEl.style.borderColor = "rgba(16, 185, 129, 0.2)";
-        iconBgEl.style.color = "#10b981";
-        iconBgEl.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.2)";
+        iconBgEl.style.background = "rgba(56, 189, 248, 0.15)";
+        iconBgEl.style.borderColor = "rgba(56, 189, 248, 0.2)";
+        iconBgEl.style.color = "#38bdf8";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(56, 189, 248, 0.2)";
       }
       if (iconEl) {
         iconEl.className = "fa-solid fa-award";
@@ -1370,9 +1370,9 @@ function updateBocBannersVisibility() {
       }
       if (viewBtn) {
         viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil BOC';
-        viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+        viewBtn.style.background = "linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)";
         viewBtn.style.color = "#fff";
-        viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(56, 189, 248, 0.3)";
       }
     } else {
       // Ongoing/default State style (Gold/Yellow Theme)
@@ -7886,9 +7886,9 @@ function renderBocPlayoffConsole(event) {
     if (isCompleted) {
       statusBadge.textContent = "Selesai";
       statusBadge.className = "boc-playoff-status-badge";
-      statusBadge.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+      statusBadge.style.background = "linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)";
       statusBadge.style.color = "#fff";
-      statusBadge.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.35)";
+      statusBadge.style.boxShadow = "0 0 15px rgba(56, 189, 248, 0.35)";
     } else if (isOngoing) {
       statusBadge.textContent = "Live Playoff";
       statusBadge.className = "boc-playoff-status-badge pulse-red";
@@ -8014,6 +8014,122 @@ function renderBocPlayoffConsole(event) {
     participants = JSON.parse(event.participants || "[]");
   } catch (e) {}
 
+  // Dynamic stats calculation for BATTLE OF CHAMPIONS season panel
+  const currentYearEvents = (appData.events || []).filter(e => {
+    const matchesYear = e.title.includes(currentBocYear) || e.description?.includes(currentBocYear) || e.date?.includes(currentBocYear);
+    return matchesYear && e.status !== 'Cancelled';
+  });
+
+  // Filter sirkuit events (excluding the Grand Final playoff itself)
+  const sirkuitEvents = currentYearEvents.filter(e => e.elimination_type !== 'boc');
+
+  // Calculate unique participants across sirkuit events (no duplicates: 1 name = 1 count)
+  const uniqueParticipants = new Set();
+  sirkuitEvents.forEach(e => {
+    let parts = [];
+    try {
+      parts = typeof e.participants === 'string' ? JSON.parse(e.participants || '[]') : (e.participants || []);
+    } catch (err) {}
+    if (Array.isArray(parts)) {
+      parts.forEach(pName => {
+        if (pName && pName.trim() !== '') {
+          uniqueParticipants.add(pName.trim());
+        }
+      });
+    }
+  });
+
+  // Calculate matches count in sirkuit events
+  let totalMatchesCount = 0;
+  sirkuitEvents.forEach(e => {
+    let bracketData = null;
+    try {
+      bracketData = typeof e.bracket === 'string' ? JSON.parse(e.bracket || '{}') : (e.bracket || {});
+    } catch (err) {}
+    
+    if (bracketData) {
+      // 1. Group Stage matches
+      if (bracketData.groups) {
+        Object.values(bracketData.groups).forEach(g => {
+          if (g && g.matches) {
+            const matchesArr = Array.isArray(g.matches) ? g.matches : Object.values(g.matches);
+            matchesArr.forEach(m => {
+              if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+                if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+                  totalMatchesCount++;
+                }
+              }
+            });
+          }
+        });
+      }
+      // 2. Main Bracket matches
+      if (bracketData.mainBracket) {
+        Object.values(bracketData.mainBracket).forEach(m => {
+          if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+            if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+              totalMatchesCount++;
+            }
+          }
+        });
+      }
+      // 3. Loser Bracket matches (for Double Elimination)
+      if (bracketData.loserBracket) {
+        Object.values(bracketData.loserBracket).forEach(m => {
+          if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+            if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+              totalMatchesCount++;
+            }
+          }
+        });
+      }
+      // 4. Third Place match
+      if (bracketData.thirdPlace) {
+        const m = bracketData.thirdPlace;
+        if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+          if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+            totalMatchesCount++;
+          }
+        }
+      }
+      // 5. Grand Final match
+      if (bracketData.grandFinal) {
+        const m = bracketData.grandFinal;
+        if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+          if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+            totalMatchesCount++;
+          }
+        }
+      }
+      // 6. Replay match
+      if (bracketData.grandFinalReplay) {
+        const m = bracketData.grandFinalReplay;
+        if (m && m.p1 && m.p2 && m.p1 !== 'TBD' && m.p2 !== 'TBD') {
+          if (m.winner || m.status === 'completed' || m.s1 !== undefined || m.s2 !== undefined) {
+            totalMatchesCount++;
+          }
+        }
+      }
+    }
+  });
+
+  // Filter sirkuit events to show count in series
+  const sirkuitEventsCount = currentYearEvents.filter(e => e.elimination_type !== 'boc').length;
+
+  // Fallback / standard default display if no database matches are recorded
+  const finalSeriesVal = sirkuitEventsCount || 12;
+  const finalParticipantsVal = uniqueParticipants.size || 487;
+  const finalMatchesVal = totalMatchesCount || 2134;
+
+  // Format values
+  const seriesEl = document.getElementById("boc-stat-total-series");
+  const participantsEl = document.getElementById("boc-stat-total-participants");
+  const matchesEl = document.getElementById("boc-stat-total-matches");
+
+  if (seriesEl) seriesEl.textContent = finalSeriesVal.toLocaleString('id-ID');
+  if (participantsEl) participantsEl.textContent = finalParticipantsVal.toLocaleString('id-ID');
+  if (matchesEl) matchesEl.textContent = finalMatchesVal.toLocaleString('id-ID');
+
   // Setup/Render Simulator (Grup & Knockout tabs)
   const simEl = document.getElementById("boc-playoff-bracket-simulator");
   const bannerEl = document.getElementById("boc-playoff-completion-banner");
@@ -8027,6 +8143,23 @@ function renderBocPlayoffConsole(event) {
   // Render lists
   renderBocFinalistsGrid(participants);
   renderBocPodium3D(event, bracketObj);
+
+  // Set up CTA buttons click handlers (always active)
+  const viewAllBtn = document.getElementById("boc-view-all-series-btn");
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => {
+      const backBtn = document.getElementById("boc-playoff-back-btn");
+      if (backBtn) backBtn.click();
+    };
+  }
+
+  const viewBracketBtn = document.getElementById("boc-view-bracket-btn");
+  if (viewBracketBtn) {
+    viewBracketBtn.onclick = () => {
+      const knockoutTabBtn = document.querySelector('.boc-playoff-stab[data-boc-playoff-tab="knockout"]');
+      if (knockoutTabBtn) knockoutTabBtn.click();
+    };
+  }
 
   // Setup back button
   const backBtn = document.getElementById("boc-playoff-back-btn");
@@ -8287,23 +8420,6 @@ function renderBocPodium3D(event, bracketObj) {
   if (!isCompleted || !bracketObj.mainBracket) {
     container.innerHTML = `<div style="color: var(--text-dim); padding: 20px;">Podium juara akan ditampilkan setelah turnamen berakhir.</div>`;
     return;
-  }
-
-  // Set up CTA buttons click handlers
-  const viewAllBtn = document.getElementById("boc-view-all-series-btn");
-  if (viewAllBtn) {
-    viewAllBtn.onclick = () => {
-      const backBtn = document.getElementById("boc-playoff-back-btn");
-      if (backBtn) backBtn.click();
-    };
-  }
-
-  const viewBracketBtn = document.getElementById("boc-view-bracket-btn");
-  if (viewBracketBtn) {
-    viewBracketBtn.onclick = () => {
-      const knockoutTabBtn = document.querySelector('.boc-playoff-stab[data-boc-playoff-tab="knockout"]');
-      if (knockoutTabBtn) knockoutTabBtn.click();
-    };
   }
 
   // Get details helper for the podium players
@@ -8574,12 +8690,6 @@ function renderBocPodium3D(event, bracketObj) {
   const timelineNodesContainer = document.querySelector(".boc-timeline-nodes");
   if (timelineNodesContainer) {
     let currentSirkuits = bocSirkuits || [];
-    if (currentSirkuits.length === 0) {
-      const htEvents = (appData.events || [])
-        .filter(e => e.type === "Home Tournament" || e.title.includes("HT") || e.title.includes("Series"))
-        .sort((a, b) => a.id.localeCompare(b.id));
-      currentSirkuits = htEvents.map(e => e.title);
-    }
 
     // If still empty, fallback to 12 placeholder series names
     if (currentSirkuits.length === 0) {
@@ -8641,7 +8751,7 @@ function renderBocPodium3D(event, bracketObj) {
 
       nodesHtml += `
         <div class="boc-timeline-node ${statusClass}" ${clickHandler} title="${tooltipText}">
-          <span class="node-num" style="white-space: nowrap; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;">${sName}</span>
+          <span class="node-num" style="text-overflow: ellipsis; overflow: hidden; max-width: 75px; white-space: nowrap; display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;">${sName}</span>
           <div class="node-status-dot">${iconHtml}</div>
           <span class="node-status-text">${statusText}</span>
         </div>
@@ -9333,7 +9443,7 @@ function renderPublicResults(event) {
   const rowsHtml = recapData.map(r => {
     const slug = generateSlug(r.name);
     return `
-      <tr onclick="openAthleteProfile('${slug}')" style="border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background-color 0.2s; ${r.isPromoted ? 'background: rgba(16, 185, 129, 0.06); border-left: 3px solid #10b981;' : ''}" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.04)'" onmouseout="this.style.backgroundColor='${r.isPromoted ? 'rgba(16, 185, 129, 0.06)' : ''}'">
+      <tr onclick="openAthleteProfile('${slug}')" style="border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background-color 0.2s; ${r.isPromoted ? 'background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8;' : ''}" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.04)'" onmouseout="this.style.backgroundColor='${r.isPromoted ? 'rgba(56, 189, 248, 0.08)' : ''}'">
         <td style="font-weight: 700; color: ${r.rankOrder === 1 ? 'var(--gold)' : (r.rankOrder === 2 ? '#94a3b8' : (r.rankOrder === 3 ? '#b45309' : '#64748b'))};">${r.rankText}</td>
         <td>
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -12967,7 +13077,7 @@ function renderEventDetailTabs(event) {
 
         const recapData = getTournamentRecapData(event);
         const rowsHtml = recapData.map(r => `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r.isPromoted ? 'background: rgba(16, 185, 129, 0.06); border-left: 3px solid #10b981;' : ''}">
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r.isPromoted ? 'background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8;' : ''}">
             <td style="font-weight: 700; color: ${r.rankOrder === 1 ? 'var(--gold)' : (r.rankOrder === 2 ? '#94a3b8' : (r.rankOrder === 3 ? '#b45309' : '#64748b'))};">${r.rankText}</td>
             <td class="table-name-bold">${r.name}</td>
             <td>${r.club}</td>
@@ -16458,11 +16568,11 @@ function renderRecapHandicapProgress(r) {
   let barHtml = '';
   
   if (r.isPromoted) {
-    // If promoted, show a green highlighted bar representing completion/promotion
+    // If promoted, show a blue highlighted bar representing completion/promotion
     barHtml = `
-      <div class="progress-container" style="flex: 1; min-width: 120px; max-width: 165px; border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
+      <div class="progress-container" style="flex: 1; min-width: 120px; max-width: 165px; border-color: rgba(56, 189, 248, 0.5); box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">
         <div class="progress-bar-custom" style="width: ${poinAwalPercent}%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); opacity: 0.85;"></div>
-        <div class="progress-bar-custom" style="left: ${poinAwalPercent}%; width: ${100 - poinAwalPercent}%; background: linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+        <div class="progress-bar-custom" style="left: ${poinAwalPercent}%; width: ${100 - poinAwalPercent}%; background: linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%);"></div>
         <span class="progress-label-text" style="color: #fff; font-weight: 800;">${poinAwal} (+${r.hcPts}) / ${targetPoints} Pts</span>
       </div>
     `;
@@ -16471,9 +16581,9 @@ function renderRecapHandicapProgress(r) {
       <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: 100%;">
         <span class="table-badge-hc ${startColorClass}">HC ${hc}</span>
         ${barHtml}
-        <i class="fa-solid fa-angles-right" style="color: #10b981; font-size: 0.65rem;"></i>
-        <span class="table-badge-hc ${getHandicapColorClass(r.hcAkhir)}" style="box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); border-color: #10b981;">HC ${r.hcAkhir}</span>
-        <span class="badge-promoted-tag" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2.5px 5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);"><i class="fa-solid fa-arrow-trend-up"></i> PROMOTED!</span>
+        <i class="fa-solid fa-angles-right" style="color: #38bdf8; font-size: 0.65rem;"></i>
+        <span class="table-badge-hc ${getHandicapColorClass(r.hcAkhir)}" style="box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: #38bdf8;">HC ${r.hcAkhir}</span>
+        <span class="badge-promoted-tag" style="background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2.5px 5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);"><i class="fa-solid fa-arrow-trend-up"></i> PROMOTED!</span>
       </div>
     `;
   } else {

@@ -10597,13 +10597,13 @@ tr:hover td.sticky-col {
 }
 
 .boc-roadmap-node.completed {
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(56, 189, 248, 0.2);
 }
 
 .boc-roadmap-node.completed .boc-roadmap-node-circle {
-  border-color: #10b981;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.08);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .boc-roadmap-node.ongoing {
@@ -10643,7 +10643,7 @@ tr:hover td.sticky-col {
 }
 
 .boc-roadmap-node.completed .boc-roadmap-node-status {
-  color: #10b981;
+  color: #38bdf8;
   font-weight: 600;
 }
 
@@ -11085,7 +11085,7 @@ tr:hover td.sticky-col {
 
 .boc-playoff-stab.active {
   color: #fff;
-  border-bottom-color: #10b981;
+  border-bottom-color: #38bdf8;
 }
 
 /* Finalists Seeding Cards */
@@ -11319,7 +11319,8 @@ tr:hover td.sticky-col {
 
 /* 1st Place Specific Styling */
 .podium-pedestal-3d.first .podium-block {
-  height: 180px;
+  height: 200px;
+  padding-top: 48px;
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(217, 119, 6, 0.05) 100%);
   border-color: rgba(251, 191, 36, 0.4);
 }
@@ -11350,7 +11351,8 @@ tr:hover td.sticky-col {
 
 /* 2nd Place Specific Styling */
 .podium-pedestal-3d.second .podium-block {
-  height: 145px;
+  height: 165px;
+  padding-top: 42px;
   background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(107, 114, 128, 0.05) 100%);
   border-color: rgba(156, 163, 175, 0.3);
 }
@@ -11375,7 +11377,8 @@ tr:hover td.sticky-col {
 
 /* 3rd Place Specific Styling */
 .podium-pedestal-3d.third .podium-block {
-  height: 125px;
+  height: 145px;
+  padding-top: 42px;
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(180, 83, 9, 0.05) 100%);
   border-color: rgba(217, 119, 6, 0.3);
 }
@@ -12083,7 +12086,8 @@ input:-webkit-autofill:active {
 
 /* 1st Place Specific Styling */
 .podium-pedestal-3d.first .podium-block {
-  height: 180px;
+  height: 200px;
+  padding-top: 48px;
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(15, 23, 42, 0.75) 100%);
   border-color: rgba(251, 191, 36, 0.4);
   box-shadow: 0 15px 35px rgba(251, 191, 36, 0.15), inset 0 1px 2px rgba(251, 191, 36, 0.25);
@@ -12120,7 +12124,8 @@ input:-webkit-autofill:active {
 
 /* 2nd Place Specific Styling */
 .podium-pedestal-3d.second .podium-block {
-  height: 145px;
+  height: 165px;
+  padding-top: 42px;
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.15) 0%, rgba(15, 23, 42, 0.75) 100%);
   border-color: rgba(148, 163, 184, 0.35);
   box-shadow: 0 15px 30px rgba(148, 163, 184, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.15);
@@ -12150,7 +12155,8 @@ input:-webkit-autofill:active {
 
 /* 3rd Place Specific Styling */
 .podium-pedestal-3d.third .podium-block {
-  height: 125px;
+  height: 145px;
+  padding-top: 42px;
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.75) 100%);
   border-color: rgba(245, 158, 11, 0.3);
   box-shadow: 0 15px 30px rgba(245, 158, 11, 0.05), inset 0 1px 2px rgba(245, 158, 11, 0.1);
@@ -12241,7 +12247,7 @@ input:-webkit-autofill:active {
   box-sizing: border-box;
 }
 .hover-card-match-item.win {
-  border-left-color: #10b981;
+  border-left-color: #38bdf8;
 }
 .hover-card-match-item.lose {
   border-left-color: #ef4444;
@@ -12347,14 +12353,18 @@ input:-webkit-autofill:active {
   margin: 0;
   line-height: 1.1;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .boc-hero-year {
   font-family: var(--font-headers);
   font-size: 1.8rem;
   font-weight: 900;
-  color: #10b981;
+  color: #38bdf8;
   margin: 0;
   line-height: 1.1;
+  display: inline-block;
 }
 .boc-season-summary-mini {
   display: flex;
@@ -12387,15 +12397,15 @@ input:-webkit-autofill:active {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 12px;
   padding: 10px 18px;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.05);
 }
 .boc-prizepool-panel .prizepool-icon {
   font-size: 1.5rem;
-  color: #10b981;
+  color: #38bdf8;
 }
 .boc-prizepool-panel .prizepool-details {
   display: flex;
@@ -12410,7 +12420,7 @@ input:-webkit-autofill:active {
 .boc-prizepool-panel .prizepool-val {
   font-size: 1.15rem;
   font-weight: 900;
-  color: #10b981;
+  color: #38bdf8;
 }
 
 /* Road to Grand Final Section */
@@ -12454,9 +12464,9 @@ input:-webkit-autofill:active {
   max-width: 500px;
 }
 .boc-premium-cta-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8 !important;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.78rem;
@@ -12469,9 +12479,11 @@ input:-webkit-autofill:active {
   letter-spacing: 0.5px;
 }
 .boc-premium-cta-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #ffffff !important;
   transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
 }
 .boc-timeline-container {
   flex: 2;
@@ -12565,7 +12577,7 @@ input:-webkit-autofill:active {
   color: rgba(255, 255, 255, 0.3);
 }
 .boc-timeline-node.completed .node-num {
-  color: #10b981;
+  color: #38bdf8;
 }
 .boc-timeline-node.completed .node-status-dot {
   background: #064e3b;
@@ -12574,7 +12586,7 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 .boc-timeline-node.completed .node-status-text {
-  color: #10b981;
+  color: #38bdf8;
 }
 .boc-timeline-node.ongoing .node-num {
   color: #38bdf8;
@@ -12686,31 +12698,24 @@ input:-webkit-autofill:active {
 }
 .boc-finalist-card-premium:hover {
   transform: translateY(-5px);
-  border-color: rgba(16, 185, 129, 0.4);
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.1);
 }
 .boc-finalist-card-premium .rank-seed-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  width: 18px;
-  height: 18px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1.5px solid #10b981;
-  color: #10b981;
-  border-radius: 50%;
-  font-size: 0.65rem;
+  color: #38bdf8;
+  font-size: 0.72rem;
   font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  letter-spacing: 0.5px;
 }
 .boc-finalist-card-premium .avatar-frame {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  border: 2px solid rgba(56, 189, 248, 0.3);
   margin: 0 auto 12px auto;
   overflow: hidden;
   background: rgba(11, 15, 26, 0.7);
@@ -12721,8 +12726,8 @@ input:-webkit-autofill:active {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .boc-finalist-card-premium:hover .avatar-frame {
-  border-color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.45);
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.45);
 }
 .boc-finalist-card-premium .avatar-frame img {
   width: 100%;
@@ -12733,7 +12738,7 @@ input:-webkit-autofill:active {
   font-family: var(--font-headers);
   font-weight: 800;
   font-size: 0.85rem;
-  color: #10b981;
+  color: #38bdf8;
 }
 .boc-finalist-card-premium .player-name {
   font-family: var(--font-headers);
@@ -12758,9 +12763,9 @@ input:-webkit-autofill:active {
   display: inline-block;
   font-size: 0.52rem;
   font-weight: 800;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.15);
   border-radius: 4px;
   padding: 2px 6px;
   letter-spacing: 0.2px;
@@ -12785,9 +12790,9 @@ input:-webkit-autofill:active {
   transform: translateY(-5px);
 }
 /* Colorful themes for different awards */
-.boc-award-card.wins { border-color: rgba(16, 185, 129, 0.15); }
-.boc-award-card.wins:hover { border-color: #10b981; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1); }
-.boc-award-card.wins .award-icon-badge { background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; }
+.boc-award-card.wins { border-color: rgba(56, 189, 248, 0.15); }
+.boc-award-card.wins:hover { border-color: #38bdf8; box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15); }
+.boc-award-card.wins .award-icon-badge { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; color: #38bdf8; }
 
 .boc-award-card.streak { border-color: rgba(249, 115, 22, 0.15); }
 .boc-award-card.streak:hover { border-color: #f97316; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.1); }
@@ -12886,7 +12891,7 @@ input:-webkit-autofill:active {
   overflow: hidden;
   min-height: 380px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   aspect-ratio: 16 / 9;
 }
 .boc-recap-grid {
@@ -12908,7 +12913,7 @@ input:-webkit-autofill:active {
   margin-bottom: 20px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border-left: 3px solid #10b981;
+  border-left: 3px solid #38bdf8;
   padding-left: 12px;
   line-height: 1.2;
 }
@@ -12922,8 +12927,8 @@ input:-webkit-autofill:active {
 .boc-recap-closing-msg {
   font-family: 'Caveat', cursive;
   font-size: 2.2rem;
-  color: #10b981;
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
   transform: rotate(-3deg);
   margin-left: 10px;
   display: inline-block;
@@ -12937,10 +12942,10 @@ input:-webkit-autofill:active {
   bottom: -6px;
   width: 110%;
   height: 3px;
-  background: #10b981;
+  background: #38bdf8;
   border-radius: 50%;
   transform: rotate(-1.5deg);
-  box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
 .boc-recap-visuals {
@@ -13013,7 +13018,7 @@ input:-webkit-autofill:active {
   white-space: nowrap;
 }
 
-.boc-recap-section .text-green { color: #10b981 !important; }
+.boc-recap-section .text-green { color: #38bdf8 !important; }
 .boc-recap-section .text-orange { color: #f97316 !important; }
 .boc-recap-section .text-blue { color: #38bdf8 !important; }
 .boc-recap-section .text-purple { color: #a855f7 !important; }
