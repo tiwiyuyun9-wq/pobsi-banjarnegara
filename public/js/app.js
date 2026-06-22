@@ -13064,13 +13064,39 @@ function renderEventDetailTabs(event) {
     // Flatpickr initialization
     const dateWrapper = document.getElementById("tab-boc-schedule-date-wrapper");
     if (dateWrapper && typeof flatpickr !== "undefined" && !dateWrapper._flatpickr) {
-      flatpickr(tabBocDate, {
+      flatpickr(dateWrapper, {
         dateFormat: "d F Y",
         locale: "id",
         allowInput: true,
         disableMobile: true,
         wrap: true
       });
+    }
+
+    // Toggle schedule and regulation sections based on tournament status (playoff has started or is completed)
+    const sectionSchedule = document.getElementById("tab-boc-settings-section-schedule");
+    const sectionRegulations = document.getElementById("tab-boc-settings-section-regulations");
+
+    if (event.status !== "Daftar") {
+      // Hide sections
+      if (sectionSchedule) sectionSchedule.style.display = "none";
+      if (sectionRegulations) sectionRegulations.style.display = "none";
+      
+      // Remove required attributes to prevent hidden validation errors
+      if (tabBocDate) tabBocDate.removeAttribute("required");
+      if (tabBocTime) tabBocTime.removeAttribute("required");
+      if (tabBocVenue) tabBocVenue.removeAttribute("required");
+      if (tabBocYear) tabBocYear.removeAttribute("required");
+    } else {
+      // Show sections
+      if (sectionSchedule) sectionSchedule.style.display = "flex";
+      if (sectionRegulations) sectionRegulations.style.display = "flex";
+      
+      // Restore required attributes
+      if (tabBocDate) tabBocDate.setAttribute("required", "");
+      if (tabBocTime) tabBocTime.setAttribute("required", "");
+      if (tabBocVenue) tabBocVenue.setAttribute("required", "");
+      if (tabBocYear) tabBocYear.setAttribute("required", "");
     }
 
     // Role Restriction Check (RBAC)
@@ -15361,11 +15387,22 @@ function clearDownstreamBocMainMatches(bracket, matchIdx) {
 function checkAndFinalizeBoc(event, bracket) {
   const finalMatch = bracket.mainBracket[6];
   const thirdMatch = bracket.thirdPlace;
-  if (finalMatch && finalMatch.winner && thirdMatch && thirdMatch.winner) {
+  if (finalMatch && finalMatch.winner) {
     const champion = finalMatch.winner;
     const runnerUp = champion === finalMatch.p1 ? finalMatch.p2 : finalMatch.p1;
-    const thirdPlaceWinner = thirdMatch.winner;
-    const thirdPlaceLoser = thirdPlaceWinner === thirdMatch.p1 ? thirdMatch.p2 : thirdMatch.p1;
+    
+    let thirdPlaceWinner = "";
+    let thirdPlaceLoser = "";
+    if (thirdMatch && thirdMatch.winner) {
+      thirdPlaceWinner = thirdMatch.winner;
+      thirdPlaceLoser = thirdPlaceWinner === thirdMatch.p1 ? thirdMatch.p2 : thirdMatch.p1;
+    } else {
+      // Fallback: Semifinal losers
+      const sf1 = bracket.mainBracket[4];
+      const sf2 = bracket.mainBracket[5];
+      if (sf1) thirdPlaceWinner = sf1.winner === sf1.p1 ? sf1.p2 : sf1.p1;
+      if (sf2) thirdPlaceLoser = sf2.winner === sf2.p1 ? sf2.p2 : sf2.p1;
+    }
     
     const qfLosers = [];
     for (let i = 0; i < 4; i++) {
@@ -16613,15 +16650,19 @@ window.finalizeTournamentFromBracket = async function(eventId) {
       showCustomToast("Pertandingan final belum selesai!", "error");
       return;
     }
-    if (!bracket.thirdPlace || !bracket.thirdPlace.winner) {
-      showCustomToast("Pertandingan perebutan juara 3 & 4 belum selesai!", "error");
-      return;
-    }
     newWinner = bracket.mainBracket[6].winner;
     runnerUp = newWinner === bracket.mainBracket[6].p1 ? bracket.mainBracket[6].p2 : bracket.mainBracket[6].p1;
 
-    t4_1 = bracket.thirdPlace.winner;
-    t4_2 = t4_1 === bracket.thirdPlace.p1 ? bracket.thirdPlace.p2 : bracket.thirdPlace.p1;
+    if (bracket.thirdPlace && bracket.thirdPlace.winner) {
+      t4_1 = bracket.thirdPlace.winner;
+      t4_2 = t4_1 === bracket.thirdPlace.p1 ? bracket.thirdPlace.p2 : bracket.thirdPlace.p1;
+    } else {
+      // Fallback: Semifinal losers
+      const sf1 = bracket.mainBracket[4];
+      const sf2 = bracket.mainBracket[5];
+      if (sf1) t4_1 = sf1.winner === sf1.p1 ? sf1.p2 : sf1.p1;
+      if (sf2) t4_2 = sf2.winner === sf2.p1 ? sf2.p2 : sf2.p1;
+    }
 
     for (let i = 0; i < 4; i++) {
       const qf = bracket.mainBracket[i];
