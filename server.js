@@ -134,6 +134,7 @@ db.serialize(() => {
   // Safely add point_rules column to support custom point calculations
   db.run(`ALTER TABLE boc_settings ADD COLUMN point_rules TEXT`, () => {});
   db.run(`ALTER TABLE boc_settings ADD COLUMN cover TEXT`, () => {});
+  db.run(`ALTER TABLE boc_settings ADD COLUMN recap_cover TEXT`, () => {});
 
   db.run(`CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,

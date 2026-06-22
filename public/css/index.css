@@ -12872,7 +12872,7 @@ input:-webkit-autofill:active {
 
 /* Section 5: Season Recap */
 .boc-recap-section {
-  background: linear-gradient(90deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 35%, rgba(9, 14, 26, 0.3) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+  background: linear-gradient(90deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 35%, rgba(9, 14, 26, 0.3) 100%), var(--boc-recap-bg, url('../images/boc-community-2026.jpg')) no-repeat center center;
   background-size: cover;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 16px;
@@ -13052,7 +13052,7 @@ input:-webkit-autofill:active {
   .boc-recap-grid { grid-template-columns: 1fr; gap: 32px; }
   .boc-recap-section {
     margin: 32px;
-    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 60%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 60%, rgba(9, 14, 26, 0.4) 100%), var(--boc-recap-bg, url('../images/boc-community-2026.jpg')) no-repeat center center;
     background-size: cover;
   }
 }
@@ -13068,7 +13068,7 @@ input:-webkit-autofill:active {
   .boc-recap-section {
     margin: 20px;
     padding: 24px 20px !important;
-    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 65%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 65%, rgba(9, 14, 26, 0.4) 100%), var(--boc-recap-bg, url('../images/boc-community-2026.jpg')) no-repeat center center;
     background-size: cover;
   }
 }
@@ -13080,7 +13080,7 @@ input:-webkit-autofill:active {
   .boc-recap-section {
     margin: 12px;
     padding: 16px !important;
-    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.85) 75%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.85) 75%, rgba(9, 14, 26, 0.4) 100%), var(--boc-recap-bg, url('../images/boc-community-2026.jpg')) no-repeat center center;
     background-size: cover;
   }
 }

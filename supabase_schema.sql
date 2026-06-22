@@ -113,7 +113,8 @@ CREATE TABLE boc_settings (
     rules TEXT,
     point_rules TEXT,
     status TEXT DEFAULT 'active',
-    cover TEXT
+    cover TEXT,
+    recap_cover TEXT
 );
 
 -- Seed akun pengguna default (superadmin, admin, staff)
