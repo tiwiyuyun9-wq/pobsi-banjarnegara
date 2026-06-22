@@ -9327,7 +9327,7 @@ function renderPublicResults(event) {
   const rowsHtml = recapData.map(r => {
     const slug = generateSlug(r.name);
     return `
-      <tr onclick="openAthleteProfile('${slug}')" style="border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background-color 0.2s; ${r.isPromoted ? 'background: rgba(16, 185, 129, 0.06); border-left: 3px solid #10b981;' : ''}" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.04)'" onmouseout="this.style.backgroundColor='${r.isPromoted ? 'rgba(16, 185, 129, 0.06)' : ''}'">
+      <tr onclick="openAthleteProfile('${slug}')" style="border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background-color 0.2s; ${r.isPromoted ? 'background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8;' : ''}" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.04)'" onmouseout="this.style.backgroundColor='${r.isPromoted ? 'rgba(56, 189, 248, 0.08)' : ''}'">
         <td style="font-weight: 700; color: ${r.rankOrder === 1 ? 'var(--gold)' : (r.rankOrder === 2 ? '#94a3b8' : (r.rankOrder === 3 ? '#b45309' : '#64748b'))};">${r.rankText}</td>
         <td>
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -12961,7 +12961,7 @@ function renderEventDetailTabs(event) {
 
         const recapData = getTournamentRecapData(event);
         const rowsHtml = recapData.map(r => `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r.isPromoted ? 'background: rgba(16, 185, 129, 0.06); border-left: 3px solid #10b981;' : ''}">
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r.isPromoted ? 'background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8;' : ''}">
             <td style="font-weight: 700; color: ${r.rankOrder === 1 ? 'var(--gold)' : (r.rankOrder === 2 ? '#94a3b8' : (r.rankOrder === 3 ? '#b45309' : '#64748b'))};">${r.rankText}</td>
             <td class="table-name-bold">${r.name}</td>
             <td>${r.club}</td>
@@ -16452,11 +16452,11 @@ function renderRecapHandicapProgress(r) {
   let barHtml = '';
   
   if (r.isPromoted) {
-    // If promoted, show a green highlighted bar representing completion/promotion
+    // If promoted, show a blue highlighted bar representing completion/promotion
     barHtml = `
-      <div class="progress-container" style="flex: 1; min-width: 120px; max-width: 165px; border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
+      <div class="progress-container" style="flex: 1; min-width: 120px; max-width: 165px; border-color: rgba(56, 189, 248, 0.5); box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">
         <div class="progress-bar-custom" style="width: ${poinAwalPercent}%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); opacity: 0.85;"></div>
-        <div class="progress-bar-custom" style="left: ${poinAwalPercent}%; width: ${100 - poinAwalPercent}%; background: linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+        <div class="progress-bar-custom" style="left: ${poinAwalPercent}%; width: ${100 - poinAwalPercent}%; background: linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%);"></div>
         <span class="progress-label-text" style="color: #fff; font-weight: 800;">${poinAwal} (+${r.hcPts}) / ${targetPoints} Pts</span>
       </div>
     `;
@@ -16465,9 +16465,9 @@ function renderRecapHandicapProgress(r) {
       <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: 100%;">
         <span class="table-badge-hc ${startColorClass}">HC ${hc}</span>
         ${barHtml}
-        <i class="fa-solid fa-angles-right" style="color: #10b981; font-size: 0.65rem;"></i>
-        <span class="table-badge-hc ${getHandicapColorClass(r.hcAkhir)}" style="box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); border-color: #10b981;">HC ${r.hcAkhir}</span>
-        <span class="badge-promoted-tag" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2.5px 5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);"><i class="fa-solid fa-arrow-trend-up"></i> PROMOTED!</span>
+        <i class="fa-solid fa-angles-right" style="color: #38bdf8; font-size: 0.65rem;"></i>
+        <span class="table-badge-hc ${getHandicapColorClass(r.hcAkhir)}" style="box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: #38bdf8;">HC ${r.hcAkhir}</span>
+        <span class="badge-promoted-tag" style="background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2.5px 5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);"><i class="fa-solid fa-arrow-trend-up"></i> PROMOTED!</span>
       </div>
     `;
   } else {
