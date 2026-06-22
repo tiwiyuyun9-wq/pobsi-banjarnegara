@@ -12464,9 +12464,9 @@ input:-webkit-autofill:active {
   max-width: 500px;
 }
 .boc-premium-cta-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  border: 1px solid rgba(96, 165, 250, 0.4);
-  color: #ffffff !important;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8 !important;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.78rem;
@@ -12477,14 +12477,13 @@ input:-webkit-autofill:active {
   align-items: center;
   gap: 8px;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 .boc-premium-cta-btn:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-color: #60a5fa;
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
   color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5), 0 0 15px rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
 }
 .boc-timeline-container {
   flex: 2;
