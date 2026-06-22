@@ -12029,6 +12029,9 @@ input:-webkit-autofill:active {
   align-items: center !important;
   height: auto !important;
   position: static !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Month & Year wrapper */
@@ -12043,6 +12046,9 @@ input:-webkit-autofill:active {
   left: auto !important;
   text-align: center !important;
   padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Month Dropdown Select (Clean Typography, No Block Background/Border) */
@@ -12081,6 +12087,9 @@ input:-webkit-autofill:active {
 .flatpickr-calendar .numInputWrapper {
   width: auto !important;
   display: inline-block !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 .flatpickr-calendar .numInputWrapper span {
   display: none !important; /* Hide year adjusting arrows */
