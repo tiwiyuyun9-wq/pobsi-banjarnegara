@@ -12686,9 +12686,9 @@ input:-webkit-autofill:active {
 }
 .boc-finalist-card-premium:hover {
   transform: translateY(-5px);
-  border-color: rgba(16, 185, 129, 0.4);
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.1);
 }
 .boc-finalist-card-premium .rank-seed-badge {
   position: absolute;
@@ -12696,9 +12696,9 @@ input:-webkit-autofill:active {
   left: 8px;
   width: 18px;
   height: 18px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1.5px solid #10b981;
-  color: #10b981;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1.5px solid #38bdf8;
+  color: #38bdf8;
   border-radius: 50%;
   font-size: 0.65rem;
   font-weight: 900;
@@ -12710,7 +12710,7 @@ input:-webkit-autofill:active {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  border: 2px solid rgba(56, 189, 248, 0.3);
   margin: 0 auto 12px auto;
   overflow: hidden;
   background: rgba(11, 15, 26, 0.7);
@@ -12721,8 +12721,8 @@ input:-webkit-autofill:active {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .boc-finalist-card-premium:hover .avatar-frame {
-  border-color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.45);
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.45);
 }
 .boc-finalist-card-premium .avatar-frame img {
   width: 100%;
@@ -12733,7 +12733,7 @@ input:-webkit-autofill:active {
   font-family: var(--font-headers);
   font-weight: 800;
   font-size: 0.85rem;
-  color: #10b981;
+  color: #38bdf8;
 }
 .boc-finalist-card-premium .player-name {
   font-family: var(--font-headers);
@@ -12758,9 +12758,9 @@ input:-webkit-autofill:active {
   display: inline-block;
   font-size: 0.52rem;
   font-weight: 800;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.15);
   border-radius: 4px;
   padding: 2px 6px;
   letter-spacing: 0.2px;
