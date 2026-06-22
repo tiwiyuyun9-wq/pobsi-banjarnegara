@@ -8574,12 +8574,6 @@ function renderBocPodium3D(event, bracketObj) {
   const timelineNodesContainer = document.querySelector(".boc-timeline-nodes");
   if (timelineNodesContainer) {
     let currentSirkuits = bocSirkuits || [];
-    if (currentSirkuits.length === 0) {
-      const htEvents = (appData.events || [])
-        .filter(e => e.type === "Home Tournament" || e.title.includes("HT") || e.title.includes("Series"))
-        .sort((a, b) => a.id.localeCompare(b.id));
-      currentSirkuits = htEvents.map(e => e.title);
-    }
 
     // If still empty, fallback to 12 placeholder series names
     if (currentSirkuits.length === 0) {
@@ -8641,7 +8635,7 @@ function renderBocPodium3D(event, bracketObj) {
 
       nodesHtml += `
         <div class="boc-timeline-node ${statusClass}" ${clickHandler} title="${tooltipText}">
-          <span class="node-num" style="white-space: nowrap; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;">${sName}</span>
+          <span class="node-num" style="text-overflow: ellipsis; overflow: hidden; max-width: 75px; white-space: nowrap; display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;">${sName}</span>
           <div class="node-status-dot">${iconHtml}</div>
           <span class="node-status-text">${statusText}</span>
         </div>
