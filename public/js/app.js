@@ -1351,16 +1351,16 @@ function updateBocBannersVisibility() {
     const viewBtn = document.getElementById("btn-view-boc-playoff");
 
     if (playoffEvent.status === 'Selesai') {
-      // Completed State style (Green Theme)
-      playoffBanner.style.background = "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%)";
-      playoffBanner.style.borderColor = "rgba(16, 185, 129, 0.25)";
-      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(16, 185, 129, 0.03)";
+      // Completed State style (Blue Theme)
+      playoffBanner.style.background = "linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%)";
+      playoffBanner.style.borderColor = "rgba(56, 189, 248, 0.25)";
+      playoffBanner.style.boxShadow = "var(--shadow-lg), 0 0 35px rgba(56, 189, 248, 0.03)";
       
       if (iconBgEl) {
-        iconBgEl.style.background = "rgba(16, 185, 129, 0.15)";
-        iconBgEl.style.borderColor = "rgba(16, 185, 129, 0.2)";
-        iconBgEl.style.color = "#10b981";
-        iconBgEl.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.2)";
+        iconBgEl.style.background = "rgba(56, 189, 248, 0.15)";
+        iconBgEl.style.borderColor = "rgba(56, 189, 248, 0.2)";
+        iconBgEl.style.color = "#38bdf8";
+        iconBgEl.style.boxShadow = "0 0 15px rgba(56, 189, 248, 0.2)";
       }
       if (iconEl) {
         iconEl.className = "fa-solid fa-award";
@@ -1370,9 +1370,9 @@ function updateBocBannersVisibility() {
       }
       if (viewBtn) {
         viewBtn.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Lihat Hasil BOC';
-        viewBtn.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+        viewBtn.style.background = "linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)";
         viewBtn.style.color = "#fff";
-        viewBtn.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
+        viewBtn.style.boxShadow = "0 4px 15px rgba(56, 189, 248, 0.3)";
       }
     } else {
       // Ongoing/default State style (Gold/Yellow Theme)
@@ -7886,9 +7886,9 @@ function renderBocPlayoffConsole(event) {
     if (isCompleted) {
       statusBadge.textContent = "Selesai";
       statusBadge.className = "boc-playoff-status-badge";
-      statusBadge.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+      statusBadge.style.background = "linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)";
       statusBadge.style.color = "#fff";
-      statusBadge.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.35)";
+      statusBadge.style.boxShadow = "0 0 15px rgba(56, 189, 248, 0.35)";
     } else if (isOngoing) {
       statusBadge.textContent = "Live Playoff";
       statusBadge.className = "boc-playoff-status-badge pulse-red";
