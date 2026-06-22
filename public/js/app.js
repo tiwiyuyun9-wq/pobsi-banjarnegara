@@ -7226,7 +7226,7 @@ function setupBocAdminListeners() {
       if (modal) {
         const label = document.getElementById("dev-reset-year-label");
         if (label) {
-          label.textContent = `Target: BOC ${currentBocYear}`;
+          label.textContent = `Target: BOC 2026`;
         }
         modal.style.display = "flex";
       }
@@ -7269,7 +7269,7 @@ function setupBocAdminListeners() {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            year: currentBocYear,
+            year: "2026",
             clearEvents,
             clearSchedule,
             clearSirkuits,
@@ -7290,11 +7290,17 @@ function setupBocAdminListeners() {
 
           if (clearSirkuits) {
             bocSirkuits = [];
-            localStorage.removeItem(`bocSirkuits_${currentBocYear}`);
+            localStorage.removeItem(`bocSirkuits_2026`);
           }
 
           console.log("Dev Reset Summary:", data.summary);
           showCustomToast(data.message || "BOC state berhasil di-reset!", "success");
+
+          // Always set currentBocYear back to 2026 on dev reset completion
+          currentBocYear = "2026";
+          localStorage.setItem("currentBocYear", "2026");
+          bocSirkuits = loadBocSirkuitsForYear("2026");
+          await loadBocSettings("2026");
 
           // Reload all data from API and re-render
           await loadDataFromApi();
