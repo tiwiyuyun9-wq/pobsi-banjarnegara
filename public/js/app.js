@@ -8028,6 +8028,23 @@ function renderBocPlayoffConsole(event) {
   renderBocFinalistsGrid(participants);
   renderBocPodium3D(event, bracketObj);
 
+  // Set up CTA buttons click handlers (always active)
+  const viewAllBtn = document.getElementById("boc-view-all-series-btn");
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => {
+      const backBtn = document.getElementById("boc-playoff-back-btn");
+      if (backBtn) backBtn.click();
+    };
+  }
+
+  const viewBracketBtn = document.getElementById("boc-view-bracket-btn");
+  if (viewBracketBtn) {
+    viewBracketBtn.onclick = () => {
+      const knockoutTabBtn = document.querySelector('.boc-playoff-stab[data-boc-playoff-tab="knockout"]');
+      if (knockoutTabBtn) knockoutTabBtn.click();
+    };
+  }
+
   // Setup back button
   const backBtn = document.getElementById("boc-playoff-back-btn");
   if (backBtn) {
@@ -8287,23 +8304,6 @@ function renderBocPodium3D(event, bracketObj) {
   if (!isCompleted || !bracketObj.mainBracket) {
     container.innerHTML = `<div style="color: var(--text-dim); padding: 20px;">Podium juara akan ditampilkan setelah turnamen berakhir.</div>`;
     return;
-  }
-
-  // Set up CTA buttons click handlers
-  const viewAllBtn = document.getElementById("boc-view-all-series-btn");
-  if (viewAllBtn) {
-    viewAllBtn.onclick = () => {
-      const backBtn = document.getElementById("boc-playoff-back-btn");
-      if (backBtn) backBtn.click();
-    };
-  }
-
-  const viewBracketBtn = document.getElementById("boc-view-bracket-btn");
-  if (viewBracketBtn) {
-    viewBracketBtn.onclick = () => {
-      const knockoutTabBtn = document.querySelector('.boc-playoff-stab[data-boc-playoff-tab="knockout"]');
-      if (knockoutTabBtn) knockoutTabBtn.click();
-    };
   }
 
   // Get details helper for the podium players
