@@ -3375,6 +3375,17 @@
                   <i class="fa-solid fa-magnifying-glass"></i>
                   <input type="text" id="boc-admin-search-input" placeholder="Cari nama atlet...">
                 </div>
+                <div style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px 12px; border-radius: 6px; height: 38px; box-sizing: border-box;">
+                  <i class="fa-solid fa-crop-simple" style="color: var(--gold); font-size: 0.85rem;"></i>
+                  <span style="font-size: 0.78rem; color: var(--text-dim); font-weight: 600; white-space: nowrap;">Cut-Off:</span>
+                  <select id="table-set-boc-cutoff" class="select-reset" style="background: transparent; border: none; color: #fff; font-size: 0.78rem; font-weight: 700; cursor: pointer; padding: 0 20px 0 0; outline: none; width: auto; height: auto;">
+                    <option value="8" style="background: #0d1527; color: #fff;">8 Besar</option>
+                    <option value="12" style="background: #0d1527; color: #fff;">12 Besar</option>
+                    <option value="16" style="background: #0d1527; color: #fff;">16 Besar</option>
+                    <option value="24" style="background: #0d1527; color: #fff;">24 Besar</option>
+                    <option value="32" style="background: #0d1527; color: #fff;">32 Besar</option>
+                  </select>
+                </div>
                 <button class="pm-btn pm-btn-outline" id="btn-boc-recalculate-engine" title="Hitung ulang peringkat & perbaiki integritas data">
                   <i class="fa-solid fa-rotate-left"></i> Re-index Ranks
                 </button>
@@ -3572,28 +3583,7 @@
                 <h4 style="font-family: var(--font-headers); font-size: 1rem; color: #fff; font-weight: 700; margin: 12px 0 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
                   <i class="fa-solid fa-trophy" style="color: #fbbf24; margin-right: 6px;"></i> Regulasi Sirkuit
                 </h4>
-                <div class="form-row-double">
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="set-boc-cutoff">Batas Zona Kelayakan Playoff (Cut-Off)</label>
-                    <select id="set-boc-cutoff" class="select-reset">
-                      <option value="8">8 Besar</option>
-                      <option value="12">12 Besar</option>
-                      <option value="16" selected>16 Besar</option>
-                      <option value="24">24 Besar</option>
-                      <option value="32">32 Besar</option>
-                    </select>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="set-boc-maxhc">Batas Handicap Maksimal</label>
-                    <select id="set-boc-maxhc" class="select-reset">
-                      <option value="Bebas" selected>Bebas (Tanpa Batasan)</option>
-                      <option value="7">Handicap 7</option>
-                      <option value="6">Handicap 6</option>
-                      <option value="5">Handicap 5</option>
-                      <option value="4">Handicap 4</option>
-                    </select>
-                  </div>
-                </div>
+
                 <div class="form-group-item">
                   <label class="form-lbl" for="set-boc-year">Tahun Musim Sirkuit Berjalan</label>
                   <input type="number" id="set-boc-year" min="2020" max="2050" required placeholder="Contoh: 2026">
@@ -3943,7 +3933,7 @@
                 </label>
 
                 <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(168, 85, 247, 0.04)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                  <input type="checkbox" id="dev-reset-opt-sirkuits" style="width: 18px; height: 18px; accent-color: #c084fc; cursor: pointer;">
+                  <input type="checkbox" id="dev-reset-opt-sirkuits" checked style="width: 18px; height: 18px; accent-color: #c084fc; cursor: pointer;">
                   <div>
                     <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">🔄 Clear Sirkuit</span>
                     <p style="font-size: 0.72rem; color: var(--text-muted); margin: 2px 0 0 0;">Hapus semua seri sirkuit yang sudah dibuat</p>
@@ -3951,7 +3941,7 @@
                 </label>
 
                 <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(168, 85, 247, 0.04)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                  <input type="checkbox" id="dev-reset-opt-reseed" style="width: 18px; height: 18px; accent-color: #c084fc; cursor: pointer;">
+                  <input type="checkbox" id="dev-reset-opt-reseed" checked style="width: 18px; height: 18px; accent-color: #c084fc; cursor: pointer;">
                   <div>
                     <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">🌱 Reseed Standings & Sirkuit</span>
                     <p style="font-size: 0.72rem; color: var(--text-muted); margin: 2px 0 0 0;">Kembalikan data sirkuit dan standings ke data seed awal</p>
@@ -4406,27 +4396,15 @@
                       <h4 style="font-family: var(--font-headers); font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin: 10px 0 0 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
                         <i class="fa-solid fa-scale-balanced"></i> Regulasi Sirkuit
                       </h4>
-                      <div class="form-row-double">
-                        <div class="form-group-item">
-                          <label class="form-lbl" for="tab-set-boc-cutoff">Batas Kelayakan (Cut-Off)</label>
-                          <select id="tab-set-boc-cutoff" class="select-reset">
-                            <option value="8">8 Besar</option>
-                            <option value="12">12 Besar</option>
-                            <option value="16">16 Besar</option>
-                            <option value="24">24 Besar</option>
-                            <option value="32">32 Besar</option>
-                          </select>
-                        </div>
-                        <div class="form-group-item">
-                          <label class="form-lbl" for="tab-set-boc-maxhc">Batas Handicap Maksimal</label>
-                          <select id="tab-set-boc-maxhc" class="select-reset">
-                            <option value="Bebas">Bebas (Tanpa Batasan)</option>
-                            <option value="7">Handicap 7</option>
-                            <option value="6">Handicap 6</option>
-                            <option value="5">Handicap 5</option>
-                            <option value="4">Handicap 4</option>
-                          </select>
-                        </div>
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-cutoff">Batas Kelayakan (Cut-Off)</label>
+                        <select id="tab-set-boc-cutoff" class="select-reset">
+                          <option value="8">8 Besar</option>
+                          <option value="12">12 Besar</option>
+                          <option value="16">16 Besar</option>
+                          <option value="24">24 Besar</option>
+                          <option value="32">32 Besar</option>
+                        </select>
                       </div>
                       <div class="form-group-item">
                         <label class="form-lbl" for="tab-set-boc-year">Tahun Musim Sirkuit</label>
