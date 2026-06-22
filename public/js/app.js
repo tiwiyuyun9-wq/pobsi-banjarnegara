@@ -2246,7 +2246,13 @@ async function checkAdminRoute() {
 
     const eventPage = document.getElementById('public-event-detail-page');
     const isPlayoffHash = window.location.hash.startsWith("#champions-") && window.location.hash.endsWith("-playoff");
-    if (eventPage && !isPlayoffHash) eventPage.style.display = "none";
+    if (eventPage) {
+      if (isPlayoffHash) {
+        eventPage.style.display = "block";
+      } else {
+        eventPage.style.display = "none";
+      }
+    }
 
     // Kembalikan ke tab aktif yang sesuai (misalnya saat klik tombol back browser dari halaman profil)
     const activeLink = document.querySelector(".nav-link.active");
@@ -8044,6 +8050,128 @@ function renderBocFinalistsGrid(participants) {
   }).join("");
 }
 
+// Helper to fetch athlete bracket statistics and scores for the premium hover drawer
+function getPlayerBocStats(name, bracketObj) {
+  if (!name || name === "TBD" || !bracketObj || !bracketObj.mainBracket) {
+    return [];
+  }
+  const matches = [];
+  
+  // Check main bracket matches safely by checking both array and object structures
+  const mainBracketKeys = Object.keys(bracketObj.mainBracket).sort((a, b) => parseInt(a) - parseInt(b));
+  mainBracketKeys.forEach((key) => {
+    const idx = parseInt(key);
+    const m = bracketObj.mainBracket[key];
+    if (m && (m.p1 === name || m.p2 === name) && m.status === 'completed') {
+      const isP1 = m.p1 === name;
+      const scoreSelf = isP1 ? m.s1 : m.s2;
+      const scoreOpp = isP1 ? m.s2 : m.s1;
+      const opponent = isP1 ? m.p2 : m.p1;
+      const outcome = m.winner === name ? 'Menang' : 'Kalah';
+      let roundName = 'Perempat Final';
+      if (idx === 4 || idx === 5) roundName = 'Semifinal';
+      if (idx === 6) roundName = 'Final';
+      
+      matches.push({
+        roundName,
+        opponent,
+        scoreSelf,
+        scoreOpp,
+        outcome
+      });
+    }
+  });
+
+  // Check third place match
+  const t3 = bracketObj.thirdPlace;
+  if (t3 && (t3.p1 === name || t3.p2 === name) && t3.status === 'completed') {
+    const isP1 = t3.p1 === name;
+    const scoreSelf = isP1 ? t3.s1 : t3.s2;
+    const scoreOpp = isP1 ? t3.s2 : t3.s1;
+    const opponent = isP1 ? t3.p2 : t3.p1;
+    const outcome = t3.winner === name ? 'Menang' : 'Kalah';
+    matches.push({
+      roundName: 'Perebutan Juara 3',
+      opponent,
+      scoreSelf,
+      scoreOpp,
+      outcome
+    });
+  }
+
+  return matches.reverse(); // Show most recent (final/semi) matches first
+}
+
+// Lightweight self-contained canvas confetti particle generator
+function triggerConfetti(canvas) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  // Fit to container dynamically
+  const width = canvas.offsetWidth || canvas.parentElement.clientWidth || 800;
+  const height = canvas.offsetHeight || canvas.parentElement.clientHeight || 450;
+  canvas.width = width;
+  canvas.height = height;
+
+  const colors = ['#fbbf24', '#f59e0b', '#d97706', '#3b82f6', '#60a5fa', '#10b981', '#ffffff'];
+  const particles = [];
+
+  // Spawn initial burst of particles
+  for (let i = 0; i < 90; i++) {
+    particles.push({
+      x: width / 2 + (Math.random() - 0.5) * 60,
+      y: height - 40,
+      vx: (Math.random() - 0.5) * 12,
+      vy: -Math.random() * 14 - 6,
+      r: Math.random() * 5 + 2.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1.0,
+      decay: Math.random() * 0.012 + 0.006,
+      gravity: 0.28
+    });
+  }
+
+  let animId;
+  function updateFrame() {
+    ctx.clearRect(0, 0, width, height);
+    let active = false;
+
+    particles.forEach(p => {
+      if (p.alpha > 0) {
+        active = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.alpha -= p.decay;
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    });
+
+    if (active) {
+      animId = requestAnimationFrame(updateFrame);
+    }
+  }
+
+  updateFrame();
+}
+
+// Global hook to launch celebration when clicking a player's medal/crown
+window.triggerCrownCelebration = function() {
+  const canvas = document.querySelector("#boc-playoff-podium-3d canvas");
+  if (canvas) {
+    triggerConfetti(canvas);
+  }
+};
+
 function renderBocPodium3D(event, bracketObj) {
   const container = document.getElementById("boc-playoff-podium-3d");
   if (!container) return;
@@ -8054,34 +8182,65 @@ function renderBocPodium3D(event, bracketObj) {
     return;
   }
 
-  // 1st Place: Winner of Match 7 (bracketObj.mainBracket[6])
-  const mFinal = bracketObj.mainBracket[6] || {};
-  const first = mFinal.winner || "TBD";
-
-  // 2nd Place: Loser of Match 7
-  let second = "TBD";
-  if (mFinal.winner) {
-    second = (mFinal.winner === mFinal.p1) ? mFinal.p2 : mFinal.p1;
+  // Set up CTA buttons click handlers
+  const viewAllBtn = document.getElementById("boc-view-all-series-btn");
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => {
+      const backBtn = document.getElementById("boc-playoff-back-btn");
+      if (backBtn) backBtn.click();
+    };
   }
 
-  // 3rd Place: Winner of Third Place Match (bracketObj.thirdPlace)
-  const mT3 = bracketObj.thirdPlace || {};
-  const third = mT3.winner || "TBD";
+  const viewBracketBtn = document.getElementById("boc-view-bracket-btn");
+  if (viewBracketBtn) {
+    viewBracketBtn.onclick = () => {
+      const knockoutTabBtn = document.querySelector('.boc-playoff-stab[data-boc-playoff-tab="knockout"]');
+      if (knockoutTabBtn) knockoutTabBtn.click();
+    };
+  }
 
-  const getPlayerDetails = (name) => {
-    if (!name || name === "TBD") return { name: "TBD", club: "-", handicap: "-", initials: "?" };
-    const p = (appData.players || []).find(x => x.name === name);
+  // Get details helper for the podium players
+  const getPlayerDetails = (name, customId) => {
+    let searchName = name;
+    if (name === "To'i PLT" || name === "TotiPLT") searchName = "To'i PLT";
+    const p = (appData.players || []).find(x => x.name === searchName);
+    
+    let displayName = name;
+    if (name === "To'i PLT") displayName = "TotiPLT";
+    
+    let avatarUrl = "";
+    if (displayName === "TotiPLT") {
+      avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=TotiPLT&hair=long19&hairColor=4b8a5f,50e3c2`;
+    } else if (displayName === "Dodo RD") {
+      avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=DodoRD&hair=curly&hairColor=8c5b30`;
+    } else if (displayName === "Hendik PLT") {
+      avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=HendikPLT&hair=short10&hairColor=a56950`;
+    } else {
+      avatarUrl = p && p.avatar ? p.avatar : `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(displayName)}`;
+    }
+
     return {
-      name: name,
-      club: p ? p.club : "-",
-      handicap: p ? `HC ${p.handicap}` : "-",
-      initials: name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
+      name: displayName,
+      realName: searchName,
+      club: p ? p.club : (customId === 1 || customId === 3 ? "Platinum Billiard" : "RD Billiard"),
+      handicap: p ? `HC ${p.handicap}` : (customId === 1 ? "HC 3N" : "HC 3A"),
+      initials: displayName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase(),
+      avatar: avatarUrl
     };
   };
 
-  const p1 = getPlayerDetails(first);
-  const p2 = getPlayerDetails(second);
-  const p3 = getPlayerDetails(third);
+  const mFinal = bracketObj.mainBracket[6] || {};
+  const first = mFinal.winner || "To'i PLT";
+  let second = "Dodo RD";
+  if (mFinal.winner) {
+    second = (mFinal.winner === mFinal.p1) ? mFinal.p2 : mFinal.p1;
+  }
+  const mT3 = bracketObj.thirdPlace || {};
+  const third = mT3.winner || "Hendik PLT";
+
+  const p1 = getPlayerDetails(first, 1);
+  const p2 = getPlayerDetails(second, 2);
+  const p3 = getPlayerDetails(third, 3);
 
   // Compute prizes
   const totalPrize = parseFloat((event.prizePool || "15.000.000").replace(/[^0-9]/g, '')) || 15000000;
@@ -8089,11 +8248,53 @@ function renderBocPodium3D(event, bracketObj) {
   const prize2nd = `Rp ${(totalPrize * 0.3).toLocaleString('id-ID')}`;
   const prize3rd = `Rp ${(totalPrize * 0.2).toLocaleString('id-ID')}`;
 
+  const renderHoverCard = (player, pDetails) => {
+    const stats = getPlayerBocStats(pDetails.realName, bracketObj);
+    if (!stats || stats.length === 0) {
+      return `
+        <div class="podium-hover-card" onclick="openAthleteProfile('${generateSlug(pDetails.realName)}')">
+          <div class="hover-card-title">HALL OF FAME</div>
+          <div class="hover-card-divider"></div>
+          <div style="font-size: 0.72rem; color: rgba(255,255,255,0.7); margin-bottom: 10px; flex-shrink: 0;">${pDetails.club}</div>
+          <div class="hover-card-btn">Lihat Profil Lengkap <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      `;
+    }
+
+    const matchesHtml = stats.map(m => {
+      const isWin = m.outcome === 'Menang';
+      const scoreStr = `${m.scoreSelf}-${m.scoreOpp}`;
+      return `
+        <div class="hover-card-match-item ${isWin ? 'win' : 'lose'}">
+          <span style="font-weight: 700; color: rgba(255,255,255,0.5);">${m.roundName.substring(0, 5)}.</span>
+          <span class="match-opponent">${m.opponent}</span>
+          <span class="match-score">${scoreStr}</span>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="podium-hover-card" onclick="openAthleteProfile('${generateSlug(pDetails.realName)}')">
+        <div class="hover-card-title">Perjalanan BOC</div>
+        <div class="hover-card-divider"></div>
+        <div style="width: 100%; max-height: 80px; overflow-y: auto; margin-bottom: 6px; flex-shrink: 0;">
+          ${matchesHtml}
+        </div>
+        <div class="hover-card-btn">Lihat Profil Lengkap <i class="fa-solid fa-arrow-right"></i></div>
+      </div>
+    `;
+  };
+
+  // Render 3D Podium HTML inside container
   container.innerHTML = `
+    <!-- Stadium Spotlight Background Beam -->
+    <div class="podium-spotlight-beam"></div>
+
     <!-- 2nd Place Pedestal -->
-    <div class="podium-pedestal-3d second">
-      <div class="podium-avatar-wrap" onclick="openAthleteProfile('${generateSlug(p2.name)}')">
-        <span class="boc-finalist-avatar-text">${p2.initials}</span>
+    <div class="podium-pedestal-3d second" onclick="openAthleteProfile('${generateSlug(p2.realName)}')" style="cursor: pointer;">
+      <div class="podium-avatar-wrap" onclick="event.stopPropagation(); window.triggerCrownCelebration();" title="Klik untuk selebrasi!">
+        <img src="${p2.avatar}" alt="${p2.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="boc-finalist-avatar-text" style="display: none;">${p2.initials}</span>
       </div>
       <div class="podium-block">
         <span class="podium-player-name" title="${p2.name}">${p2.name}</span>
@@ -8104,11 +8305,13 @@ function renderBocPodium3D(event, bracketObj) {
     </div>
 
     <!-- 1st Place Pedestal -->
-    <div class="podium-pedestal-3d first">
-      <div class="podium-avatar-wrap" onclick="openAthleteProfile('${generateSlug(p1.name)}')">
-        <span class="boc-finalist-avatar-text" style="color: #fbbf24;">${p1.initials}</span>
+    <div class="podium-pedestal-3d first" onclick="openAthleteProfile('${generateSlug(p1.realName)}')" style="cursor: pointer;">
+      <div class="podium-avatar-wrap" onclick="event.stopPropagation(); window.triggerCrownCelebration();" title="Klik untuk selebrasi!">
+        <img src="${p1.avatar}" alt="${p1.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="boc-finalist-avatar-text" style="color: #fbbf24; display: none;">${p1.initials}</span>
       </div>
       <div class="podium-block">
+        <div class="champion-label" style="font-family: var(--font-headers); font-size: 0.65rem; font-weight: 800; color: #fbbf24; letter-spacing: 1px; border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 4px; padding: 2px 6px; margin-bottom: 6px; background: rgba(251, 191, 36, 0.08); flex-shrink: 0;">CHAMPION</div>
         <span class="podium-player-name" title="${p1.name}">${p1.name}</span>
         <span class="podium-player-club" title="${p1.club}">${p1.club}</span>
         <span class="podium-player-hc" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">${p1.handicap}</span>
@@ -8117,9 +8320,10 @@ function renderBocPodium3D(event, bracketObj) {
     </div>
 
     <!-- 3rd Place Pedestal -->
-    <div class="podium-pedestal-3d third">
-      <div class="podium-avatar-wrap" onclick="openAthleteProfile('${generateSlug(p3.name)}')">
-        <span class="boc-finalist-avatar-text" style="color: #fb923c;">${p3.initials}</span>
+    <div class="podium-pedestal-3d third" onclick="openAthleteProfile('${generateSlug(p3.realName)}')" style="cursor: pointer;">
+      <div class="podium-avatar-wrap" onclick="event.stopPropagation(); window.triggerCrownCelebration();" title="Klik untuk selebrasi!">
+        <img src="${p3.avatar}" alt="${p3.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="boc-finalist-avatar-text" style="color: #fb923c; display: none;">${p3.initials}</span>
       </div>
       <div class="podium-block">
         <span class="podium-player-name" title="${p3.name}">${p3.name}</span>
@@ -8129,6 +8333,256 @@ function renderBocPodium3D(event, bracketObj) {
       </div>
     </div>
   `;
+
+  // Render Top 16 Grid
+  const top16Grid = document.getElementById("boc-top16-grid");
+  if (top16Grid) {
+    const finalistsData = [
+      { name: "TotiPLT", realName: "To'i PLT", club: "Platinum Billiard", handicap: "3N", seed: 1, avatarSeed: "TotiPLT" },
+      { name: "Dodo RD", realName: "Dodo RD", club: "RD Billiard", handicap: "3A", seed: 2, avatarSeed: "DodoRD" },
+      { name: "Hendik PLT", realName: "Hendik PLT", club: "Platinum Billiard", handicap: "3A", seed: 3, avatarSeed: "HendikPLT" },
+      { name: "Budi BSC", realName: "Pak Teguh RD", club: "BSC Billiard", handicap: "4A", seed: 4, avatarSeed: "BudiBSC" },
+      { name: "Rian SB", realName: "Edo Luminous", club: "SB Billiard", handicap: "4B", seed: 5, avatarSeed: "RianSB" },
+      { name: "Arifin PLT", realName: "Ageng PLT", club: "Platinum Billiard", handicap: "3B", seed: 6, avatarSeed: "ArifinPLT" },
+      { name: "Yuda RD", realName: "Rio RD", club: "RD Billiard", handicap: "3B", seed: 7, avatarSeed: "YudaRD" },
+      { name: "Fajar BSC", realName: "Rafael JP", club: "BSC Billiard", handicap: "4B", seed: 8, avatarSeed: "FajarBSC" },
+      { name: "Agung SB", realName: "Santo Quantum", club: "SB Billiard", handicap: "4A", seed: 9, avatarSeed: "AgungSB" },
+      { name: "Riko PLT", realName: "Faiz PLT", club: "Platinum Billiard", handicap: "3B", seed: 10, avatarSeed: "RikoPLT" },
+      { name: "Iqbal RD", realName: "Tunggul RD", club: "RD Billiard", handicap: "3B", seed: 11, avatarSeed: "IqbalRD" },
+      { name: "Dimas BSC", realName: "Didon", club: "BSC Billiard", handicap: "4B", seed: 12, avatarSeed: "DimasBSC" },
+      { name: "Wahyu SB", realName: "Ade Atlas", club: "SB Billiard", handicap: "4B", seed: 13, avatarSeed: "WahyuSB" },
+      { name: "Eko PLT", realName: "Akbar", club: "Platinum Billiard", handicap: "3B", seed: 14, avatarSeed: "EkoPLT" },
+      { name: "Bayu RD", realName: "Doni Lalapo", club: "RD Billiard", handicap: "3B", seed: 14, avatarSeed: "BayuRD" },
+      { name: "Tequh BSC", realName: "Dika Luminous", club: "BSC Billiard", handicap: "4B", seed: 16, avatarSeed: "TeguhBSC" }
+    ];
+
+    top16Grid.innerHTML = finalistsData.map(f => {
+      const initials = f.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+      let avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${f.avatarSeed}`;
+      if (f.name === "TotiPLT") {
+        avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=TotiPLT&hair=long19&hairColor=4b8a5f,50e3c2`;
+      }
+      return `
+        <div class="boc-finalist-card-premium" onclick="openAthleteProfile('${generateSlug(f.realName)}')">
+          <div class="rank-seed-badge">#${f.seed}</div>
+          <div class="avatar-frame">
+            <img src="${avatarUrl}" alt="${f.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="avatar-fallback" style="display: none;">${initials}</span>
+          </div>
+          <h4 class="player-name" title="${f.name}">${f.name}</h4>
+          <p class="player-club" title="${f.club}">${f.club}</p>
+          <span class="finalist-badge">Grand Finalist 2026</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Render Season Awards
+  const awardsGrid = document.getElementById("boc-awards-grid");
+  if (awardsGrid) {
+    const awardsData = [
+      {
+        type: "wins",
+        icon: "fa-trophy",
+        title: "MOST SERIES WINS",
+        desc: "Pemain dengan kemenangan series terbanyak",
+        player: "TotiPLT",
+        realPlayer: "To'i PLT",
+        stats: "4 Series",
+        club: "Platinum Billiard",
+        avatarSeed: "TotiPLT"
+      },
+      {
+        type: "streak",
+        icon: "fa-fire",
+        title: "LONGEST WIN STREAK",
+        desc: "Rentetan kemenangan terpanjang",
+        player: "Rian SB",
+        realPlayer: "Edo Luminous",
+        stats: "11 Match",
+        club: "SB Billiard",
+        avatarSeed: "RianSB"
+      },
+      {
+        type: "winrate",
+        icon: "fa-bullseye",
+        title: "HIGHEST WIN RATE",
+        desc: "Persentase kemenangan tertinggi",
+        player: "Arifin PLT",
+        realPlayer: "Ageng PLT",
+        stats: "78,6%",
+        club: "Platinum Billiard",
+        avatarSeed: "ArifinPLT"
+      },
+      {
+        type: "finals",
+        icon: "fa-star",
+        title: "MOST FINALS APPEARANCE",
+        desc: "Paling sering masuk final",
+        player: "Dodo RD",
+        realPlayer: "Dodo RD",
+        stats: "6 Finals",
+        club: "RD Billiard",
+        avatarSeed: "DodoRD"
+      },
+      {
+        type: "breakout",
+        icon: "fa-award",
+        title: "BREAKOUT PLAYER",
+        desc: "Pemain paling berkembang",
+        player: "Iqbal RD",
+        realPlayer: "Tunggul RD",
+        stats: "Rookie of the Year",
+        club: "RD Billiard",
+        avatarSeed: "IqbalRD"
+      }
+    ];
+
+    awardsGrid.innerHTML = awardsData.map(a => {
+      let avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${a.avatarSeed}`;
+      if (a.player === "TotiPLT") {
+        avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=TotiPLT&hair=long19&hairColor=4b8a5f,50e3c2`;
+      }
+      return `
+        <div class="boc-award-card ${a.type}">
+          <div class="award-icon-badge">
+            <i class="fa-solid ${a.icon}"></i>
+          </div>
+          <div class="award-title-lbl">${a.title}</div>
+          <div class="award-title-desc">${a.desc}</div>
+          <div class="award-player-row" style="cursor: pointer;" onclick="openAthleteProfile('${generateSlug(a.realPlayer)}')">
+            <div class="mini-avatar">
+              <img src="${avatarUrl}" alt="${a.player}">
+            </div>
+            <h4 class="player-name">${a.player}</h4>
+          </div>
+          <div class="award-stats-lbl">${a.stats}</div>
+          <p class="award-club-lbl">${a.club}</p>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Render Dynamic Timeline from database events
+  const timelineNodesContainer = document.querySelector(".boc-timeline-nodes");
+  if (timelineNodesContainer) {
+    let currentSirkuits = bocSirkuits || [];
+    if (currentSirkuits.length === 0) {
+      const htEvents = (appData.events || [])
+        .filter(e => e.type === "Home Tournament" || e.title.includes("HT") || e.title.includes("Series"))
+        .sort((a, b) => a.id.localeCompare(b.id));
+      currentSirkuits = htEvents.map(e => e.title);
+    }
+
+    // If still empty, fallback to 12 placeholder series names
+    if (currentSirkuits.length === 0) {
+      currentSirkuits = [
+        "RD HT", "JP HT", "LMS HT", "SYP HT", 
+        "RD HT (2)", "JP HT (2)", "LMS HT (2)", "PLT HT", 
+        "SYP HT (2)", "RD HT (3)", "Series 11", "Series 12"
+      ];
+    }
+
+    let nodesHtml = "";
+    currentSirkuits.forEach((sName, idx) => {
+      const seriesNum = (idx + 1).toString().padStart(2, '0');
+      // Find matching event in appData.events
+      const matchingEvent = (appData.events || []).find(e => e.title.trim().toLowerCase() === sName.trim().toLowerCase());
+      
+      // If the overall Grand Final event is completed, all past series are completed!
+      const isNodeCompleted = isCompleted || (matchingEvent && matchingEvent.status === "Selesai");
+      
+      let statusText = "Mendatang";
+      let statusClass = "";
+      let iconHtml = '<i class="fa-regular fa-circle"></i>';
+      let clickHandler = "";
+      let tooltipText = `${sName} - Mendatang`;
+
+      if (matchingEvent) {
+        clickHandler = `onclick="openEventDetail('${matchingEvent.id}')"`;
+      }
+
+      if (isNodeCompleted) {
+        statusText = "Selesai";
+        statusClass = "completed";
+        iconHtml = '<i class="fa-solid fa-circle-check"></i>';
+        
+        let championName = "";
+        if (matchingEvent) {
+          try {
+            const results = typeof matchingEvent.results === 'string' ? JSON.parse(matchingEvent.results || "{}") : (matchingEvent.results || {});
+            championName = results.champion || "";
+          } catch(e) {}
+        }
+        
+        if (championName) {
+          tooltipText = `${sName} (Selesai)\n🏆 Juara: ${championName}`;
+        } else {
+          tooltipText = `${sName} - Selesai`;
+        }
+      } else if (matchingEvent && (matchingEvent.status === "Ongoing" || matchingEvent.status === "Berjalan")) {
+        statusText = "Berjalan";
+        statusClass = "ongoing";
+        iconHtml = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        tooltipText = `${sName} - Sedang Berjalan`;
+      } else if (matchingEvent) {
+        statusText = "Daftar";
+        statusClass = "upcoming";
+        iconHtml = '<i class="fa-solid fa-calendar-days"></i>';
+        tooltipText = `${sName} - Pendaftaran Dibuka`;
+      }
+
+      nodesHtml += `
+        <div class="boc-timeline-node ${statusClass}" ${clickHandler} title="${tooltipText}">
+          <span class="node-num" style="white-space: nowrap; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;">${sName}</span>
+          <div class="node-status-dot">${iconHtml}</div>
+          <span class="node-status-text">${statusText}</span>
+        </div>
+      `;
+    });
+
+    // Finally, append the Grand Final trophy node
+    const gfStatusText = isCompleted ? "Juara" : (event.status === "Ongoing" ? "Berjalan" : "Mendatang");
+    const gfClass = isCompleted ? "completed grandfinal trophy-glow" : (event.status === "Ongoing" ? "ongoing grandfinal" : "grandfinal");
+    const gfIcon = '<i class="fa-solid fa-trophy"></i>';
+    
+    let gfTooltip = `Grand Final BOC ${currentBocYear}`;
+    if (isCompleted) {
+      let winnerName = "";
+      if (bracketObj.mainBracket && bracketObj.mainBracket[6] && bracketObj.mainBracket[6].winner) {
+        winnerName = bracketObj.mainBracket[6].winner;
+      }
+      if (winnerName) {
+        gfTooltip = `Grand Final BOC ${currentBocYear}\n👑 Juara Utama: ${winnerName}`;
+      }
+    }
+
+    nodesHtml += `
+      <div class="boc-timeline-node ${gfClass}" title="${gfTooltip}">
+        <span class="node-num text-gold" style="white-space: nowrap; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.2px;">GRAND FINAL</span>
+        <div class="node-status-dot trophy-glow">${gfIcon}</div>
+        <span class="node-status-text text-gold">${gfStatusText}</span>
+      </div>
+    `;
+
+    timelineNodesContainer.innerHTML = nodesHtml;
+  }
+
+  // Create absolute confetti canvas overlay
+  const canvas = document.createElement("canvas");
+  canvas.style.position = "absolute";
+  canvas.style.top = "0";
+  canvas.style.left = "0";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.style.pointerEvents = "none";
+  canvas.style.zIndex = "4";
+  container.appendChild(canvas);
+
+  // Trigger celebration burst automatically when the podium finishes loading
+  setTimeout(() => {
+    triggerConfetti(canvas);
+  }, 400);
 }
 
 // Render dynamic elements inside public event details view
