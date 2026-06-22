@@ -87,13 +87,28 @@ module.exports = async (req, res) => {
         recap_cover: recapCoverUrl
       };
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('boc_settings')
         .upsert(upsertData, { onConflict: 'year' })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If recap_cover is not found in schema cache, try upserting without it
+        if (error.message && error.message.includes('recap_cover')) {
+          console.warn("⚠️ Column 'recap_cover' not found in Supabase 'boc_settings' table. Retrying upsert without it.");
+          delete upsertData.recap_cover;
+          const retryRes = await supabase
+            .from('boc_settings')
+            .upsert(upsertData, { onConflict: 'year' })
+            .select()
+            .single();
+          if (retryRes.error) throw retryRes.error;
+          data = retryRes.data;
+        } else {
+          throw error;
+        }
+      }
 
       if (coverUrl) {
         await supabase

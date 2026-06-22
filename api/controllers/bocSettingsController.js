@@ -60,33 +60,65 @@ exports.saveSettings = async (req, res) => {
       recapCoverUrl = await uploadMedia(recap_cover, `boc-recap-cover-${year}`, 'covers');
     }
 
-    // UPSERT: Insert or replace
-    await dbRun(
-      `INSERT INTO boc_settings (year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover, recap_cover)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(year) DO UPDATE SET
-         cutoff_limit = excluded.cutoff_limit,
-         max_handicap = excluded.max_handicap,
-         playoff_schedule = excluded.playoff_schedule,
-         prizes = excluded.prizes,
-         rules = excluded.rules,
-         status = excluded.status,
-         point_rules = excluded.point_rules,
-         cover = excluded.cover,
-         recap_cover = excluded.recap_cover`,
-      [
-        year.toString(),
-        cutoff_limit != null ? parseInt(cutoff_limit) : 16,
-        max_handicap || 'Bebas',
-        playoffStr,
-        prizesStr,
-        rules || null,
-        status || 'active',
-        pointRulesStr,
-        coverUrl,
-        recapCoverUrl
-      ]
-    );
+    // UPSERT: Insert or replace with safe fallback if recap_cover column doesn't exist yet
+    try {
+      await dbRun(
+        `INSERT INTO boc_settings (year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover, recap_cover)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(year) DO UPDATE SET
+           cutoff_limit = excluded.cutoff_limit,
+           max_handicap = excluded.max_handicap,
+           playoff_schedule = excluded.playoff_schedule,
+           prizes = excluded.prizes,
+           rules = excluded.rules,
+           status = excluded.status,
+           point_rules = excluded.point_rules,
+           cover = excluded.cover,
+           recap_cover = excluded.recap_cover`,
+        [
+          year.toString(),
+          cutoff_limit != null ? parseInt(cutoff_limit) : 16,
+          max_handicap || 'Bebas',
+          playoffStr,
+          prizesStr,
+          rules || null,
+          status || 'active',
+          pointRulesStr,
+          coverUrl,
+          recapCoverUrl
+        ]
+      );
+    } catch (dbErr) {
+      if (dbErr.message && dbErr.message.includes('recap_cover')) {
+        console.warn("⚠️ Column 'recap_cover' not found in SQLite table 'boc_settings'. Falling back to saving without it.");
+        await dbRun(
+          `INSERT INTO boc_settings (year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(year) DO UPDATE SET
+             cutoff_limit = excluded.cutoff_limit,
+             max_handicap = excluded.max_handicap,
+             playoff_schedule = excluded.playoff_schedule,
+             prizes = excluded.prizes,
+             rules = excluded.rules,
+             status = excluded.status,
+             point_rules = excluded.point_rules,
+             cover = excluded.cover`,
+          [
+            year.toString(),
+            cutoff_limit != null ? parseInt(cutoff_limit) : 16,
+            max_handicap || 'Bebas',
+            playoffStr,
+            prizesStr,
+            rules || null,
+            status || 'active',
+            pointRulesStr,
+            coverUrl
+          ]
+        );
+      } else {
+        throw dbErr;
+      }
+    }
 
     if (coverUrl) {
       await dbRun(
