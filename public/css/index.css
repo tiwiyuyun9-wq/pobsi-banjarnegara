@@ -8,6 +8,7 @@
    1. DESIGN TOKENS & CSS CUSTOM PROPERTIES
    ========================================================================== */
 :root {
+  color-scheme: dark;
   /* Backgrounds — Deep Space Navy */
   --bg-primary: #060B18;
   --bg-secondary: #0A1128;
@@ -8943,6 +8944,20 @@ tr:hover td.sticky-col {
 
 .admin-form-element input[type="number"]::-webkit-inner-spin-button:hover,
 .admin-form-element input[type="number"]::-webkit-outer-spin-button:hover {
+  opacity: 1;
+}
+
+/* Style premium time inputs and invert clock picker icon to white */
+.admin-form-element input[type="time"] {
+  color-scheme: dark !important;
+}
+.admin-form-element input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.admin-form-element input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
