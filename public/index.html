@@ -3649,28 +3649,48 @@
 
               <!-- STEP 3: Foto Cover Musim -->
               <div class="boc-settings-step-pane" data-step="3">
-                <h4 style="font-family: var(--font-headers); font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-                  <i class="fa-solid fa-image" style="color: #10b981; margin-right: 6px;"></i> Foto Cover Musim
+                <h4 style="font-family: var(--font-headers); font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <i class="fa-solid fa-images" style="color: #10b981; margin-right: 6px;"></i> Foto Cover & Media Musim
                 </h4>
-                <div class="form-group-item">
-                  <label class="form-lbl">Foto Cover Banner Musim (Opsional)</label>
-                  <!-- Hidden native file input -->
-                  <input type="file" id="set-boc-cover-file" accept="image/*" style="display: none;">
-                  <!-- Custom Drag & Drop / Click Upload Zone -->
-                  <div class="event-upload-zone" id="boc-cover-drop-zone">
-                    <i class="fa-solid fa-image upload-zone-icon"></i>
-                    <span class="upload-zone-text">Tarik foto cover ke sini atau <strong>klik untuk upload</strong></span>
-                    <span class="upload-zone-sub">Format: JPG, PNG, WebP (Maks. 2MB, Rekomendasi Lanskap)</span>
-                  </div>
-                  <!-- Preview Container -->
-                  <div class="event-upload-preview" id="boc-cover-preview-container" style="display: none;">
-                    <div class="preview-event-poster-wrapper">
-                      <img id="boc-cover-preview-img" src="" alt="Preview Cover BOC">
-                      <button type="button" class="btn-remove-avatar" id="btn-clear-boc-cover" title="Hapus Gambar">
-                        <i class="fa-solid fa-xmark"></i>
-                      </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <!-- Playoff Cover Poster -->
+                  <div class="form-group-item">
+                    <label class="form-lbl">Foto Cover Banner Musim (Opsional)</label>
+                    <input type="file" id="set-boc-cover-file" accept="image/*" style="display: none;">
+                    <div class="event-upload-zone" id="boc-cover-drop-zone" style="height: 100px; padding: 10px;">
+                      <i class="fa-solid fa-image upload-zone-icon" style="font-size: 1.2rem;"></i>
+                      <span class="upload-zone-text" style="font-size: 0.72rem; margin-top: 4px;">Klik untuk upload poster</span>
+                      <span class="upload-zone-sub" style="font-size: 0.6rem;">Format: JPG, PNG, WebP</span>
                     </div>
-                    <span class="preview-avatar-filename" id="boc-cover-preview-filename">filename.png</span>
+                    <div class="event-upload-preview" id="boc-cover-preview-container" style="display: none; padding: 6px;">
+                      <div class="preview-event-poster-wrapper" style="height: 60px;">
+                        <img id="boc-cover-preview-img" src="" alt="Preview Cover BOC" style="max-height: 60px;">
+                        <button type="button" class="btn-remove-avatar" id="btn-clear-boc-cover" title="Hapus Gambar">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                      <span class="preview-avatar-filename" id="boc-cover-preview-filename" style="font-size: 0.65rem;">filename.png</span>
+                    </div>
+                  </div>
+
+                  <!-- Season Recap Cover -->
+                  <div class="form-group-item">
+                    <label class="form-lbl">Foto Cover Season Recap (Opsional)</label>
+                    <input type="file" id="set-boc-recap-file" accept="image/*" style="display: none;">
+                    <div class="event-upload-zone" id="boc-recap-drop-zone" style="height: 100px; padding: 10px;">
+                      <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="font-size: 1.2rem; color: var(--green);"></i>
+                      <span class="upload-zone-text" style="font-size: 0.72rem; margin-top: 4px;">Klik untuk upload recap cover</span>
+                      <span class="upload-zone-sub" style="font-size: 0.6rem;">Format: JPG, PNG, WebP</span>
+                    </div>
+                    <div class="event-upload-preview" id="boc-recap-preview-container" style="display: none; padding: 6px;">
+                      <div class="preview-event-poster-wrapper" style="height: 60px;">
+                        <img id="boc-recap-preview-img" src="" alt="Preview Recap Cover BOC" style="max-height: 60px;">
+                        <button type="button" class="btn-remove-avatar" id="btn-clear-boc-recap" title="Hapus Gambar">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                      <span class="preview-avatar-filename" id="boc-recap-preview-filename" style="font-size: 0.65rem;">filename.png</span>
+                    </div>
                   </div>
                 </div>
               </div>

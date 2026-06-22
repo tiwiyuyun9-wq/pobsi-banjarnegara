@@ -6716,6 +6716,26 @@ function setupBocAdminListeners() {
       if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
     }
 
+    // Prefill recap cover image preview if it exists in DB
+    const bocRecapDropZone = document.getElementById("boc-recap-drop-zone");
+    const bocRecapPreviewContainer = document.getElementById("boc-recap-preview-container");
+    const bocRecapPreviewImg = document.getElementById("boc-recap-preview-img");
+    const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
+    const bocRecapFileInput = document.getElementById("set-boc-recap-file");
+
+    if (bocSettings.recap_cover) {
+      window.currentUploadedBocRecapBase64 = bocSettings.recap_cover;
+      if (bocRecapPreviewImg) bocRecapPreviewImg.src = bocSettings.recap_cover;
+      if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = "recap_cover.png";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "none";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "flex";
+    } else {
+      window.currentUploadedBocRecapBase64 = "";
+      if (bocRecapFileInput) bocRecapFileInput.value = "";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "flex";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "none";
+    }
+
     // Reset settings wizard
     window.resetBocScheduleWizard();
 
@@ -6842,6 +6862,76 @@ function setupBocAdminListeners() {
     };
   }
 
+  // Season Recap Image handlers for Schedule Modal
+  const bocRecapDropZone = document.getElementById("boc-recap-drop-zone");
+  const bocRecapFileInput = document.getElementById("set-boc-recap-file");
+  const bocRecapPreviewContainer = document.getElementById("boc-recap-preview-container");
+  const bocRecapPreviewImg = document.getElementById("boc-recap-preview-img");
+  const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
+  const btnClearBocRecap = document.getElementById("btn-clear-boc-recap");
+
+  if (bocRecapDropZone && bocRecapFileInput) {
+    bocRecapDropZone.onclick = () => bocRecapFileInput.click();
+
+    bocRecapDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      bocRecapDropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      bocRecapDropZone.addEventListener(eventName, () => {
+        bocRecapDropZone.classList.remove("dragover");
+      });
+    });
+
+    bocRecapDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleBocRecapFileSelection(files[0]);
+      }
+    });
+
+    bocRecapFileInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (files.length > 0) {
+        handleBocRecapFileSelection(files[0]);
+      }
+    });
+  }
+
+  function handleBocRecapFileSelection(file) {
+    if (!file.type.startsWith("image/")) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showCustomToast("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      window.currentUploadedBocRecapBase64 = e.target.result;
+      
+      if (bocRecapPreviewImg) bocRecapPreviewImg.src = window.currentUploadedBocRecapBase64;
+      if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "none";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (btnClearBocRecap) {
+    btnClearBocRecap.onclick = () => {
+      window.currentUploadedBocRecapBase64 = "";
+      if (bocRecapFileInput) bocRecapFileInput.value = "";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "flex";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "none";
+    };
+  }
+
   if (formBocSchedule) {
     formBocSchedule.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -6879,7 +6969,8 @@ function setupBocAdminListeners() {
           best_game: bestgame
         },
         rules: rulesVal,
-        cover: window.currentUploadedBocCoverBase64 || null
+        cover: window.currentUploadedBocCoverBase64 || null,
+        recap_cover: window.currentUploadedBocRecapBase64 || null
       });
 
       const oldYear = localStorage.getItem("currentBocYear") || "2026";
