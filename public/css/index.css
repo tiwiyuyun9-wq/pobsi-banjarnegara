@@ -11282,6 +11282,7 @@ tr:hover td.sticky-col {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .podium-player-club {
@@ -11293,6 +11294,7 @@ tr:hover td.sticky-col {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .podium-player-hc {
@@ -11309,6 +11311,7 @@ tr:hover td.sticky-col {
   font-weight: 800;
   font-size: 0.82rem;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 /* 1st Place Specific Styling */
@@ -11344,7 +11347,7 @@ tr:hover td.sticky-col {
 
 /* 2nd Place Specific Styling */
 .podium-pedestal-3d.second .podium-block {
-  height: 135px;
+  height: 145px;
   background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(107, 114, 128, 0.05) 100%);
   border-color: rgba(156, 163, 175, 0.3);
 }
@@ -11369,7 +11372,7 @@ tr:hover td.sticky-col {
 
 /* 3rd Place Specific Styling */
 .podium-pedestal-3d.third .podium-block {
-  height: 105px;
+  height: 125px;
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(180, 83, 9, 0.05) 100%);
   border-color: rgba(217, 119, 6, 0.3);
 }
@@ -12001,5 +12004,1087 @@ input:-webkit-autofill:active {
 #boc-playoff-container #pane-event-detail {
   padding: 0 !important;
 }
+
+/* Premium BOC Playoff Podium Styles */
+.podium-spotlight-beam {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.03) 50%, transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 1;
+  animation: spotlight-pulse 4s infinite alternate ease-in-out;
+}
+@keyframes spotlight-pulse {
+  0% { opacity: 0.7; transform: translateX(-50%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+}
+
+.podium-pedestal-3d {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.3s ease;
+  cursor: pointer;
+}
+.podium-pedestal-3d:hover {
+  transform: translateY(-8px) scale(1.03) rotateY(2deg);
+  filter: brightness(1.15);
+  z-index: 10;
+}
+
+.podium-block {
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 18px 16px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-bottom: none;
+  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.podium-avatar-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.8);
+  border: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: absolute;
+  top: -30px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  overflow: hidden;
+  z-index: 2;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.podium-avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 1st Place Specific Styling */
+.podium-pedestal-3d.first .podium-block {
+  height: 180px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(15, 23, 42, 0.75) 100%);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 15px 35px rgba(251, 191, 36, 0.15), inset 0 1px 2px rgba(251, 191, 36, 0.25);
+}
+
+.podium-pedestal-3d.first .podium-avatar-wrap {
+  width: 72px;
+  height: 72px;
+  top: -36px;
+  border-color: #fbbf24;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.podium-pedestal-3d.first .podium-avatar-wrap::after {
+  content: '\f521';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #fbbf24;
+  position: absolute;
+  top: -18px;
+  font-size: 1.25rem;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+  animation: crown-float 2s infinite alternate ease-in-out;
+}
+@keyframes crown-float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+
+.podium-pedestal-3d.first .podium-prize-tag {
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251,191,36,0.3);
+}
+
+/* 2nd Place Specific Styling */
+.podium-pedestal-3d.second .podium-block {
+  height: 145px;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.15) 0%, rgba(15, 23, 42, 0.75) 100%);
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 15px 30px rgba(148, 163, 184, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+}
+
+.podium-pedestal-3d.second .podium-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  top: -32px;
+  border-color: #9ca3af;
+  box-shadow: 0 0 15px rgba(156, 163, 175, 0.3);
+}
+
+.podium-pedestal-3d.second .podium-avatar-wrap::after {
+  content: '\f5a2';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #9ca3af;
+  position: absolute;
+  top: -14px;
+  font-size: 0.95rem;
+}
+
+.podium-pedestal-3d.second .podium-prize-tag {
+  color: #e2e8f0;
+}
+
+/* 3rd Place Specific Styling */
+.podium-pedestal-3d.third .podium-block {
+  height: 125px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.75) 100%);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 15px 30px rgba(245, 158, 11, 0.05), inset 0 1px 2px rgba(245, 158, 11, 0.1);
+}
+
+.podium-pedestal-3d.third .podium-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  top: -32px;
+  border-color: #d97706;
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.3);
+}
+
+.podium-pedestal-3d.third .podium-avatar-wrap::after {
+  content: '\f5a2';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #d97706;
+  position: absolute;
+  top: -14px;
+  font-size: 0.95rem;
+}
+
+.podium-pedestal-3d.third .podium-prize-tag {
+  color: #fb923c;
+}
+
+/* Victory Details Card Overlay on Hover */
+.podium-hover-card {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  background: rgba(10, 15, 30, 0.96);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  padding: 12px 10px;
+  border-radius: 8px;
+  transform: translateY(15px);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+  box-sizing: border-box;
+}
+
+.podium-pedestal-3d:hover .podium-hover-card {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hover-card-title {
+  font-family: var(--font-headers);
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: #fbbf24;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.hover-card-divider {
+  width: 40px;
+  height: 2px;
+  background: var(--gradient-primary);
+  margin: 0 auto 10px auto;
+  border-radius: 1px;
+}
+
+.hover-card-match-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+  box-sizing: border-box;
+}
+.hover-card-match-item.win {
+  border-left-color: #10b981;
+}
+.hover-card-match-item.lose {
+  border-left-color: #ef4444;
+}
+
+.match-opponent {
+  font-weight: 600;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-score {
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.hover-card-btn {
+  margin-top: 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--gradient-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  transition: transform 0.2s ease;
+  width: 90%;
+  justify-content: center;
+}
+.hover-card-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   MOCKUP PODIUM PREMIUM REDESIGN - BATTLE OF CHAMPIONS 2026
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
+.boc-premium-section {
+  padding: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.boc-premium-section:last-child {
+  border-bottom: none;
+}
+
+/* Hero Section (Papan Podium) */
+.boc-hero-podium-section {
+  padding: 40px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.3) 0%, rgba(9, 14, 26, 0.5) 100%);
+}
+.boc-hero-podium-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 24px;
+}
+.boc-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.boc-shield-logo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
+}
+.boc-svg-logo {
+  width: 100%;
+  height: 100%;
+}
+.boc-hero-title-group {
+  display: flex;
+  flex-direction: column;
+}
+.boc-hero-badge {
+  font-family: var(--font-headers);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 2px;
+  margin-bottom: 2px;
+}
+.boc-hero-main-title {
+  font-family: var(--font-headers);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+.boc-hero-year {
+  font-family: var(--font-headers);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #10b981;
+  margin: 0;
+  line-height: 1.1;
+}
+.boc-season-summary-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 99px;
+  padding: 8px 16px;
+}
+.boc-mini-stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.boc-mini-stat-item .val {
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+.boc-mini-stat-item .lbl {
+  color: rgba(255, 255, 255, 0.5);
+}
+.boc-mini-stat-dot {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+}
+.boc-prizepool-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  padding: 10px 18px;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+}
+.boc-prizepool-panel .prizepool-icon {
+  font-size: 1.5rem;
+  color: #10b981;
+}
+.boc-prizepool-panel .prizepool-details {
+  display: flex;
+  flex-direction: column;
+}
+.boc-prizepool-panel .prizepool-lbl {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+}
+.boc-prizepool-panel .prizepool-val {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #10b981;
+}
+
+/* Road to Grand Final Section */
+.boc-road-section {
+  padding-bottom: 24px;
+}
+.boc-section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.boc-section-header-row.inline-header {
+  align-items: center;
+  margin-bottom: 30px;
+}
+.boc-section-title-col {
+  flex: 1;
+  min-width: 280px;
+}
+.boc-premium-section-title {
+  font-family: var(--font-headers);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.boc-premium-section-title i {
+  color: #fbbf24;
+  margin-right: 6px;
+}
+.boc-premium-section-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  max-width: 500px;
+}
+.boc-premium-cta-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+.boc-premium-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+.boc-timeline-container {
+  flex: 2;
+  min-width: 320px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px 20px;
+  overflow: hidden;
+}
+.boc-timeline-scroll {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+  padding-top: 8px;
+  padding-bottom: 12px;
+}
+.boc-timeline-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.boc-timeline-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.boc-timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.boc-timeline-track {
+  position: absolute;
+  top: 40px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+.boc-timeline-nodes {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  gap: 20px;
+  width: max-content;
+  min-width: 100%;
+}
+.boc-timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 75px;
+  text-align: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.boc-timeline-node[onclick] {
+  cursor: pointer;
+}
+.boc-timeline-node[onclick]:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.25);
+}
+.boc-timeline-node .node-num {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+}
+.boc-timeline-node .node-lbl {
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: -2px;
+  margin-bottom: 6px;
+}
+.boc-timeline-node .node-status-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1f2937;
+  border: 2.5px solid #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: #4b5563;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.boc-timeline-node .node-status-text {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+}
+.boc-timeline-node.completed .node-num {
+  color: #10b981;
+}
+.boc-timeline-node.completed .node-status-dot {
+  background: #064e3b;
+  border-color: #047857;
+  color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+.boc-timeline-node.completed .node-status-text {
+  color: #10b981;
+}
+.boc-timeline-node.ongoing .node-num {
+  color: #38bdf8;
+}
+.boc-timeline-node.ongoing .node-status-dot {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+.boc-timeline-node.ongoing .node-status-text {
+  color: #38bdf8;
+}
+.boc-timeline-node.upcoming .node-num {
+  color: #fb923c;
+}
+.boc-timeline-node.upcoming .node-status-dot {
+  background: rgba(251, 146, 60, 0.15);
+  border-color: #fb923c;
+  color: #fb923c;
+  box-shadow: 0 0 8px rgba(251, 146, 60, 0.2);
+}
+.boc-timeline-node.upcoming .node-status-text {
+  color: #fb923c;
+}
+.boc-timeline-node.grandfinal {
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  background: #090d16; /* Solid dark color matching section background */
+  padding-left: 20px;
+  box-shadow: -15px 0 20px -10px rgba(0, 0, 0, 0.8);
+}
+.boc-timeline-node.grandfinal .node-status-dot {
+  width: 24px;
+  height: 24px;
+  margin-top: -3px;
+  margin-bottom: 3px;
+  background: #78350f;
+  border-color: #d97706;
+  color: #fbbf24;
+}
+.boc-timeline-node.grandfinal.trophy-glow .node-status-dot {
+  animation: trophy-pulsate 2s infinite alternate ease-in-out;
+}
+@keyframes trophy-pulsate {
+  0% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.2); }
+  100% { box-shadow: 0 0 18px rgba(245, 158, 11, 0.6); }
+}
+
+.boc-stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+.boc-stats-summary-card {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 18px 12px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.boc-stats-summary-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.boc-stats-summary-card .icon {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+.boc-stats-summary-card .val {
+  font-family: var(--font-headers);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+.boc-stats-summary-card .lbl {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.8px;
+}
+.boc-stats-summary-card .desc {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 4px;
+}
+
+/* Section 3: Finalists Grid Premium */
+.boc-finalists-grid-premium {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 16px;
+}
+.boc-finalist-card-premium {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-sizing: border-box;
+}
+.boc-finalist-card-premium:hover {
+  transform: translateY(-5px);
+  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1);
+}
+.boc-finalist-card-premium .rank-seed-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1.5px solid #10b981;
+  color: #10b981;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.boc-finalist-card-premium .avatar-frame {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  margin: 0 auto 12px auto;
+  overflow: hidden;
+  background: rgba(11, 15, 26, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.boc-finalist-card-premium:hover .avatar-frame {
+  border-color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.45);
+}
+.boc-finalist-card-premium .avatar-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.boc-finalist-card-premium .avatar-fallback {
+  font-family: var(--font-headers);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #10b981;
+}
+.boc-finalist-card-premium .player-name {
+  font-family: var(--font-headers);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+}
+.boc-finalist-card-premium .player-club {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.boc-finalist-card-premium .finalist-badge {
+  display: inline-block;
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.2px;
+}
+
+/* Section 4: Season Awards */
+.boc-awards-grid-premium {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+.boc-award-card {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-sizing: border-box;
+}
+.boc-award-card:hover {
+  transform: translateY(-5px);
+}
+/* Colorful themes for different awards */
+.boc-award-card.wins { border-color: rgba(16, 185, 129, 0.15); }
+.boc-award-card.wins:hover { border-color: #10b981; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1); }
+.boc-award-card.wins .award-icon-badge { background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; }
+
+.boc-award-card.streak { border-color: rgba(249, 115, 22, 0.15); }
+.boc-award-card.streak:hover { border-color: #f97316; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.1); }
+.boc-award-card.streak .award-icon-badge { background: rgba(249, 115, 22, 0.1); border-color: #f97316; color: #f97316; }
+
+.boc-award-card.winrate { border-color: rgba(59, 130, 246, 0.15); }
+.boc-award-card.winrate:hover { border-color: #3b82f6; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1); }
+.boc-award-card.winrate .award-icon-badge { background: rgba(59, 130, 246, 0.1); border-color: #3b82f6; color: #3b82f6; }
+
+.boc-award-card.finals { border-color: rgba(168, 85, 247, 0.15); }
+.boc-award-card.finals:hover { border-color: #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.1); }
+.boc-award-card.finals .award-icon-badge { background: rgba(168, 85, 247, 0.1); border-color: #a855f7; color: #a855f7; }
+
+.boc-award-card.breakout { border-color: rgba(234, 179, 8, 0.15); }
+.boc-award-card.breakout:hover { border-color: #eab308; box-shadow: 0 8px 24px rgba(234, 179, 8, 0.1); }
+.boc-award-card.breakout .award-icon-badge { background: rgba(234, 179, 8, 0.1); border-color: #eab308; color: #eab308; }
+
+.award-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  margin: 0 auto 14px auto;
+}
+.award-title-lbl {
+  font-family: var(--font-headers);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+.award-title-desc {
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 16px;
+  line-height: 1.2;
+  min-height: 26px;
+}
+.award-player-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 12px;
+}
+.award-player-row .mini-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  background: #000;
+}
+.award-player-row .mini-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.award-player-row .player-name {
+  font-family: var(--font-headers);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+}
+.award-stats-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2px;
+}
+.award-club-lbl {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+/* Section 5: Season Recap */
+.boc-recap-section {
+  background: linear-gradient(90deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 35%, rgba(9, 14, 26, 0.3) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+  background-size: cover;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px;
+  padding: 32px 40px !important;
+  margin: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+}
+.boc-recap-grid {
+  display: grid;
+  grid-template-columns: 3.2fr 6.8fr;
+  gap: 40px;
+  align-items: flex-start;
+}
+.boc-recap-narrative {
+  display: flex;
+  flex-direction: column;
+}
+.recap-title-premium {
+  font-family: var(--font-headers);
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-left: 3px solid #10b981;
+  padding-left: 12px;
+  line-height: 1.2;
+}
+.boc-recap-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+.boc-recap-closing-msg {
+  font-family: 'Caveat', cursive;
+  font-size: 2.2rem;
+  color: #10b981;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+  transform: rotate(-3deg);
+  margin-left: 10px;
+  display: inline-block;
+  position: relative;
+  align-self: flex-start;
+}
+.boc-recap-closing-msg::after {
+  content: '';
+  position: absolute;
+  left: -5%;
+  bottom: -6px;
+  width: 110%;
+  height: 3px;
+  background: #10b981;
+  border-radius: 50%;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+}
+
+.boc-recap-visuals {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.boc-recap-stats-row-premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+}
+.recap-stat-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+.recap-stat-col:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+.recap-stat-col:first-child {
+  padding-left: 0;
+}
+.recap-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  width: 100%;
+  justify-content: center;
+}
+.recap-stat-header .icon {
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.recap-stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+.recap-stat-info .val {
+  font-family: var(--font-headers);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+.recap-stat-info .lbl {
+  font-family: var(--font-headers);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.recap-stat-col .desc {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.boc-recap-section .text-green { color: #10b981 !important; }
+.boc-recap-section .text-orange { color: #f97316 !important; }
+.boc-recap-section .text-blue { color: #38bdf8 !important; }
+.boc-recap-section .text-purple { color: #a855f7 !important; }
+.boc-recap-section .text-yellow { color: #fbbf24 !important; }
+
+.boc-community-photo-wrapper {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  height: 220px;
+}
+.boc-community-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.boc-community-photo-wrapper:hover .boc-community-photo {
+  transform: scale(1.03);
+}
+.photo-overlay-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, transparent 40%, rgba(9, 14, 26, 0.4) 100%);
+  pointer-events: none;
+}
+
+/* Responsive constraints for mockup podium layouts */
+@media (max-width: 1024px) {
+  .boc-finalists-grid-premium { grid-template-columns: repeat(4, 1fr); }
+  .boc-awards-grid-premium { grid-template-columns: repeat(3, 1fr); }
+  .boc-stats-summary-grid { grid-template-columns: repeat(3, 1fr); }
+  .boc-recap-grid { grid-template-columns: 1fr; gap: 32px; }
+  .boc-recap-section {
+    margin: 32px;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 60%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background-size: cover;
+  }
+}
+@media (max-width: 768px) {
+  .boc-hero-podium-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .boc-prizepool-panel { width: 100%; }
+  .boc-finalists-grid-premium { grid-template-columns: repeat(2, 1fr); }
+  .boc-awards-grid-premium { grid-template-columns: repeat(2, 1fr); }
+  .boc-recap-stats-row-premium { flex-wrap: wrap; gap: 16px; justify-content: center; padding-bottom: 12px; }
+  .recap-stat-col { flex: 0 0 calc(50% - 16px); border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.04); padding: 8px; align-items: center; }
+  .recap-stat-col:nth-child(even) { border-left: 1px solid rgba(255, 255, 255, 0.04); }
+  .recap-stat-col:last-child { flex: 0 0 100%; border-bottom: none; }
+  .boc-recap-section {
+    margin: 20px;
+    padding: 24px 20px !important;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.8) 65%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background-size: cover;
+  }
+}
+@media (max-width: 480px) {
+  .boc-finalists-grid-premium { grid-template-columns: 1fr; }
+  .boc-awards-grid-premium { grid-template-columns: 1fr; }
+  .boc-stats-summary-grid { grid-template-columns: 1fr; }
+  .recap-stat-col { flex: 0 0 100%; border-left: none !important; border-right: none !important; padding: 12px 0; }
+  .boc-recap-section {
+    margin: 12px;
+    padding: 16px !important;
+    background: linear-gradient(180deg, rgba(9, 14, 26, 0.95) 0%, rgba(9, 14, 26, 0.85) 75%, rgba(9, 14, 26, 0.4) 100%), url('../images/boc-community-2026.jpg') no-repeat center center;
+    background-size: cover;
+  }
+}
+
+
 
 

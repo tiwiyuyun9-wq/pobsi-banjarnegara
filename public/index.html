@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=11">
+  <link rel="stylesheet" href="css/index.css?v=12">
   
   <!-- Flatpickr for premium Date Picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -1291,10 +1291,206 @@
 
           <!-- Tab 4: Podium Celebration -->
           <div class="boc-playoff-tab-content" id="boc-playoff-tab-podium" style="display: none;">
-            <div class="calc-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 32px 24px; box-shadow: var(--shadow-sm); text-align: center;">
-              <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 30px;"><i class="fa-solid fa-crown text-gold"></i> Papan Juara & Podium BOC</h3>
-              <div class="boc-podium-3d-wrapper" id="boc-playoff-podium-3d">
-                <!-- Dynamically populated 3D podium pedestal -->
+            <div class="calc-card" style="background: rgba(9, 14, 26, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 0; box-shadow: var(--shadow-lg); overflow: hidden; text-align: left;">
+              <!-- Section 1: Hero Section (Papan Podium) -->
+              <div class="boc-premium-section boc-hero-podium-section">
+                <div class="boc-hero-podium-header">
+                  <div class="boc-hero-brand">
+                    <!-- Custom SVG Logo for BOC -->
+                    <div class="boc-shield-logo">
+                      <svg viewBox="0 0 100 100" class="boc-svg-logo">
+                        <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#090d16" stroke="#fbbf24" stroke-width="3"/>
+                        <circle cx="50" cy="53" r="28" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
+                        <text x="50" y="42" font-family="'Inter', sans-serif" font-weight="900" font-size="12" fill="#fbbf24" text-anchor="middle">BOC</text>
+                        <circle cx="50" cy="62" r="14" fill="#020617"/>
+                        <circle cx="46" cy="58" r="4" fill="#ffffff" opacity="0.8"/>
+                        <text x="50" y="66" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="#ffffff" text-anchor="middle">8</text>
+                        <!-- Crown at top -->
+                        <path d="M38,15 L44,22 L50,14 L56,22 L62,15 L59,27 L41,27 Z" fill="#fbbf24"/>
+                      </svg>
+                    </div>
+                    <div class="boc-hero-title-group">
+                      <span class="boc-hero-badge">BOC GRAND FINAL</span>
+                      <h1 class="boc-hero-main-title">PAPAN PODIUM</h1>
+                      <h2 class="boc-hero-year">2026</h2>
+                    </div>
+                  </div>
+                  <div class="boc-prizepool-panel">
+                    <div class="prizepool-icon">
+                      <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                    <div class="prizepool-details">
+                      <span class="prizepool-lbl">TOTAL PRIZE POOL</span>
+                      <span class="prizepool-val">Rp 15.000.000</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="boc-podium-3d-wrapper" id="boc-playoff-podium-3d">
+                  <!-- Dynamically populated 3D podium pedestal -->
+                </div>
+              </div>
+
+              <!-- Section 2: Road to Grand Final -->
+              <div class="boc-premium-section boc-road-section">
+                <div class="boc-section-header-row">
+                  <div class="boc-section-title-col">
+                    <h3 class="boc-premium-section-title"><i class="fa-solid fa-route"></i> ROAD TO GRAND FINAL</h3>
+                    <p class="boc-premium-section-desc">Perjalanan panjang selama 12 series sepanjang tahun, hanya 16 pemain terbaik yang berhasil melaju ke Grand Final.</p>
+                    <button class="boc-premium-cta-btn" id="boc-view-all-series-btn">
+                      LIHAT SEMUA SERIES <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                  <!-- Timeline column -->
+                  <div class="boc-timeline-container">
+                    <div class="boc-timeline-scroll">
+                      <div class="boc-timeline-track"></div>
+                      <div class="boc-timeline-nodes">
+                        <!-- 12 series nodes -->
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">01</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">02</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">03</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">04</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">05</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">06</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">07</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">08</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">09</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">10</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">11</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <div class="boc-timeline-node completed">
+                          <span class="node-num">12</span><span class="node-lbl">SERIES</span>
+                          <div class="node-status-dot"><i class="fa-solid fa-circle-check"></i></div>
+                          <span class="node-status-text">Selesai</span>
+                        </div>
+                        <!-- Grand Final trophy node -->
+                        <div class="boc-timeline-node grandfinal">
+                          <span class="node-num text-gold" style="font-weight:900;">GRAND</span><span class="node-lbl text-gold" style="font-weight:900;">FINAL</span>
+                          <div class="node-status-dot trophy-glow"><i class="fa-solid fa-trophy"></i></div>
+                          <span class="node-status-text text-gold">Juara</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="boc-stats-summary-grid">
+                  <div class="boc-stats-summary-card">
+                    <div class="icon"><i class="fa-solid fa-calendar-check text-green"></i></div>
+                    <div class="val">12</div>
+                    <div class="lbl">SERIES</div>
+                    <div class="desc">Home Tournament</div>
+                  </div>
+                  <div class="boc-stats-summary-card">
+                    <div class="icon"><i class="fa-solid fa-users text-gold"></i></div>
+                    <div class="val">487</div>
+                    <div class="lbl">PESERTA UNIK</div>
+                    <div class="desc">Sepanjang Tahun</div>
+                  </div>
+                  <div class="boc-stats-summary-card">
+                    <div class="icon"><i class="fa-solid fa-gamepad text-blue"></i></div>
+                    <div class="val">2.134</div>
+                    <div class="lbl">MATCH</div>
+                    <div class="desc">Telah Diselesaikan</div>
+                  </div>
+                  <div class="boc-stats-summary-card">
+                    <div class="icon"><i class="fa-solid fa-id-card text-purple"></i></div>
+                    <div class="val">16</div>
+                    <div class="lbl">GRAND FINALISTS</div>
+                    <div class="desc">Terbaik</div>
+                  </div>
+                  <div class="boc-stats-summary-card">
+                    <div class="icon"><i class="fa-solid fa-crown text-gold"></i></div>
+                    <div class="val">1</div>
+                    <div class="lbl">CHAMPION</div>
+                    <div class="desc">Satu yang Terbaik</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Top 16 Grand Finalists -->
+              <div class="boc-premium-section boc-top16-section">
+                <div class="boc-section-header-row inline-header">
+                  <div>
+                    <h3 class="boc-premium-section-title"><i class="fa-solid fa-medal"></i> TOP 16 GRAND FINALISTS</h3>
+                    <p class="boc-premium-section-desc">16 pemain terbaik yang berhasil melaju ke Grand Final BOC 2026</p>
+                  </div>
+                  <button class="boc-premium-cta-btn" id="boc-view-bracket-btn">
+                    LIHAT BRACKET FINAL <i class="fa-solid fa-up-right-from-square"></i>
+                  </button>
+                </div>
+                <div class="boc-finalists-grid-premium" id="boc-top16-grid">
+                  <!-- Dynamically populated 16 finalist cards -->
+                </div>
+              </div>
+
+              <!-- Section 4: Season Awards 2026 -->
+              <div class="boc-premium-section boc-awards-section">
+                <div class="boc-section-header-row inline-header" style="margin-bottom: 30px;">
+                  <div>
+                    <h3 class="boc-premium-section-title"><i class="fa-solid fa-award"></i> SEASON AWARDS 2026</h3>
+                    <p class="boc-premium-section-desc">Penghargaan untuk performa terbaik sepanjang musim</p>
+                  </div>
+                </div>
+                <div class="boc-awards-grid-premium" id="boc-awards-grid">
+                  <!-- Dynamically populated 5 awards cards -->
+                </div>
+              </div>
+
+              <!-- Section 5: Season Recap 2026 -->
+              <div class="boc-premium-section boc-recap-section">
+                <div class="boc-recap-grid">
+                  <div class="boc-recap-narrative">
+                    <h3 class="recap-title-premium">SEASON RECAP 2026</h3>
+                    <p class="boc-recap-text">Terima kasih kepada seluruh peserta, penonton, dan semua yang telah menjadi bagian dari perjalanan BOC 2026.</p>
+                    
+                    <div class="boc-recap-closing-msg">
+                      See you in BOC 2027!
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -5652,6 +5848,6 @@
 
   <!-- Loaded Data and Script files -->
   <script src="js/data.js"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 </html>
