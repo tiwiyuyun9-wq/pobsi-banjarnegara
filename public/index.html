@@ -3649,28 +3649,48 @@
 
               <!-- STEP 3: Foto Cover Musim -->
               <div class="boc-settings-step-pane" data-step="3">
-                <h4 style="font-family: var(--font-headers); font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-                  <i class="fa-solid fa-image" style="color: #10b981; margin-right: 6px;"></i> Foto Cover Musim
+                <h4 style="font-family: var(--font-headers); font-size: 1rem; color: #fff; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <i class="fa-solid fa-images" style="color: #10b981; margin-right: 6px;"></i> Foto Cover & Media Musim
                 </h4>
-                <div class="form-group-item">
-                  <label class="form-lbl">Foto Cover Banner Musim (Opsional)</label>
-                  <!-- Hidden native file input -->
-                  <input type="file" id="set-boc-cover-file" accept="image/*" style="display: none;">
-                  <!-- Custom Drag & Drop / Click Upload Zone -->
-                  <div class="event-upload-zone" id="boc-cover-drop-zone">
-                    <i class="fa-solid fa-image upload-zone-icon"></i>
-                    <span class="upload-zone-text">Tarik foto cover ke sini atau <strong>klik untuk upload</strong></span>
-                    <span class="upload-zone-sub">Format: JPG, PNG, WebP (Maks. 2MB, Rekomendasi Lanskap)</span>
-                  </div>
-                  <!-- Preview Container -->
-                  <div class="event-upload-preview" id="boc-cover-preview-container" style="display: none;">
-                    <div class="preview-event-poster-wrapper">
-                      <img id="boc-cover-preview-img" src="" alt="Preview Cover BOC">
-                      <button type="button" class="btn-remove-avatar" id="btn-clear-boc-cover" title="Hapus Gambar">
-                        <i class="fa-solid fa-xmark"></i>
-                      </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <!-- Playoff Cover Poster -->
+                  <div class="form-group-item">
+                    <label class="form-lbl">Foto Cover Banner Musim (Opsional)</label>
+                    <input type="file" id="set-boc-cover-file" accept="image/*" style="display: none;">
+                    <div class="event-upload-zone" id="boc-cover-drop-zone" style="height: 100px; padding: 10px;">
+                      <i class="fa-solid fa-image upload-zone-icon" style="font-size: 1.2rem;"></i>
+                      <span class="upload-zone-text" style="font-size: 0.72rem; margin-top: 4px;">Klik untuk upload poster</span>
+                      <span class="upload-zone-sub" style="font-size: 0.6rem;">Format: JPG, PNG, WebP</span>
                     </div>
-                    <span class="preview-avatar-filename" id="boc-cover-preview-filename">filename.png</span>
+                    <div class="event-upload-preview" id="boc-cover-preview-container" style="display: none; padding: 6px;">
+                      <div class="preview-event-poster-wrapper" style="height: 60px;">
+                        <img id="boc-cover-preview-img" src="" alt="Preview Cover BOC" style="max-height: 60px;">
+                        <button type="button" class="btn-remove-avatar" id="btn-clear-boc-cover" title="Hapus Gambar">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                      <span class="preview-avatar-filename" id="boc-cover-preview-filename" style="font-size: 0.65rem;">filename.png</span>
+                    </div>
+                  </div>
+
+                  <!-- Season Recap Cover -->
+                  <div class="form-group-item">
+                    <label class="form-lbl">Foto Cover Season Recap (Opsional)</label>
+                    <input type="file" id="set-boc-recap-file" accept="image/*" style="display: none;">
+                    <div class="event-upload-zone" id="boc-recap-drop-zone" style="height: 100px; padding: 10px;">
+                      <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="font-size: 1.2rem; color: var(--green);"></i>
+                      <span class="upload-zone-text" style="font-size: 0.72rem; margin-top: 4px;">Klik untuk upload recap cover</span>
+                      <span class="upload-zone-sub" style="font-size: 0.6rem;">Format: JPG, PNG, WebP</span>
+                    </div>
+                    <div class="event-upload-preview" id="boc-recap-preview-container" style="display: none; padding: 6px;">
+                      <div class="preview-event-poster-wrapper" style="height: 60px;">
+                        <img id="boc-recap-preview-img" src="" alt="Preview Recap Cover BOC" style="max-height: 60px;">
+                        <button type="button" class="btn-remove-avatar" id="btn-clear-boc-recap" title="Hapus Gambar">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
+                      <span class="preview-avatar-filename" id="boc-recap-preview-filename" style="font-size: 0.65rem;">filename.png</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4254,6 +4274,7 @@
                   </span>
                 </button>
                 <button class="pm-stab" data-event-tab="results" style="padding: 10px 20px; font-weight: 700; font-size: 0.9rem; font-family: var(--font-headers); background: none; border: none; cursor: pointer; transition: all 0.3s;"><i class="fa-solid fa-trophy"></i> Hasil Podium</button>
+                <button class="pm-stab" data-event-tab="boc-settings" id="adm-tab-btn-boc-settings" style="display: none; padding: 10px 20px; font-weight: 700; font-size: 0.9rem; font-family: var(--font-headers); background: none; border: none; cursor: pointer; transition: all 0.3s;"><i class="fa-solid fa-gear"></i> Pengaturan BOC</button>
               </div>
 
               <!-- Tab content containers -->
@@ -4347,6 +4368,164 @@
                     <!-- Champion, Runner Up, Top 4 visual cards -->
                   </div>
                   <div id="event-results-recap-container"></div>
+                </div>
+              </div>
+
+              <!-- Tab 4: Pengaturan BOC -->
+              <div class="pm-tab-content" id="event-tab-boc-settings">
+                <div class="calc-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 24px; position: relative;">
+                  <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-gears text-gold"></i> Pengaturan Konfigurasi & Regulasi BOC
+                  </h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin: -12px 0 10px 0;">
+                    Konfigurasi regulasi sirkuit, jadwal playoff, prize pool, poster event, dan cover season recap.
+                  </p>
+
+                  <!-- Role Restriction Overlay for Staff in BOC Settings Tab -->
+                  <div class="role-restriction-overlay" id="restrict-boc-tab-settings" style="display: none; border-radius: var(--radius-md);">
+                    <div class="restriction-message" style="padding: 10px;">
+                      <i class="fa-solid fa-lock" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                      <p style="font-size: 0.85rem; margin: 0; font-weight: 700;">Akses Dibatasi</p>
+                      <p style="font-size: 0.72rem; margin: 4px 0 0 0; color: rgba(255,255,255,0.5);">Peran Staff tidak diizinkan mengubah regulasi/pengaturan BOC.</p>
+                    </div>
+                  </div>
+
+                  <form id="form-tab-boc-settings" class="admin-form-element" style="gap: 20px;">
+                    <!-- Row 1: Waktu & Lokasi -->
+                    <div id="tab-boc-settings-section-schedule" style="display: flex; flex-direction: column; gap: 20px;">
+                      <h4 style="font-family: var(--font-headers); font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin: 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                        <i class="fa-solid fa-clock"></i> Waktu & Tempat Grand Final
+                      </h4>
+                      <div class="form-row-double">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="tab-boc-schedule-date">Tanggal Pelaksanaan <span style="color: var(--red);">*</span></label>
+                          <div id="tab-boc-schedule-date-wrapper" style="position: relative; width: 100%;">
+                            <input type="text" id="tab-boc-schedule-date" data-input required placeholder="Pilih tanggal">
+                            <i class="fa-regular fa-calendar-days" data-toggle style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; font-size: 1.05rem;"></i>
+                          </div>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="tab-boc-schedule-time">Waktu Mulai <span style="color: var(--red);">*</span></label>
+                          <input type="time" id="tab-boc-schedule-time" required>
+                        </div>
+                      </div>
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-boc-schedule-venue">Lokasi / Venue <span style="color: var(--red);">*</span></label>
+                        <input type="text" id="tab-boc-schedule-venue" required placeholder="Contoh: Midnight Arena (Banjarnegara)">
+                      </div>
+                    </div>
+
+                    <!-- Row 2: Regulasi -->
+                    <div id="tab-boc-settings-section-regulations" style="display: flex; flex-direction: column; gap: 20px;">
+                      <h4 style="font-family: var(--font-headers); font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin: 10px 0 0 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                        <i class="fa-solid fa-scale-balanced"></i> Regulasi Sirkuit
+                      </h4>
+                      <div class="form-row-double">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="tab-set-boc-cutoff">Batas Kelayakan (Cut-Off)</label>
+                          <select id="tab-set-boc-cutoff" class="select-reset">
+                            <option value="8">8 Besar</option>
+                            <option value="12">12 Besar</option>
+                            <option value="16">16 Besar</option>
+                            <option value="24">24 Besar</option>
+                            <option value="32">32 Besar</option>
+                          </select>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="tab-set-boc-maxhc">Batas Handicap Maksimal</label>
+                          <select id="tab-set-boc-maxhc" class="select-reset">
+                            <option value="Bebas">Bebas (Tanpa Batasan)</option>
+                            <option value="7">Handicap 7</option>
+                            <option value="6">Handicap 6</option>
+                            <option value="5">Handicap 5</option>
+                            <option value="4">Handicap 4</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-year">Tahun Musim Sirkuit</label>
+                        <input type="number" id="tab-set-boc-year" min="2020" max="2050" required placeholder="Contoh: 2026">
+                      </div>
+                    </div>
+
+                    <!-- Row 3: Hadiah & Hadiah Lainnya -->
+                    <h4 style="font-family: var(--font-headers); font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin: 10px 0 0 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                      <i class="fa-solid fa-gift"></i> Hadiah Musim (Prize Pool)
+                    </h4>
+                    <div class="form-row-double">
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-prize1">Juara 1</label>
+                        <input type="text" id="tab-set-boc-prize1" placeholder="Contoh: Rp 7.500.000">
+                      </div>
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-prize2">Juara 2</label>
+                        <input type="text" id="tab-set-boc-prize2" placeholder="Contoh: Rp 4.500.000">
+                      </div>
+                    </div>
+                    <div class="form-row-double">
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-prize3">Juara 3 / 4</label>
+                        <input type="text" id="tab-set-boc-prize3" placeholder="Contoh: Rp 3.000.000">
+                      </div>
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="tab-set-boc-bestgame">Penghargaan Lainnya (misal: Best Game)</label>
+                        <input type="text" id="tab-set-boc-bestgame" placeholder="Contoh: Rp 500.000">
+                      </div>
+                    </div>
+                    <div class="form-group-item">
+                      <label class="form-lbl" for="tab-set-boc-rules">Keterangan Regulasi / Aturan Tambahan</label>
+                      <textarea id="tab-set-boc-rules" rows="3" placeholder="Tulis regulasi khusus di sini..." style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 16px; border-radius: var(--radius-sm); outline: none; font-family: var(--font-body); resize: vertical; min-height: 80px; width: 100%; box-sizing: border-box;"></textarea>
+                    </div>
+
+                    <!-- Row 4: Poster & Season Recap Images -->
+                    <h4 style="font-family: var(--font-headers); font-size: 0.95rem; color: #fbbf24; font-weight: 700; margin: 10px 0 0 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                      <i class="fa-solid fa-images"></i> Media & Cover Gambar
+                    </h4>
+                    <div class="form-row-double" style="gap: 20px;">
+                      <!-- Playoff Cover Poster -->
+                      <div class="form-group-item">
+                        <label class="form-lbl">Poster / Cover Playoff BOC</label>
+                        <input type="file" id="tab-set-boc-cover-file" accept="image/*" style="display: none;">
+                        <div class="event-upload-zone" id="tab-boc-cover-drop-zone">
+                          <i class="fa-solid fa-image upload-zone-icon"></i>
+                          <span class="upload-zone-text">Tarik foto cover ke sini atau <strong>klik untuk upload</strong></span>
+                          <span class="upload-zone-sub">Format: JPG, PNG, WebP (Maks 2MB)</span>
+                        </div>
+                        <div class="event-upload-preview" id="tab-boc-cover-preview-container" style="display: none;">
+                          <div class="preview-event-poster-wrapper">
+                            <img src="" id="tab-boc-cover-preview-img" alt="BOC Cover">
+                            <button type="button" class="btn-remove-avatar" id="btn-clear-tab-boc-cover" onclick="event.preventDefault()" title="Hapus Gambar"><i class="fa-solid fa-xmark"></i></button>
+                          </div>
+                          <span class="preview-avatar-filename" id="tab-boc-cover-preview-filename">-</span>
+                        </div>
+                      </div>
+
+                      <!-- Season Recap Photo Cover -->
+                      <div class="form-group-item">
+                        <label class="form-lbl">Foto Cover Season Recap</label>
+                        <input type="file" id="tab-set-boc-recap-file" accept="image/*" style="display: none;">
+                        <div class="event-upload-zone" id="tab-boc-recap-drop-zone">
+                          <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="color: var(--green);"></i>
+                          <span class="upload-zone-text">Tarik foto cover ke sini atau <strong>klik untuk upload</strong></span>
+                          <span class="upload-zone-sub">Format: JPG, PNG, WebP (Maks 2MB)</span>
+                        </div>
+                        <div class="event-upload-preview" id="tab-boc-recap-preview-container" style="display: none;">
+                          <div class="preview-event-poster-wrapper">
+                            <img src="" id="tab-boc-recap-preview-img" alt="BOC Recap Cover">
+                            <button type="button" class="btn-remove-avatar" id="btn-clear-tab-boc-recap" onclick="event.preventDefault()" title="Hapus Gambar"><i class="fa-solid fa-xmark"></i></button>
+                          </div>
+                          <span class="preview-avatar-filename" id="tab-boc-recap-preview-filename">-</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+                      <button type="submit" class="pm-btn pm-btn-primary" id="btn-save-tab-boc-settings" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); display: flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 24px;">
+                        <i class="fa-solid fa-circle-check"></i> Simpan Pengaturan BOC
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
 

@@ -717,7 +717,8 @@ let bocSettings = {
   prizes: null,
   rules: null,
   point_rules: null,
-  status: 'active'
+  status: 'active',
+  recap_cover: null
 };
 
 const defaultPointRules = {
@@ -830,6 +831,16 @@ function applyBocSettingsToDOM() {
       }
     } else {
       totalPrizeEl.textContent = "RP 15.000.000";
+    }
+  }
+
+  // Update Season Recap background
+  const recapSection = document.querySelector(".boc-recap-section");
+  if (recapSection) {
+    if (bocSettings.recap_cover) {
+      recapSection.style.setProperty('--boc-recap-bg', `url('${bocSettings.recap_cover}')`);
+    } else {
+      recapSection.style.removeProperty('--boc-recap-bg');
     }
   }
 
@@ -2112,10 +2123,12 @@ async function checkAdminRoute() {
       const role = localStorage.getItem("pobsi_admin_role") || "admin";
       const playersOverlay = document.getElementById("restrict-players-overlay");
       const bocUpdateOverlay = document.getElementById("restrict-boc-update-overlay");
+      const bocTabSettingsOverlay = document.getElementById("restrict-boc-tab-settings");
       
       if (role === "staff") {
         if (playersOverlay) playersOverlay.style.display = "flex";
         if (bocUpdateOverlay) bocUpdateOverlay.style.display = "flex";
+        if (bocTabSettingsOverlay) bocTabSettingsOverlay.style.display = "flex";
         const clubsOverlay = document.getElementById("restrict-clubs-overlay");
         if (clubsOverlay) clubsOverlay.style.display = "flex";
         const editClubsOverlay = document.getElementById("restrict-edit-clubs-overlay");
@@ -2124,9 +2137,11 @@ async function checkAdminRoute() {
         toggleFormInputs("form-admin-update-boc-points", false);
         toggleFormInputs("form-admin-add-club", false);
         toggleFormInputs("form-admin-edit-club", false);
+        toggleFormInputs("form-tab-boc-settings", false);
       } else {
         if (playersOverlay) playersOverlay.style.display = "none";
         if (bocUpdateOverlay) bocUpdateOverlay.style.display = "none";
+        if (bocTabSettingsOverlay) bocTabSettingsOverlay.style.display = "none";
         const clubsOverlay = document.getElementById("restrict-clubs-overlay");
         if (clubsOverlay) clubsOverlay.style.display = "none";
         const editClubsOverlay = document.getElementById("restrict-edit-clubs-overlay");
@@ -2135,6 +2150,7 @@ async function checkAdminRoute() {
         toggleFormInputs("form-admin-update-boc-points", true);
         toggleFormInputs("form-admin-add-club", true);
         toggleFormInputs("form-admin-edit-club", true);
+        toggleFormInputs("form-tab-boc-settings", true);
       }
       
       // Update data di workspace
@@ -6700,6 +6716,26 @@ function setupBocAdminListeners() {
       if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
     }
 
+    // Prefill recap cover image preview if it exists in DB
+    const bocRecapDropZone = document.getElementById("boc-recap-drop-zone");
+    const bocRecapPreviewContainer = document.getElementById("boc-recap-preview-container");
+    const bocRecapPreviewImg = document.getElementById("boc-recap-preview-img");
+    const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
+    const bocRecapFileInput = document.getElementById("set-boc-recap-file");
+
+    if (bocSettings.recap_cover) {
+      window.currentUploadedBocRecapBase64 = bocSettings.recap_cover;
+      if (bocRecapPreviewImg) bocRecapPreviewImg.src = bocSettings.recap_cover;
+      if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = "recap_cover.png";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "none";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "flex";
+    } else {
+      window.currentUploadedBocRecapBase64 = "";
+      if (bocRecapFileInput) bocRecapFileInput.value = "";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "flex";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "none";
+    }
+
     // Reset settings wizard
     window.resetBocScheduleWizard();
 
@@ -6826,6 +6862,76 @@ function setupBocAdminListeners() {
     };
   }
 
+  // Season Recap Image handlers for Schedule Modal
+  const bocRecapDropZone = document.getElementById("boc-recap-drop-zone");
+  const bocRecapFileInput = document.getElementById("set-boc-recap-file");
+  const bocRecapPreviewContainer = document.getElementById("boc-recap-preview-container");
+  const bocRecapPreviewImg = document.getElementById("boc-recap-preview-img");
+  const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
+  const btnClearBocRecap = document.getElementById("btn-clear-boc-recap");
+
+  if (bocRecapDropZone && bocRecapFileInput) {
+    bocRecapDropZone.onclick = () => bocRecapFileInput.click();
+
+    bocRecapDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      bocRecapDropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      bocRecapDropZone.addEventListener(eventName, () => {
+        bocRecapDropZone.classList.remove("dragover");
+      });
+    });
+
+    bocRecapDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleBocRecapFileSelection(files[0]);
+      }
+    });
+
+    bocRecapFileInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (files.length > 0) {
+        handleBocRecapFileSelection(files[0]);
+      }
+    });
+  }
+
+  function handleBocRecapFileSelection(file) {
+    if (!file.type.startsWith("image/")) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showCustomToast("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      window.currentUploadedBocRecapBase64 = e.target.result;
+      
+      if (bocRecapPreviewImg) bocRecapPreviewImg.src = window.currentUploadedBocRecapBase64;
+      if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "none";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (btnClearBocRecap) {
+    btnClearBocRecap.onclick = () => {
+      window.currentUploadedBocRecapBase64 = "";
+      if (bocRecapFileInput) bocRecapFileInput.value = "";
+      if (bocRecapDropZone) bocRecapDropZone.style.display = "flex";
+      if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "none";
+    };
+  }
+
   if (formBocSchedule) {
     formBocSchedule.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -6863,7 +6969,8 @@ function setupBocAdminListeners() {
           best_game: bestgame
         },
         rules: rulesVal,
-        cover: window.currentUploadedBocCoverBase64 || null
+        cover: window.currentUploadedBocCoverBase64 || null,
+        recap_cover: window.currentUploadedBocRecapBase64 || null
       });
 
       const oldYear = localStorage.getItem("currentBocYear") || "2026";
@@ -12257,6 +12364,10 @@ function openEventDetail(eventId, updateUrl = true) {
   ensureLivePollingStarted();
 
   const isBoc = event.elimination_type === 'boc';
+  const bocSettingsTabBtn = document.getElementById("adm-tab-btn-boc-settings");
+  if (bocSettingsTabBtn) {
+    bocSettingsTabBtn.style.display = isBoc ? "inline-block" : "none";
+  }
   
   const eventDetail = document.getElementById("pane-event-detail");
   const bocPlayoffContainer = document.getElementById("boc-playoff-container");
@@ -12913,6 +13024,285 @@ function renderEventDetailTabs(event) {
             </div>
           </div>
         `;
+      }
+    }
+  }
+
+  else if (tabId === "boc-settings") {
+    // Populate the form fields with current values from global bocSettings
+    const tabBocCutoff = document.getElementById("tab-set-boc-cutoff");
+    const tabBocMaxhc = document.getElementById("tab-set-boc-maxhc");
+    const tabBocYear = document.getElementById("tab-set-boc-year");
+    
+    const tabBocPrize1 = document.getElementById("tab-set-boc-prize1");
+    const tabBocPrize2 = document.getElementById("tab-set-boc-prize2");
+    const tabBocPrize3 = document.getElementById("tab-set-boc-prize3");
+    const tabBocBestgame = document.getElementById("tab-set-boc-bestgame");
+    const tabBocRules = document.getElementById("tab-set-boc-rules");
+
+    const tabBocDate = document.getElementById("tab-boc-schedule-date");
+    const tabBocTime = document.getElementById("tab-boc-schedule-time");
+    const tabBocVenue = document.getElementById("tab-boc-schedule-venue");
+
+    const savedSchedule = bocSettings.playoff_schedule || {};
+    const prizes = bocSettings.prizes || {};
+
+    if (tabBocCutoff) tabBocCutoff.value = bocSettings.cutoff_limit || "16";
+    if (tabBocMaxhc) tabBocMaxhc.value = bocSettings.max_handicap || "Bebas";
+    if (tabBocYear) tabBocYear.value = currentBocYear || "2026";
+
+    if (tabBocPrize1) tabBocPrize1.value = prizes.juara1 || "";
+    if (tabBocPrize2) tabBocPrize2.value = prizes.juara2 || "";
+    if (tabBocPrize3) tabBocPrize3.value = prizes.juara3 || "";
+    if (tabBocBestgame) tabBocBestgame.value = prizes.best_game || "";
+    if (tabBocRules) tabBocRules.value = bocSettings.rules || "";
+
+    if (tabBocDate) tabBocDate.value = savedSchedule.date || "";
+    if (tabBocTime) tabBocTime.value = savedSchedule.time || "";
+    if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
+
+    // Flatpickr initialization
+    const dateWrapper = document.getElementById("tab-boc-schedule-date-wrapper");
+    if (dateWrapper && typeof flatpickr !== "undefined" && !dateWrapper._flatpickr) {
+      flatpickr(dateWrapper, {
+        dateFormat: "d F Y",
+        locale: "id",
+        allowInput: true,
+        disableMobile: true,
+        wrap: true
+      });
+    }
+
+    // Toggle schedule and regulation sections based on tournament status (playoff has started or is completed)
+    const sectionSchedule = document.getElementById("tab-boc-settings-section-schedule");
+    const sectionRegulations = document.getElementById("tab-boc-settings-section-regulations");
+
+    if (event.status !== "Daftar") {
+      // Hide sections
+      if (sectionSchedule) sectionSchedule.style.display = "none";
+      if (sectionRegulations) sectionRegulations.style.display = "none";
+      
+      // Remove required attributes to prevent hidden validation errors
+      if (tabBocDate) tabBocDate.removeAttribute("required");
+      if (tabBocTime) tabBocTime.removeAttribute("required");
+      if (tabBocVenue) tabBocVenue.removeAttribute("required");
+      if (tabBocYear) tabBocYear.removeAttribute("required");
+    } else {
+      // Show sections
+      if (sectionSchedule) sectionSchedule.style.display = "flex";
+      if (sectionRegulations) sectionRegulations.style.display = "flex";
+      
+      // Restore required attributes
+      if (tabBocDate) tabBocDate.setAttribute("required", "");
+      if (tabBocTime) tabBocTime.setAttribute("required", "");
+      if (tabBocVenue) tabBocVenue.setAttribute("required", "");
+      if (tabBocYear) tabBocYear.setAttribute("required", "");
+    }
+
+    // Role Restriction Check (RBAC)
+    const role = localStorage.getItem("pobsi_admin_role") || "admin";
+    const restrictOverlay = document.getElementById("restrict-boc-tab-settings");
+    if (role === "staff") {
+      if (restrictOverlay) restrictOverlay.style.display = "flex";
+      toggleFormInputs("form-tab-boc-settings", false);
+    } else {
+      if (restrictOverlay) restrictOverlay.style.display = "none";
+      toggleFormInputs("form-tab-boc-settings", true);
+    }
+
+    // Image Upload zones
+    // 1. Playoff Cover
+    const coverDropZone = document.getElementById("tab-boc-cover-drop-zone");
+    const coverFileInput = document.getElementById("tab-set-boc-cover-file");
+    const coverPreviewContainer = document.getElementById("tab-boc-cover-preview-container");
+    const coverPreviewImg = document.getElementById("tab-boc-cover-preview-img");
+    const coverPreviewFilename = document.getElementById("tab-boc-cover-preview-filename");
+    const btnClearCover = document.getElementById("btn-clear-tab-boc-cover");
+
+    window.tabUploadedBocCoverBase64 = bocSettings.cover || "";
+
+    if (bocSettings.cover) {
+      if (coverPreviewImg) coverPreviewImg.src = bocSettings.cover;
+      if (coverPreviewFilename) coverPreviewFilename.textContent = "boc_cover.png";
+      if (coverDropZone) coverDropZone.style.display = "none";
+      if (coverPreviewContainer) coverPreviewContainer.style.display = "flex";
+    } else {
+      if (coverDropZone) coverDropZone.style.display = "flex";
+      if (coverPreviewContainer) coverPreviewContainer.style.display = "none";
+    }
+
+    if (coverDropZone && coverFileInput && role !== "staff") {
+      coverDropZone.onclick = () => coverFileInput.click();
+      
+      coverDropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        coverDropZone.classList.add("dragover");
+      });
+      ["dragleave", "drop"].forEach(eventName => {
+        coverDropZone.addEventListener(eventName, () => coverDropZone.classList.remove("dragover"));
+      });
+      coverDropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleFileSelect(files[0], "cover");
+      });
+      coverFileInput.onchange = (e) => {
+        const files = e.target.files;
+        if (files.length > 0) handleFileSelect(files[0], "cover");
+      };
+    }
+
+    if (btnClearCover && role !== "staff") {
+      btnClearCover.onclick = () => {
+        window.tabUploadedBocCoverBase64 = "";
+        if (coverFileInput) coverFileInput.value = "";
+        if (coverDropZone) coverDropZone.style.display = "flex";
+        if (coverPreviewContainer) coverPreviewContainer.style.display = "none";
+      };
+    }
+
+    // 2. Season Recap Cover
+    const recapDropZone = document.getElementById("tab-boc-recap-drop-zone");
+    const recapFileInput = document.getElementById("tab-set-boc-recap-file");
+    const recapPreviewContainer = document.getElementById("tab-boc-recap-preview-container");
+    const recapPreviewImg = document.getElementById("tab-boc-recap-preview-img");
+    const recapPreviewFilename = document.getElementById("tab-boc-recap-preview-filename");
+    const btnClearRecap = document.getElementById("btn-clear-tab-boc-recap");
+
+    window.tabUploadedBocRecapBase64 = bocSettings.recap_cover || "";
+
+    if (bocSettings.recap_cover) {
+      if (recapPreviewImg) recapPreviewImg.src = bocSettings.recap_cover;
+      if (recapPreviewFilename) recapPreviewFilename.textContent = "recap_cover.png";
+      if (recapDropZone) recapDropZone.style.display = "none";
+      if (recapPreviewContainer) recapPreviewContainer.style.display = "flex";
+    } else {
+      if (recapDropZone) recapDropZone.style.display = "flex";
+      if (recapPreviewContainer) recapPreviewContainer.style.display = "none";
+    }
+
+    if (recapDropZone && recapFileInput && role !== "staff") {
+      recapDropZone.onclick = () => recapFileInput.click();
+      
+      recapDropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        recapDropZone.classList.add("dragover");
+      });
+      ["dragleave", "drop"].forEach(eventName => {
+        recapDropZone.addEventListener(eventName, () => recapDropZone.classList.remove("dragover"));
+      });
+      recapDropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleFileSelect(files[0], "recap");
+      });
+      recapFileInput.onchange = (e) => {
+        const files = e.target.files;
+        if (files.length > 0) handleFileSelect(files[0], "recap");
+      };
+    }
+
+    if (btnClearRecap && role !== "staff") {
+      btnClearRecap.onclick = () => {
+        window.tabUploadedBocRecapBase64 = "";
+        if (recapFileInput) recapFileInput.value = "";
+        if (recapDropZone) recapDropZone.style.display = "flex";
+        if (recapPreviewContainer) recapPreviewContainer.style.display = "none";
+      };
+    }
+
+    function handleFileSelect(file, type) {
+      if (!file.type.startsWith("image/")) {
+        showCustomToast("Berkas harus berupa gambar!", "error");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        showCustomToast("Ukuran gambar maksimal 2MB!", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Data = e.target.result;
+        if (type === "cover") {
+          window.tabUploadedBocCoverBase64 = base64Data;
+          if (coverPreviewImg) coverPreviewImg.src = base64Data;
+          if (coverPreviewFilename) coverPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+          if (coverDropZone) coverDropZone.style.display = "none";
+          if (coverPreviewContainer) coverPreviewContainer.style.display = "flex";
+        } else {
+          window.tabUploadedBocRecapBase64 = base64Data;
+          if (recapPreviewImg) recapPreviewImg.src = base64Data;
+          if (recapPreviewFilename) recapPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+          if (recapDropZone) recapDropZone.style.display = "none";
+          if (recapPreviewContainer) recapPreviewContainer.style.display = "flex";
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Submit handler
+    const formBocSettings = document.getElementById("form-tab-boc-settings");
+    if (formBocSettings) {
+      if (!formBocSettings._hasSubmitListener) {
+        formBocSettings._hasSubmitListener = true;
+        formBocSettings.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const role = localStorage.getItem("pobsi_admin_role") || "admin";
+          if (role === "staff") {
+            showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi/pengaturan BOC.", "error");
+            return;
+          }
+
+          const date = document.getElementById("tab-boc-schedule-date").value;
+          const time = document.getElementById("tab-boc-schedule-time").value;
+          const venue = document.getElementById("tab-boc-schedule-venue").value;
+
+          const cutoffVal = parseInt(document.getElementById("tab-set-boc-cutoff").value, 10);
+          const maxhcVal = document.getElementById("tab-set-boc-maxhc").value;
+          const newYear = document.getElementById("tab-set-boc-year").value.trim();
+
+          const prize1 = document.getElementById("tab-set-boc-prize1").value.trim();
+          const prize2 = document.getElementById("tab-set-boc-prize2").value.trim();
+          const prize3 = document.getElementById("tab-set-boc-prize3").value.trim();
+          const bestgame = document.getElementById("tab-set-boc-bestgame").value.trim();
+          const rulesVal = document.getElementById("tab-set-boc-rules").value.trim();
+
+          // Save settings to database
+          await saveBocSettings({
+            cutoff_limit: cutoffVal,
+            max_handicap: maxhcVal,
+            year: newYear,
+            playoff_schedule: { date, time, venue },
+            prizes: {
+              juara1: prize1,
+              juara2: prize2,
+              juara3: prize3,
+              best_game: bestgame
+            },
+            rules: rulesVal,
+            cover: window.tabUploadedBocCoverBase64 || null,
+            recap_cover: window.tabUploadedBocRecapBase64 || null
+          });
+
+          showCustomToast("Pengaturan BOC berhasil disimpan!", "success");
+
+          const oldYear = localStorage.getItem("currentBocYear") || "2026";
+          localStorage.setItem("currentBocYear", newYear);
+
+          if (oldYear !== newYear) {
+            currentBocYear = newYear;
+            await loadBocSettings(newYear);
+            bocSirkuits = loadBocSirkuitsForYear(newYear);
+            loadDataFromApi().then(() => {
+              renderStandings();
+              renderEvents("all");
+              renderAdminBocConsole();
+            });
+          } else {
+            renderAdminBocConsole();
+            renderStandings();
+          }
+        });
       }
     }
   }
@@ -14997,11 +15387,22 @@ function clearDownstreamBocMainMatches(bracket, matchIdx) {
 function checkAndFinalizeBoc(event, bracket) {
   const finalMatch = bracket.mainBracket[6];
   const thirdMatch = bracket.thirdPlace;
-  if (finalMatch && finalMatch.winner && thirdMatch && thirdMatch.winner) {
+  if (finalMatch && finalMatch.winner) {
     const champion = finalMatch.winner;
     const runnerUp = champion === finalMatch.p1 ? finalMatch.p2 : finalMatch.p1;
-    const thirdPlaceWinner = thirdMatch.winner;
-    const thirdPlaceLoser = thirdPlaceWinner === thirdMatch.p1 ? thirdMatch.p2 : thirdMatch.p1;
+    
+    let thirdPlaceWinner = "";
+    let thirdPlaceLoser = "";
+    if (thirdMatch && thirdMatch.winner) {
+      thirdPlaceWinner = thirdMatch.winner;
+      thirdPlaceLoser = thirdPlaceWinner === thirdMatch.p1 ? thirdMatch.p2 : thirdMatch.p1;
+    } else {
+      // Fallback: Semifinal losers
+      const sf1 = bracket.mainBracket[4];
+      const sf2 = bracket.mainBracket[5];
+      if (sf1) thirdPlaceWinner = sf1.winner === sf1.p1 ? sf1.p2 : sf1.p1;
+      if (sf2) thirdPlaceLoser = sf2.winner === sf2.p1 ? sf2.p2 : sf2.p1;
+    }
     
     const qfLosers = [];
     for (let i = 0; i < 4; i++) {
@@ -16249,15 +16650,19 @@ window.finalizeTournamentFromBracket = async function(eventId) {
       showCustomToast("Pertandingan final belum selesai!", "error");
       return;
     }
-    if (!bracket.thirdPlace || !bracket.thirdPlace.winner) {
-      showCustomToast("Pertandingan perebutan juara 3 & 4 belum selesai!", "error");
-      return;
-    }
     newWinner = bracket.mainBracket[6].winner;
     runnerUp = newWinner === bracket.mainBracket[6].p1 ? bracket.mainBracket[6].p2 : bracket.mainBracket[6].p1;
 
-    t4_1 = bracket.thirdPlace.winner;
-    t4_2 = t4_1 === bracket.thirdPlace.p1 ? bracket.thirdPlace.p2 : bracket.thirdPlace.p1;
+    if (bracket.thirdPlace && bracket.thirdPlace.winner) {
+      t4_1 = bracket.thirdPlace.winner;
+      t4_2 = t4_1 === bracket.thirdPlace.p1 ? bracket.thirdPlace.p2 : bracket.thirdPlace.p1;
+    } else {
+      // Fallback: Semifinal losers
+      const sf1 = bracket.mainBracket[4];
+      const sf2 = bracket.mainBracket[5];
+      if (sf1) t4_1 = sf1.winner === sf1.p1 ? sf1.p2 : sf1.p1;
+      if (sf2) t4_2 = sf2.winner === sf2.p1 ? sf2.p2 : sf2.p1;
+    }
 
     for (let i = 0; i < 4; i++) {
       const qf = bracket.mainBracket[i];

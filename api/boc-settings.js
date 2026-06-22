@@ -49,7 +49,8 @@ module.exports = async (req, res) => {
           rules: null,
           point_rules: null,
           status: 'active',
-          cover: null
+          cover: null,
+          recap_cover: null
         });
       }
     }
@@ -58,7 +59,7 @@ module.exports = async (req, res) => {
        POST: Menyimpan / Memperbarui Settings BOC untuk Tahun Tertentu
        ========================================================================== */
     if (req.method === 'POST') {
-      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover } = req.body;
+      const { year, cutoff_limit, max_handicap, playoff_schedule, prizes, rules, status, point_rules, cover, recap_cover } = req.body;
       if (!year) {
         return res.status(400).json({ error: "Parameter year wajib disertakan!" });
       }
@@ -66,6 +67,11 @@ module.exports = async (req, res) => {
       let coverUrl = cover || null;
       if (cover) {
         coverUrl = await uploadMedia(cover, `boc-cover-${year}`, 'covers');
+      }
+
+      let recapCoverUrl = recap_cover || null;
+      if (recap_cover) {
+        recapCoverUrl = await uploadMedia(recap_cover, `boc-recap-cover-${year}`, 'covers');
       }
 
       const upsertData = {
@@ -77,16 +83,32 @@ module.exports = async (req, res) => {
         point_rules: point_rules ? (typeof point_rules === 'object' ? JSON.stringify(point_rules) : point_rules) : null,
         rules: rules || null,
         status: status || 'active',
-        cover: coverUrl
+        cover: coverUrl,
+        recap_cover: recapCoverUrl
       };
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('boc_settings')
         .upsert(upsertData, { onConflict: 'year' })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If recap_cover is not found in schema cache, try upserting without it
+        if (error.message && error.message.includes('recap_cover')) {
+          console.warn("⚠️ Column 'recap_cover' not found in Supabase 'boc_settings' table. Retrying upsert without it.");
+          delete upsertData.recap_cover;
+          const retryRes = await supabase
+            .from('boc_settings')
+            .upsert(upsertData, { onConflict: 'year' })
+            .select()
+            .single();
+          if (retryRes.error) throw retryRes.error;
+          data = retryRes.data;
+        } else {
+          throw error;
+        }
+      }
 
       if (coverUrl) {
         await supabase
