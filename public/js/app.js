@@ -6720,12 +6720,14 @@ function setupBocAdminListeners() {
     if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
     if (bocYearInput) bocYearInput.value = currentBocYear || "2026";
 
-    const prizes = bocSettings.prizes || {};
+    const prizes = saved ? (bocSettings.prizes || {}) : {};
+    const rules = saved ? (bocSettings.rules || "") : "";
+
     if (bocPrize1Input) bocPrize1Input.value = prizes.juara1 || "";
     if (bocPrize2Input) bocPrize2Input.value = prizes.juara2 || "";
     if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
     if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
-    if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
+    if (bocRulesInput) bocRulesInput.value = rules || "";
 
     // Prefill cover image preview if it exists in DB
     const bocCoverDropZone = document.getElementById("boc-cover-drop-zone");
@@ -6734,7 +6736,7 @@ function setupBocAdminListeners() {
     const bocCoverPreviewFilename = document.getElementById("boc-cover-preview-filename");
     const bocCoverFileInput = document.getElementById("set-boc-cover-file");
 
-    if (bocSettings.cover) {
+    if (saved && bocSettings.cover) {
       window.currentUploadedBocCoverBase64 = bocSettings.cover;
       if (bocCoverPreviewImg) bocCoverPreviewImg.src = bocSettings.cover;
       if (bocCoverPreviewFilename) bocCoverPreviewFilename.textContent = "boc_cover.png";
@@ -6754,7 +6756,7 @@ function setupBocAdminListeners() {
     const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
     const bocRecapFileInput = document.getElementById("set-boc-recap-file");
 
-    if (bocSettings.recap_cover) {
+    if (saved && bocSettings.recap_cover) {
       window.currentUploadedBocRecapBase64 = bocSettings.recap_cover;
       if (bocRecapPreviewImg) bocRecapPreviewImg.src = bocSettings.recap_cover;
       if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = "recap_cover.png";
