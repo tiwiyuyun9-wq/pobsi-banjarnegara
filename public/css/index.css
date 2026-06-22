@@ -12454,9 +12454,9 @@ input:-webkit-autofill:active {
   max-width: 500px;
 }
 .boc-premium-cta-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.78rem;
@@ -12469,9 +12469,11 @@ input:-webkit-autofill:active {
   letter-spacing: 0.5px;
 }
 .boc-premium-cta-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #ffffff;
   transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
 }
 .boc-timeline-container {
   flex: 2;
