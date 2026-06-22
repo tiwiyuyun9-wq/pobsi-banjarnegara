@@ -850,6 +850,13 @@ function applyBocSettingsToDOM() {
     el.textContent = bocSettings.cutoff_limit || "16";
   });
 
+  const tableCutoff = document.getElementById("table-set-boc-cutoff");
+  if (tableCutoff) tableCutoff.value = bocSettings.cutoff_limit || 16;
+  const setBocCutoff = document.getElementById("set-boc-cutoff");
+  if (setBocCutoff) setBocCutoff.value = bocSettings.cutoff_limit || 16;
+  const tabSetBocCutoff = document.getElementById("tab-set-boc-cutoff");
+  if (tabSetBocCutoff) tabSetBocCutoff.value = bocSettings.cutoff_limit || 16;
+
   // Populate Point & Handicap settings form if present
   const ptsCircuitChampion = document.getElementById("pts-circuit-champion");
   if (ptsCircuitChampion) {
@@ -6224,15 +6231,16 @@ window.renderAdminBocConsole = function() {
   }
 
   const standings = appData.standings || [];
+  const cutoffLimit = bocSettings.cutoff_limit || 16;
   
   // Calculate Stats
   const totalPoints = standings.reduce((sum, p) => sum + (p.points || 0), 0);
-  const cutoffPoints = standings.length >= 16 ? standings[15].points : 0;
+  const cutoffPoints = standings.length >= cutoffLimit ? standings[cutoffLimit - 1].points : 0;
   
   // Count tied borderline contenders
   let tiedCount = 0;
-  if (standings.length >= 16) {
-    const targetPoints = standings[15].points;
+  if (standings.length >= cutoffLimit) {
+    const targetPoints = standings[cutoffLimit - 1].points;
     tiedCount = standings.filter(p => p.points === targetPoints).length;
   }
   
@@ -6254,7 +6262,7 @@ window.renderAdminBocConsole = function() {
             <i class="fa-solid fa-circle-exclamation text-red" style="font-size: 1.25rem; margin-top: 1px;"></i>
             <div>
               <h4 style="font-family: var(--font-headers); font-size: 0.9rem; font-weight: 800; color: #fca5a5; margin-bottom: 2px;">⚠️ Terdeteksi Sengketa Kelayakan Playoff (${tiedCount} Atlet)</h4>
-              <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Terdeteksi <strong>${tiedCount} atlet</strong> memiliki akumulasi poin sama (${cutoffPoints} Pts) pada batas kelayakan kualifikasi (Peringkat 16). Sesuai regulasi POBSI Banjarnegara, sengketa diselesaikan melalui babak playoff kualifikasi dengan format <strong>Sistem Gugur (Single Elimination)</strong>.</p>
+              <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Terdeteksi <strong>${tiedCount} atlet</strong> memiliki akumulasi poin sama (${cutoffPoints} Pts) pada batas kelayakan kualifikasi (Peringkat ${cutoffLimit}). Sesuai regulasi POBSI Banjarnegara, sengketa diselesaikan melalui babak playoff kualifikasi dengan format <strong>Sistem Gugur (Single Elimination)</strong>.</p>
             </div>
           </div>
         `;
@@ -6264,7 +6272,7 @@ window.renderAdminBocConsole = function() {
             <i class="fa-solid fa-triangle-exclamation text-gold" style="font-size: 1.25rem; margin-top: 1px;"></i>
             <div>
               <h4 style="font-family: var(--font-headers); font-size: 0.9rem; font-weight: 800; color: #fde047; margin-bottom: 2px;">⚠️ Terdeteksi Sengketa Kelayakan Playoff (${tiedCount} Atlet)</h4>
-              <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Terdeteksi <strong>${tiedCount} atlet</strong> memiliki akumulasi poin sama (${cutoffPoints} Pts) pada batas kelayakan kualifikasi (Peringkat 16). Sesuai regulasi POBSI Banjarnegara, sengketa diselesaikan melalui babak playoff kualifikasi dengan format <strong>Setengah Kompetisi (Round Robin)</strong>.</p>
+              <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Terdeteksi <strong>${tiedCount} atlet</strong> memiliki akumulasi poin sama (${cutoffPoints} Pts) pada batas kelayakan kualifikasi (Peringkat ${cutoffLimit}). Sesuai regulasi POBSI Banjarnegara, sengketa diselesaikan melalui babak playoff kualifikasi dengan format <strong>Setengah Kompetisi (Round Robin)</strong>.</p>
             </div>
           </div>
         `;
@@ -6275,7 +6283,7 @@ window.renderAdminBocConsole = function() {
           <i class="fa-solid fa-circle-check text-green" style="font-size: 1.25rem; margin-top: 1px;"></i>
           <div>
             <h4 style="font-family: var(--font-headers); font-size: 0.9rem; font-weight: 800; color: #a7f3d0; margin-bottom: 2px;">✅ Kelayakan Playoff Bersih & Kondusif</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Status kualifikasi aman. 16 pemain teratas memiliki pembagian poin unik dan siap didelegasikan secara langsung ke putaran final Battle of Champions ${currentBocYear} tanpa sengketa tie-breaker.</p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">Status kualifikasi aman. ${cutoffLimit} pemain teratas memiliki pembagian poin unik dan siap didelegasikan secara langsung ke putaran final Battle of Champions ${currentBocYear} tanpa sengketa tie-breaker.</p>
           </div>
         </div>
       `;
@@ -6304,7 +6312,7 @@ window.renderAdminBocConsole = function() {
 
   // Render Table rows
   tableBody.innerHTML = pagedItems.map((player, idx) => {
-    const isBocZone = player.rank <= 16;
+    const isBocZone = player.rank <= cutoffLimit;
     const highlightClass = isBocZone ? 'boc-qualified-row' : '';
     
     // Get deterministic event scores
@@ -6462,6 +6470,30 @@ function setupBocAdminListeners() {
       if (bocAdminCurrentPage < totalPages) {
         bocAdminCurrentPage++;
         renderAdminBocConsole();
+      }
+    });
+  }
+
+  const tableCutoffInput = document.getElementById("table-set-boc-cutoff");
+  if (tableCutoffInput) {
+    tableCutoffInput.addEventListener("change", async (e) => {
+      const role = localStorage.getItem("pobsi_admin_role") || "admin";
+      if (role === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah regulasi/jadwal BOC.", "error");
+        tableCutoffInput.value = bocSettings.cutoff_limit || 16;
+        return;
+      }
+      
+      const newCutoff = parseInt(e.target.value, 10);
+      if (isNaN(newCutoff)) return;
+      
+      const success = await saveBocSettings({ cutoff_limit: newCutoff });
+      if (success) {
+        renderAdminBocConsole();
+        showCustomToast(`Batas Kelayakan Playoff (Cut-Off) berhasil diubah ke ${newCutoff} Besar.`, "success");
+      } else {
+        showCustomToast("Gagal menyimpan perubahan batas kelayakan playoff.", "error");
+        tableCutoffInput.value = bocSettings.cutoff_limit || 16;
       }
     });
   }
@@ -6665,14 +6697,13 @@ function setupBocAdminListeners() {
       if (inpTime) inpTime.value = schedule.time || "";
       if (inpVenue) inpVenue.value = schedule.venue || "";
     } else {
-      const defaultDate = getDefaultBocScheduleDate();
       if (scheduleDatePicker) {
-        scheduleDatePicker.setDate(defaultDate);
+        scheduleDatePicker.setDate("");
       } else if (inpDate) {
-        inpDate.value = defaultDate;
+        inpDate.value = "";
       }
-      if (inpTime) inpTime.value = "10:00";
-      if (inpVenue) inpVenue.value = "Midnight Arena (Banjarnegara)";
+      if (inpTime) inpTime.value = "";
+      if (inpVenue) inpVenue.value = "";
     }
 
     // Prefill settings fields too
@@ -6946,8 +6977,10 @@ function setupBocAdminListeners() {
       const time = document.getElementById("inp-boc-schedule-time").value;
       const venue = document.getElementById("inp-boc-schedule-venue").value;
 
-      const cutoffVal = parseInt(document.getElementById("set-boc-cutoff").value, 10);
-      const maxhcVal = document.getElementById("set-boc-maxhc").value;
+      const cutoffInput = document.getElementById("set-boc-cutoff");
+      const cutoffVal = cutoffInput ? parseInt(cutoffInput.value, 10) : (bocSettings.cutoff_limit || 16);
+      const maxhcInput = document.getElementById("set-boc-maxhc");
+      const maxhcVal = maxhcInput ? maxhcInput.value : "Bebas";
       const newYear = document.getElementById("set-boc-year").value.trim();
 
       const prize1 = document.getElementById("set-boc-prize1").value.trim();
@@ -13368,7 +13401,8 @@ function renderEventDetailTabs(event) {
           const venue = document.getElementById("tab-boc-schedule-venue").value;
 
           const cutoffVal = parseInt(document.getElementById("tab-set-boc-cutoff").value, 10);
-          const maxhcVal = document.getElementById("tab-set-boc-maxhc").value;
+          const maxhcInput = document.getElementById("tab-set-boc-maxhc");
+          const maxhcVal = maxhcInput ? maxhcInput.value : "Bebas";
           const newYear = document.getElementById("tab-set-boc-year").value.trim();
 
           const prize1 = document.getElementById("tab-set-boc-prize1").value.trim();
@@ -17964,8 +17998,8 @@ function setupSystemSettings() {
 
       // Save settings to database
       await saveBocSettings({
-        cutoff_limit: parseInt(bocCutoffInput.value),
-        max_handicap: bocMaxhcInput.value,
+        cutoff_limit: bocCutoffInput ? parseInt(bocCutoffInput.value, 10) : (bocSettings.cutoff_limit || 16),
+        max_handicap: bocMaxhcInput ? bocMaxhcInput.value : "Bebas",
         prizes: {
           juara1: bocPrize1Input ? bocPrize1Input.value.trim() : '',
           juara2: bocPrize2Input ? bocPrize2Input.value.trim() : '',
