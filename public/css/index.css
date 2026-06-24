@@ -93,7 +93,9 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark !important;
 }
+
 
 body {
   background-color: var(--bg-primary);
