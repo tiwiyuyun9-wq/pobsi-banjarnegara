@@ -3573,7 +3573,10 @@
                   </div>
                   <div class="form-group-item">
                     <label class="form-lbl" for="inp-boc-schedule-time">Waktu Mulai <span style="color: var(--red);">*</span></label>
-                    <input type="time" id="inp-boc-schedule-time" required>
+                    <div id="inp-boc-schedule-time-wrapper" style="position: relative; width: 100%;">
+                      <input type="text" id="inp-boc-schedule-time" data-input required placeholder="Pilih waktu mulai" style="width: 100%; padding-right: 40px;">
+                      <i class="fa-solid fa-clock" data-toggle style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; font-size: 1.05rem;"></i>
+                    </div>
                   </div>
                 </div>
                 <div class="form-group-item">
@@ -4383,7 +4386,10 @@
                         </div>
                         <div class="form-group-item">
                           <label class="form-lbl" for="tab-boc-schedule-time">Waktu Mulai <span style="color: var(--red);">*</span></label>
-                          <input type="time" id="tab-boc-schedule-time" required>
+                          <div id="tab-boc-schedule-time-wrapper" style="position: relative; width: 100%;">
+                            <input type="text" id="tab-boc-schedule-time" data-input required placeholder="Pilih waktu" style="width: 100%; padding-right: 40px;">
+                            <i class="fa-solid fa-clock" data-toggle style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; font-size: 1.05rem;"></i>
+                          </div>
                         </div>
                       </div>
                       <div class="form-group-item">

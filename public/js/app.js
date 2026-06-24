@@ -6694,7 +6694,12 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = schedule.date || "";
       }
-      if (inpTime) inpTime.value = schedule.time || "";
+      const scheduleTimePicker = document.getElementById("inp-boc-schedule-time-wrapper")?._flatpickr;
+      if (scheduleTimePicker) {
+        scheduleTimePicker.setDate(schedule.time || "");
+      } else if (inpTime) {
+        inpTime.value = schedule.time || "";
+      }
       if (inpVenue) inpVenue.value = schedule.venue || "";
     } else {
       if (scheduleDatePicker) {
@@ -6702,7 +6707,12 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = "";
       }
-      if (inpTime) inpTime.value = "";
+      const scheduleTimePicker = document.getElementById("inp-boc-schedule-time-wrapper")?._flatpickr;
+      if (scheduleTimePicker) {
+        scheduleTimePicker.setDate("");
+      } else if (inpTime) {
+        inpTime.value = "";
+      }
       if (inpVenue) inpVenue.value = "";
     }
 
@@ -13208,10 +13218,6 @@ function renderEventDetailTabs(event) {
     if (tabBocBestgame) tabBocBestgame.value = prizes.best_game || "";
     if (tabBocRules) tabBocRules.value = bocSettings.rules || "";
 
-    if (tabBocDate) tabBocDate.value = savedSchedule.date || "";
-    if (tabBocTime) tabBocTime.value = savedSchedule.time || "";
-    if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
-
     // Flatpickr initialization
     const dateWrapper = document.getElementById("tab-boc-schedule-date-wrapper");
     if (dateWrapper && typeof flatpickr !== "undefined" && !dateWrapper._flatpickr) {
@@ -13223,6 +13229,35 @@ function renderEventDetailTabs(event) {
         wrap: true
       });
     }
+
+    const timeWrapper = document.getElementById("tab-boc-schedule-time-wrapper");
+    if (timeWrapper && typeof flatpickr !== "undefined" && !timeWrapper._flatpickr) {
+      flatpickr(timeWrapper, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        allowInput: true,
+        disableMobile: true,
+        wrap: true
+      });
+    }
+
+    const tabBocDatePicker = dateWrapper?._flatpickr;
+    if (tabBocDatePicker) {
+      tabBocDatePicker.setDate(savedSchedule.date || "");
+    } else if (tabBocDate) {
+      tabBocDate.value = savedSchedule.date || "";
+    }
+
+    const tabBocTimePicker = timeWrapper?._flatpickr;
+    if (tabBocTimePicker) {
+      tabBocTimePicker.setDate(savedSchedule.time || "");
+    } else if (tabBocTime) {
+      tabBocTime.value = savedSchedule.time || "";
+    }
+
+    if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
 
     // Toggle schedule and regulation sections based on tournament status (playoff has started or is completed)
     const sectionSchedule = document.getElementById("tab-boc-settings-section-schedule");
@@ -17332,6 +17367,20 @@ function setupDatePickers() {
       static: true
     };
     flatpickr("#inp-boc-schedule-date-wrapper", singleConfig);
+
+    // Flatpickr for BOC Schedule Time (Time Picker)
+    const timeConfig = {
+      wrap: true,
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      clickOpens: false,
+      allowInput: true,
+      disableMobile: true,
+      static: true
+    };
+    flatpickr("#inp-boc-schedule-time-wrapper", timeConfig);
   }
 }
 
