@@ -5,6 +5,79 @@ let handicapCurrentPage = 1;
 let docsCurrentPage = 1;
 let admDocsCurrentPage = 1;
 
+// Helper to format/normalize manually entered time values to HH:MM format
+function formatTimeInput(val) {
+  if (!val) return "";
+  let clean = val.trim().replace(/\./g, ":");
+  const parts = clean.split(":");
+  if (parts.length === 2) {
+    let hh = parts[0].padStart(2, "0");
+    let mm = parts[1].padStart(2, "0");
+    return `${hh}:${mm}`;
+  }
+  return clean;
+}
+
+// Helper to setup auto-formatting and mask for time text inputs (HH:MM)
+function setupTimeInputMask(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  input.addEventListener("input", function(e) {
+    let value = e.target.value.replace(/[^0-9]/g, ""); // Allow only digits
+    if (value.length > 4) {
+      value = value.slice(0, 4); // Limit to 4 digits (HHMM)
+    }
+
+    if (value.length > 2) {
+      const hh = value.slice(0, 2);
+      const mm = value.slice(2);
+      
+      let hVal = parseInt(hh, 10);
+      if (hVal > 23) {
+        value = "23" + mm;
+      }
+      
+      if (mm.length > 0) {
+        let mVal = parseInt(mm, 10);
+        if (mVal > 59) {
+          value = value.slice(0, 2) + "59";
+        }
+      }
+      
+      e.target.value = value.slice(0, 2) + ":" + value.slice(2);
+    } else if (value.length > 0) {
+      let hVal = parseInt(value, 10);
+      if (value.length === 2 && hVal > 23) {
+        value = "23";
+      }
+      e.target.value = value;
+    } else {
+      e.target.value = "";
+    }
+  });
+
+  input.addEventListener("blur", function(e) {
+    let val = e.target.value.trim();
+    if (!val) return;
+    
+    val = val.replace(/\./g, ":");
+    
+    let parts = val.split(":");
+    if (parts.length === 1 && parts[0].length > 0) {
+      let hh = parts[0].padStart(2, "0");
+      if (parseInt(hh, 10) > 23) hh = "23";
+      e.target.value = `${hh}:00`;
+    } else if (parts.length === 2) {
+      let hh = parts[0].padStart(2, "0");
+      let mm = parts[1].padEnd(2, "0");
+      if (parseInt(hh, 10) > 23) hh = "23";
+      if (parseInt(mm, 10) > 59) mm = "59";
+      e.target.value = `${hh}:${mm}`;
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
   initApp();
@@ -83,6 +156,10 @@ async function initApp() {
 
   // Load Date Pickers
   setupDatePickers();
+
+  // Setup Time Input Auto-Formatter Masks
+  setupTimeInputMask("inp-boc-schedule-time");
+  setupTimeInputMask("tab-boc-schedule-time");
 
   // Load Admin Panel Control
   setupAdminPanel();
@@ -1356,6 +1433,8 @@ function updateBocBannersVisibility() {
     const iconBgEl = document.getElementById("boc-playoff-banner-icon-bg");
     const iconEl = document.getElementById("boc-playoff-banner-icon");
     const viewBtn = document.getElementById("btn-view-boc-playoff");
+    const badgeDotEl = document.getElementById("boc-playoff-badge-dot");
+    const badgeTextEl = document.getElementById("boc-playoff-badge-text");
 
     if (playoffEvent.status === 'Selesai') {
       // Completed State style (Blue Theme)
@@ -1381,6 +1460,15 @@ function updateBocBannersVisibility() {
         viewBtn.style.color = "#fff";
         viewBtn.style.boxShadow = "0 4px 15px rgba(56, 189, 248, 0.3)";
       }
+      if (badgeTextEl) {
+        badgeTextEl.textContent = "BOC SELESAI";
+        badgeTextEl.style.color = "#38bdf8";
+      }
+      if (badgeDotEl) {
+        badgeDotEl.style.background = "#38bdf8";
+        badgeDotEl.style.boxShadow = "0 0 8px #38bdf8";
+        badgeDotEl.style.animation = "none";
+      }
     } else {
       // Ongoing/default State style (Gold/Yellow Theme)
       playoffBanner.style.background = "linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)";
@@ -1404,6 +1492,15 @@ function updateBocBannersVisibility() {
         viewBtn.style.background = "linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)";
         viewBtn.style.color = "#0f172a";
         viewBtn.style.boxShadow = "0 4px 15px rgba(251, 191, 36, 0.3)";
+      }
+      if (badgeTextEl) {
+        badgeTextEl.textContent = "PLAYOFF LIVE";
+        badgeTextEl.style.color = "#fbbf24";
+      }
+      if (badgeDotEl) {
+        badgeDotEl.style.background = "#fbbf24";
+        badgeDotEl.style.boxShadow = "0 0 8px #fbbf24";
+        badgeDotEl.style.animation = "pulse-live-dot 1.5s infinite alternate";
       }
     }
     
@@ -6976,7 +7073,7 @@ function setupBocAdminListeners() {
       }
 
       const date = document.getElementById("inp-boc-schedule-date").value;
-      const time = document.getElementById("inp-boc-schedule-time").value;
+      const time = formatTimeInput(document.getElementById("inp-boc-schedule-time").value);
       const venue = document.getElementById("inp-boc-schedule-venue").value;
 
       const cutoffInput = document.getElementById("set-boc-cutoff");
@@ -11422,8 +11519,7 @@ function setupEventManagement() {
               top8: t8.filter(v => v && v !== 'BYE')
             });
 
-            event.status = "Selesai";
-            showCustomToast("Turnamen selesai! Juara & podium ditentukan.", "success");
+            showCustomToast("Hasil pertandingan final disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
           } else {
             const nextMatchIdx = matchInfo.nextIdx;
             const isEven = matchInfo.isEven;
@@ -11643,8 +11739,7 @@ function setupEventManagement() {
             });
           }
 
-          event.status = "Selesai";
-          showCustomToast("Turnamen selesai! Juara & podium ditentukan.", "success");
+          showCustomToast("Hasil pertandingan final disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
         }
       }
 
@@ -13208,10 +13303,6 @@ function renderEventDetailTabs(event) {
     if (tabBocBestgame) tabBocBestgame.value = prizes.best_game || "";
     if (tabBocRules) tabBocRules.value = bocSettings.rules || "";
 
-    if (tabBocDate) tabBocDate.value = savedSchedule.date || "";
-    if (tabBocTime) tabBocTime.value = savedSchedule.time || "";
-    if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
-
     // Flatpickr initialization
     const dateWrapper = document.getElementById("tab-boc-schedule-date-wrapper");
     if (dateWrapper && typeof flatpickr !== "undefined" && !dateWrapper._flatpickr) {
@@ -13223,6 +13314,17 @@ function renderEventDetailTabs(event) {
         wrap: true
       });
     }
+
+    const tabBocDatePicker = dateWrapper?._flatpickr;
+    if (tabBocDatePicker) {
+      tabBocDatePicker.setDate(savedSchedule.date || "");
+    } else if (tabBocDate) {
+      tabBocDate.value = savedSchedule.date || "";
+    }
+
+    if (tabBocTime) tabBocTime.value = savedSchedule.time || "";
+
+    if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
 
     // Toggle schedule and regulation sections based on tournament status (playoff has started or is completed)
     const sectionSchedule = document.getElementById("tab-boc-settings-section-schedule");
@@ -13405,7 +13507,7 @@ function renderEventDetailTabs(event) {
           }
 
           const date = document.getElementById("tab-boc-schedule-date").value;
-          const time = document.getElementById("tab-boc-schedule-time").value;
+          const time = formatTimeInput(document.getElementById("tab-boc-schedule-time").value);
           const venue = document.getElementById("tab-boc-schedule-venue").value;
 
           const cutoffVal = parseInt(document.getElementById("tab-set-boc-cutoff").value, 10);
@@ -13559,12 +13661,25 @@ function renderBracketContent(simEl, bannerEl, event, bracket, participants, B) 
   }
 
   if (bannerEl && championName) {
-    bannerEl.innerHTML = `
-      <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success);">
-        <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-trophy text-gold"></i> Turnamen Selesai! Juara: ${championName}
-        </h4>
-      </div>`;
+    if (event.status === "Selesai") {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success);">
+          <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-trophy text-gold"></i> Turnamen Selesai! Juara: ${championName}
+          </h4>
+        </div>`;
+    } else {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+          <h4 style="margin: 0; color: #60a5fa; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-flag-checkered text-accent"></i> Seluruh Pertandingan Selesai! Juara Teridentifikasi: ${championName}
+          </h4>
+          <p style="margin: 0; font-size: 0.82rem; color: var(--text-dim);">Silakan tinjau kembali skor bracket di bawah. Jika sudah yakin benar, klik tombol di bawah untuk memfinalisasi hasil turnamen.</p>
+          <button class="pm-btn pm-btn-primary" onclick="window.finalizeTournamentFromBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 10px 20px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <i class="fa-solid fa-circle-check"></i> Selesaikan Turnamen
+          </button>
+        </div>`;
+    }
   } else if (bannerEl && event.status === "Daftar" && Object.keys(bracket).length > 0) {
     const requiredPlayers = B;
     const currentCount = participants.length;
@@ -15582,8 +15697,7 @@ function checkAndFinalizeBoc(event, bracket) {
       top8: qfLosers.filter(Boolean),
       top16: groupStageEliminated.filter(Boolean)
     });
-    event.status = "Selesai";
-    showCustomToast("Battle of Champions selesai! Juara & seluruh posisi podium telah ditentukan.", "success");
+    showCustomToast("Hasil pertandingan final BOC disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
   }
 }
 
@@ -15655,12 +15769,32 @@ function renderBocBracketContent(simEl, bannerEl, event, bracket, participants, 
     championName = bracket.mainBracket[6].winner;
   }
   if (bannerEl && championName) {
-    bannerEl.innerHTML = `
-      <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success); width: 100%;">
-        <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-trophy text-gold"></i> Turnamen BOC Selesai! Juara: ${championName}
-        </h4>
-      </div>`;
+    if (event.status === "Selesai") {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success); width: 100%;">
+          <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-trophy text-gold"></i> Turnamen BOC Selesai! Juara: ${championName}
+          </h4>
+        </div>`;
+    } else if (isAdmin) {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+          <h4 style="margin: 0; color: #60a5fa; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-flag-checkered text-accent"></i> Seluruh Pertandingan Selesai! Juara Teridentifikasi: ${championName}
+          </h4>
+          <p style="margin: 0; font-size: 0.82rem; color: var(--text-dim);">Silakan tinjau kembali skor bracket di bawah. Jika sudah yakin benar, klik tombol di bawah untuk memfinalisasi hasil turnamen.</p>
+          <button class="pm-btn pm-btn-primary" onclick="window.finalizeTournamentFromBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 10px 20px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <i class="fa-solid fa-circle-check"></i> Selesaikan Turnamen
+          </button>
+        </div>`;
+    } else {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.25); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; width: 100%;">
+          <h4 style="margin: 0; color: #fbbf24; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-hourglass-half"></i> Turnamen Menunggu Finalisasi Hasil (Juara Teridentifikasi: ${championName})
+          </h4>
+        </div>`;
+    }
   } else if (bannerEl) {
     bannerEl.innerHTML = "";
   }
@@ -16955,6 +17089,14 @@ window.finalizeTournamentFromBracket = async function(eventId) {
   event.status = "Selesai";
   await saveEventDetails(event);
 
+  if (elimType === "boc") {
+    showCustomToast("Turnamen Battle of Champions berhasil diselesaikan!", "success");
+    await loadDataFromApi();
+    renderAdminBocConsole();
+    openEventDetail(event.id);
+    return;
+  }
+
   // Trigger points publishing modal
   showPublishSirkuitModal(event, async (sirkuitIdx) => {
     await publishPointsSequence(event, sirkuitIdx);
@@ -17332,6 +17474,7 @@ function setupDatePickers() {
       static: true
     };
     flatpickr("#inp-boc-schedule-date-wrapper", singleConfig);
+
   }
 }
 

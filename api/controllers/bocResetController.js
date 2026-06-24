@@ -27,6 +27,50 @@ exports.resetBoc = async (req, res) => {
     if (supabase) {
       console.log(`☁️ Supabase mode active for resetBoc (BOC ${yearStr})`);
       
+      // 0. Hapus semua data tahun berikutnya (future years > yearStr)
+      const targetYearInt = parseInt(yearStr, 10);
+      const { error: delSettingsErr } = await supabase
+        .from('boc_settings')
+        .delete()
+        .gt('year', yearStr);
+      if (delSettingsErr) throw delSettingsErr;
+
+      const { error: delStandingsErr } = await supabase
+        .from('standings')
+        .delete()
+        .gt('year', yearStr);
+      if (delStandingsErr) throw delStandingsErr;
+
+      const { error: delSirkuitsErr } = await supabase
+        .from('boc_sirkuits')
+        .delete()
+        .gt('year', yearStr);
+      if (delSirkuitsErr) throw delSirkuitsErr;
+
+      const { data: allEvents, error: getEventsErr } = await supabase
+        .from('events')
+        .select('id, title, description, date');
+      if (getEventsErr) throw getEventsErr;
+
+      const futureEvents = (allEvents || []).filter(e => {
+        const matchTitle = e.title?.match(/\b(20\d{2})\b/);
+        const matchDesc = e.description?.match(/\b(20\d{2})\b/);
+        const matchDate = e.date?.match(/\b(20\d{2})\b/);
+        const yTitle = matchTitle ? parseInt(matchTitle[1], 10) : 0;
+        const yDesc = matchDesc ? parseInt(matchDesc[1], 10) : 0;
+        const yDate = matchDate ? parseInt(matchDate[1], 10) : 0;
+        return yTitle > targetYearInt || yDesc > targetYearInt || yDate > targetYearInt;
+      });
+
+      if (futureEvents.length > 0) {
+        const { error: deleteFutureEventsErr } = await supabase
+          .from('events')
+          .delete()
+          .in('id', futureEvents.map(e => e.id));
+        if (deleteFutureEventsErr) throw deleteFutureEventsErr;
+        summary.push(`🗑️ Dihapus ${futureEvents.length} future event(s) (> ${yearStr}) dari Supabase.`);
+      }
+
       // 1. Hapus semua BOC events untuk tahun ini (jika terpilih)
       if (clearEvents !== false) {
         const { data: events, error: getEventsErr } = await supabase
@@ -167,6 +211,30 @@ exports.resetBoc = async (req, res) => {
     } else {
       console.log(`💾 SQLite mode active for resetBoc (BOC ${yearStr})`);
       
+      // 0. Hapus semua data tahun berikutnya (future years > yearStr)
+      const targetYearInt = parseInt(yearStr, 10);
+      await dbRun(`DELETE FROM boc_settings WHERE CAST(year AS INTEGER) > ?`, [targetYearInt]);
+      await dbRun(`DELETE FROM standings WHERE CAST(year AS INTEGER) > ?`, [targetYearInt]);
+      await dbRun(`DELETE FROM boc_sirkuits WHERE CAST(year AS INTEGER) > ?`, [targetYearInt]);
+
+      const allEvents = await dbAll(`SELECT id, title, description, date FROM events`);
+      const futureEvents = (allEvents || []).filter(e => {
+        const matchTitle = e.title?.match(/\b(20\d{2})\b/);
+        const matchDesc = e.description?.match(/\b(20\d{2})\b/);
+        const matchDate = e.date?.match(/\b(20\d{2})\b/);
+        const yTitle = matchTitle ? parseInt(matchTitle[1], 10) : 0;
+        const yDesc = matchDesc ? parseInt(matchDesc[1], 10) : 0;
+        const yDate = matchDate ? parseInt(matchDate[1], 10) : 0;
+        return yTitle > targetYearInt || yDesc > targetYearInt || yDate > targetYearInt;
+      });
+
+      if (futureEvents.length > 0) {
+        const ids = futureEvents.map(e => e.id);
+        const placeholders = ids.map(() => '?').join(',');
+        await dbRun(`DELETE FROM events WHERE id IN (${placeholders})`, ids);
+        summary.push(`🗑️ Dihapus ${futureEvents.length} future event(s) (> ${yearStr}) dari SQLite.`);
+      }
+
       // 1. Hapus semua BOC events untuk tahun ini (jika terpilih)
       if (clearEvents !== false) {
         const bocEvents = await dbAll(
