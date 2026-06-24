@@ -1433,6 +1433,8 @@ function updateBocBannersVisibility() {
     const iconBgEl = document.getElementById("boc-playoff-banner-icon-bg");
     const iconEl = document.getElementById("boc-playoff-banner-icon");
     const viewBtn = document.getElementById("btn-view-boc-playoff");
+    const badgeDotEl = document.getElementById("boc-playoff-badge-dot");
+    const badgeTextEl = document.getElementById("boc-playoff-badge-text");
 
     if (playoffEvent.status === 'Selesai') {
       // Completed State style (Blue Theme)
@@ -1458,6 +1460,15 @@ function updateBocBannersVisibility() {
         viewBtn.style.color = "#fff";
         viewBtn.style.boxShadow = "0 4px 15px rgba(56, 189, 248, 0.3)";
       }
+      if (badgeTextEl) {
+        badgeTextEl.textContent = "BOC SELESAI";
+        badgeTextEl.style.color = "#38bdf8";
+      }
+      if (badgeDotEl) {
+        badgeDotEl.style.background = "#38bdf8";
+        badgeDotEl.style.boxShadow = "0 0 8px #38bdf8";
+        badgeDotEl.style.animation = "none";
+      }
     } else {
       // Ongoing/default State style (Gold/Yellow Theme)
       playoffBanner.style.background = "linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)";
@@ -1481,6 +1492,15 @@ function updateBocBannersVisibility() {
         viewBtn.style.background = "linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)";
         viewBtn.style.color = "#0f172a";
         viewBtn.style.boxShadow = "0 4px 15px rgba(251, 191, 36, 0.3)";
+      }
+      if (badgeTextEl) {
+        badgeTextEl.textContent = "PLAYOFF LIVE";
+        badgeTextEl.style.color = "#fbbf24";
+      }
+      if (badgeDotEl) {
+        badgeDotEl.style.background = "#fbbf24";
+        badgeDotEl.style.boxShadow = "0 0 8px #fbbf24";
+        badgeDotEl.style.animation = "pulse-live-dot 1.5s infinite alternate";
       }
     }
     
