@@ -11519,8 +11519,7 @@ function setupEventManagement() {
               top8: t8.filter(v => v && v !== 'BYE')
             });
 
-            event.status = "Selesai";
-            showCustomToast("Turnamen selesai! Juara & podium ditentukan.", "success");
+            showCustomToast("Hasil pertandingan final disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
           } else {
             const nextMatchIdx = matchInfo.nextIdx;
             const isEven = matchInfo.isEven;
@@ -11740,8 +11739,7 @@ function setupEventManagement() {
             });
           }
 
-          event.status = "Selesai";
-          showCustomToast("Turnamen selesai! Juara & podium ditentukan.", "success");
+          showCustomToast("Hasil pertandingan final disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
         }
       }
 
@@ -13663,12 +13661,25 @@ function renderBracketContent(simEl, bannerEl, event, bracket, participants, B) 
   }
 
   if (bannerEl && championName) {
-    bannerEl.innerHTML = `
-      <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success);">
-        <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-trophy text-gold"></i> Turnamen Selesai! Juara: ${championName}
-        </h4>
-      </div>`;
+    if (event.status === "Selesai") {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success);">
+          <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-trophy text-gold"></i> Turnamen Selesai! Juara: ${championName}
+          </h4>
+        </div>`;
+    } else {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+          <h4 style="margin: 0; color: #60a5fa; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-flag-checkered text-accent"></i> Seluruh Pertandingan Selesai! Juara Teridentifikasi: ${championName}
+          </h4>
+          <p style="margin: 0; font-size: 0.82rem; color: var(--text-dim);">Silakan tinjau kembali skor bracket di bawah. Jika sudah yakin benar, klik tombol di bawah untuk memfinalisasi hasil turnamen.</p>
+          <button class="pm-btn pm-btn-primary" onclick="window.finalizeTournamentFromBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 10px 20px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <i class="fa-solid fa-circle-check"></i> Selesaikan Turnamen
+          </button>
+        </div>`;
+    }
   } else if (bannerEl && event.status === "Daftar" && Object.keys(bracket).length > 0) {
     const requiredPlayers = B;
     const currentCount = participants.length;
@@ -15686,8 +15697,7 @@ function checkAndFinalizeBoc(event, bracket) {
       top8: qfLosers.filter(Boolean),
       top16: groupStageEliminated.filter(Boolean)
     });
-    event.status = "Selesai";
-    showCustomToast("Battle of Champions selesai! Juara & seluruh posisi podium telah ditentukan.", "success");
+    showCustomToast("Hasil pertandingan final BOC disimpan! Silakan klik tombol 'Selesaikan Turnamen' untuk memfinalisasi hasil.", "success");
   }
 }
 
@@ -15759,12 +15769,32 @@ function renderBocBracketContent(simEl, bannerEl, event, bracket, participants, 
     championName = bracket.mainBracket[6].winner;
   }
   if (bannerEl && championName) {
-    bannerEl.innerHTML = `
-      <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success); width: 100%;">
-        <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-trophy text-gold"></i> Turnamen BOC Selesai! Juara: ${championName}
-        </h4>
-      </div>`;
+    if (event.status === "Selesai") {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-neon-success); width: 100%;">
+          <h4 style="margin: 0; color: #10b981; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-trophy text-gold"></i> Turnamen BOC Selesai! Juara: ${championName}
+          </h4>
+        </div>`;
+    } else if (isAdmin) {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+          <h4 style="margin: 0; color: #60a5fa; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-flag-checkered text-accent"></i> Seluruh Pertandingan Selesai! Juara Teridentifikasi: ${championName}
+          </h4>
+          <p style="margin: 0; font-size: 0.82rem; color: var(--text-dim);">Silakan tinjau kembali skor bracket di bawah. Jika sudah yakin benar, klik tombol di bawah untuk memfinalisasi hasil turnamen.</p>
+          <button class="pm-btn pm-btn-primary" onclick="window.finalizeTournamentFromBracket('${event.id}')" style="background: var(--gradient-primary); box-shadow: var(--shadow-neon); padding: 10px 20px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <i class="fa-solid fa-circle-check"></i> Selesaikan Turnamen
+          </button>
+        </div>`;
+    } else {
+      bannerEl.innerHTML = `
+        <div class="completion-banner" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.25); padding: 16px; border-radius: var(--radius-md); text-align: center; margin-bottom: 24px; width: 100%;">
+          <h4 style="margin: 0; color: #fbbf24; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-hourglass-half"></i> Turnamen Menunggu Finalisasi Hasil (Juara Teridentifikasi: ${championName})
+          </h4>
+        </div>`;
+    }
   } else if (bannerEl) {
     bannerEl.innerHTML = "";
   }
@@ -17058,6 +17088,14 @@ window.finalizeTournamentFromBracket = async function(eventId) {
 
   event.status = "Selesai";
   await saveEventDetails(event);
+
+  if (elimType === "boc") {
+    showCustomToast("Turnamen Battle of Champions berhasil diselesaikan!", "success");
+    await loadDataFromApi();
+    renderAdminBocConsole();
+    openEventDetail(event.id);
+    return;
+  }
 
   // Trigger points publishing modal
   showPublishSirkuitModal(event, async (sirkuitIdx) => {
