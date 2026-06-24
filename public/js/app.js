@@ -5,6 +5,76 @@ let handicapCurrentPage = 1;
 let docsCurrentPage = 1;
 let admDocsCurrentPage = 1;
 
+// Helper to populate select elements with 30-minute intervals
+function populateTimeDropdowns() {
+  const dropdownIds = ["inp-boc-schedule-time", "tab-boc-schedule-time"];
+  dropdownIds.forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    
+    // Clear existing options
+    select.innerHTML = "";
+    
+    // Add placeholder option
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = id === "tab-boc-schedule-time" ? "Pilih waktu" : "Pilih waktu mulai";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.style.background = "#0d1527";
+    placeholder.style.color = "rgba(255,255,255,0.4)";
+    select.appendChild(placeholder);
+    
+    // Generate hours and minutes
+    for (let hour = 0; hour < 24; hour++) {
+      for (let min of [0, 30]) {
+        const hh = String(hour).padStart(2, '0');
+        const mm = String(min).padStart(2, '0');
+        const val = `${hh}:${mm}`;
+        
+        const opt = document.createElement("option");
+        opt.value = val;
+        opt.textContent = val;
+        opt.style.background = "#0d1527";
+        opt.style.color = "#fff";
+        select.appendChild(opt);
+      }
+    }
+  });
+}
+
+// Helper to set selected time in a dropdown, dynamically adding option if it doesn't exist
+function setSelectedTimeValue(selectId, value) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  
+  if (value) {
+    let standardizedValue = value.trim();
+    if (standardizedValue.length === 5) {
+      let exists = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === standardizedValue) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = standardizedValue;
+        opt.textContent = standardizedValue;
+        opt.style.background = "#0d1527";
+        opt.style.color = "#fff";
+        select.appendChild(opt);
+      }
+      select.value = standardizedValue;
+    } else {
+      select.value = "";
+    }
+  } else {
+    select.value = "";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
   initApp();
@@ -12,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Inisialisasi Aplikasi Utama
 async function initApp() {
+  populateTimeDropdowns();
   // Ambil tahun dari hash URL di awal (sebelum loadDataFromApi) agar pemuatan API sesuai tahun sasaran
   const initHash = window.location.hash.substring(1);
   if (initHash.startsWith("champions-")) {
@@ -6694,12 +6765,7 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = schedule.date || "";
       }
-      const scheduleTimePicker = document.getElementById("inp-boc-schedule-time-wrapper")?._flatpickr;
-      if (scheduleTimePicker) {
-        scheduleTimePicker.setDate(schedule.time || "");
-      } else if (inpTime) {
-        inpTime.value = schedule.time || "";
-      }
+      setSelectedTimeValue("inp-boc-schedule-time", schedule.time || "");
       if (inpVenue) inpVenue.value = schedule.venue || "";
     } else {
       if (scheduleDatePicker) {
@@ -6707,12 +6773,7 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = "";
       }
-      const scheduleTimePicker = document.getElementById("inp-boc-schedule-time-wrapper")?._flatpickr;
-      if (scheduleTimePicker) {
-        scheduleTimePicker.setDate("");
-      } else if (inpTime) {
-        inpTime.value = "";
-      }
+      setSelectedTimeValue("inp-boc-schedule-time", "");
       if (inpVenue) inpVenue.value = "";
     }
 
@@ -13230,19 +13291,6 @@ function renderEventDetailTabs(event) {
       });
     }
 
-    const timeWrapper = document.getElementById("tab-boc-schedule-time-wrapper");
-    if (timeWrapper && typeof flatpickr !== "undefined" && !timeWrapper._flatpickr) {
-      flatpickr(timeWrapper, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        allowInput: true,
-        disableMobile: true,
-        wrap: true
-      });
-    }
-
     const tabBocDatePicker = dateWrapper?._flatpickr;
     if (tabBocDatePicker) {
       tabBocDatePicker.setDate(savedSchedule.date || "");
@@ -13250,12 +13298,7 @@ function renderEventDetailTabs(event) {
       tabBocDate.value = savedSchedule.date || "";
     }
 
-    const tabBocTimePicker = timeWrapper?._flatpickr;
-    if (tabBocTimePicker) {
-      tabBocTimePicker.setDate(savedSchedule.time || "");
-    } else if (tabBocTime) {
-      tabBocTime.value = savedSchedule.time || "";
-    }
+    setSelectedTimeValue("tab-boc-schedule-time", savedSchedule.time || "");
 
     if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
 
@@ -17368,19 +17411,6 @@ function setupDatePickers() {
     };
     flatpickr("#inp-boc-schedule-date-wrapper", singleConfig);
 
-    // Flatpickr for BOC Schedule Time (Time Picker)
-    const timeConfig = {
-      wrap: true,
-      enableTime: true,
-      noCalendar: true,
-      dateFormat: "H:i",
-      time_24hr: true,
-      clickOpens: false,
-      allowInput: true,
-      disableMobile: true,
-      static: true
-    };
-    flatpickr("#inp-boc-schedule-time-wrapper", timeConfig);
   }
 }
 
