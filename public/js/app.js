@@ -18,6 +18,66 @@ function formatTimeInput(val) {
   return clean;
 }
 
+// Helper to setup auto-formatting and mask for time text inputs (HH:MM)
+function setupTimeInputMask(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  input.addEventListener("input", function(e) {
+    let value = e.target.value.replace(/[^0-9]/g, ""); // Allow only digits
+    if (value.length > 4) {
+      value = value.slice(0, 4); // Limit to 4 digits (HHMM)
+    }
+
+    if (value.length > 2) {
+      const hh = value.slice(0, 2);
+      const mm = value.slice(2);
+      
+      let hVal = parseInt(hh, 10);
+      if (hVal > 23) {
+        value = "23" + mm;
+      }
+      
+      if (mm.length > 0) {
+        let mVal = parseInt(mm, 10);
+        if (mVal > 59) {
+          value = value.slice(0, 2) + "59";
+        }
+      }
+      
+      e.target.value = value.slice(0, 2) + ":" + value.slice(2);
+    } else if (value.length > 0) {
+      let hVal = parseInt(value, 10);
+      if (value.length === 2 && hVal > 23) {
+        value = "23";
+      }
+      e.target.value = value;
+    } else {
+      e.target.value = "";
+    }
+  });
+
+  input.addEventListener("blur", function(e) {
+    let val = e.target.value.trim();
+    if (!val) return;
+    
+    val = val.replace(/\./g, ":");
+    
+    let parts = val.split(":");
+    if (parts.length === 1 && parts[0].length > 0) {
+      let hh = parts[0].padStart(2, "0");
+      if (parseInt(hh, 10) > 23) hh = "23";
+      e.target.value = `${hh}:00`;
+    } else if (parts.length === 2) {
+      let hh = parts[0].padStart(2, "0");
+      let mm = parts[1].padEnd(2, "0");
+      if (parseInt(hh, 10) > 23) hh = "23";
+      if (parseInt(mm, 10) > 59) mm = "59";
+      e.target.value = `${hh}:${mm}`;
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
   initApp();
@@ -96,6 +156,10 @@ async function initApp() {
 
   // Load Date Pickers
   setupDatePickers();
+
+  // Setup Time Input Auto-Formatter Masks
+  setupTimeInputMask("inp-boc-schedule-time");
+  setupTimeInputMask("tab-boc-schedule-time");
 
   // Load Admin Panel Control
   setupAdminPanel();
