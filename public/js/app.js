@@ -5,74 +5,17 @@ let handicapCurrentPage = 1;
 let docsCurrentPage = 1;
 let admDocsCurrentPage = 1;
 
-// Helper to populate select elements with 30-minute intervals
-function populateTimeDropdowns() {
-  const dropdownIds = ["inp-boc-schedule-time", "tab-boc-schedule-time"];
-  dropdownIds.forEach(id => {
-    const select = document.getElementById(id);
-    if (!select) return;
-    
-    // Clear existing options
-    select.innerHTML = "";
-    
-    // Add placeholder option
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = id === "tab-boc-schedule-time" ? "Pilih waktu" : "Pilih waktu mulai";
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    placeholder.style.background = "#0d1527";
-    placeholder.style.color = "rgba(255,255,255,0.4)";
-    select.appendChild(placeholder);
-    
-    // Generate hours and minutes
-    for (let hour = 0; hour < 24; hour++) {
-      for (let min of [0, 30]) {
-        const hh = String(hour).padStart(2, '0');
-        const mm = String(min).padStart(2, '0');
-        const val = `${hh}:${mm}`;
-        
-        const opt = document.createElement("option");
-        opt.value = val;
-        opt.textContent = val;
-        opt.style.background = "#0d1527";
-        opt.style.color = "#fff";
-        select.appendChild(opt);
-      }
-    }
-  });
-}
-
-// Helper to set selected time in a dropdown, dynamically adding option if it doesn't exist
-function setSelectedTimeValue(selectId, value) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
-  
-  if (value) {
-    let standardizedValue = value.trim();
-    if (standardizedValue.length === 5) {
-      let exists = false;
-      for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].value === standardizedValue) {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) {
-        const opt = document.createElement("option");
-        opt.value = standardizedValue;
-        opt.textContent = standardizedValue;
-        opt.style.background = "#0d1527";
-        opt.style.color = "#fff";
-        select.appendChild(opt);
-      }
-      select.value = standardizedValue;
-    } else {
-      select.value = "";
-    }
-  } else {
-    select.value = "";
+// Helper to format/normalize manually entered time values to HH:MM format
+function formatTimeInput(val) {
+  if (!val) return "";
+  let clean = val.trim().replace(/\./g, ":");
+  const parts = clean.split(":");
+  if (parts.length === 2) {
+    let hh = parts[0].padStart(2, "0");
+    let mm = parts[1].padStart(2, "0");
+    return `${hh}:${mm}`;
   }
+  return clean;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -82,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Inisialisasi Aplikasi Utama
 async function initApp() {
-  populateTimeDropdowns();
   // Ambil tahun dari hash URL di awal (sebelum loadDataFromApi) agar pemuatan API sesuai tahun sasaran
   const initHash = window.location.hash.substring(1);
   if (initHash.startsWith("champions-")) {
@@ -6765,7 +6707,7 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = schedule.date || "";
       }
-      setSelectedTimeValue("inp-boc-schedule-time", schedule.time || "");
+      if (inpTime) inpTime.value = schedule.time || "";
       if (inpVenue) inpVenue.value = schedule.venue || "";
     } else {
       if (scheduleDatePicker) {
@@ -6773,7 +6715,7 @@ function setupBocAdminListeners() {
       } else if (inpDate) {
         inpDate.value = "";
       }
-      setSelectedTimeValue("inp-boc-schedule-time", "");
+      if (inpTime) inpTime.value = "";
       if (inpVenue) inpVenue.value = "";
     }
 
@@ -7047,7 +6989,7 @@ function setupBocAdminListeners() {
       }
 
       const date = document.getElementById("inp-boc-schedule-date").value;
-      const time = document.getElementById("inp-boc-schedule-time").value;
+      const time = formatTimeInput(document.getElementById("inp-boc-schedule-time").value);
       const venue = document.getElementById("inp-boc-schedule-venue").value;
 
       const cutoffInput = document.getElementById("set-boc-cutoff");
@@ -13298,7 +13240,7 @@ function renderEventDetailTabs(event) {
       tabBocDate.value = savedSchedule.date || "";
     }
 
-    setSelectedTimeValue("tab-boc-schedule-time", savedSchedule.time || "");
+    if (tabBocTime) tabBocTime.value = savedSchedule.time || "";
 
     if (tabBocVenue) tabBocVenue.value = savedSchedule.venue || "";
 
@@ -13483,7 +13425,7 @@ function renderEventDetailTabs(event) {
           }
 
           const date = document.getElementById("tab-boc-schedule-date").value;
-          const time = document.getElementById("tab-boc-schedule-time").value;
+          const time = formatTimeInput(document.getElementById("tab-boc-schedule-time").value);
           const venue = document.getElementById("tab-boc-schedule-venue").value;
 
           const cutoffVal = parseInt(document.getElementById("tab-set-boc-cutoff").value, 10);
