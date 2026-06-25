@@ -78,6 +78,77 @@ function setupTimeInputMask(inputId) {
   });
 }
 
+// Helper to format string/number to Rupiah with dot separator (e.g., Rp 10.000.000)
+function formatRupiah(value) {
+  if (value === null || value === undefined) return "";
+  const numberString = value.toString().replace(/[^0-9]/g, "");
+  if (!numberString) return "";
+  const formatted = numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return "Rp " + formatted;
+}
+window.formatRupiah = formatRupiah;
+
+// Helper to setup auto-formatting for Rupiah input fields
+function setupRupiahInputMask(inputIdOrEl) {
+  const input = typeof inputIdOrEl === "string" ? document.getElementById(inputIdOrEl) : inputIdOrEl;
+  if (!input) return;
+
+  // Format initial value if any
+  if (input.value) {
+    input.value = formatRupiah(input.value);
+  }
+
+  input.addEventListener("input", function (e) {
+    let cursorPosition = this.selectionStart;
+    const originalLength = this.value.length;
+
+    const formatted = formatRupiah(this.value);
+    this.value = formatted;
+
+    const newLength = this.value.length;
+    cursorPosition = cursorPosition + (newLength - originalLength);
+
+    if (cursorPosition < 3 && formatted.length >= 3) {
+      cursorPosition = 3;
+    }
+
+    this.setSelectionRange(cursorPosition, cursorPosition);
+  });
+}
+window.setupRupiahInputMask = setupRupiahInputMask;
+
+// Helper to sync playoff event prize pool on settings save
+async function syncPlayoffEventPrizePool(year, prizes) {
+  if (!appData || !appData.events) return;
+  const playoffEvent = appData.events.find(e => 
+    e.elimination_type === 'boc' && 
+    e.status !== 'Cancelled' && 
+    (e.title.includes(year) || e.description?.includes(year))
+  );
+  if (playoffEvent) {
+    const extractNumber = (str) => {
+      if (!str) return 0;
+      const clean = str.toString().replace(/[^0-9]/g, "");
+      return parseInt(clean, 10) || 0;
+    };
+    const p1 = extractNumber(prizes.juara1);
+    const p2 = extractNumber(prizes.juara2);
+    const p3 = extractNumber(prizes.juara3);
+    const pb = extractNumber(prizes.best_game);
+    const total = p1 + p2 + p3 + pb;
+    if (total > 0) {
+      playoffEvent.prizePool = `Rp ${total.toLocaleString('id-ID')}`;
+      try {
+        await saveEventDetails(playoffEvent);
+      } catch (e) {
+        console.error("Failed to sync playoff event prize pool:", e);
+      }
+    }
+  }
+}
+window.syncPlayoffEventPrizePool = syncPlayoffEventPrizePool;
+
+
 document.addEventListener("DOMContentLoaded", () => {
   // Jalankan inisialisasi aplikasi
   initApp();
@@ -160,6 +231,16 @@ async function initApp() {
   // Setup Time Input Auto-Formatter Masks
   setupTimeInputMask("inp-boc-schedule-time");
   setupTimeInputMask("tab-boc-schedule-time");
+
+  // Setup Rupiah Input Auto-Formatter Masks
+  setupRupiahInputMask("set-boc-prize1");
+  setupRupiahInputMask("set-boc-prize2");
+  setupRupiahInputMask("set-boc-prize3");
+  setupRupiahInputMask("set-boc-bestgame");
+  setupRupiahInputMask("tab-set-boc-prize1");
+  setupRupiahInputMask("tab-set-boc-prize2");
+  setupRupiahInputMask("tab-set-boc-prize3");
+  setupRupiahInputMask("tab-set-boc-bestgame");
 
   // Load Admin Panel Control
   setupAdminPanel();
@@ -6828,10 +6909,10 @@ function setupBocAdminListeners() {
     const prizes = saved ? (bocSettings.prizes || {}) : {};
     const rules = saved ? (bocSettings.rules || "") : "";
 
-    if (bocPrize1Input) bocPrize1Input.value = prizes.juara1 || "";
-    if (bocPrize2Input) bocPrize2Input.value = prizes.juara2 || "";
-    if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
-    if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
+    if (bocPrize1Input) bocPrize1Input.value = formatRupiah(prizes.juara1 || "");
+    if (bocPrize2Input) bocPrize2Input.value = formatRupiah(prizes.juara2 || "");
+    if (bocPrize3Input) bocPrize3Input.value = formatRupiah(prizes.juara3 || "");
+    if (bocBestGameInput) bocBestGameInput.value = formatRupiah(prizes.best_game || "");
     if (bocRulesInput) bocRulesInput.value = rules || "";
 
     // Prefill cover image preview if it exists in DB
@@ -7113,6 +7194,14 @@ function setupBocAdminListeners() {
         recap_cover: window.currentUploadedBocRecapBase64 || null
       });
 
+      // Sync playoff event prize pool in database
+      await syncPlayoffEventPrizePool(newYear, {
+        juara1: prize1,
+        juara2: prize2,
+        juara3: prize3,
+        best_game: bestgame
+      });
+
       const oldYear = localStorage.getItem("currentBocYear") || "2026";
       localStorage.setItem("currentBocYear", newYear);
 
@@ -7151,7 +7240,6 @@ function setupBocAdminListeners() {
       const existingBocEvent = appData.events.find(e => 
         e.elimination_type === "boc" && 
         e.status !== "Cancelled" && 
-        e.status !== "Selesai" &&
         (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear))
       );
       if (existingBocEvent) {
@@ -7197,12 +7285,31 @@ function setupBocAdminListeners() {
         }
 
         const newEventId = "E" + String(Date.now()).slice(-3) + String(Math.floor(Math.random() * 10));
+        
+        let calculatedPrizePool = "Rp 15.000.000";
+        if (typeof bocSettings !== 'undefined' && bocSettings.prizes) {
+          const prizes = bocSettings.prizes;
+          const extractNumber = (str) => {
+            if (!str) return 0;
+            const clean = str.toString().replace(/[^0-9]/g, "");
+            return parseInt(clean, 10) || 0;
+          };
+          const p1 = extractNumber(prizes.juara1);
+          const p2 = extractNumber(prizes.juara2);
+          const p3 = extractNumber(prizes.juara3);
+          const pb = extractNumber(prizes.best_game);
+          const total = p1 + p2 + p3 + pb;
+          if (total > 0) {
+            calculatedPrizePool = `Rp ${total.toLocaleString('id-ID')}`;
+          }
+        }
+
         const eventData = {
           id: newEventId,
           title: `Grand Final Battle of Champions ${currentBocYear}`,
           date: formatSqlDate(scheduleObj.date),
           venue: scheduleObj.venue,
-          prizePool: "Rp 15.000.000",
+          prizePool: calculatedPrizePool,
           entryFee: "Rp 150.000",
           contact: "POBSI Committee",
           status: "Daftar",
@@ -8612,10 +8719,17 @@ function renderBocPodium3D(event, bracketObj) {
   const p3 = getPlayerDetails(third, 3);
 
   // Compute prizes
+  const prizes = (typeof bocSettings !== 'undefined' && bocSettings.prizes) ? bocSettings.prizes : {};
   const totalPrize = parseFloat((event.prizePool || "15.000.000").replace(/[^0-9]/g, '')) || 15000000;
-  const prize1st = `Rp ${(totalPrize * 0.5).toLocaleString('id-ID')}`;
-  const prize2nd = `Rp ${(totalPrize * 0.3).toLocaleString('id-ID')}`;
-  const prize3rd = `Rp ${(totalPrize * 0.2).toLocaleString('id-ID')}`;
+  
+  const prize1st = prizes.juara1 ? formatRupiah(prizes.juara1) : `Rp ${(totalPrize * 0.5).toLocaleString('id-ID')}`;
+  const prize2nd = prizes.juara2 ? formatRupiah(prizes.juara2) : `Rp ${(totalPrize * 0.3).toLocaleString('id-ID')}`;
+  const prize3rd = prizes.juara3 ? formatRupiah(prizes.juara3) : `Rp ${(totalPrize * 0.2).toLocaleString('id-ID')}`;
+
+  const podiumPrizeEl = document.getElementById("boc-playoff-podium-total-prize") || document.querySelector("#boc-playoff-tab-podium .prizepool-val");
+  if (podiumPrizeEl) {
+    podiumPrizeEl.textContent = event.prizePool || `Rp ${totalPrize.toLocaleString('id-ID')}`;
+  }
 
   const renderHoverCard = (player, pDetails) => {
     const stats = getPlayerBocStats(pDetails.realName, bracketObj);
@@ -13305,10 +13419,10 @@ function renderEventDetailTabs(event) {
     if (tabBocMaxhc) tabBocMaxhc.value = bocSettings.max_handicap || "Bebas";
     if (tabBocYear) tabBocYear.value = currentBocYear || "2026";
 
-    if (tabBocPrize1) tabBocPrize1.value = prizes.juara1 || "";
-    if (tabBocPrize2) tabBocPrize2.value = prizes.juara2 || "";
-    if (tabBocPrize3) tabBocPrize3.value = prizes.juara3 || "";
-    if (tabBocBestgame) tabBocBestgame.value = prizes.best_game || "";
+    if (tabBocPrize1) tabBocPrize1.value = formatRupiah(prizes.juara1 || "");
+    if (tabBocPrize2) tabBocPrize2.value = formatRupiah(prizes.juara2 || "");
+    if (tabBocPrize3) tabBocPrize3.value = formatRupiah(prizes.juara3 || "");
+    if (tabBocBestgame) tabBocBestgame.value = formatRupiah(prizes.best_game || "");
     if (tabBocRules) tabBocRules.value = bocSettings.rules || "";
 
     // Flatpickr initialization
@@ -13544,6 +13658,14 @@ function renderEventDetailTabs(event) {
             rules: rulesVal,
             cover: window.tabUploadedBocCoverBase64 || null,
             recap_cover: window.tabUploadedBocRecapBase64 || null
+          });
+
+          // Sync playoff event prize pool in database
+          await syncPlayoffEventPrizePool(newYear, {
+            juara1: prize1,
+            juara2: prize2,
+            juara3: prize3,
+            best_game: bestgame
           });
 
           showCustomToast("Pengaturan BOC berhasil disimpan!", "success");
@@ -18084,10 +18206,10 @@ function setupSystemSettings() {
 
   // Populate prizes from bocSettings
   const prizes = bocSettings.prizes || {};
-  if (bocPrize1Input) bocPrize1Input.value = prizes.juara1 || "";
-  if (bocPrize2Input) bocPrize2Input.value = prizes.juara2 || "";
-  if (bocPrize3Input) bocPrize3Input.value = prizes.juara3 || "";
-  if (bocBestGameInput) bocBestGameInput.value = prizes.best_game || "";
+  if (bocPrize1Input) bocPrize1Input.value = formatRupiah(prizes.juara1 || "");
+  if (bocPrize2Input) bocPrize2Input.value = formatRupiah(prizes.juara2 || "");
+  if (bocPrize3Input) bocPrize3Input.value = formatRupiah(prizes.juara3 || "");
+  if (bocBestGameInput) bocBestGameInput.value = formatRupiah(prizes.best_game || "");
   if (bocRulesInput) bocRulesInput.value = bocSettings.rules || "";
 
 
