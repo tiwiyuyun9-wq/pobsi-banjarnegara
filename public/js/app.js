@@ -868,7 +868,15 @@ function applyBocSettingsToDOM() {
     if (bocSettings.cover) {
       publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('${bocSettings.cover}')`;
     } else {
-      publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('/images/hero-player.png')`;
+      const hasPlayoffEvent = (appData.events || []).some(e => e.elimination_type === 'boc' && e.status !== 'Cancelled' && (e.title.includes(currentBocYear) || e.description?.includes(currentBocYear)));
+      const hasSchedule = bocSettings.playoff_schedule;
+      
+      if (!hasPlayoffEvent && !hasSchedule) {
+        publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.98) 0%, rgba(6, 11, 24, 0.95) 50%, rgba(6, 11, 24, 0.98) 100%)`;
+        publicHero.style.backgroundColor = "#060b18";
+      } else {
+        publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('/images/hero-player.png')`;
+      }
     }
   }
 
