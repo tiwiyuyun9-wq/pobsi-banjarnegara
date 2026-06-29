@@ -81,13 +81,32 @@ module.exports = async (req, res) => {
         cover: cover || null
       };
 
-      const { data, error } = await supabase
-        .from('clubs')
-        .insert([newClub])
-        .select()
-        .single();
+      let data;
+      let insertPayload = { ...newClub };
+      let maxRetries = 5;
 
-      if (error) throw error;
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const resInsert = await supabase
+          .from('clubs')
+          .insert([insertPayload])
+          .select()
+          .single();
+
+        if (resInsert.error) {
+          // Deteksi kolom yang belum ada di Supabase dan hapus dari payload
+          const colMatch = resInsert.error.message && resInsert.error.message.match(/Could not find the '(\w+)' column/);
+          if (colMatch) {
+            const missingCol = colMatch[1];
+            console.warn(`⚠️ Warning: Kolom '${missingCol}' belum dibuat di Supabase Cloud. Menghapus dari payload dan retry...`);
+            delete insertPayload[missingCol];
+            continue;
+          }
+          throw resInsert.error;
+        }
+
+        data = resInsert.data;
+        break;
+      }
 
       await logActivity("Klub baru ditambahkan", `${newClub.name} terdaftar sebagai klub terafiliasi`, "success", "fa-building");
 
@@ -117,12 +136,28 @@ module.exports = async (req, res) => {
         cover: cover || null
       };
 
-      const { error } = await supabase
-        .from('clubs')
-        .update(updated)
-        .eq('id', id);
+      let updatePayload = { ...updated };
+      let maxRetries = 5;
 
-      if (error) throw error;
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const resUpdate = await supabase
+          .from('clubs')
+          .update(updatePayload)
+          .eq('id', id);
+
+        if (resUpdate.error) {
+          // Deteksi kolom yang belum ada di Supabase dan hapus dari payload
+          const colMatch = resUpdate.error.message && resUpdate.error.message.match(/Could not find the '(\w+)' column/);
+          if (colMatch) {
+            const missingCol = colMatch[1];
+            console.warn(`⚠️ Warning: Kolom '${missingCol}' belum dibuat di Supabase Cloud. Menghapus dari payload dan retry...`);
+            delete updatePayload[missingCol];
+            continue;
+          }
+          throw resUpdate.error;
+        }
+        break;
+      }
 
       await logActivity("Data klub diperbarui", `Data klub ${name} berhasil diperbarui`, "info", "fa-building");
 
