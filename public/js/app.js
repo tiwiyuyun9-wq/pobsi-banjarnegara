@@ -2620,7 +2620,118 @@ function renderWorkspacePreviews() {
   if (typeof renderAdminEventsDashboard === "function") {
     renderAdminEventsDashboard();
   }
+
+  // Render running circuit events in Overview
+  renderOverviewRunningEvents();
 }
+
+function parseIndonesianDate(dateStr) {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+  const parts = dateStr.trim().split(/\s+/);
+  if (parts.length >= 3) {
+    const day = parseInt(parts[0], 10);
+    const monthName = parts[1].toLowerCase();
+    const year = parseInt(parts[2], 10);
+    const indonesianMonths = {
+      'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
+      'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11,
+      'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'mei': 4, 'jun': 5, 'jul': 6, 'agt': 7, 'sep': 8, 'okt': 9, 'nov': 10, 'des': 11
+    };
+    const month = indonesianMonths[monthName] !== undefined ? indonesianMonths[monthName] : 0;
+    if (!isNaN(day) && !isNaN(year)) {
+      return new Date(year, month, day);
+    }
+  }
+  const testDate = new Date(dateStr);
+  if (!isNaN(testDate.getTime())) return testDate;
+  return null;
+}
+
+function renderOverviewRunningEvents() {
+  const container = document.getElementById("dashboard-running-events-list");
+  if (!container) return;
+
+  try {
+    const events = appData.events || [];
+    let activeEvents = events.filter(e => e.status === "Ongoing" || e.status === "Daftar");
+
+    // Sort by status: Ongoing first, then by date ascending
+    activeEvents.sort((a, b) => {
+      if (a.status === "Ongoing" && b.status !== "Ongoing") return -1;
+      if (a.status !== "Ongoing" && b.status === "Ongoing") return 1;
+      const dateA = parseIndonesianDate(a.date) || new Date(0);
+      const dateB = parseIndonesianDate(b.date) || new Date(0);
+      return dateA - dateB;
+    });
+
+    if (activeEvents.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--text-dim);">
+          <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
+          Tidak ada event sirkuit berjalan saat ini.<br>
+          <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Jadwalkan turnamen baru di menu Event.</span>
+        </div>`;
+      return;
+    }
+
+    const top3 = activeEvents.slice(0, 3);
+
+    container.innerHTML = top3.map(e => {
+      const d = parseIndonesianDate(e.date) || new Date();
+      const day = d.getDate();
+      const monthNames = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGT", "SEP", "OKT", "NOV", "DES"];
+      const month = monthNames[d.getMonth()];
+
+      let participantCount = 0;
+      try {
+        if (e.participants) {
+          const parsed = typeof e.participants === 'string' ? JSON.parse(e.participants) : e.participants;
+          if (Array.isArray(parsed)) participantCount = parsed.length;
+        }
+      } catch (err) {
+        console.error("Error parsing participants count:", err);
+      }
+
+      let statusHtml = "";
+      if (e.status === "Ongoing") {
+        statusHtml = `<span class="participants-pill live" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">
+          <span style="width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; display: inline-block; animation: statusPulse 1.5s infinite;"></span> LIVE
+        </span>`;
+      } else {
+        statusHtml = `<span class="participants-pill open" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">BUKA</span>`;
+      }
+
+      const venueName = e.venue || "Lokasi Belum Ditentukan";
+
+      return `
+        <div class="upcoming-item" style="cursor: pointer;" onclick="if(window.openEventDetail) { window.openEventDetail('${e.id}'); }">
+          <div class="upcoming-date-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; width: 56px; height: 56px; text-align: center; flex-shrink: 0;">
+            <span class="upcoming-day" style="font-size: 1.15rem; font-weight: 800; color: var(--accent); line-height: 1;">${day}</span>
+            <span class="upcoming-month" style="font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-top: 2px;">${month}</span>
+          </div>
+          <div class="upcoming-info" style="flex: 1; margin-left: 14px;">
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #fff;">${e.title}</h4>
+            <p class="subtitle" style="margin: 4px 0 0 0; font-size: 0.78rem; color: var(--text-dim);">${e.type || "Turnamen Sirkuit POBSI"}</p>
+            <div class="upcoming-meta" style="display: flex; gap: 12px; margin-top: 6px; font-size: 0.75rem; color: var(--text-dim);">
+              <span><i class="fa-solid fa-location-dot" style="margin-right: 4px;"></i> ${venueName}</span>
+            </div>
+          </div>
+          <div class="upcoming-badge" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; justify-content: center;">
+            <span class="participants-pill blue" style="font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 600;">${participantCount} Atlet</span>
+            ${statusHtml}
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error("Gagal merender event sirkuit berjalan:", err);
+    container.innerHTML = `<div style="padding: 12px; text-align: center; color: var(--text-dim);">Gagal memuat event berjalan.</div>`;
+  }
+}
+
 
 // Function to populate the Top Ranked Athletes snapshot leaderboard in the overview pane
 function renderTopAthletes() {
