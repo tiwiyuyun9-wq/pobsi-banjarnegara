@@ -246,9 +246,139 @@ async function initApp() {
   // Load Admin Panel Control
   setupAdminPanel();
 
+  // Setup SSOT for Event Title inputs in modals
+  setupEventPopupTitleSSOT();
+
   // Jalankan routing hash awal setelah semua data API dan pengaturan BOC termuat
   if (typeof window.checkInitialRoute === 'function') {
     window.checkInitialRoute();
+  }
+}
+
+// Setup SSOT for Event Title inputs in modals (Home Tournament / Sirkuit BOC)
+function setupEventPopupTitleSSOT() {
+  const admEvtType = document.getElementById("adm-evt-type");
+  const admEvtTitle = document.getElementById("adm-evt-title");
+  const admEvtTitleSelect = document.getElementById("adm-evt-title-select");
+
+  const syncAddEventTitleOptions = () => {
+    if (!admEvtTitleSelect) return;
+    admEvtTitleSelect.innerHTML = "";
+    if (bocSirkuits && bocSirkuits.length > 0) {
+      bocSirkuits.forEach(sirkuitName => {
+        const opt = document.createElement("option");
+        opt.value = sirkuitName;
+        opt.textContent = sirkuitName;
+        admEvtTitleSelect.appendChild(opt);
+      });
+      if (admEvtType && admEvtType.value === "Home Tournament" && admEvtTitle) {
+        admEvtTitle.value = admEvtTitleSelect.value;
+      }
+    } else {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Belum Ada Sirkuit Terdaftar --";
+      admEvtTitleSelect.appendChild(opt);
+    }
+  };
+
+  const handleAddEventTypeChange = () => {
+    if (!admEvtType || !admEvtTitle || !admEvtTitleSelect) return;
+    if (admEvtType.value === "Home Tournament") {
+      admEvtTitle.style.display = "none";
+      admEvtTitleSelect.style.display = "block";
+      syncAddEventTitleOptions();
+    } else {
+      admEvtTitle.style.display = "block";
+      admEvtTitleSelect.style.display = "none";
+    }
+  };
+
+  if (admEvtType) {
+    admEvtType.addEventListener("change", handleAddEventTypeChange);
+  }
+  if (admEvtTitleSelect && admEvtTitle) {
+    admEvtTitleSelect.addEventListener("change", () => {
+      admEvtTitle.value = admEvtTitleSelect.value;
+    });
+  }
+
+  const btnOpenAdd = document.getElementById("btn-open-add-event-modal");
+  if (btnOpenAdd) {
+    btnOpenAdd.addEventListener("click", () => {
+      syncAddEventTitleOptions();
+      handleAddEventTypeChange();
+    });
+  }
+
+  // Bind to global window helper so calendar clicks also sync
+  window.syncEventPopupTitleOptions = () => {
+    syncAddEventTitleOptions();
+    handleAddEventTypeChange();
+  };
+
+  const editEvtType = document.getElementById("edit-evt-type");
+  const editEvtTitle = document.getElementById("edit-evt-title");
+  const editEvtTitleSelect = document.getElementById("edit-evt-title-select");
+
+  const syncEditEventTitleOptions = (currentVal) => {
+    if (!editEvtTitleSelect) return;
+    editEvtTitleSelect.innerHTML = "";
+    
+    const list = [...(bocSirkuits || [])];
+    if (currentVal && !list.includes(currentVal)) {
+      list.push(currentVal);
+    }
+
+    if (list.length > 0) {
+      list.forEach(sirkuitName => {
+        const opt = document.createElement("option");
+        opt.value = sirkuitName;
+        opt.textContent = sirkuitName;
+        editEvtTitleSelect.appendChild(opt);
+      });
+      if (currentVal) {
+        editEvtTitleSelect.value = currentVal;
+      }
+    } else {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Belum Ada Sirkuit Terdaftar --";
+      editEvtTitleSelect.appendChild(opt);
+    }
+  };
+
+  const handleEditEventTypeChange = () => {
+    if (!editEvtType || !editEvtTitle || !editEvtTitleSelect) return;
+    if (editEvtType.value === "Home Tournament") {
+      editEvtTitle.style.display = "none";
+      editEvtTitleSelect.style.display = "block";
+      if (editEvtTitleSelect.value) {
+        editEvtTitle.value = editEvtTitleSelect.value;
+      }
+    } else {
+      editEvtTitle.style.display = "block";
+      editEvtTitleSelect.style.display = "none";
+    }
+  };
+
+  if (editEvtType) {
+    editEvtType.addEventListener("change", handleEditEventTypeChange);
+  }
+  if (editEvtTitleSelect && editEvtTitle) {
+    editEvtTitleSelect.addEventListener("change", () => {
+      editEvtTitle.value = editEvtTitleSelect.value;
+    });
+  }
+
+  const btnEditDetail = document.getElementById("btn-event-detail-edit");
+  if (btnEditDetail) {
+    btnEditDetail.addEventListener("click", () => {
+      const event = appData.events.find(evt => evt.id === currentActiveEventId);
+      if (!event) return;
+      syncEditEventTitleOptions(event.title);
+      handleEditEventTypeChange();
+    });
   }
 }
 
@@ -1942,21 +2072,43 @@ function setupStandingsSearch() {
 }
 
 // 8. Handicap Registry Database Logic
+function populateAthleteClubDropdowns() {
+  const addPlayerClubSelect = document.getElementById("adm-player-club");
+  const editPlayerClubSelect = document.getElementById("edit-player-club");
+  
+  const clubs = appData.clubs || [];
+  
+  // Sort clubs alphabetically by name
+  const sortedClubs = [...clubs].sort((a, b) => a.name.localeCompare(b.name));
+  
+  const optionsHtml = sortedClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  
+  if (addPlayerClubSelect) {
+    addPlayerClubSelect.innerHTML = `<option value="" disabled selected>Pilih Klub / Arena</option>` + optionsHtml;
+  }
+  if (editPlayerClubSelect) {
+    editPlayerClubSelect.innerHTML = `<option value="" disabled>Pilih Klub / Arena</option>` + optionsHtml;
+  }
+}
+
 function populateClubFilters() {
   const clubSelect = document.getElementById("club-filter-select");
-  if (!clubSelect) return;
+  if (clubSelect) {
+    // Reset dropdown except the first option
+    clubSelect.innerHTML = '<option value="all">Semua Klub</option>';
 
-  // Reset dropdown except the first option
-  clubSelect.innerHTML = '<option value="all">Semua Klub</option>';
+    const clubs = [...new Set(appData.players.map(p => p.club))].sort();
+    clubs.forEach(club => {
+      if (!club) return;
+      const opt = document.createElement("option");
+      opt.value = club;
+      opt.textContent = club;
+      clubSelect.appendChild(opt);
+    });
+  }
 
-  const clubs = [...new Set(appData.players.map(p => p.club))].sort();
-  clubs.forEach(club => {
-    if (!club) return;
-    const opt = document.createElement("option");
-    opt.value = club;
-    opt.textContent = club;
-    clubSelect.appendChild(opt);
-  });
+  // Auto-refresh athlete form club selects
+  populateAthleteClubDropdowns();
 }
 
 function renderHandicapList() {
@@ -4762,7 +4914,7 @@ function renderClubs(filterQuery = '') {
   const query = filterQuery.toLowerCase().trim();
 
   const filtered = query
-    ? clubs.filter(c => c.name.toLowerCase().includes(query) || c.address.toLowerCase().includes(query))
+    ? clubs.filter(c => c.name.toLowerCase().includes(query) || c.address.toLowerCase().includes(query) || (c.abbr && c.abbr.toLowerCase().includes(query)))
     : clubs;
 
   // Count members per club from players
@@ -4790,7 +4942,7 @@ function renderClubs(filterQuery = '') {
           <i class="fa-solid fa-building"></i>
         </div>
         <div>
-          <h3 class="club-card-name">${club.name}</h3>
+          <h3 class="club-card-name">${club.name} ${club.abbr && club.abbr !== '-' ? `<span class="club-abbr-badge" style="font-size: 0.72rem; color: var(--accent); margin-left: 6px; background: rgba(245, 158, 11, 0.1); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 800; vertical-align: middle;">${club.abbr}</span>` : ''}</h3>
           <span class="club-card-status">
             <span class="status-dot"></span>${club.status || 'Aktif'}
           </span>
@@ -5172,6 +5324,7 @@ function setupAdminClubsConsole() {
       // Populate fields
       document.getElementById('edit-club-id').value = club.id;
       document.getElementById('edit-club-name').value = club.name;
+      document.getElementById('edit-club-abbr').value = club.abbr || '';
       document.getElementById('edit-club-address').value = club.address;
       document.getElementById('edit-club-owner').value = club.owner || '';
       document.getElementById('edit-club-phone').value = club.phone || '';
@@ -5200,6 +5353,7 @@ function setupAdminClubsConsole() {
       e.preventDefault();
       const id = document.getElementById('edit-club-id').value;
       const name = document.getElementById('edit-club-name').value.trim();
+      const abbr = document.getElementById('edit-club-abbr').value.trim();
       const address = document.getElementById('edit-club-address').value.trim();
       const owner = document.getElementById('edit-club-owner').value.trim();
       const phone = document.getElementById('edit-club-phone').value.trim();
@@ -5226,7 +5380,7 @@ function setupAdminClubsConsole() {
           const res = await fetch(`/api/clubs/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, address, owner, phone, tables, status })
+            body: JSON.stringify({ name, abbr, address, owner, phone, tables, status })
           });
           if (res.ok) {
             await onSuccess();
@@ -5241,7 +5395,7 @@ function setupAdminClubsConsole() {
         const clubs = appData.clubs || [];
         const index = clubs.findIndex(c => c.id.toString() === id.toString());
         if (index !== -1) {
-          clubs[index] = { ...clubs[index], name, address, owner, phone, tables, status };
+          clubs[index] = { ...clubs[index], name, abbr: abbr || '-', address, owner, phone, tables, status };
           alert(`Mode Luring: Data klub "${name}" diperbarui di memori sementara!`);
           formEditClub.reset();
           if (editClubModal) editClubModal.style.display = 'none';
@@ -5272,6 +5426,7 @@ function setupAdminClubsConsole() {
     formClub.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('adm-club-name').value.trim();
+      const abbr = document.getElementById('adm-club-abbr').value.trim();
       const address = document.getElementById('adm-club-address').value.trim();
       const owner = document.getElementById('adm-club-owner').value.trim();
       const phone = document.getElementById('adm-club-phone').value.trim();
@@ -5312,6 +5467,7 @@ function setupAdminClubsConsole() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name,
+              abbr,
               address,
               owner,
               phone,
@@ -5334,6 +5490,7 @@ function setupAdminClubsConsole() {
         const newClub = {
           id: tempId,
           name,
+          abbr: abbr || '-',
           address,
           owner: owner || '-',
           phone: phone || '-',
@@ -5779,7 +5936,9 @@ window.selectClubRow = function(clubId, element) {
   const tablesTag = document.getElementById('pm-club-detail-tables-tag');
   const tablesCountEl = document.getElementById('pm-club-detail-tables-count');
   
-  if (nameEl) nameEl.textContent = club.name;
+  if (nameEl) {
+    nameEl.innerHTML = `${club.name} ${club.abbr && club.abbr !== '-' ? `<small style="font-size: 0.8rem; font-weight: 800; color: var(--accent); margin-left: 6px;">(${club.abbr})</small>` : ''}`;
+  }
   if (idEl) idEl.textContent = `ID: CLB-${club.id.toString().padStart(3, '0')}`;
   if (tablesTag) tablesTag.textContent = `${club.tables || 0} Meja Biliar`;
   if (tablesCountEl) tablesCountEl.textContent = club.tables || 0;
@@ -5934,7 +6093,7 @@ function renderAdminClubPreview(searchQuery = '') {
               ${c.logo ? `<img src="${c.logo}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-building" style="font-size: 1.1rem; color: #60a5fa;"></i>`}
             </div>
             <div class="pm-cell-name-wrap">
-              <span class="pm-cell-name">${c.name}</span>
+              <span class="pm-cell-name">${c.name} ${c.abbr && c.abbr !== '-' ? `<small style="font-size: 0.72rem; color: var(--accent-light); font-weight: 700; margin-left: 4px; background: rgba(245, 158, 11, 0.12); padding: 2px 6px; border-radius: 4px;">${c.abbr}</small>` : ''}</span>
               <span class="pm-cell-id">ID: CLB-${c.id.toString().padStart(3, '0')}</span>
             </div>
           </div>
@@ -6645,7 +6804,20 @@ function setupAthleteDetailActions() {
 
     document.getElementById("edit-player-id").value = player.id;
     document.getElementById("edit-player-name").value = player.name;
-    document.getElementById("edit-player-club").value = player.club;
+    
+    const editPlayerClubSelect = document.getElementById("edit-player-club");
+    if (editPlayerClubSelect) {
+      populateAthleteClubDropdowns();
+      const exists = Array.from(editPlayerClubSelect.options).some(opt => opt.value === player.club);
+      if (!exists && player.club) {
+        const opt = document.createElement("option");
+        opt.value = player.club;
+        opt.textContent = `${player.club} (Tidak Terdaftar)`;
+        editPlayerClubSelect.appendChild(opt);
+      }
+      editPlayerClubSelect.value = player.club;
+    }
+
     document.getElementById("edit-player-hc").value = player.handicap;
     document.getElementById("edit-player-points").value = player.points || 0;
     document.getElementById("edit-player-gender").value = player.gender || "Laki-laki";
@@ -7298,6 +7470,7 @@ function setupClubDetailActions() {
 
     document.getElementById('edit-club-id').value = club.id;
     document.getElementById('edit-club-name').value = club.name;
+    document.getElementById('edit-club-abbr').value = club.abbr || '';
     document.getElementById('edit-club-address').value = club.address;
     document.getElementById('edit-club-owner').value = club.owner || '';
     document.getElementById('edit-club-phone').value = club.phone || '';
@@ -18706,6 +18879,11 @@ window.openAddEventFromCalendar = function(dateStr) {
   // Reset wizard to Step 1
   if (typeof window.resetAddEventWizard === "function") {
     window.resetAddEventWizard();
+  }
+
+  // Sync title options and handle initial event type logic
+  if (typeof window.syncEventPopupTitleOptions === "function") {
+    window.syncEventPopupTitleOptions();
   }
 
   // Tampilkan modal

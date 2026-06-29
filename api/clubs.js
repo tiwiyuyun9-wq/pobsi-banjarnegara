@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
        POST: Menambahkan Klub Baru
        ========================================================================== */
     if (req.method === 'POST') {
-      const { name, address, owner, phone, tables, logo, cover } = req.body;
+      const { name, abbr, address, owner, phone, tables, logo, cover } = req.body;
       if (!name || !address) {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
@@ -71,6 +71,7 @@ module.exports = async (req, res) => {
       const newClub = {
         id: newId,
         name: name.trim(),
+        abbr: (abbr || '').trim() || '-',
         address: address.trim(),
         owner: owner || '-',
         phone: phone || '-',
@@ -99,13 +100,14 @@ module.exports = async (req, res) => {
     if (req.method === 'PUT') {
       if (!id) return res.status(400).json({ error: "ID klub wajib diberikan!" });
 
-      const { name, address, owner, phone, tables, status, logo, cover } = req.body;
+      const { name, abbr, address, owner, phone, tables, status, logo, cover } = req.body;
       if (!name || !address) {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
 
       const updated = {
         name: name.trim(),
+        abbr: (abbr || '').trim() || '-',
         address: address.trim(),
         owner: owner || '-',
         phone: phone || '-',

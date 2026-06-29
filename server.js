@@ -180,6 +180,7 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS clubs (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    abbr TEXT,
     address TEXT NOT NULL,
     owner TEXT DEFAULT '-',
     phone TEXT DEFAULT '-',
@@ -189,9 +190,10 @@ db.serialize(() => {
     cover TEXT
   )`);
 
-  // Safely alter existing table to add logo & cover columns if they don't exist yet
+  // Safely alter existing table to add logo, cover, & abbr columns if they don't exist yet
   db.run(`ALTER TABLE clubs ADD COLUMN logo TEXT`, () => {});
   db.run(`ALTER TABLE clubs ADD COLUMN cover TEXT`, () => {});
+  db.run(`ALTER TABLE clubs ADD COLUMN abbr TEXT`, () => {});
 
   // 5. Buat Tabel Users (RBAC)
   db.run(`CREATE TABLE IF NOT EXISTS users (

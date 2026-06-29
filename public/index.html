@@ -2863,9 +2863,13 @@
                   <input type="text" id="edit-player-name" required placeholder="Contoh: Rizky Pratama">
                 </div>
                 <div class="form-group-item">
-                  <label class="form-lbl" for="edit-player-club">Klub / Arena Biliar</label>
-                  <input type="text" id="edit-player-club" required placeholder="Contoh: Victory Billiard Club">
-                </div>
+                   <label class="form-lbl" for="edit-player-club">Klub / Arena Biliar</label>
+                   <div class="select-wrapper width-100">
+                     <select id="edit-player-club" required style="width: 100%; padding-left: 16px;">
+                       <!-- Dihasilkan secara dinamis -->
+                     </select>
+                   </div>
+                 </div>
                 <div class="pm-form-row">
                   <div class="form-group-item">
                     <label class="form-lbl" for="edit-player-hc">Handicap Resmi</label>
@@ -4518,9 +4522,10 @@
               <!-- STEP 1: Informasi Utama -->
               <div class="add-event-step-pane active" data-step="1">
                 <div class="form-row-double">
-                  <div class="form-group-item">
+                  <div class="form-group-item" id="adm-evt-title-container">
                     <label class="form-lbl" for="adm-evt-title">Nama Turnamen / Agenda <span style="color:var(--red);">*</span></label>
                     <input type="text" id="adm-evt-title" placeholder="Contoh: Open Handicap Turnamen">
+                    <select id="adm-evt-title-select" class="select-reset" style="display: none;"></select>
                   </div>
                   <div class="form-group-item">
                     <label class="form-lbl" for="adm-evt-max-hc">Batas Handicap Maksimal (Max HC) <span style="color:var(--red);">*</span></label>
@@ -4688,9 +4693,10 @@
               <!-- STEP 1: Informasi Utama -->
               <div class="edit-event-step-pane active" data-step="1">
                 <div class="form-row-double">
-                  <div class="form-group-item">
+                  <div class="form-group-item" id="edit-evt-title-container">
                     <label class="form-lbl" for="edit-evt-title">Nama Turnamen / Agenda <span style="color:var(--red);">*</span></label>
                     <input type="text" id="edit-evt-title" placeholder="Contoh: Open Handicap Turnamen">
+                    <select id="edit-evt-title-select" class="select-reset" style="display: none;"></select>
                   </div>
                   <div class="form-group-item">
                     <label class="form-lbl" for="edit-evt-max-hc">Batas Handicap Maksimal (Max HC) <span style="color:var(--red);">*</span></label>
@@ -6055,7 +6061,11 @@
           <div class="add-player-step-pane" data-step="2">
             <div class="form-group-item">
               <label class="form-lbl" for="adm-player-club">Klub / Arena Biliar <span style="color: var(--red);">*</span></label>
-              <input type="text" id="adm-player-club" required placeholder="Contoh: Golden Banjarnegara">
+              <div class="select-wrapper width-100">
+                <select id="adm-player-club" required style="width: 100%; padding-left: 16px;">
+                  <!-- Dihasilkan secara dinamis -->
+                </select>
+              </div>
             </div>
             <div class="form-row-double">
               <div class="form-group-item">
@@ -6201,9 +6211,15 @@
         <form id="form-admin-add-club" class="admin-form-element" style="padding: 20px 24px 24px 24px; gap: 20px;">
           <!-- STEP 1: Data Klub -->
           <div class="add-club-step-pane active" data-step="1">
-            <div class="form-group-item">
-              <label class="form-lbl" for="adm-club-name">Nama Klub <span style="color: var(--red);">*</span></label>
-              <input type="text" id="adm-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+            <div class="form-row-double" style="grid-template-columns: 2fr 1fr;">
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-club-name">Nama Klub <span style="color: var(--red);">*</span></label>
+                <input type="text" id="adm-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+              </div>
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-club-abbr">Singkatan Klub <span style="color: var(--red);">*</span></label>
+                <input type="text" id="adm-club-abbr" placeholder="Contoh: GBC" required>
+              </div>
             </div>
             <div class="form-row-double">
               <div class="form-group-item">
@@ -6304,9 +6320,15 @@
         </div>
         <form id="form-admin-edit-club" class="admin-form-element">
           <input type="hidden" id="edit-club-id">
-          <div class="form-group-item">
-            <label class="form-lbl" for="edit-club-name">Nama Klub</label>
-            <input type="text" id="edit-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+          <div class="form-row-double" style="grid-template-columns: 2fr 1fr;">
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-name">Nama Klub <span style="color: var(--red);">*</span></label>
+              <input type="text" id="edit-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-abbr">Singkatan Klub <span style="color: var(--red);">*</span></label>
+              <input type="text" id="edit-club-abbr" placeholder="Contoh: GBC" required>
+            </div>
           </div>
           <div class="form-group-item">
             <label class="form-lbl" for="edit-club-address">Alamat Lengkap</label>
