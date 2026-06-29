@@ -1,14 +1,17 @@
 // BOC Reset Controller - Dev/Testing Tool untuk Reset State BOC
-const { dbAll, dbRun, dbGet } = require('../config/db');
+const { dbAll, dbRun, dbGet, logActivity: sqliteLogActivity } = require('../config/db');
 const path = require('path');
 const fs = require('fs');
 
-// Optional Supabase client for Supabase mode
+// Optional Supabase client & logger for Supabase mode
 let supabase = null;
+let logActivity = sqliteLogActivity;
 const isSupabaseEnabled = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
 if (isSupabaseEnabled) {
   try {
-    supabase = require('../_supabase').supabase;
+    const supabaseModule = require('../_supabase');
+    supabase = supabaseModule.supabase;
+    logActivity = supabaseModule.logActivity;
   } catch (e) {
     console.warn("⚠️ Warning: Failed to load Supabase client in bocResetController:", e.message);
   }
@@ -320,6 +323,10 @@ exports.resetBoc = async (req, res) => {
           summary.push(`⚠️ File db.json tidak ditemukan, skip reseed`);
         }
       }
+    }
+
+    if (logActivity) {
+      await logActivity("Reset BOC State", `BOC state tahun ${yearStr} berhasil di-reset`, "warning", "fa-rotate-left");
     }
 
     res.json({

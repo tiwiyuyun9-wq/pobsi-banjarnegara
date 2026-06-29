@@ -1,5 +1,5 @@
 // Event Controller - Mengelola Agenda Turnamen / Acara POBSI
-const { dbAll, dbGet, dbRun } = require('../config/db');
+const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
 const { uploadMedia } = require('../_media-upload');
 
 exports.getEvents = async (req, res) => {
@@ -63,6 +63,8 @@ exports.addEvent = async (req, res) => {
       [newEvent.id, newEvent.title, newEvent.date, newEvent.venue, newEvent.prizePool, newEvent.entryFee, newEvent.contact, newEvent.status, newEvent.description, newEvent.poster, newEvent.participants, newEvent.bracket, newEvent.results, 0, newEvent.type, newEvent.bracket_size, newEvent.elimination_type, newEvent.max_hc]
     );
 
+    await logActivity("Event BOC Series dibuat", `Event "${title}" berhasil ditambahkan ke agenda sirkuit`, "info", "fa-trophy");
+
     res.status(201).json(newEvent);
   } catch (error) {
     res.status(500).json({ error: "Gagal menyimpan event ke SQLite: " + error.message });
@@ -74,8 +76,11 @@ exports.updateEvent = async (req, res) => {
   const { title, date, venue, prizePool, entryFee, contact, description, status, poster, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc } = req.body;
 
   try {
-    const event = await dbGet(`SELECT poster FROM events WHERE id = ?`, [id]);
-    const currentPoster = event ? event.poster : "images/event-poster.png";
+    const event = await dbGet(`SELECT title, poster FROM events WHERE id = ?`, [id]);
+    if (!event) {
+      return res.status(404).json({ error: "Event tidak ditemukan!" });
+    }
+    const currentPoster = event.poster || "images/event-poster.png";
 
     let posterUrl = currentPoster;
     if (poster !== undefined) {
@@ -90,8 +95,11 @@ exports.updateEvent = async (req, res) => {
       `UPDATE events 
        SET title = ?, date = ?, venue = ?, prizePool = ?, entryFee = ?, contact = ?, description = ?, status = ?, poster = ?, participants = ?, bracket = ?, results = ?, points_published = ?, type = ?, bracket_size = ?, elimination_type = ?, max_hc = ?
        WHERE id = ?`,
-      [title, date, venue, prizePool, entryFee, contact, description, status, posterUrl, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc, id]
+      [title || event.title, date, venue, prizePool, entryFee, contact, description, status, posterUrl, participants, bracket, results, points_published, type, bracket_size, elimination_type, max_hc, id]
     );
+
+    await logActivity("Event diperbarui", `Event "${title || event.title}" berhasil diperbarui`, "info", "fa-trophy");
+
     res.json({ success: true, message: "Event updated successfully!" });
   } catch (error) {
     res.status(500).json({ error: "Gagal memperbarui event di SQLite: " + error.message });
@@ -101,7 +109,15 @@ exports.updateEvent = async (req, res) => {
 exports.deleteEvent = async (req, res) => {
   const { id } = req.params;
   try {
+    const event = await dbGet(`SELECT title FROM events WHERE id = ?`, [id]);
+    if (!event) {
+      return res.status(404).json({ error: "Event tidak ditemukan!" });
+    }
+
     await dbRun(`DELETE FROM events WHERE id = ?`, [id]);
+
+    await logActivity("Event dihapus", `Event "${event.title}" telah dihapus`, "danger", "fa-trash");
+
     res.json({ success: true, message: "Event deleted successfully!" });
   } catch (error) {
     res.status(500).json({ error: "Gagal menghapus event dari SQLite: " + error.message });

@@ -1,5 +1,5 @@
 // Player Controller - Mengelola Data Atlet Handicap
-const { dbAll, dbGet, dbRun } = require('../config/db');
+const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
 const { uploadMedia } = require('../_media-upload');
 
 exports.getPlayers = async (req, res) => {
@@ -82,6 +82,8 @@ exports.addPlayer = async (req, res) => {
         newPlayer.ktp
       ]
     );
+
+    await logActivity("Atlet baru ditambahkan", `${newPlayer.name} telah didaftarkan sebagai atlet resmi`, "success", "fa-user-plus");
 
     res.status(201).json(newPlayer);
   } catch (error) {
@@ -186,6 +188,8 @@ exports.updatePlayer = async (req, res) => {
       ).catch(() => null);
     }
 
+    await logActivity("Data atlet diperbarui", `Data ${updated.name} berhasil diperbarui`, "info", "fa-user-pen");
+
     res.json({ success: true, message: `Data atlet ${id} berhasil diperbarui.`, player: { id, ...updated } });
   } catch (error) {
     res.status(500).json({ error: "Gagal memperbarui atlet di SQLite: " + error.message });
@@ -209,6 +213,8 @@ exports.deletePlayer = async (req, res) => {
     
     // Delete from players
     await dbRun(`DELETE FROM players WHERE id = ?`, [id]);
+
+    await logActivity("Atlet dihapus", `Atlet ${player.name} telah dihapus dari database`, "danger", "fa-user-minus");
     
     res.json({ success: true, message: `Atlet ${id} berhasil dihapus.` });
   } catch (error) {

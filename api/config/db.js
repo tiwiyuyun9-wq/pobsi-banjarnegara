@@ -39,10 +39,23 @@ const dbGet = (query, params = []) => new Promise((resolve, reject) => {
   });
 });
 
+const logActivity = async (title, description, type = 'info', icon = 'fa-info') => {
+  try {
+    await dbRun(
+      `INSERT INTO activity_logs (title, description, type, icon) VALUES (?, ?, ?, ?)`,
+      [title, description, type, icon]
+    );
+    console.log(`📝 Logged local activity: ${title} - ${description}`);
+  } catch (err) {
+    console.error("Gagal mencatat aktivitas ke SQLite:", err);
+  }
+};
+
 module.exports = {
   db,
   dbRun,
   dbAll,
   dbGet,
+  logActivity,
   DB_FILE
 };

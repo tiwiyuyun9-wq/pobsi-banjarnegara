@@ -242,6 +242,16 @@ db.serialize(() => {
     FOREIGN KEY(player_id) REFERENCES players(id) ON DELETE CASCADE
   )`);
 
+  // 10. Buat Tabel Activity Logs
+  db.run(`CREATE TABLE IF NOT EXISTS activity_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    type TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // Lakukan Seeding Otomatis Akun Pengguna jika tabel users kosong
   db.get(`SELECT COUNT(*) as count FROM users`, (err, row) => {
     if (err) {
@@ -367,6 +377,7 @@ if (isSupabaseEnabled) {
   const bocSirkuitsHandler = require('./api/boc-sirkuits');
   const bocSettingsHandler = require('./api/boc-settings');
   const athleteDataHandler = require('./api/athlete-data');
+  const activityLogsHandler = require('./api/activity-logs');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -392,6 +403,8 @@ if (isSupabaseEnabled) {
   app.all('/api/standings/reindex', bridge(standingsHandler));
   app.all('/api/standings', bridge(standingsHandler));
 
+  // Activity Logs
+  app.all('/api/activity-logs', bridge(activityLogsHandler));
 
   // DB Status
   app.all('/api/db-status', bridge(dbStatusHandler));
@@ -445,6 +458,7 @@ if (isSupabaseEnabled) {
   app.use('/api/tournament-history', require('./api/routes/tournamentHistoryRoutes'));
   app.use('/api/handicap-history', require('./api/routes/handicapHistoryRoutes'));
   app.use('/api/ranking-history', require('./api/routes/rankingHistoryRoutes'));
+  app.use('/api/activity-logs', require('./api/routes/activityLogRoutes'));
   
   app.get('/api/db-status', (req, res) => {
     res.json({ database: 'SQLite' });

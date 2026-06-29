@@ -14,4 +14,27 @@ const supabase = createClient(
   supabaseKey || 'placeholder-key'
 );
 
-module.exports = { supabase };
+const logActivity = async (title, description, type = 'info', icon = 'fa-info') => {
+  try {
+    const { error } = await supabase
+      .from('activity_logs')
+      .insert([{
+        title: title.trim(),
+        description: description.trim(),
+        type: type,
+        icon: icon
+      }]);
+    if (error) {
+      if (error.message && (error.message.includes('activity_logs') || error.message.includes('cache') || error.message.includes('relation'))) {
+        console.warn(`⚠️ Warning: Tabel 'activity_logs' belum dibuat di database Supabase Cloud. Pencatatan cloud "${title}" dilewati.`);
+        return;
+      }
+      throw error;
+    }
+    console.log(`☁️ Logged cloud activity: ${title} - ${description}`);
+  } catch (err) {
+    console.error("Gagal mencatat aktivitas ke Supabase:", err.message || err);
+  }
+};
+
+module.exports = { supabase, logActivity };
