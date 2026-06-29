@@ -1,5 +1,6 @@
 // Logic Web POBSI Kabupaten Banjarnegara - Modern Premium Billiards Platform
 let appData = POBSI_DATA; // Inisialisasi awal dengan data lokal offline dari data.js
+appData.matches = [];
 let standingsCurrentPage = 1;
 let handicapCurrentPage = 1;
 let docsCurrentPage = 1;
@@ -262,14 +263,15 @@ async function loadDataFromApi() {
 
     console.log(`Menghubungkan ke Vercel Serverless API untuk memuat database tahun ${currentBocYear}...`);
     
-    // Fetch kelima endpoint dan sirkuit secara paralel untuk performa maksimal
-    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes] = await Promise.all([
+    // Fetch keenam endpoint dan sirkuit secara paralel untuk performa maksimal
+    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes, matchesRes] = await Promise.all([
       fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/standings?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/events', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/docs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/clubs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch(`/api/boc-sirkuits?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch(`/api/boc-sirkuits?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/matches', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
 
     // Update database runtime jika response API valid
@@ -320,6 +322,12 @@ async function loadDataFromApi() {
     if (clubsRes && Array.isArray(clubsRes)) {
       appData.clubs = clubsRes;
       console.log(`Loaded ${clubsRes.length} clubs from API.`);
+    }
+    if (matchesRes && Array.isArray(matchesRes)) {
+      appData.matches = matchesRes;
+      console.log(`Loaded ${matchesRes.length} matches from API.`);
+    } else {
+      appData.matches = [];
     }
 
     // Populate season/year selectors dynamically
@@ -694,6 +702,13 @@ function loadStatistics() {
   // Active / Upcoming Events Count
   const totalEvents = appData.events.length;
   document.getElementById("stat-events-count").textContent = totalEvents;
+
+  // Total Matches Count
+  const totalMatches = (appData.matches || []).length;
+  const statMatchesCountEl = document.getElementById("stat-matches-count");
+  if (statMatchesCountEl) {
+    statMatchesCountEl.textContent = totalMatches > 0 ? `${totalMatches}+` : "0";
+  }
 
   // Calculate Cumulative Total Prize Pool for currentBocYear (including sirkuit and BOC playoff)
   let cumulativePrize = 0;
