@@ -5987,12 +5987,14 @@ window.viewClub = function(clubId) {
 };
 
 window.editClub = function(clubId) {
-  window.history.pushState({}, "", `/admin/clubs/${clubId}`);
-  checkAdminRoute();
-  setTimeout(() => {
-    const adEditBtn = document.getElementById("ad-club-btn-edit");
-    if (adEditBtn) adEditBtn.click();
-  }, 120);
+  const club = (appData.clubs || []).find(c => c.id.toString() === clubId.toString());
+  if (!club) return;
+  
+  if (typeof window.populateEditClubModal === 'function') {
+    window.populateEditClubModal(club);
+    const editModal = document.getElementById('pm-edit-club-modal');
+    if (editModal) editModal.style.display = 'flex';
+  }
 };
 
 window.deleteClub = async function(clubId) {
