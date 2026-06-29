@@ -5819,6 +5819,17 @@ tr:hover td.sticky-col {
   background: rgba(59, 130, 246, 0.05);
 }
 
+.pm-btn-red-outline {
+  background: transparent;
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.pm-btn-red-outline:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fee2e2;
+}
+
 .pm-btn-ghost {
   background: transparent;
   color: var(--text-muted);

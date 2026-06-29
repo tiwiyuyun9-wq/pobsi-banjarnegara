@@ -4379,7 +4379,7 @@ function setupPlayerManagement() {
         const isActive = pmActivePlayerId === p.id;
 
         return `<tr class="${isSelected ? "pm-row-selected" : ""} ${isActive ? "pm-row-active" : ""}" data-player-id="${p.id}">
-          <td class="text-center"><input type="checkbox" class="pm-row-check" data-id="${p.id}" ${isSelected ? "checked" : ""}></td>
+          <td class="text-center" style="padding: 14px 24px; width: 40px;" onclick="event.stopPropagation()"><input type="checkbox" class="pm-row-check" data-id="${p.id}" ${isSelected ? "checked" : ""}></td>
           <td>
             <div class="pm-cell-player">
               <img class="pm-cell-avatar" src="${p.avatar}" alt="${p.name}" onerror="this.src='https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(p.name)}'">
@@ -6395,7 +6395,7 @@ function renderAdminClubPreview(searchQuery = '') {
     
     return `
       <tr class="pm-row-clickable ${isSelected ? 'pm-row-selected' : ''}" onclick="selectClubRow('${c.id}', this)">
-        <td class="pm-td-check" onclick="event.stopPropagation()">
+        <td class="text-center" style="padding: 14px 24px; width: 40px;" onclick="event.stopPropagation()">
           <input type="checkbox" class="pm-club-row-check" value="${c.id}" ${isSelected ? 'checked' : ''}>
         </td>
         <td>
