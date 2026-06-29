@@ -1759,11 +1759,11 @@
         <ul class="footer-contact-list">
           <li>
             <i class="fa-solid fa-location-dot contact-icon"></i>
-            <span>Jl. Dewi Sartika No. 1 Sokanandi Banjarnegara Jawa Tengah</span>
+            <span id="footer-contact-address">Jl. Dewi Sartika No. 1 Sokanandi Banjarnegara Jawa Tengah</span>
           </li>
           <li>
             <i class="fa-solid fa-phone contact-icon"></i>
-            <span>0813-2233-4455 (Humas Pengcab)</span>
+            <span id="footer-contact-phone">0813-2233-4455 (Humas Pengcab)</span>
           </li>
           <li>
             <i class="fa-solid fa-clock contact-icon"></i>
@@ -1776,7 +1776,7 @@
       <div class="footer-map-col" style="display: flex; flex-direction: column; gap: 20px;">
         <h4 class="footer-title">Lokasi Sekretariat</h4>
         <div class="footer-map-wrapper" style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); height: 150px; background: rgba(15, 23, 42, 0.4);">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <iframe id="footer-map-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
     </div>
@@ -5501,6 +5501,20 @@
                       <div class="form-group-item">
                         <label class="form-lbl" for="set-org-address">Alamat Sekretariat</label>
                         <input type="text" id="set-org-address" required placeholder="Contoh: Banjarnegara, Jawa Tengah">
+                      </div>
+
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="set-org-maps">URL Google Map Embed (src Iframe)</label>
+                        <input type="text" id="set-org-maps" placeholder="Masukkan URL Google Maps Embed (iframe src)">
+                        <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Panduan: Buka Google Maps -> Bagikan -> Sematkan Peta -> Salin URL di dalam atribut <code>src="..."</code></span>
+                      </div>
+                      
+                      <!-- Live Map Preview Wrapper -->
+                      <div class="form-group-item" style="margin-top: 6px;">
+                        <label class="form-lbl">Pratinjau Peta Lokasi</label>
+                        <div id="settings-map-preview-wrapper" style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); height: 160px; background: rgba(0, 0, 0, 0.25);">
+                          <iframe id="settings-map-preview-iframe" src="" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
                       </div>
 
                       <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">

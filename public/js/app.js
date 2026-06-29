@@ -19331,6 +19331,8 @@ function setupSystemSettings() {
   const emailInput = document.getElementById("set-org-email");
   const whatsappInput = document.getElementById("set-org-whatsapp");
   const addressInput = document.getElementById("set-org-address");
+  const mapsInput = document.getElementById("set-org-maps");
+  const previewIframe = document.getElementById("settings-map-preview-iframe");
 
   const orgPelindungInput = document.getElementById("set-org-pelindung");
   const orgKetuaInput = document.getElementById("set-org-ketua-umum");
@@ -19390,6 +19392,28 @@ function setupSystemSettings() {
   if (emailInput) emailInput.value = localStorage.getItem("pobsi_email") || "info@pobsibanjarnegara.or.id";
   if (whatsappInput) whatsappInput.value = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
   if (addressInput) addressInput.value = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
+
+  const defaultMapsUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid";
+  if (mapsInput) {
+    mapsInput.value = localStorage.getItem("pobsi_maps_url") || defaultMapsUrl;
+  }
+  if (previewIframe) {
+    previewIframe.src = localStorage.getItem("pobsi_maps_url") || defaultMapsUrl;
+  }
+
+  if (mapsInput && previewIframe) {
+    mapsInput.addEventListener("input", () => {
+      let val = mapsInput.value.trim();
+      if (val.startsWith("<iframe")) {
+        const match = val.match(/src=["']([^"']+)["']/);
+        if (match && match[1]) {
+          val = match[1];
+          mapsInput.value = val;
+        }
+      }
+      previewIframe.src = val || "";
+    });
+  }
 
   if (orgPelindungInput) orgPelindungInput.value = localStorage.getItem("org_role_pelindung") || "Ketua KONI Banjarnegara";
   if (orgKetuaInput) orgKetuaInput.value = localStorage.getItem("org_role_ketua") || "Wahyu Hidayat, S.E.";
@@ -19565,6 +19589,9 @@ function setupSystemSettings() {
       localStorage.setItem("pobsi_email", emailInput.value.trim());
       localStorage.setItem("pobsi_whatsapp", whatsappInput.value.trim());
       localStorage.setItem("pobsi_address", addressInput.value.trim());
+      if (mapsInput) {
+        localStorage.setItem("pobsi_maps_url", mapsInput.value.trim());
+      }
 
       showCustomToast("Profil organisasi berhasil diperbarui!", "success");
       
@@ -19937,6 +19964,21 @@ function applySettingsToDOM() {
   const footerCopyright = document.querySelector(".footer-bottom p");
   if (footerCopyright) {
     footerCopyright.innerHTML = `&copy; 2026 ${orgName}. Hak Cipta Dilindungi. Didukung oleh KONI Kabupaten Banjarnegara.`;
+  }
+
+  // Update footer contacts dynamically
+  const footerContactAddress = document.getElementById("footer-contact-address");
+  if (footerContactAddress) {
+    footerContactAddress.textContent = address;
+  }
+  const footerContactPhone = document.getElementById("footer-contact-phone");
+  if (footerContactPhone) {
+    footerContactPhone.textContent = `${whatsapp} (Humas Pengcab)`;
+  }
+  const footerMapIframe = document.getElementById("footer-map-iframe");
+  if (footerMapIframe) {
+    const savedMapsUrl = localStorage.getItem("pobsi_maps_url") || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid";
+    footerMapIframe.src = savedMapsUrl;
   }
 
   // Render the Dynamic Organization Structure
