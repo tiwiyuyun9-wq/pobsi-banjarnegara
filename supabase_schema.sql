@@ -79,11 +79,14 @@ CREATE TABLE documents (
 CREATE TABLE clubs (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    abbr TEXT DEFAULT '-',
     address TEXT NOT NULL,
     owner TEXT DEFAULT '-',
     phone TEXT DEFAULT '-',
     tables INTEGER DEFAULT 0,
-    status TEXT DEFAULT 'Aktif'
+    status TEXT DEFAULT 'Aktif',
+    logo TEXT,
+    cover TEXT
 );
 
 -- 6. Buat Tabel Users (Autentikasi RBAC Admin)
@@ -195,5 +198,11 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 );
 ALTER TABLE activity_logs DISABLE ROW LEVEL SECURITY;
 
-
+-- =============================================================================
+-- MIGRASI: Tambahkan kolom baru pada tabel clubs (untuk database yang sudah ada)
+-- Jalankan query berikut di Supabase SQL Editor jika tabel clubs sudah ada
+-- =============================================================================
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS abbr TEXT DEFAULT '-';
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS logo TEXT;
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS cover TEXT;
 

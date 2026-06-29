@@ -90,4 +90,57 @@ async function uploadMedia(fileData, filenamePrefix, folderName) {
   }
 }
 
-module.exports = { uploadMedia };
+/**
+ * Deletes a media file from either Supabase Storage (production)
+ * or local filesystem (development/offline SQLite mode).
+ * 
+ * @param {string} fileUrl - The public URL or relative file path to delete.
+ * @returns {Promise<boolean>} True if successful or file not found/deleted.
+ */
+async function deleteMedia(fileUrl) {
+  if (!fileUrl) return false;
+
+  try {
+    if (isSupabaseEnabled) {
+      let storagePath = "";
+      const marker = '/storage/v1/object/public/media/';
+      const altMarker = '/public/media/';
+      
+      if (fileUrl.includes(marker)) {
+        storagePath = fileUrl.split(marker).pop();
+      } else if (fileUrl.includes(altMarker)) {
+        storagePath = fileUrl.split(altMarker).pop();
+      }
+
+      if (storagePath) {
+        storagePath = decodeURIComponent(storagePath);
+        const { error } = await supabase.storage
+          .from('media')
+          .remove([storagePath]);
+          
+        if (error) {
+          console.error(`❌ Gagal menghapus media dari Supabase Storage (${storagePath}):`, error.message);
+          return false;
+        }
+        console.log(`🗑️ Deleted cloud media: media/${storagePath}`);
+        return true;
+      }
+    } else {
+      // Local fallback (SQLite offline mode)
+      if (fileUrl.startsWith('/uploads/')) {
+        const relativePath = fileUrl.replace(/^\//, ''); // remove leading slash
+        const filePath = path.join(__dirname, '..', 'public', relativePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`🗑️ Deleted local media: ${filePath}`);
+          return true;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error deleting media:', err);
+  }
+  return false;
+}
+
+module.exports = { uploadMedia, deleteMedia };
