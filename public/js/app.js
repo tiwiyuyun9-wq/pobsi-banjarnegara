@@ -18809,12 +18809,6 @@ window.refreshActivityLogs = async function() {
   const container = document.getElementById("dashboard-activity-list");
   if (!container) return;
 
-  const defaultLogs = [
-    { title: "Atlet baru ditambahkan", description: "Andika Wijaya telah didaftarkan sebagai atlet resmi", type: "success", icon: "fa-user-plus", created_at: new Date().toISOString() },
-    { title: "Event BOC Series #4 dibuat", description: "Event baru berhasil ditambahkan ke sistem", type: "info", icon: "fa-trophy", created_at: new Date().toISOString() },
-    { title: "Ranking diperbarui", description: "Klasemen Battle of Champions telah diperbarui", type: "warning", icon: "fa-ranking-star", created_at: new Date().toISOString() }
-  ];
-
   try {
     let logs = [];
     if (window.isServerOnline) {
@@ -18823,12 +18817,16 @@ window.refreshActivityLogs = async function() {
         logs = await response.json();
       }
     }
-    
-    if (!logs || logs.length === 0) {
-      logs = defaultLogs;
-    }
 
     window.activityLogs = logs;
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `<div style="padding: 18px; text-align: center; color: var(--text-dim); font-size: 0.85rem;">
+        <i class="fa-solid fa-inbox" style="font-size: 1.4rem; margin-bottom: 8px; display: block; opacity: 0.4;"></i>
+        Belum ada riwayat aktivitas tercatat.<br>Lakukan aksi admin untuk memulai pencatatan.
+      </div>`;
+      return;
+    }
 
     // Render top 3 logs in Dashboard
     const top3 = logs.slice(0, 3);
@@ -18855,9 +18853,24 @@ function formatLogTime(isoString) {
   if (!isoString) return "-";
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return isoString;
+  
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHrs = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1) return "Baru saja";
+  if (diffMin < 60) return `${diffMin} menit lalu`;
+  if (diffHrs < 24) return `${diffHrs} jam lalu`;
+  if (diffDays === 1) return "Kemarin";
+  
+  const day = date.getDate().toString().padStart(2, '0');
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  const month = months[date.getMonth()];
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes} WIB`;
+  return `${day} ${month}, ${hours}:${minutes}`;
 }
 
 window.addActivityLog = async function(title, description, type = 'info', icon = 'fa-info') {
