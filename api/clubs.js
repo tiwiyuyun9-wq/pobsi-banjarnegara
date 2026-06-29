@@ -1,5 +1,5 @@
 const { supabase, logActivity } = require('./_supabase');
-const { uploadMedia } = require('./_media-upload');
+const { uploadMedia, deleteMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -129,9 +129,29 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
 
+      // Get existing club data before update to handle media replacement
+      const { data: existingClub, error: fetchClubErr } = await supabase
+        .from('clubs')
+        .select('logo, cover')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (fetchClubErr) throw fetchClubErr;
+      if (!existingClub) return res.status(404).json({ error: "Klub tidak ditemukan!" });
+
       // Upload logo and cover to Supabase Storage or local fallback
       const logoUrl = logo ? await uploadMedia(logo, `club-logo-${id}`, 'clubs') : null;
       const coverUrl = cover ? await uploadMedia(cover, `club-cover-${id}`, 'clubs') : null;
+
+      // Delete old logo if it was replaced or cleared
+      if (existingClub.logo && existingClub.logo !== logoUrl) {
+        await deleteMedia(existingClub.logo);
+      }
+
+      // Delete old cover if it was replaced or cleared
+      if (existingClub.cover && existingClub.cover !== coverUrl) {
+        await deleteMedia(existingClub.cover);
+      }
 
       const updated = {
         name: name.trim(),
@@ -179,10 +199,10 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       if (!id) return res.status(400).json({ error: "ID klub wajib diberikan!" });
 
-      // Cek apakah klub ada
+      // Cek apakah klub ada beserta data media
       const { data: club, error: checkErr } = await supabase
         .from('clubs')
-        .select('name')
+        .select('name, logo, cover')
         .eq('id', id)
         .maybeSingle();
 
@@ -195,6 +215,26 @@ module.exports = async (req, res) => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Cascading delete logo and cover files from storage
+      if (club.logo) {
+        await deleteMedia(club.logo);
+      }
+      if (club.cover) {
+        await deleteMedia(club.cover);
+      }
+
+      // Update players who belonged to this club to have club '-' (orphaned)
+      if (club.name) {
+        const { error: updatePlayersErr } = await supabase
+          .from('players')
+          .update({ club: '-' })
+          .eq('club', club.name);
+        
+        if (updatePlayersErr) {
+          console.error("Gagal meng-orphan data atlit setelah klub dihapus:", updatePlayersErr.message);
+        }
+      }
 
       await logActivity("Klub dihapus", `Klub ${club.name} dihapus dari daftar afiliasi`, "danger", "fa-building");
 

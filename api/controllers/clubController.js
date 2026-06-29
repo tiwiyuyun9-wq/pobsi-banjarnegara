@@ -1,5 +1,6 @@
 // Club Controller - Mengelola Data Klub Biliar
 const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
+const { uploadMedia, deleteMedia } = require('../_media-upload');
 
 exports.getClubs = async (req, res) => {
   try {
@@ -30,6 +31,10 @@ exports.addClub = async (req, res) => {
     const nextNum = maxNum + 1;
     const id = `C${nextNum.toString().padStart(3, '0')}`;
 
+    // Upload logo and cover to Supabase Storage or local fallback
+    const logoUrl = logo ? await uploadMedia(logo, `club-logo-${id}`, 'clubs') : null;
+    const coverUrl = cover ? await uploadMedia(cover, `club-cover-${id}`, 'clubs') : null;
+
     const newClub = {
       id,
       name,
@@ -39,8 +44,8 @@ exports.addClub = async (req, res) => {
       phone: phone || '-',
       tables: parseInt(tables || 0),
       status: 'Aktif',
-      logo: logo || null,
-      cover: cover || null
+      logo: logoUrl || null,
+      cover: coverUrl || null
     };
 
     await dbRun(
@@ -63,12 +68,25 @@ exports.deleteClub = async (req, res) => {
   }
 
   try {
-    const club = await dbGet(`SELECT name FROM clubs WHERE id = ?`, [id]);
+    const club = await dbGet(`SELECT name, logo, cover FROM clubs WHERE id = ?`, [id]);
     if (!club) {
       return res.status(404).json({ error: "Klub tidak ditemukan!" });
     }
     
     await dbRun(`DELETE FROM clubs WHERE id = ?`, [id]);
+
+    // Cleanup media files from storage
+    if (club.logo) {
+      await deleteMedia(club.logo);
+    }
+    if (club.cover) {
+      await deleteMedia(club.cover);
+    }
+
+    // Update players who belonged to this club to have club '-' (orphaned)
+    if (club.name) {
+      await dbRun(`UPDATE players SET club = '-' WHERE club = ?`, [club.name]);
+    }
 
     await logActivity("Klub dihapus", `Klub ${club.name} dihapus dari daftar afiliasi`, "danger", "fa-building");
 
@@ -84,11 +102,29 @@ exports.updateClub = async (req, res) => {
   if (!name || !address) {
     return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
   }
-
   try {
+    const existingClub = await dbGet(`SELECT logo, cover FROM clubs WHERE id = ?`, [id]);
+    if (!existingClub) {
+      return res.status(404).json({ error: "Klub tidak ditemukan!" });
+    }
+
+    // Upload logo and cover to Supabase Storage or local fallback
+    const logoUrl = logo ? await uploadMedia(logo, `club-logo-${id}`, 'clubs') : null;
+    const coverUrl = cover ? await uploadMedia(cover, `club-cover-${id}`, 'clubs') : null;
+
+    // Delete old logo if it was replaced or cleared
+    if (existingClub.logo && existingClub.logo !== logoUrl) {
+      await deleteMedia(existingClub.logo);
+    }
+
+    // Delete old cover if it was replaced or cleared
+    if (existingClub.cover && existingClub.cover !== coverUrl) {
+      await deleteMedia(existingClub.cover);
+    }
+
     const result = await dbRun(
       `UPDATE clubs SET name = ?, abbr = ?, address = ?, owner = ?, phone = ?, tables = ?, status = ?, logo = ?, cover = ? WHERE id = ?`,
-      [name, abbr || '-', address, owner || '-', phone || '-', parseInt(tables || 0), status || 'Aktif', logo || null, cover || null, id]
+      [name, abbr || '-', address, owner || '-', phone || '-', parseInt(tables || 0), status || 'Aktif', logoUrl || null, coverUrl || null, id]
     );
     if (result.changes === 0) {
       return res.status(404).json({ error: "Klub tidak ditemukan!" });
