@@ -1,5 +1,5 @@
 // Standing Controller - Mengelola Klasemen Battle of Champions
-const { dbAll, dbRun } = require('../config/db');
+const { dbAll, dbRun, logActivity } = require('../config/db');
 
 exports.getStandings = async (req, res) => {
   const { year } = req.query;
@@ -79,6 +79,8 @@ exports.resetStandings = async (req, res) => {
     // Hapus seluruh sirkuit untuk tahun tersebut
     await dbRun(`DELETE FROM boc_sirkuits WHERE year = ?`, [year.toString()]);
 
+    await logActivity("Klasemen di-reset", `Klasemen BOC tahun ${year} berhasil di-reset`, "warning", "fa-rotate-left");
+
     res.json({ success: true, message: `Seluruh klasemen sirkuit BOC tahun ${year} berhasil di-reset!` });
   } catch (error) {
     res.status(500).json({ error: "Gagal mereset klasemen di SQLite: " + error.message });
@@ -111,6 +113,8 @@ exports.reindexStandings = async (req, res) => {
         [rank, player_name, standingYear]
       );
     }
+
+    await logActivity("Klasemen di-reindex", `Peringkat klasemen BOC tahun ${standingYear} berhasil diperbarui`, "info", "fa-ranking-star");
 
     res.json({ success: true, message: `Peringkat klasemen tahun ${standingYear} berhasil di-reindex di database SQLite.` });
   } catch (error) {

@@ -1,4 +1,4 @@
-const { supabase } = require('./_supabase');
+const { supabase, logActivity } = require('./_supabase');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -85,6 +85,9 @@ module.exports = async (req, res) => {
         .single();
 
       if (error) throw error;
+
+      await logActivity("Klub baru ditambahkan", `${newClub.name} terdaftar sebagai klub terafiliasi`, "success", "fa-building");
+
       return res.status(201).json(data);
     }
 
@@ -115,6 +118,8 @@ module.exports = async (req, res) => {
 
       if (error) throw error;
 
+      await logActivity("Data klub diperbarui", `Data klub ${name} berhasil diperbarui`, "info", "fa-building");
+
       return res.status(200).json({ success: true, message: `Klub ${id} berhasil diperbarui.` });
     }
 
@@ -124,12 +129,24 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       if (!id) return res.status(400).json({ error: "ID klub wajib diberikan!" });
 
+      // Cek apakah klub ada
+      const { data: club, error: checkErr } = await supabase
+        .from('clubs')
+        .select('name')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (checkErr) throw checkErr;
+      if (!club) return res.status(404).json({ error: "Klub tidak ditemukan!" });
+
       const { error } = await supabase
         .from('clubs')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      await logActivity("Klub dihapus", `Klub ${club.name} dihapus dari daftar afiliasi`, "danger", "fa-building");
 
       return res.status(200).json({ success: true, message: `Klub ${id} berhasil dihapus.` });
     }

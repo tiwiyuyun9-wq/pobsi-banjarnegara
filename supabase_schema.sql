@@ -184,4 +184,16 @@ CREATE TABLE ranking_history (
 ALTER TABLE handicap_history DISABLE ROW LEVEL SECURITY;
 ALTER TABLE ranking_history DISABLE ROW LEVEL SECURITY;
 
+-- 12. Buat Tabel Activity Logs
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    type TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE activity_logs DISABLE ROW LEVEL SECURITY;
+
+
 

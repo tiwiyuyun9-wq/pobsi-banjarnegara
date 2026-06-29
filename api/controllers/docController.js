@@ -1,7 +1,7 @@
 // Document Controller - Mengelola Surat Edaran & Dokumen Resmi POBSI
 const fs = require('fs');
 const path = require('path');
-const { dbAll, dbGet, dbRun } = require('../config/db');
+const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
 
 exports.getDocs = async (req, res) => {
   try {
@@ -63,6 +63,8 @@ exports.addDoc = async (req, res) => {
       [newDoc.id, newDoc.title, newDoc.date, newDoc.fileSize, newDoc.fileType, newDoc.fileUrl]
     );
 
+    await logActivity("Surat edaran ditambahkan", `Dokumen resmi "${title}" berhasil diunggah`, "info", "fa-file-invoice");
+
     res.status(201).json(newDoc);
   } catch (error) {
     res.status(500).json({ error: "Gagal menyimpan berkas ke SQLite: " + error.message });
@@ -96,6 +98,9 @@ exports.deleteDoc = async (req, res) => {
     }
 
     await dbRun(`DELETE FROM documents WHERE id = ?`, [id]);
+
+    await logActivity("Surat edaran dihapus", `Dokumen "${doc.title}" telah dihapus`, "danger", "fa-file-invoice");
+
     res.json({ success: true, message: "Dokumen berhasil dihapus." });
   } catch (error) {
     res.status(500).json({ error: "Gagal menghapus berkas di SQLite: " + error.message });

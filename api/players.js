@@ -1,4 +1,4 @@
-const { supabase } = require('./_supabase');
+const { supabase, logActivity } = require('./_supabase');
 const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
@@ -110,6 +110,9 @@ module.exports = async (req, res) => {
         .single();
 
       if (error) throw error;
+      
+      await logActivity("Atlet baru ditambahkan", `${newPlayer.name} telah didaftarkan sebagai atlet resmi`, "success", "fa-user-plus");
+
       return res.status(201).json(data);
     }
 
@@ -208,6 +211,8 @@ module.exports = async (req, res) => {
           .eq('name', player.name);
       }
 
+      await logActivity("Data atlet diperbarui", `Data ${updated.name} berhasil diperbarui`, "info", "fa-user-pen");
+
       return res.status(200).json({ success: true, player: { id, ...updated } });
     }
 
@@ -240,6 +245,8 @@ module.exports = async (req, res) => {
         .eq('id', id);
 
       if (deleteErr) throw deleteErr;
+
+      await logActivity("Atlet dihapus", `Atlet ${player.name} telah dihapus dari database`, "danger", "fa-user-minus");
 
       return res.status(200).json({ success: true, message: `Atlet ${id} berhasil dihapus.` });
     }

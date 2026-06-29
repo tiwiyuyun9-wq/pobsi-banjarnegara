@@ -1,4 +1,4 @@
-const { supabase } = require('./_supabase');
+const { supabase, logActivity } = require('./_supabase');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -52,6 +52,8 @@ module.exports = async (req, res) => {
 
       if (deleteErr) throw deleteErr;
 
+      await logActivity("Klasemen di-reset", `Klasemen BOC tahun ${resetYear} berhasil di-reset`, "warning", "fa-rotate-left");
+
       return res.status(200).json({ success: true, message: `Seluruh klasemen sirkuit BOC tahun ${resetYear} berhasil di-reset!` });
     }
 
@@ -104,6 +106,8 @@ module.exports = async (req, res) => {
         .upsert(rankUpdates, { onConflict: 'name,year' });
 
       if (updateErr) throw updateErr;
+
+      await logActivity("Klasemen di-reindex", `Peringkat klasemen BOC tahun ${standingYear} berhasil diperbarui`, "info", "fa-ranking-star");
 
       return res.status(200).json({ success: true, message: `Peringkat klasemen tahun ${standingYear} berhasil di-reindex di database Supabase.` });
     }

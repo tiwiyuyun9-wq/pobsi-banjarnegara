@@ -1,4 +1,4 @@
-const { supabase } = require('./_supabase');
+const { supabase, logActivity } = require('./_supabase');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -105,6 +105,9 @@ module.exports = async (req, res) => {
         .single();
 
       if (error) throw error;
+
+      await logActivity("Surat edaran ditambahkan", `Dokumen resmi "${title}" berhasil diunggah`, "info", "fa-file-invoice");
+
       return res.status(201).json(data);
     }
 
@@ -140,6 +143,9 @@ module.exports = async (req, res) => {
         .eq('id', id);
 
       if (error) throw error;
+
+      await logActivity("Surat edaran dihapus", `Dokumen "${doc ? doc.title : id}" telah dihapus`, "danger", "fa-file-invoice");
+
       return res.status(200).json({ success: true, message: "Berkas berhasil dihapus." });
     }
 

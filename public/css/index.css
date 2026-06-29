@@ -4444,19 +4444,7 @@ tr:hover td.sticky-col {
   transform: translateY(-2px);
 }
 
-/* Premium Overview Pane with Blended Billiard Player Background spanning across header and cards */
 #pane-overview {
-  background-image: 
-    linear-gradient(180deg, rgba(6, 11, 24, 0) 30%, #060b18 95%),
-    linear-gradient(90deg, #060b18 35%, rgba(6, 11, 24, 0.5) 65%, rgba(6, 11, 24, 0.1) 100%), 
-    url('../images/dashboard-hero.png');
-  background-size: cover;
-  background-position: right top;
-  background-repeat: no-repeat;
-  padding: 10px 40px 40px 40px;
-  margin: -40px -40px 0 -40px;
-  border-radius: var(--radius-md);
-  max-width: calc(100% + 80px);
   box-sizing: border-box;
 }
 
@@ -4801,15 +4789,18 @@ tr:hover td.sticky-col {
 }
 
 .dashboard-col {
-  background: #0f162a;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: var(--radius-md);
+  background: var(--gradient-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-lg);
   min-height: 380px;
+  overflow: hidden;
 }
 
 .col-header {
@@ -4817,7 +4808,7 @@ tr:hover td.sticky-col {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  padding-bottom: 14px;
+  padding-bottom: 10px;
 }
 
 .col-title {
@@ -4859,10 +4850,10 @@ tr:hover td.sticky-col {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.015);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: var(--transition-smooth);
 }
 .activity-item:hover {
@@ -4919,10 +4910,10 @@ tr:hover td.sticky-col {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.015);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: var(--transition-smooth);
 }
 .upcoming-item:hover {
@@ -5075,15 +5066,18 @@ tr:hover td.sticky-col {
 }
 
 .analytics-col {
-  background: #0f162a;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: var(--radius-md);
+  background: var(--gradient-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-lg);
   min-height: 290px;
+  overflow: hidden;
 }
 
 /* Donut Chart Style */
@@ -5392,20 +5386,21 @@ tr:hover td.sticky-col {
   }
 }
 
-/* Layer 2: Sports Operations & History Columns (Medium Glass Elevation) */
+/* Layer 2: Sports Operations & History Columns (Medium Glass Elevation) - Compact SSOT */
 .dashboard-col {
-  background: rgba(15, 22, 42, 0.65) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
-  border-radius: var(--radius-md);
-  padding: 24px;
+  background: var(--gradient-surface) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  min-height: 380px;
+  gap: 12px;
+  box-shadow: var(--shadow-lg);
+  min-height: 290px;
   transition: var(--transition-smooth);
+  overflow: hidden;
 }
 
 .dashboard-col:hover {
@@ -5418,10 +5413,10 @@ tr:hover td.sticky-col {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.015);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: var(--transition-smooth);
 }
 
@@ -5541,10 +5536,10 @@ tr:hover td.sticky-col {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.015);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: var(--transition-smooth);
 }
 
@@ -5609,14 +5604,14 @@ tr:hover td.sticky-col {
 
 /* Layer 3: Mission Control Tactical Actions (Highest Contrast, Rich Glow) */
 .mission-control-panel-container {
-  background: rgba(10, 16, 32, 0.8) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1.5px solid rgba(59, 130, 246, 0.3) !important;
-  border-radius: var(--radius-md);
+  background: var(--gradient-surface) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4), 0 0 25px rgba(37, 99, 235, 0.1), inset 0 0 20px rgba(37, 99, 235, 0.05);
+  box-shadow: var(--shadow-lg);
 }
 
 .mission-control-header {
@@ -5677,6 +5672,7 @@ tr:hover td.sticky-col {
 .action-icon-wrapper-premium.purple-glow { background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
 .action-icon-wrapper-premium.info-glow { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
 .action-icon-wrapper-premium.primary-glow { background: rgba(37, 99, 235, 0.1); color: #3b82f6; border: 1px solid rgba(37, 99, 235, 0.2); }
+.action-icon-wrapper-premium.danger-glow { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
 
 .action-label-block {
   display: flex;
@@ -9987,6 +9983,17 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
+.edit-event-step-pane {
+  display: none;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
+}
+
+.edit-event-step-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @keyframes stepPaneFadeIn {
   from {
     opacity: 0;
@@ -13388,6 +13395,19 @@ span.flatpickr-weekday {
   }
 }
 
-
-
+/* Change Event Status Modal Option Cards */
+.status-option-card:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.status-option-card.selected {
+  background: rgba(251, 191, 36, 0.05) !important;
+  border-color: var(--gold) !important;
+}
+.status-option-card.selected .status-option-circle {
+  border-color: var(--gold) !important;
+}
+.status-option-card.selected .status-option-dot {
+  display: block !important;
+}
 

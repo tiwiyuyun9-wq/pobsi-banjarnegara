@@ -1,4 +1,4 @@
-const { supabase } = require('./_supabase');
+const { supabase, logActivity } = require('./_supabase');
 const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
@@ -104,6 +104,9 @@ module.exports = async (req, res) => {
         .single();
 
       if (error) throw error;
+
+      await logActivity("Event BOC Series dibuat", `Event "${title}" berhasil ditambahkan ke agenda sirkuit`, "info", "fa-trophy");
+
       return res.status(201).json(data);
     }
 
@@ -163,6 +166,8 @@ module.exports = async (req, res) => {
 
       if (updateErr) throw updateErr;
 
+      await logActivity("Event diperbarui", `Event "${title || event.title}" berhasil diperbarui`, "info", "fa-trophy");
+
       return res.status(200).json({ success: true, message: "Event updated successfully!" });
     }
 
@@ -172,12 +177,24 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       if (!id) return res.status(400).json({ error: "ID event wajib diberikan!" });
 
+      // Cek apakah event ada
+      const { data: event, error: checkErr } = await supabase
+        .from('events')
+        .select('title')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (checkErr) throw checkErr;
+      if (!event) return res.status(404).json({ error: "Event tidak ditemukan!" });
+
       const { error: deleteErr } = await supabase
         .from('events')
         .delete()
         .eq('id', id);
 
       if (deleteErr) throw deleteErr;
+
+      await logActivity("Event dihapus", `Event "${event.title}" telah dihapus`, "danger", "fa-trash");
 
       return res.status(200).json({ success: true, message: "Event deleted successfully!" });
     }

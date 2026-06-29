@@ -1,5 +1,5 @@
 // Club Controller - Mengelola Data Klub Biliar
-const { dbAll, dbGet, dbRun } = require('../config/db');
+const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
 
 exports.getClubs = async (req, res) => {
   try {
@@ -45,6 +45,8 @@ exports.addClub = async (req, res) => {
       [newClub.id, newClub.name, newClub.address, newClub.owner, newClub.phone, newClub.tables, newClub.status]
     );
 
+    await logActivity("Klub baru ditambahkan", `${newClub.name} terdaftar sebagai klub terafiliasi`, "success", "fa-building");
+
     res.status(201).json(newClub);
   } catch (error) {
     res.status(500).json({ error: "Gagal menambahkan klub ke SQLite: " + error.message });
@@ -58,10 +60,15 @@ exports.deleteClub = async (req, res) => {
   }
 
   try {
-    const result = await dbRun(`DELETE FROM clubs WHERE id = ?`, [id]);
-    if (result.changes === 0) {
+    const club = await dbGet(`SELECT name FROM clubs WHERE id = ?`, [id]);
+    if (!club) {
       return res.status(404).json({ error: "Klub tidak ditemukan!" });
     }
+    
+    await dbRun(`DELETE FROM clubs WHERE id = ?`, [id]);
+
+    await logActivity("Klub dihapus", `Klub ${club.name} dihapus dari daftar afiliasi`, "danger", "fa-building");
+
     res.json({ success: true, message: `Klub ${id} berhasil dihapus.` });
   } catch (error) {
     res.status(500).json({ error: "Gagal menghapus klub dari SQLite: " + error.message });
@@ -83,6 +90,9 @@ exports.updateClub = async (req, res) => {
     if (result.changes === 0) {
       return res.status(404).json({ error: "Klub tidak ditemukan!" });
     }
+
+    await logActivity("Data klub diperbarui", `Data klub ${name} berhasil diperbarui`, "info", "fa-building");
+
     res.json({ success: true, message: `Klub ${id} berhasil diperbarui.` });
   } catch (error) {
     res.status(500).json({ error: "Gagal memperbarui data klub di SQLite: " + error.message });

@@ -2913,6 +2913,9 @@ async function setupAdminPanel() {
   setupEventManagement();
   setupAthleteDetailActions();
   setupClubDetailActions();
+  if (typeof window.refreshActivityLogs === "function") {
+    window.refreshActivityLogs();
+  }
   setupBocAdminListeners();
   setupDocManagement();
   setupSystemSettings();
@@ -12026,6 +12029,116 @@ function setupEventManagement() {
     formAddEvent.addEventListener("submit", hideAddModal);
   }
 
+  // --- MULTISTEP EDIT EVENT WIZARD STATE & NAVIGATION ---
+  window.currentEditEventStep = 1;
+
+  window.updateEditEventWizardUI = function() {
+    const step = window.currentEditEventStep;
+    const panes = document.querySelectorAll(".edit-event-step-pane");
+    panes.forEach(pane => {
+      const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+      if (paneStep === step) {
+        pane.classList.add("active");
+        pane.removeAttribute("style");
+      } else {
+        pane.classList.remove("active");
+        pane.removeAttribute("style");
+      }
+    });
+
+    const steps = document.querySelectorAll("#edit-event-wizard-stepper .wizard-step");
+    steps.forEach(s => {
+      const sStep = parseInt(s.getAttribute("data-step"), 10);
+      const circle = s.querySelector(".wizard-step-circle");
+      s.classList.remove("active", "completed");
+      if (sStep === step) {
+        s.classList.add("active");
+        if (circle) circle.innerHTML = sStep;
+      } else if (sStep < step) {
+        s.classList.add("completed");
+        if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+      } else {
+        if (circle) circle.innerHTML = sStep;
+      }
+    });
+
+    const progress = document.getElementById("edit-event-wizard-progress");
+    if (progress && steps.length > 1) {
+      const percent = ((step - 1) / (steps.length - 1)) * 100;
+      progress.style.width = `${percent}%`;
+    }
+
+    const btnCancel = document.getElementById("modal-edit-event-btn-cancel");
+    const btnPrev = document.getElementById("modal-edit-event-btn-prev");
+    const btnNext = document.getElementById("modal-edit-event-btn-next");
+    const btnSubmit = document.getElementById("modal-edit-event-btn-submit");
+
+    if (step === 1) {
+      if (btnCancel) btnCancel.style.display = "inline-block";
+      if (btnPrev) btnPrev.style.display = "none";
+      if (btnNext) btnNext.style.display = "inline-block";
+      if (btnSubmit) btnSubmit.style.display = "none";
+    } else if (step === 2) {
+      if (btnCancel) btnCancel.style.display = "none";
+      if (btnPrev) btnPrev.style.display = "inline-block";
+      if (btnNext) btnNext.style.display = "inline-block";
+      if (btnSubmit) btnSubmit.style.display = "none";
+    } else if (step === 3) {
+      if (btnCancel) btnCancel.style.display = "none";
+      if (btnPrev) btnPrev.style.display = "inline-block";
+      if (btnNext) btnNext.style.display = "none";
+      if (btnSubmit) btnSubmit.style.display = "inline-block";
+    }
+  };
+
+  window.resetEditEventWizard = function() {
+    window.currentEditEventStep = 1;
+    window.updateEditEventWizardUI();
+  };
+
+  const btnEditWizardPrev = document.getElementById("modal-edit-event-btn-prev");
+  const btnEditWizardNext = document.getElementById("modal-edit-event-btn-next");
+
+  if (btnEditWizardPrev) {
+    btnEditWizardPrev.onclick = function() {
+      if (window.currentEditEventStep > 1) {
+        window.currentEditEventStep--;
+        window.updateEditEventWizardUI();
+      }
+    };
+  }
+
+  if (btnEditWizardNext) {
+    btnEditWizardNext.onclick = function() {
+      if (window.currentEditEventStep === 1) {
+        const title = document.getElementById("edit-evt-title").value.trim();
+        if (!title) {
+          showCustomToast("Nama Turnamen / Agenda wajib diisi!", "error");
+          document.getElementById("edit-evt-title").focus();
+          return;
+        }
+      } else if (window.currentEditEventStep === 2) {
+        const date = document.getElementById("edit-evt-date").value.trim();
+        const venue = document.getElementById("edit-evt-venue").value.trim();
+        if (!date) {
+          showCustomToast("Tanggal Pelaksanaan wajib diisi!", "error");
+          document.getElementById("edit-evt-date").focus();
+          return;
+        }
+        if (!venue) {
+          showCustomToast("Lokasi / Arena wajib diisi!", "error");
+          document.getElementById("edit-evt-venue").focus();
+          return;
+        }
+      }
+
+      if (window.currentEditEventStep < 3) {
+        window.currentEditEventStep++;
+        window.updateEditEventWizardUI();
+      }
+    };
+  }
+
   // Edit Event Modal Close Controls
   const modalEdit = document.getElementById("modal-edit-event");
   const modalEditClose = document.getElementById("modal-edit-event-close");
@@ -12033,10 +12146,7 @@ function setupEventManagement() {
 
   const hideEditModal = () => {
     if (modalEdit) {
-      modalEdit.classList.remove("open");
-      setTimeout(() => {
-        modalEdit.style.display = "none";
-      }, 300);
+      modalEdit.style.display = "none";
     }
   };
   if (modalEditClose) modalEditClose.addEventListener("click", hideEditModal);
@@ -12142,27 +12252,111 @@ function setupEventManagement() {
         if (previewContainer) previewContainer.style.display = "none";
       }
 
+      // Reset wizard to step 1
+      window.resetEditEventWizard();
+
       if (modalEdit) {
         modalEdit.style.display = "flex";
-        setTimeout(() => modalEdit.classList.add("open"), 10);
       }
     });
   }
 
+  // Change Status Modal Controls
+  const modalChangeStatus = document.getElementById("modal-change-event-status");
+  const modalChangeStatusClose = document.getElementById("modal-change-event-status-close");
+  const btnChangeStatusCancel = document.getElementById("modal-change-status-btn-cancel");
+  const btnChangeStatusSave = document.getElementById("modal-change-status-btn-save");
+  const changeStatusBadge = document.getElementById("change-status-current-badge");
+  const statusOptionCards = document.querySelectorAll(".status-option-card");
+  
+  let selectedStatus = "";
+
+  // Add click handlers for status cards
+  statusOptionCards.forEach(card => {
+    card.addEventListener("click", () => {
+      statusOptionCards.forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      selectedStatus = card.getAttribute("data-status");
+    });
+  });
+
+  // Open modal handler (attached to btnStatusToggle)
   if (btnStatusToggle) {
-    btnStatusToggle.addEventListener("click", async () => {
+    btnStatusToggle.addEventListener("click", () => {
       const event = appData.events.find(evt => evt.id === currentActiveEventId);
       if (!event) return;
 
-      // Cycle status: Daftar -> Ongoing -> Selesai -> Cancelled -> Daftar
-      const statuses = ["Daftar", "Ongoing", "Selesai", "Cancelled"];
-      const currentIdx = statuses.indexOf(event.status);
-      const nextIdx = (currentIdx + 1) % statuses.length;
-      event.status = statuses[nextIdx];
+      selectedStatus = event.status;
+
+      // Update current status badge
+      let statusText = "Upcoming";
+      let statusClass = "daftar";
+      if (event.status === "Ongoing") {
+        statusText = "LIVE / ONGOING";
+        statusClass = "live";
+      } else if (event.status === "Selesai") {
+        statusText = "Completed / Selesai";
+        statusClass = "selesai";
+      } else if (event.status === "Cancelled") {
+        statusText = "Cancelled / Dibatalkan";
+        statusClass = "selesai";
+      }
+
+      if (changeStatusBadge) {
+        changeStatusBadge.textContent = statusText;
+        changeStatusBadge.className = `featured-status-badge ${statusClass}`;
+      }
+
+      // Mark the current status card as selected
+      statusOptionCards.forEach(card => {
+        if (card.getAttribute("data-status") === event.status) {
+          card.classList.add("selected");
+        } else {
+          card.classList.remove("selected");
+        }
+      });
+
+      if (modalChangeStatus) {
+        modalChangeStatus.style.display = "flex";
+      }
+    });
+  }
+
+  // Close modal logic
+  const hideChangeStatusModal = () => {
+    if (modalChangeStatus) {
+      modalChangeStatus.style.display = "none";
+    }
+  };
+  if (modalChangeStatusClose) modalChangeStatusClose.addEventListener("click", hideChangeStatusModal);
+  if (btnChangeStatusCancel) btnChangeStatusCancel.addEventListener("click", hideChangeStatusModal);
+  
+  if (modalChangeStatus) {
+    modalChangeStatus.addEventListener("click", (e) => {
+      if (e.target === modalChangeStatus) {
+        hideChangeStatusModal();
+      }
+    });
+  }
+
+  // Save new status
+  if (btnChangeStatusSave) {
+    btnChangeStatusSave.addEventListener("click", async () => {
+      const event = appData.events.find(evt => evt.id === currentActiveEventId);
+      if (!event) return;
+
+      if (!selectedStatus) {
+        showCustomToast("Silakan pilih status terlebih dahulu.", "error");
+        return;
+      }
+
+      event.status = selectedStatus;
 
       await saveEventDetails(event);
-      showCustomToast(`Status event diubah menjadi ${event.status}`, "success");
+      showCustomToast(`Status event berhasil diubah menjadi ${selectedStatus}`, "success");
+      hideChangeStatusModal();
       openEventDetail(event.id);
+      renderAdminEventsDashboard();
     });
   }
 
@@ -18605,4 +18799,135 @@ function applySettingsToDOM() {
 
 window.setupSystemSettings = setupSystemSettings;
 window.applySettingsToDOM = applySettingsToDOM;
+
+// ==========================================================================
+// ACTIVITY LOGS AND DB SYNCHRONIZATION OVERHAUL (BOC 2026 DESIGN SYSTEM)
+// ==========================================================================
+window.activityLogs = [];
+
+window.refreshActivityLogs = async function() {
+  const container = document.getElementById("dashboard-activity-list");
+  if (!container) return;
+
+  const defaultLogs = [
+    { title: "Atlet baru ditambahkan", description: "Andika Wijaya telah didaftarkan sebagai atlet resmi", type: "success", icon: "fa-user-plus", created_at: new Date().toISOString() },
+    { title: "Event BOC Series #4 dibuat", description: "Event baru berhasil ditambahkan ke sistem", type: "info", icon: "fa-trophy", created_at: new Date().toISOString() },
+    { title: "Ranking diperbarui", description: "Klasemen Battle of Champions telah diperbarui", type: "warning", icon: "fa-ranking-star", created_at: new Date().toISOString() }
+  ];
+
+  try {
+    let logs = [];
+    if (window.isServerOnline) {
+      const response = await fetch('/api/activity-logs?limit=15', { cache: 'no-store' });
+      if (response.ok) {
+        logs = await response.json();
+      }
+    }
+    
+    if (!logs || logs.length === 0) {
+      logs = defaultLogs;
+    }
+
+    window.activityLogs = logs;
+
+    // Render top 3 logs in Dashboard
+    const top3 = logs.slice(0, 3);
+    container.innerHTML = top3.map(log => `
+      <div class="activity-item">
+        <div class="activity-icon-wrapper ${log.type || 'info'}">
+          <i class="fa-solid ${log.icon || 'fa-info'}"></i>
+        </div>
+        <div class="activity-info">
+          <h4>${log.title}</h4>
+          <p>${log.description}</p>
+        </div>
+        <span class="activity-time">${formatLogTime(log.created_at)}</span>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    console.error("Gagal memuat log aktivitas:", error);
+    container.innerHTML = `<div style="padding: 12px; text-align: center; color: var(--text-dim);">Gagal memuat aktivitas.</div>`;
+  }
+};
+
+function formatLogTime(isoString) {
+  if (!isoString) return "-";
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString;
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes} WIB`;
+}
+
+window.addActivityLog = async function(title, description, type = 'info', icon = 'fa-info') {
+  console.log(`📝 Menambahkan log aktivitas: "${title}"`);
+  try {
+    if (window.isServerOnline) {
+      const response = await fetch('/api/activity-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, type, icon })
+      });
+      if (response.ok) {
+        window.refreshActivityLogs();
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Gagal mengirim log aktivitas ke server:", err);
+  }
+
+  // Local fallback
+  const newLog = {
+    title,
+    description,
+    type,
+    icon,
+    created_at: new Date().toISOString()
+  };
+  window.activityLogs.unshift(newLog);
+  window.refreshActivityLogs();
+};
+
+window.openFullActivityLogsModal = function() {
+  const modal = document.getElementById("pm-activity-logs-modal");
+  const modalList = document.getElementById("modal-activity-logs-list");
+  if (!modal || !modalList) return;
+
+  const logs = window.activityLogs && window.activityLogs.length > 0 ? window.activityLogs : [];
+
+  modalList.innerHTML = logs.map(log => `
+    <div class="activity-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 12px;">
+      <div style="display: flex; gap: 14px; align-items: center;">
+        <div class="activity-icon-wrapper ${log.type || 'info'}" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 0;">
+          <i class="fa-solid ${log.icon || 'fa-info'}"></i>
+        </div>
+        <div class="activity-info">
+          <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #fff;">${log.title}</h4>
+          <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-dim);">${log.description}</p>
+        </div>
+      </div>
+      <span class="activity-time" style="font-size: 0.78rem; color: var(--text-dim); font-weight: 600; white-space: nowrap; margin-left: 12px;">${formatLogTime(log.created_at)}</span>
+    </div>
+  `).join("");
+
+  if (logs.length === 0) {
+    modalList.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-dim);">Belum ada log aktivitas tercatat.</div>`;
+  }
+
+  modal.style.display = "flex";
+};
+
+// Bind modal listeners
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "btn-open-activity-modal") {
+    window.openFullActivityLogsModal();
+  }
+  if (e.target && (e.target.id === "pm-activity-logs-modal-close" || e.target.closest("#pm-activity-logs-modal-close"))) {
+    const modal = document.getElementById("pm-activity-logs-modal");
+    if (modal) modal.style.display = "none";
+  }
+});
+
 
