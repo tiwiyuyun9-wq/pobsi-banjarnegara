@@ -4892,7 +4892,7 @@ function renderClubs(filterQuery = '') {
   const query = filterQuery.toLowerCase().trim();
 
   const filtered = query
-    ? clubs.filter(c => c.name.toLowerCase().includes(query) || c.address.toLowerCase().includes(query))
+    ? clubs.filter(c => c.name.toLowerCase().includes(query) || c.address.toLowerCase().includes(query) || (c.abbr && c.abbr.toLowerCase().includes(query)))
     : clubs;
 
   // Count members per club from players
@@ -4920,7 +4920,7 @@ function renderClubs(filterQuery = '') {
           <i class="fa-solid fa-building"></i>
         </div>
         <div>
-          <h3 class="club-card-name">${club.name}</h3>
+          <h3 class="club-card-name">${club.name} ${club.abbr && club.abbr !== '-' ? `<span class="club-abbr-badge" style="font-size: 0.72rem; color: var(--accent); margin-left: 6px; background: rgba(245, 158, 11, 0.1); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 800; vertical-align: middle;">${club.abbr}</span>` : ''}</h3>
           <span class="club-card-status">
             <span class="status-dot"></span>${club.status || 'Aktif'}
           </span>
@@ -5302,6 +5302,7 @@ function setupAdminClubsConsole() {
       // Populate fields
       document.getElementById('edit-club-id').value = club.id;
       document.getElementById('edit-club-name').value = club.name;
+      document.getElementById('edit-club-abbr').value = club.abbr || '';
       document.getElementById('edit-club-address').value = club.address;
       document.getElementById('edit-club-owner').value = club.owner || '';
       document.getElementById('edit-club-phone').value = club.phone || '';
@@ -5330,6 +5331,7 @@ function setupAdminClubsConsole() {
       e.preventDefault();
       const id = document.getElementById('edit-club-id').value;
       const name = document.getElementById('edit-club-name').value.trim();
+      const abbr = document.getElementById('edit-club-abbr').value.trim();
       const address = document.getElementById('edit-club-address').value.trim();
       const owner = document.getElementById('edit-club-owner').value.trim();
       const phone = document.getElementById('edit-club-phone').value.trim();
@@ -5356,7 +5358,7 @@ function setupAdminClubsConsole() {
           const res = await fetch(`/api/clubs/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, address, owner, phone, tables, status })
+            body: JSON.stringify({ name, abbr, address, owner, phone, tables, status })
           });
           if (res.ok) {
             await onSuccess();
@@ -5371,7 +5373,7 @@ function setupAdminClubsConsole() {
         const clubs = appData.clubs || [];
         const index = clubs.findIndex(c => c.id.toString() === id.toString());
         if (index !== -1) {
-          clubs[index] = { ...clubs[index], name, address, owner, phone, tables, status };
+          clubs[index] = { ...clubs[index], name, abbr: abbr || '-', address, owner, phone, tables, status };
           alert(`Mode Luring: Data klub "${name}" diperbarui di memori sementara!`);
           formEditClub.reset();
           if (editClubModal) editClubModal.style.display = 'none';
@@ -5402,6 +5404,7 @@ function setupAdminClubsConsole() {
     formClub.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('adm-club-name').value.trim();
+      const abbr = document.getElementById('adm-club-abbr').value.trim();
       const address = document.getElementById('adm-club-address').value.trim();
       const owner = document.getElementById('adm-club-owner').value.trim();
       const phone = document.getElementById('adm-club-phone').value.trim();
@@ -5442,6 +5445,7 @@ function setupAdminClubsConsole() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name,
+              abbr,
               address,
               owner,
               phone,
@@ -5464,6 +5468,7 @@ function setupAdminClubsConsole() {
         const newClub = {
           id: tempId,
           name,
+          abbr: abbr || '-',
           address,
           owner: owner || '-',
           phone: phone || '-',
@@ -5909,7 +5914,9 @@ window.selectClubRow = function(clubId, element) {
   const tablesTag = document.getElementById('pm-club-detail-tables-tag');
   const tablesCountEl = document.getElementById('pm-club-detail-tables-count');
   
-  if (nameEl) nameEl.textContent = club.name;
+  if (nameEl) {
+    nameEl.innerHTML = `${club.name} ${club.abbr && club.abbr !== '-' ? `<small style="font-size: 0.8rem; font-weight: 800; color: var(--accent); margin-left: 6px;">(${club.abbr})</small>` : ''}`;
+  }
   if (idEl) idEl.textContent = `ID: CLB-${club.id.toString().padStart(3, '0')}`;
   if (tablesTag) tablesTag.textContent = `${club.tables || 0} Meja Biliar`;
   if (tablesCountEl) tablesCountEl.textContent = club.tables || 0;
@@ -6064,7 +6071,7 @@ function renderAdminClubPreview(searchQuery = '') {
               ${c.logo ? `<img src="${c.logo}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-building" style="font-size: 1.1rem; color: #60a5fa;"></i>`}
             </div>
             <div class="pm-cell-name-wrap">
-              <span class="pm-cell-name">${c.name}</span>
+              <span class="pm-cell-name">${c.name} ${c.abbr && c.abbr !== '-' ? `<small style="font-size: 0.72rem; color: var(--accent-light); font-weight: 700; margin-left: 4px; background: rgba(245, 158, 11, 0.12); padding: 2px 6px; border-radius: 4px;">${c.abbr}</small>` : ''}</span>
               <span class="pm-cell-id">ID: CLB-${c.id.toString().padStart(3, '0')}</span>
             </div>
           </div>
@@ -7428,6 +7435,7 @@ function setupClubDetailActions() {
 
     document.getElementById('edit-club-id').value = club.id;
     document.getElementById('edit-club-name').value = club.name;
+    document.getElementById('edit-club-abbr').value = club.abbr || '';
     document.getElementById('edit-club-address').value = club.address;
     document.getElementById('edit-club-owner').value = club.owner || '';
     document.getElementById('edit-club-phone').value = club.phone || '';
