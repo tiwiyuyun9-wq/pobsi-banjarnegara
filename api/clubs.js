@@ -1,4 +1,5 @@
 const { supabase, logActivity } = require('./_supabase');
+const { uploadMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -68,6 +69,10 @@ module.exports = async (req, res) => {
       const nextNum = maxNum + 1;
       const newId = `C${nextNum.toString().padStart(3, '0')}`;
 
+      // Upload logo and cover to Supabase Storage or local fallback
+      const logoUrl = logo ? await uploadMedia(logo, `club-logo-${newId}`, 'clubs') : null;
+      const coverUrl = cover ? await uploadMedia(cover, `club-cover-${newId}`, 'clubs') : null;
+
       const newClub = {
         id: newId,
         name: name.trim(),
@@ -77,8 +82,8 @@ module.exports = async (req, res) => {
         phone: phone || '-',
         tables: parseInt(tables || 0, 10),
         status: 'Aktif',
-        logo: logo || null,
-        cover: cover || null
+        logo: logoUrl || null,
+        cover: coverUrl || null
       };
 
       let data;
@@ -124,6 +129,10 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
 
+      // Upload logo and cover to Supabase Storage or local fallback
+      const logoUrl = logo ? await uploadMedia(logo, `club-logo-${id}`, 'clubs') : null;
+      const coverUrl = cover ? await uploadMedia(cover, `club-cover-${id}`, 'clubs') : null;
+
       const updated = {
         name: name.trim(),
         abbr: (abbr || '').trim() || '-',
@@ -132,8 +141,8 @@ module.exports = async (req, res) => {
         phone: phone || '-',
         tables: parseInt(tables || 0, 10),
         status: status || 'Aktif',
-        logo: logo || null,
-        cover: cover || null
+        logo: logoUrl || null,
+        cover: coverUrl || null
       };
 
       let updatePayload = { ...updated };
