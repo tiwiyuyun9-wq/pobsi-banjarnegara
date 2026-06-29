@@ -4935,42 +4935,62 @@ function renderClubs(filterQuery = '') {
 
   container.innerHTML = filtered.map(club => {
     const members = memberCounts[club.name] || 0;
+    // Cover image fallback
+    const coverImg = club.cover || "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80";
+    
     return `
-    <div class="club-card animate-on-scroll">
-      <div class="club-card-header">
-        <div class="club-icon-wrapper">
-          <i class="fa-solid fa-building"></i>
+    <div class="club-card animate-on-scroll" style="display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, rgba(20, 27, 45, 0.95), rgba(10, 15, 30, 0.95)); border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+      <!-- Cover Banner -->
+      <div style="position: relative; height: 130px; width: 100%; overflow: hidden; background: #1e293b;">
+        <img src="${coverImg}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.65; transition: transform 0.5s ease;" class="club-card-banner-img">
+        <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(10, 15, 30, 0.95));"></div>
+        <span style="position: absolute; top: 12px; right: 12px; font-size: 0.68rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 3px 8px; border-radius: 99px; border: 1px solid rgba(16, 185, 129, 0.2); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>${club.status || 'Aktif'}
+        </span>
+      </div>
+
+      <!-- Overlapping Avatar & Name -->
+      <div style="padding: 0 20px; position: relative; margin-top: -36px; display: flex; align-items: flex-end; gap: 12px; z-index: 2;">
+        <div style="width: 64px; height: 64px; border-radius: 12px; border: 3px solid rgba(10, 15, 30, 0.95); background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); flex-shrink: 0;">
+          ${club.logo ? `<img src="${club.logo}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-building" style="font-size: 1.4rem; color: #3b82f6;"></i>`}
         </div>
-        <div>
-          <h3 class="club-card-name">${club.name} ${club.abbr && club.abbr !== '-' ? `<span class="club-abbr-badge" style="font-size: 0.72rem; color: var(--accent); margin-left: 6px; background: rgba(245, 158, 11, 0.1); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 800; vertical-align: middle;">${club.abbr}</span>` : ''}</h3>
-          <span class="club-card-status">
-            <span class="status-dot"></span>${club.status || 'Aktif'}
-          </span>
+        <div style="margin-bottom: 4px;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; line-height: 1.2; margin: 0;">
+            ${club.name}
+            ${club.abbr && club.abbr !== '-' ? `<span style="font-size: 0.65rem; color: #f59e0b; background: rgba(245, 158, 11, 0.12); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 800;">${club.abbr}</span>` : ''}
+          </h3>
         </div>
       </div>
-      <div class="club-card-body">
-        <div class="club-detail-row">
-          <i class="fa-solid fa-location-dot"></i>
+
+      <!-- Body info -->
+      <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1; margin-top: 4px;">
+        <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
+          <i class="fa-solid fa-location-dot" style="margin-top: 2px; color: var(--text-dim); width: 14px; text-align: center;"></i>
           <span>${club.address}</span>
         </div>
-        <div class="club-detail-row">
-          <i class="fa-solid fa-user-tie"></i>
-          <span>${club.owner || '-'}</span>
-        </div>
-        <div class="club-detail-row">
-          <i class="fa-solid fa-phone"></i>
-          <span>${club.phone || '-'}</span>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-muted);">
+          <i class="fa-solid fa-user-tie" style="color: var(--text-dim); width: 14px; text-align: center;"></i>
+          <span>Owner: <strong style="color: #fff; font-weight: 500;">${club.owner || '-'}</strong></span>
         </div>
       </div>
-      <div class="club-card-footer">
-        <div class="club-metric">
-          <span class="club-metric-val">${club.tables || 0}</span>
-          <span class="club-metric-lbl">Meja</span>
+
+      <!-- Metrics -->
+      <div style="display: flex; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px; border-right: 1px solid rgba(255,255,255,0.05);">
+          <span style="font-size: 1.25rem; font-weight: 800; color: #3b82f6; text-shadow: 0 0 8px rgba(59, 130, 246, 0.2);">${club.tables || 0}</span>
+          <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Meja</span>
         </div>
-        <div class="club-metric">
-          <span class="club-metric-val">${members}</span>
-          <span class="club-metric-lbl">Atlet</span>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px;">
+          <span style="font-size: 1.25rem; font-weight: 800; color: #10b981; text-shadow: 0 0 8px rgba(16, 185, 129, 0.2);">${members}</span>
+          <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Atlet</span>
         </div>
+      </div>
+
+      <!-- Action CTA Button -->
+      <div style="padding: 12px 20px 20px;">
+        <button onclick="openPublicClubDetail('${club.id}')" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.25); background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); color: #60a5fa; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1))'; this.style.color='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05))'; this.style.color='#60a5fa';">
+          <i class="fa-solid fa-circle-info"></i> Lihat Roster & Statistik
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -4986,6 +5006,165 @@ function renderClubs(filterQuery = '') {
   // Re-observe new animated elements
   setupScrollAnimations();
 }
+
+// Global active public club ID for search filter inside modal
+window.activePubClubId = null;
+
+// Open Premium Public Club Detail Modal
+window.openPublicClubDetail = function(clubId) {
+  const club = (appData.clubs || []).find(c => c.id.toString() === clubId.toString());
+  if (!club) return;
+
+  window.activePubClubId = clubId;
+  const modal = document.getElementById('pub-club-detail-modal');
+  if (!modal) return;
+
+  // Reset search input
+  const searchInput = document.getElementById('pub-club-roster-search');
+  if (searchInput) searchInput.value = '';
+
+  // Populate basic info
+  document.getElementById('pub-club-detail-name').innerHTML = `${club.name} ${club.abbr && club.abbr !== '-' ? `<small style="font-size: 0.85rem; color: #f59e0b; background: rgba(245, 158, 11, 0.15); padding: 2px 6px; border-radius: 4px; font-weight: 800; vertical-align: middle;">${club.abbr}</small>` : ''}`;
+  document.getElementById('pub-club-detail-address').textContent = club.address;
+  document.getElementById('pub-club-detail-owner').textContent = club.owner || '-';
+  document.getElementById('pub-club-detail-phone').textContent = club.phone || '-';
+
+  const statusEl = document.getElementById('pub-club-detail-status');
+  if (statusEl) {
+    const isAktif = (club.status || 'Aktif') === 'Aktif';
+    statusEl.textContent = club.status || 'Aktif';
+    statusEl.style.color = isAktif ? '#10b981' : '#ef4444';
+    statusEl.style.background = isAktif ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+    statusEl.style.borderColor = isAktif ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+  }
+
+  // Populate images
+  const bannerImg = document.getElementById('pub-club-detail-banner');
+  if (bannerImg) {
+    bannerImg.src = club.cover || "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80";
+  }
+
+  const logoImg = document.getElementById('pub-club-detail-logo');
+  if (logoImg) {
+    logoImg.src = club.logo || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="%2360a5fa"><path d="M184 0c-13.3 0-24 10.7-24 24V96H24c-13.3 0-24 10.7-24 24V488c0 13.3 10.7 24 24 24H488c13.3 0 24-10.7 24-24V120c0-13.3-10.7-24-24-24H352V24c0-13.3-10.7-24-24-24H184z"/></svg>';
+  }
+
+  // Calculate statistics
+  const clubPlayers = (appData.players || []).filter(p => p.club.toLowerCase() === club.name.toLowerCase());
+  
+  const parseHandicapValue = (hc) => {
+    if (!hc) return 0;
+    const num = parseFloat(hc.replace(/[^\d.]/g, ''));
+    return isNaN(num) ? 0 : num;
+  };
+  const totalHc = clubPlayers.reduce((sum, p) => sum + parseHandicapValue(p.handicap), 0);
+  const avgHc = clubPlayers.length > 0 ? (totalHc / clubPlayers.length).toFixed(1) : '0';
+
+  document.getElementById('pub-club-detail-stat-tables').textContent = club.tables || 0;
+  document.getElementById('pub-club-detail-stat-players').textContent = clubPlayers.length;
+  document.getElementById('pub-club-detail-stat-avg-hc').textContent = avgHc;
+
+  // Render Roster list
+  renderPubClubRoster(clubId);
+
+  // Render Handicap distribution
+  const hcCounts = {};
+  clubPlayers.forEach(p => {
+    hcCounts[p.handicap] = (hcCounts[p.handicap] || 0) + 1;
+  });
+
+  const distContainer = document.getElementById('pub-club-hc-dist');
+  if (distContainer) {
+    if (clubPlayers.length === 0) {
+      distContainer.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 10px;">Belum ada sebaran handicap.</div>';
+    } else {
+      const sortedHcKeys = Object.keys(hcCounts).sort((a, b) => {
+        const valA = parseHandicapValue(a);
+        const valB = parseHandicapValue(b);
+        return valA - valB;
+      });
+
+      distContainer.innerHTML = sortedHcKeys.map(hc => {
+        const count = hcCounts[hc];
+        const percentage = ((count / clubPlayers.length) * 100).toFixed(0);
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; padding: 2px 0;">
+            <span style="width: 60px; font-weight: 700; color: #fff;">HC ${hc}</span>
+            <div style="flex-grow: 1; margin: 0 16px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+              <div style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 4px;"></div>
+            </div>
+            <span style="width: 55px; text-align: right; color: var(--text-muted); font-weight: 600;">${count} (${percentage}%)</span>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Display modal
+  modal.style.display = 'flex';
+};
+
+window.renderPubClubRoster = function(clubId, filterText = '') {
+  const club = (appData.clubs || []).find(c => c.id.toString() === clubId.toString());
+  if (!club) return;
+  const rosterTbody = document.getElementById('pub-club-roster-tbody');
+  if (!rosterTbody) return;
+
+  const clubPlayers = (appData.players || []).filter(p => p.club.toLowerCase() === club.name.toLowerCase());
+  const query = filterText.toLowerCase().trim();
+  const filtered = query
+    ? clubPlayers.filter(p => p.name.toLowerCase().includes(query))
+    : clubPlayers;
+
+  if (filtered.length === 0) {
+    rosterTbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 24px; color: var(--text-dim);">Tidak ada atlet ditemukan.</td>
+      </tr>`;
+    return;
+  }
+
+  rosterTbody.innerHTML = filtered.map(p => `
+    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+      <td style="padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+          ${p.avatar ? `<img src="${p.avatar}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-user" style="font-size: 0.8rem; color: var(--text-dim);"></i>`}
+        </div>
+        <span style="font-weight: 600; color: #fff;">${p.name}</span>
+      </td>
+      <td style="padding: 12px 16px; text-align: center; color: var(--text-muted);">${p.gender || '-'}</td>
+      <td style="padding: 12px 16px; text-align: center;"><span class="pm-hc-badge" style="font-size: 0.72rem; padding: 2px 8px; font-weight: 800;">HC ${p.handicap}</span></td>
+      <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: var(--accent-light);">${p.points || 0}</td>
+    </tr>
+  `).join('');
+};
+
+// Wire up search input & close buttons for public club detail modal at startup
+document.addEventListener('DOMContentLoaded', () => {
+  const pubSearchInput = document.getElementById('pub-club-roster-search');
+  if (pubSearchInput) {
+    pubSearchInput.addEventListener('input', () => {
+      if (window.activePubClubId) {
+        window.renderPubClubRoster(window.activePubClubId, pubSearchInput.value);
+      }
+    });
+  }
+
+  const pubCloseBtn = document.getElementById('pub-club-detail-modal-close');
+  const pubModal = document.getElementById('pub-club-detail-modal');
+  if (pubCloseBtn && pubModal) {
+    pubCloseBtn.addEventListener('click', () => {
+      pubModal.style.display = 'none';
+      window.activePubClubId = null;
+    });
+    pubModal.addEventListener('click', (e) => {
+      if (e.target === pubModal) {
+        pubModal.style.display = 'none';
+        window.activePubClubId = null;
+      }
+    });
+  }
+});
 
 function setupClubSearch() {
   const input = document.getElementById('club-search-input');

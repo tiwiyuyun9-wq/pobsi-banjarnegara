@@ -6413,6 +6413,104 @@
     </div>
   </div>
 
+  <!-- Public Club Detail Premium Modal Overlay -->
+  <div class="pm-modal-overlay" id="pub-club-detail-modal" style="display:none; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(8px);">
+    <div class="pm-modal" style="max-width: 800px; width: calc(100% - 32px); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background: rgba(10, 15, 30, 0.95); border-radius: 16px;">
+      
+      <!-- Banner & Logo Header Section -->
+      <div style="position: relative; height: 180px; width: 100%; flex-shrink: 0; background: linear-gradient(135deg, #1e3a8a, #3b82f6); overflow: hidden;">
+        <img id="pub-club-detail-banner" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7; filter: blur(1px);">
+        <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(10, 15, 30, 0.95));"></div>
+        <button class="pm-modal-close" id="pub-club-detail-modal-close" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.4); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); color: #fff; cursor: pointer; transition: all 0.2s; outline: none;"><i class="fa-solid fa-xmark"></i></button>
+        
+        <!-- Logo overlapping banner -->
+        <div style="position: absolute; bottom: 0; left: 24px; display: flex; align-items: flex-end; gap: 16px;">
+          <div style="width: 84px; height: 84px; border-radius: 16px; border: 3px solid rgba(10, 15, 30, 0.95); background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+            <img id="pub-club-detail-logo" src="" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div style="margin-bottom: 8px;">
+            <h2 id="pub-club-detail-name" style="font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 8px;">Klub Name</h2>
+            <span id="pub-club-detail-status" style="font-size: 0.75rem; font-weight: 700; color: #10b981; text-transform: uppercase; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(16, 185, 129, 0.2); width: fit-content; display: inline-block;">AKTIF</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Content Body -->
+      <div class="pm-modal-body" style="overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; flex-grow: 1;">
+        
+        <!-- Club Basic Info & Statistics -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; margin-top: 10px;">
+          <!-- Left side details -->
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04);">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="margin-top: 3px; color: var(--primary-light); width: 16px; text-align: center;"></i>
+              <span id="pub-club-detail-address">Alamat...</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-user-tie" style="color: var(--primary-light); width: 16px; text-align: center;"></i>
+              <span>Owner: <strong id="pub-club-detail-owner" style="color: #fff;">-</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-phone" style="color: var(--primary-light); width: 16px; text-align: center;"></i>
+              <span>Hubungi: <strong id="pub-club-detail-phone" style="color: #fff;">-</strong></span>
+            </div>
+          </div>
+
+          <!-- Right side stats -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(29, 78, 216, 0.04)); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;">
+              <span style="font-size: 1.8rem; font-weight: 800; color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.2);" id="pub-club-detail-stat-tables">0</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-top: 4px;">Meja</span>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 95, 70, 0.04)); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;">
+              <span style="font-size: 1.8rem; font-weight: 800; color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);" id="pub-club-detail-stat-players">0</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-top: 4px;">Atlet</span>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(91, 33, 182, 0.04)); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;">
+              <span style="font-size: 1.8rem; font-weight: 800; color: #8b5cf6; text-shadow: 0 0 10px rgba(139, 92, 246, 0.2);" id="pub-club-detail-stat-avg-hc">0</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-top: 4px;">Avg HC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roster Section -->
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;"><i class="fa-solid fa-users text-blue"></i> Roster Atlet Resmi</h3>
+            <div style="position: relative; width: 100%; max-width: 250px;">
+              <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-dim);"></i>
+              <input type="text" id="pub-club-roster-search" placeholder="Cari nama atlet..." style="width: 100%; padding: 6px 12px 6px 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.8rem; outline: none;">
+            </div>
+          </div>
+          <div style="max-height: 280px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(0,0,0,0.15);">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                  <th style="padding: 10px 16px;">Nama Atlet</th>
+                  <th style="padding: 10px 16px; text-align: center;">Gender</th>
+                  <th style="padding: 10px 16px; text-align: center;">Handicap</th>
+                  <th style="padding: 10px 16px; text-align: center;">Poin BOC</th>
+                </tr>
+              </thead>
+              <tbody id="pub-club-roster-tbody">
+                <!-- Dynamically populated in app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Handicap Distribution Visual Matrix -->
+        <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 16px;">
+          <h4 style="font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-chart-bar text-purple"></i> Sebaran Level Handicap</h4>
+          <div id="pub-club-hc-dist" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
