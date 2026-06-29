@@ -184,8 +184,14 @@ db.serialize(() => {
     owner TEXT DEFAULT '-',
     phone TEXT DEFAULT '-',
     tables INTEGER DEFAULT 0,
-    status TEXT DEFAULT 'Aktif'
+    status TEXT DEFAULT 'Aktif',
+    logo TEXT,
+    cover TEXT
   )`);
+
+  // Safely alter existing table to add logo & cover columns if they don't exist yet
+  db.run(`ALTER TABLE clubs ADD COLUMN logo TEXT`, () => {});
+  db.run(`ALTER TABLE clubs ADD COLUMN cover TEXT`, () => {});
 
   // 5. Buat Tabel Users (RBAC)
   db.run(`CREATE TABLE IF NOT EXISTS users (

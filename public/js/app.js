@@ -701,7 +701,7 @@ function loadStatistics() {
     const hcKey = p.handicap ? p.handicap.toString().trim() : '3N';
     return sum + (hcWeight[hcKey] || 3.5);
   }, 0);
-  const hcAvg = (hcSum / totalPlayers).toFixed(1);
+  const hcAvg = totalPlayers === 0 ? "0.0" : (hcSum / totalPlayers).toFixed(1);
   document.getElementById("hc-stat-average").textContent = `HC ${hcAvg}`;
 
   // Handicap Paling Banyak
@@ -710,7 +710,7 @@ function loadStatistics() {
     const hc = p.handicap ? p.handicap.toString().trim() : '3N';
     hcCounts[hc] = (hcCounts[hc] || 0) + 1;
   });
-  let mostCommonHc = '3N';
+  let mostCommonHc = totalPlayers === 0 ? '-' : '3N';
   let maxCount = 0;
   for (const hc in hcCounts) {
     if (hcCounts[hc] > maxCount) {
@@ -718,9 +718,7 @@ function loadStatistics() {
       mostCommonHc = hc;
     }
   }
-  document.getElementById("hc-stat-most").textContent = `HC ${mostCommonHc}`;
-
-  // Hero Floating Cards Data: BOC Prize Pool Showcase (Static display in HTML)
+  document.getElementById("hc-stat-most").textContent = mostCommonHc === '-' ? '-' : `HC ${mostCommonHc}`;
 
   // Average handicap display
   const heroAvgHandicapEl = document.getElementById("hero-avg-handicap");
@@ -766,6 +764,15 @@ function loadStatistics() {
         heroEventBadgeContainer.classList.add("badge-ended");
       }
     }
+  } else if (heroEventTitleEl) {
+    heroEventTitleEl.textContent = "BELUM ADA EVENT";
+    if (heroEventDateEl) heroEventDateEl.textContent = "JADWAL BELUM DITENTUKAN";
+    if (heroEventSubEl) heroEventSubEl.textContent = "POBSI BANJARNEGARA";
+    if (heroEventBadgeTextEl && heroEventBadgeDotEl && heroEventBadgeContainer) {
+      heroEventBadgeTextEl.textContent = "OFFLINE";
+      heroEventBadgeDotEl.className = "live-badge-dot dot-ended";
+      heroEventBadgeContainer.className = "live-badge badge-ended";
+    }
   }
 }
 
@@ -802,34 +809,53 @@ function loadHomeHighlights() {
         </div>
       </div>
     `;
+  } else if (eventContainer) {
+    eventContainer.innerHTML = `
+      <div style="text-align: center; padding: 32px 16px; color: var(--text-dim); width: 100%;">
+        <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
+        Belum ada agenda turnamen terdekat yang dijadwalkan.<br>
+        <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Silakan hubungi Pengcab POBSI untuk informasi lebih lanjut.</span>
+      </div>
+    `;
   }
 
   // B. Sekilas BOC Klasemen 3 Besar
   const quickStandingsContainer = document.getElementById("quick-standings-placeholder");
   if (quickStandingsContainer) {
     const top3 = appData.standings.slice(0, 3);
-    quickStandingsContainer.innerHTML = top3.map(player => {
-      const slug = generateSlug(player.name);
-      return `
-      <div class="top-player-item">
-        <div class="player-left">
-          <div class="player-rank-medal rank-${player.rank}">
-            ${player.rank === 1 ? '<i class="fa-solid fa-crown" style="font-size:0.75rem"></i>' : player.rank}
-          </div>
-          <div class="player-name-club">
-            <a href="javascript:void(0)" onclick="openAthleteProfile('${slug}')" class="player-name-bold" style="color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.15); transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">${player.name}</a>
-            <span class="player-club-small">${player.club}</span>
-          </div>
+    if (top3.length === 0) {
+      quickStandingsContainer.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--text-dim); width: 100%;">
+          <i class="fa-solid fa-medal" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
+          Belum ada data klasemen terkini untuk musim ini.<br>
+          <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Klasemen akan otomatis terupdate setelah seri sirkuit berjalan.</span>
         </div>
-        <div class="player-right-stats">
-          <span class="player-hc-badge">HC ${player.handicap}</span>
-          <span class="player-points-text">${player.points} Pts</span>
-        </div>
-      </div>
       `;
-    }).join("");
+    } else {
+      quickStandingsContainer.innerHTML = top3.map(player => {
+        const slug = generateSlug(player.name);
+        return `
+        <div class="top-player-item">
+          <div class="player-left">
+            <div class="player-rank-medal rank-${player.rank}">
+              ${player.rank === 1 ? '<i class="fa-solid fa-crown" style="font-size:0.75rem"></i>' : player.rank}
+            </div>
+            <div class="player-name-club">
+              <a href="javascript:void(0)" onclick="openAthleteProfile('${slug}')" class="player-name-bold" style="color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.15); transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">${player.name}</a>
+              <span class="player-club-small">${player.club}</span>
+            </div>
+          </div>
+          <div class="player-right-stats">
+            <span class="player-hc-badge">HC ${player.handicap}</span>
+            <span class="player-points-text">${player.points} Pts</span>
+          </div>
+        </div>
+        `;
+      }).join("");
+    }
   }
 }
+
 
 // 7. Battle of Champions Leaderboard Logic
 // 7. Battle of Champions Leaderboard Logic
@@ -939,9 +965,9 @@ function applyBocSettingsToDOM() {
   const prize2El = document.getElementById("hero-boc-prize-2");
   const prize3El = document.getElementById("hero-boc-prize-3");
 
-  if (prize1El) prize1El.textContent = prizes.juara1 || "RP 7,5 JT";
-  if (prize2El) prize2El.textContent = prizes.juara2 || "RP 4,5 JT";
-  if (prize3El) prize3El.textContent = prizes.juara3 || "RP 3,0 JT";
+  if (prize1El) prize1El.textContent = prizes.juara1 || "RP 0";
+  if (prize2El) prize2El.textContent = prizes.juara2 || "RP 0";
+  if (prize3El) prize3El.textContent = prizes.juara3 || "RP 0";
 
   // Update cover backgrounds across tabs
   const publicHero = document.getElementById("boc-public-hero-section");
@@ -993,10 +1019,10 @@ function applyBocSettingsToDOM() {
       if (total > 0) {
         totalPrizeEl.textContent = `RP ${total.toLocaleString('id-ID')}`;
       } else {
-        totalPrizeEl.textContent = "RP 15.000.000";
+        totalPrizeEl.textContent = "RP 0";
       }
     } else {
-      totalPrizeEl.textContent = "RP 15.000.000";
+      totalPrizeEl.textContent = "RP 0";
     }
   }
 
@@ -1022,6 +1048,139 @@ function applyBocSettingsToDOM() {
   if (setBocCutoff) setBocCutoff.value = bocSettings.cutoff_limit || 16;
   const tabSetBocCutoff = document.getElementById("tab-set-boc-cutoff");
   if (tabSetBocCutoff) tabSetBocCutoff.value = bocSettings.cutoff_limit || 16;
+
+  // Synchronize form inputs across both popup modal and settings tab forms (SSOT)
+  const schedule = bocSettings.playoff_schedule || {};
+  const parsedSchedule = typeof schedule === 'string' ? JSON.parse(schedule) : schedule;
+  const rules = bocSettings.rules || "";
+
+  // 1. Popup Modal Form inputs
+  const inpDate = document.getElementById("inp-boc-schedule-date");
+  const inpTime = document.getElementById("inp-boc-schedule-time");
+  const inpVenue = document.getElementById("inp-boc-schedule-venue");
+  const scheduleDatePicker = document.getElementById("inp-boc-schedule-date-wrapper")?._flatpickr;
+  const setBocYear = document.getElementById("set-boc-year");
+  const setBocPrize1 = document.getElementById("set-boc-prize1");
+  const setBocPrize2 = document.getElementById("set-boc-prize2");
+  const setBocPrize3 = document.getElementById("set-boc-prize3");
+  const setBocBestGame = document.getElementById("set-boc-bestgame");
+  const setBocRules = document.getElementById("set-boc-rules");
+
+  if (inpDate) {
+    if (scheduleDatePicker) scheduleDatePicker.setDate(parsedSchedule.date || "", false);
+    else inpDate.value = parsedSchedule.date || "";
+  }
+  if (inpTime) inpTime.value = parsedSchedule.time || "";
+  if (inpVenue) inpVenue.value = parsedSchedule.venue || "";
+  if (setBocYear) setBocYear.value = bocSettings.year || currentBocYear || "2026";
+  if (setBocPrize1) setBocPrize1.value = formatRupiah(prizes.juara1 || "");
+  if (setBocPrize2) setBocPrize2.value = formatRupiah(prizes.juara2 || "");
+  if (setBocPrize3) setBocPrize3.value = formatRupiah(prizes.juara3 || "");
+  if (setBocBestGame) setBocBestGame.value = formatRupiah(prizes.best_game || "");
+  if (setBocRules) setBocRules.value = rules;
+
+  // 2. Settings Tab Form inputs
+  const tabBocDate = document.getElementById("tab-boc-schedule-date");
+  const tabBocTime = document.getElementById("tab-boc-schedule-time");
+  const tabBocVenue = document.getElementById("tab-boc-schedule-venue");
+  const tabBocDatePicker = document.getElementById("tab-boc-schedule-date-wrapper")?._flatpickr;
+  const tabSetBocYear = document.getElementById("tab-set-boc-year");
+  const tabSetBocPrize1 = document.getElementById("tab-set-boc-prize1");
+  const tabSetBocPrize2 = document.getElementById("tab-set-boc-prize2");
+  const tabSetBocPrize3 = document.getElementById("tab-set-boc-prize3");
+  const tabSetBocBestGame = document.getElementById("tab-set-boc-bestgame");
+  const tabSetBocRules = document.getElementById("tab-set-boc-rules");
+
+  if (tabBocDate) {
+    if (tabBocDatePicker) tabBocDatePicker.setDate(parsedSchedule.date || "", false);
+    else tabBocDate.value = parsedSchedule.date || "";
+  }
+  if (tabBocTime) tabBocTime.value = parsedSchedule.time || "";
+  if (tabBocVenue) tabBocVenue.value = parsedSchedule.venue || "";
+  if (tabSetBocYear) tabSetBocYear.value = bocSettings.year || currentBocYear || "2026";
+  if (tabSetBocPrize1) tabSetBocPrize1.value = formatRupiah(prizes.juara1 || "");
+  if (tabSetBocPrize2) tabSetBocPrize2.value = formatRupiah(prizes.juara2 || "");
+  if (tabSetBocPrize3) tabSetBocPrize3.value = formatRupiah(prizes.juara3 || "");
+  if (tabSetBocBestGame) tabSetBocBestGame.value = formatRupiah(prizes.best_game || "");
+  if (tabSetBocRules) tabSetBocRules.value = rules;
+
+  // 3. Image Previews (Popup Modal)
+  const bocCoverDropZone = document.getElementById("boc-cover-drop-zone");
+  const bocCoverPreviewContainer = document.getElementById("boc-cover-preview-container");
+  const bocCoverPreviewImg = document.getElementById("boc-cover-preview-img");
+  const bocCoverPreviewFilename = document.getElementById("boc-cover-preview-filename");
+  const bocCoverFileInput = document.getElementById("set-boc-cover-file");
+
+  if (bocSettings.cover) {
+    window.currentUploadedBocCoverBase64 = bocSettings.cover;
+    if (bocCoverPreviewImg) bocCoverPreviewImg.src = bocSettings.cover;
+    if (bocCoverPreviewFilename) bocCoverPreviewFilename.textContent = "boc_cover.png";
+    if (bocCoverDropZone) bocCoverDropZone.style.display = "none";
+    if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "flex";
+  } else {
+    window.currentUploadedBocCoverBase64 = "";
+    if (bocCoverFileInput) bocCoverFileInput.value = "";
+    if (bocCoverDropZone) bocCoverDropZone.style.display = "flex";
+    if (bocCoverPreviewContainer) bocCoverPreviewContainer.style.display = "none";
+  }
+
+  const bocRecapDropZone = document.getElementById("boc-recap-drop-zone");
+  const bocRecapPreviewContainer = document.getElementById("boc-recap-preview-container");
+  const bocRecapPreviewImg = document.getElementById("boc-recap-preview-img");
+  const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
+  const bocRecapFileInput = document.getElementById("set-boc-recap-file");
+
+  if (bocSettings.recap_cover) {
+    window.currentUploadedBocRecapBase64 = bocSettings.recap_cover;
+    if (bocRecapPreviewImg) bocRecapPreviewImg.src = bocSettings.recap_cover;
+    if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = "recap_cover.png";
+    if (bocRecapDropZone) bocRecapDropZone.style.display = "none";
+    if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "flex";
+  } else {
+    window.currentUploadedBocRecapBase64 = "";
+    if (bocRecapFileInput) bocRecapFileInput.value = "";
+    if (bocRecapDropZone) bocRecapDropZone.style.display = "flex";
+    if (bocRecapPreviewContainer) bocRecapPreviewContainer.style.display = "none";
+  }
+
+  // 4. Image Previews (Settings Tab)
+  const tabCoverDropZone = document.getElementById("tab-boc-cover-drop-zone");
+  const tabCoverPreviewContainer = document.getElementById("tab-boc-cover-preview-container");
+  const tabCoverPreviewImg = document.getElementById("tab-boc-cover-preview-img");
+  const tabCoverPreviewFilename = document.getElementById("tab-boc-cover-preview-filename");
+  const tabCoverFileInput = document.getElementById("tab-set-boc-cover-file");
+
+  if (bocSettings.cover) {
+    window.tabUploadedBocCoverBase64 = bocSettings.cover;
+    if (tabCoverPreviewImg) tabCoverPreviewImg.src = bocSettings.cover;
+    if (tabCoverPreviewFilename) tabCoverPreviewFilename.textContent = "boc_cover.png";
+    if (tabCoverDropZone) tabCoverDropZone.style.display = "none";
+    if (tabCoverPreviewContainer) tabCoverPreviewContainer.style.display = "flex";
+  } else {
+    window.tabUploadedBocCoverBase64 = "";
+    if (tabCoverFileInput) tabCoverFileInput.value = "";
+    if (tabCoverDropZone) tabCoverDropZone.style.display = "flex";
+    if (tabCoverPreviewContainer) tabCoverPreviewContainer.style.display = "none";
+  }
+
+  const tabRecapDropZone = document.getElementById("tab-boc-recap-drop-zone");
+  const tabRecapPreviewContainer = document.getElementById("tab-boc-recap-preview-container");
+  const tabRecapPreviewImg = document.getElementById("tab-boc-recap-preview-img");
+  const tabRecapPreviewFilename = document.getElementById("tab-boc-recap-preview-filename");
+  const tabRecapFileInput = document.getElementById("tab-set-boc-recap-file");
+
+  if (bocSettings.recap_cover) {
+    window.tabUploadedBocRecapBase64 = bocSettings.recap_cover;
+    if (tabRecapPreviewImg) tabRecapPreviewImg.src = bocSettings.recap_cover;
+    if (tabRecapPreviewFilename) tabRecapPreviewFilename.textContent = "recap_cover.png";
+    if (tabRecapDropZone) tabRecapDropZone.style.display = "none";
+    if (tabRecapPreviewContainer) tabRecapPreviewContainer.style.display = "flex";
+  } else {
+    window.tabUploadedBocRecapBase64 = "";
+    if (tabRecapFileInput) tabRecapFileInput.value = "";
+    if (tabRecapDropZone) tabRecapDropZone.style.display = "flex";
+    if (tabRecapPreviewContainer) tabRecapPreviewContainer.style.display = "none";
+  }
 
   // Populate Point & Handicap settings form if present
   const ptsCircuitChampion = document.getElementById("pts-circuit-champion");
@@ -3591,6 +3750,8 @@ async function setupAdminPanel() {
       const address = document.getElementById("adm-player-address").value.trim();
       const avatar = currentUploadedAvatarBase64 || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`;
 
+      const addPlayerModal = document.getElementById("pm-add-player-modal");
+
       if (isServerOnline) {
         try {
           const res = await fetch('/api/players', {
@@ -3599,7 +3760,7 @@ async function setupAdminPanel() {
             body: JSON.stringify({ name, club, handicap, points, gender, age, avatar, phone, address, cover: currentUploadedCoverBase64, ktp: currentUploadedKtpBase64 })
           });
           if (res.ok) {
-            alert(`Berhasil menyimpan atlet "${name}" ke database lokal!`);
+            showCustomToast(`Berhasil menyimpan atlet "${name}" ke database!`, "success");
             formPlayer.reset();
             
             // Reset upload avatar state
@@ -3620,6 +3781,9 @@ async function setupAdminPanel() {
             if (ktpDropZone) ktpDropZone.style.display = "flex";
             if (ktpPreviewContainer) ktpPreviewContainer.style.display = "none";
 
+            // Close modal overlay
+            if (addPlayerModal) addPlayerModal.style.display = "none";
+
             // Muat ulang data terbaru
             await loadDataFromApi();
             loadStatistics();
@@ -3630,12 +3794,17 @@ async function setupAdminPanel() {
             // Refresh previews & stats
             updateWorkspaceStats();
             renderWorkspacePreviews();
+
+            // Refresh player management table & page reactive components
+            if (typeof window.refreshPlayerManagement === 'function') {
+              window.refreshPlayerManagement();
+            }
           } else {
             const errJson = await res.json();
-            alert(`Gagal menyimpan atlet: ${errJson.error || 'Server error'}`);
+            showCustomToast(`Gagal menyimpan atlet: ${errJson.error || 'Server error'}`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi server: ${err.message}`);
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
         }
       } else {
         // Mode Luring: Simpan sementara di memori runtime
@@ -3643,7 +3812,7 @@ async function setupAdminPanel() {
         const newPlayer = { id: tempId, name, club, handicap, status: "Aktif", points, gender, age, avatar, phone, address, cover: currentUploadedCoverBase64, ktp: currentUploadedKtpBase64 };
         appData.players.push(newPlayer);
         
-        alert(`Mode Luring: Atlet "${name}" ditambahkan sementara di memori browser!`);
+        showCustomToast(`Mode Luring: Atlet "${name}" ditambahkan sementara di memori browser!`, "success");
         formPlayer.reset();
 
         // Reset upload avatar state
@@ -3663,6 +3832,9 @@ async function setupAdminPanel() {
         if (ktpFileInput) ktpFileInput.value = "";
         if (ktpDropZone) ktpDropZone.style.display = "flex";
         if (ktpPreviewContainer) ktpPreviewContainer.style.display = "none";
+
+        // Close modal overlay
+        if (addPlayerModal) addPlayerModal.style.display = "none";
         
         // Render ulang
         loadStatistics();
@@ -3673,6 +3845,11 @@ async function setupAdminPanel() {
         // Refresh previews & stats
         updateWorkspaceStats();
         renderWorkspacePreviews();
+
+        // Refresh player management table & page reactive components
+        if (typeof window.refreshPlayerManagement === 'function') {
+          window.refreshPlayerManagement();
+        }
       }
     });
   }
@@ -3797,6 +3974,70 @@ async function setupAdminPanel() {
 // ============================================================================
 // PLAYER MANAGEMENT CONSOLE — Full JS Logic
 // ============================================================================
+window.currentAddPlayerStep = 1;
+
+window.updateAddPlayerWizardUI = function() {
+  const step = window.currentAddPlayerStep;
+  const panes = document.querySelectorAll(".add-player-step-pane");
+  panes.forEach(pane => {
+    const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+    if (paneStep === step) {
+      pane.classList.add("active");
+    } else {
+      pane.classList.remove("active");
+    }
+  });
+
+  const steps = document.querySelectorAll("#add-player-wizard-stepper .wizard-step");
+  steps.forEach(s => {
+    const sStep = parseInt(s.getAttribute("data-step"), 10);
+    const circle = s.querySelector(".wizard-step-circle");
+    s.classList.remove("active", "completed");
+    if (sStep === step) {
+      s.classList.add("active");
+      if (circle) circle.innerHTML = sStep;
+    } else if (sStep < step) {
+      s.classList.add("completed");
+      if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+    } else {
+      if (circle) circle.innerHTML = sStep;
+    }
+  });
+
+  const progress = document.getElementById("add-player-wizard-progress");
+  if (progress && steps.length > 1) {
+    const percent = ((step - 1) / (steps.length - 1)) * 100;
+    progress.style.width = `${percent}%`;
+  }
+
+  const btnCancel = document.getElementById("add-player-modal-btn-cancel");
+  const btnPrev = document.getElementById("add-player-modal-btn-prev");
+  const btnNext = document.getElementById("add-player-modal-btn-next");
+  const btnSubmit = document.getElementById("add-player-modal-btn-submit");
+
+  if (step === 1) {
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (btnPrev) btnPrev.style.display = "none";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 2) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 3) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "none";
+    if (btnSubmit) btnSubmit.style.display = "inline-block";
+  }
+};
+
+window.resetAddPlayerWizard = function() {
+  window.currentAddPlayerStep = 1;
+  window.updateAddPlayerWizardUI();
+};
+
 function setupPlayerManagement() {
   // State
   let pmCurrentPage = 1;
@@ -4275,7 +4516,10 @@ function setupPlayerManagement() {
   const btnClose = document.getElementById("pm-modal-close");
 
   if (btnOpen && modalOverlay) {
-    btnOpen.addEventListener("click", () => { modalOverlay.style.display = "flex"; });
+    btnOpen.addEventListener("click", () => {
+      window.resetAddPlayerWizard();
+      modalOverlay.style.display = "flex";
+    });
   }
   if (btnClose && modalOverlay) {
     btnClose.addEventListener("click", () => { modalOverlay.style.display = "none"; });
@@ -4284,6 +4528,56 @@ function setupPlayerManagement() {
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) modalOverlay.style.display = "none";
     });
+  }
+
+  // Bind Add Player Wizard Buttons Navigation
+  const btnPlayerPrev = document.getElementById("add-player-modal-btn-prev");
+  const btnPlayerNext = document.getElementById("add-player-modal-btn-next");
+  const btnPlayerCancel = document.getElementById("add-player-modal-btn-cancel");
+
+  if (btnPlayerPrev) {
+    btnPlayerPrev.onclick = function() {
+      if (window.currentAddPlayerStep > 1) {
+        window.currentAddPlayerStep--;
+        window.updateAddPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnPlayerNext) {
+    btnPlayerNext.onclick = function() {
+      if (window.currentAddPlayerStep === 1) {
+        // Validate Step 1
+        const nameVal = document.getElementById("adm-player-name").value.trim();
+        const ageVal = document.getElementById("adm-player-age").value.trim();
+        const phoneVal = document.getElementById("adm-player-phone").value.trim();
+        const addressVal = document.getElementById("adm-player-address").value.trim();
+
+        if (!nameVal || !ageVal || !phoneVal || !addressVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang informasi pribadi wajib!", "error");
+          return;
+        }
+      } else if (window.currentAddPlayerStep === 2) {
+        // Validate Step 2
+        const clubVal = document.getElementById("adm-player-club").value.trim();
+        const hcVal = document.getElementById("adm-player-hc").value.trim();
+        const pointsVal = document.getElementById("adm-player-points").value.trim();
+
+        if (!clubVal || !hcVal || !pointsVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang handicap dan klub wajib!", "error");
+          return;
+        }
+      }
+
+      if (window.currentAddPlayerStep < 3) {
+        window.currentAddPlayerStep++;
+        window.updateAddPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnPlayerCancel && modalOverlay) {
+    btnPlayerCancel.onclick = () => { modalOverlay.style.display = "none"; };
   }
 
   // Export button placeholder
@@ -4488,6 +4782,72 @@ function setupClubSearch() {
 let currentSelectedClubId = null;
 let pmSelectedClubIds = new Set();
 
+window.currentAddClubStep = 1;
+let currentUploadedClubLogoBase64 = "";
+let currentUploadedClubCoverBase64 = "";
+
+window.updateAddClubWizardUI = function() {
+  const step = window.currentAddClubStep;
+  const panes = document.querySelectorAll(".add-club-step-pane");
+  panes.forEach(pane => {
+    const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+    if (paneStep === step) {
+      pane.classList.add("active");
+    } else {
+      pane.classList.remove("active");
+    }
+  });
+
+  const steps = document.querySelectorAll("#add-club-wizard-stepper .wizard-step");
+  steps.forEach(s => {
+    const sStep = parseInt(s.getAttribute("data-step"), 10);
+    const circle = s.querySelector(".wizard-step-circle");
+    s.classList.remove("active", "completed");
+    if (sStep === step) {
+      s.classList.add("active");
+      if (circle) circle.innerHTML = sStep;
+    } else if (sStep < step) {
+      s.classList.add("completed");
+      if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+    } else {
+      if (circle) circle.innerHTML = sStep;
+    }
+  });
+
+  const progress = document.getElementById("add-club-wizard-progress");
+  if (progress && steps.length > 1) {
+    const percent = ((step - 1) / (steps.length - 1)) * 100;
+    progress.style.width = `${percent}%`;
+  }
+
+  const btnCancel = document.getElementById("add-club-modal-btn-cancel");
+  const btnPrev = document.getElementById("add-club-modal-btn-prev");
+  const btnNext = document.getElementById("add-club-wizard-btn-next");
+  const btnSubmit = document.getElementById("add-club-modal-btn-submit");
+
+  if (step === 1) {
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (btnPrev) btnPrev.style.display = "none";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 2) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 3) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "none";
+    if (btnSubmit) btnSubmit.style.display = "inline-block";
+  }
+};
+
+window.resetAddClubWizard = function() {
+  window.currentAddClubStep = 1;
+  window.updateAddClubWizardUI();
+};
+
 function setupAdminClubsConsole() {
   // Modal toggle
   const btnOpenAddClub = document.getElementById('btn-open-add-club-modal');
@@ -4496,6 +4856,7 @@ function setupAdminClubsConsole() {
   
   if (btnOpenAddClub && addClubModal) {
     btnOpenAddClub.addEventListener('click', () => {
+      window.resetAddClubWizard();
       addClubModal.style.display = 'flex';
     });
   }
@@ -4509,6 +4870,173 @@ function setupAdminClubsConsole() {
         addClubModal.style.display = 'none';
       }
     });
+  }
+
+  // Bind Add Club Wizard Buttons Navigation
+  const btnClubPrev = document.getElementById("add-club-modal-btn-prev");
+  const btnClubNext = document.getElementById("add-club-wizard-btn-next");
+  const btnClubCancel = document.getElementById("add-club-modal-btn-cancel");
+
+  if (btnClubPrev) {
+    btnClubPrev.onclick = function() {
+      if (window.currentAddClubStep > 1) {
+        window.currentAddClubStep--;
+        window.updateAddClubWizardUI();
+      }
+    };
+  }
+
+  if (btnClubNext) {
+    btnClubNext.onclick = function() {
+      if (window.currentAddClubStep === 1) {
+        // Validate Step 1
+        const nameVal = document.getElementById("adm-club-name").value.trim();
+        const tablesVal = document.getElementById("adm-club-tables").value.trim();
+
+        if (!nameVal || !tablesVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang data klub wajib!", "error");
+          return;
+        }
+      } else if (window.currentAddClubStep === 2) {
+        // Validate Step 2
+        const addressVal = document.getElementById("adm-club-address").value.trim();
+
+        if (!addressVal) {
+          showCustomToast("Mohon lengkapi alamat lengkap klub!", "error");
+          return;
+        }
+      }
+
+      if (window.currentAddClubStep < 3) {
+        window.currentAddClubStep++;
+        window.updateAddClubWizardUI();
+      }
+    };
+  }
+
+  if (btnClubCancel && addClubModal) {
+    btnClubCancel.onclick = () => { addClubModal.style.display = "none"; };
+  }
+
+  // Bind Club drag and drop upload zones
+  const logoDropZone = document.getElementById("adm-club-logo-drop-zone");
+  const logoFileInput = document.getElementById("adm-club-logo-file");
+  const logoPreviewContainer = document.getElementById("adm-club-logo-preview-container");
+  const logoPreviewImg = document.getElementById("adm-club-logo-preview-img");
+  const logoPreviewFilename = document.getElementById("adm-club-logo-preview-filename");
+  const btnClearLogo = document.getElementById("adm-btn-clear-club-logo");
+
+  if (logoDropZone && logoFileInput) {
+    logoDropZone.onclick = () => logoFileInput.click();
+
+    logoDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      logoDropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      logoDropZone.addEventListener(eventName, () => {
+        logoDropZone.classList.remove("dragover");
+      });
+    });
+
+    logoDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) handleLogoFileSelection(e.dataTransfer.files[0]);
+    });
+
+    logoFileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) handleLogoFileSelection(e.target.files[0]);
+    });
+  }
+
+  function handleLogoFileSelection(file) {
+    if (!file.type.startsWith("image/")) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG).", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showCustomToast("Ukuran logo terlalu besar! Maksimal 2MB.", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentUploadedClubLogoBase64 = e.target.result;
+      if (logoPreviewImg) logoPreviewImg.src = currentUploadedClubLogoBase64;
+      if (logoPreviewFilename) logoPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      if (logoDropZone) logoDropZone.style.display = "none";
+      if (logoPreviewContainer) logoPreviewContainer.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (btnClearLogo) {
+    btnClearLogo.onclick = () => {
+      currentUploadedClubLogoBase64 = "";
+      if (logoFileInput) logoFileInput.value = "";
+      if (logoDropZone) logoDropZone.style.display = "flex";
+      if (logoPreviewContainer) logoPreviewContainer.style.display = "none";
+    };
+  }
+
+  const coverDropZone = document.getElementById("adm-club-cover-drop-zone");
+  const coverFileInput = document.getElementById("adm-club-cover-file");
+  const coverPreviewContainer = document.getElementById("adm-club-cover-preview-container");
+  const coverPreviewImg = document.getElementById("adm-club-cover-preview-img");
+  const coverPreviewFilename = document.getElementById("adm-club-cover-preview-filename");
+  const btnClearCover = document.getElementById("adm-btn-clear-club-cover");
+
+  if (coverDropZone && coverFileInput) {
+    coverDropZone.onclick = () => coverFileInput.click();
+
+    coverDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      coverDropZone.classList.add("dragover");
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      coverDropZone.addEventListener(eventName, () => {
+        coverDropZone.classList.remove("dragover");
+      });
+    });
+
+    coverDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) handleCoverFileSelection(e.dataTransfer.files[0]);
+    });
+
+    coverFileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) handleCoverFileSelection(e.target.files[0]);
+    });
+  }
+
+  function handleCoverFileSelection(file) {
+    if (!file.type.startsWith("image/")) {
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG).", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showCustomToast("Ukuran cover terlalu besar! Maksimal 2MB.", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentUploadedClubCoverBase64 = e.target.result;
+      if (coverPreviewImg) coverPreviewImg.src = currentUploadedClubCoverBase64;
+      if (coverPreviewFilename) coverPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      if (coverDropZone) coverDropZone.style.display = "none";
+      if (coverPreviewContainer) coverPreviewContainer.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (btnClearCover) {
+    btnClearCover.onclick = () => {
+      currentUploadedClubCoverBase64 = "";
+      if (coverFileInput) coverFileInput.value = "";
+      if (coverDropZone) coverDropZone.style.display = "flex";
+      if (coverPreviewContainer) coverPreviewContainer.style.display = "none";
+    };
   }
 
   // Sidebar Tab Switcher
@@ -4683,8 +5211,24 @@ function setupAdminClubsConsole() {
       const tables = parseInt(document.getElementById('adm-club-tables').value || 0);
 
       const onSuccess = async () => {
-        alert(`Klub "${name}" berhasil ditambahkan!`);
+        showCustomToast(`Klub "${name}" berhasil ditambahkan!`, "success");
         formClub.reset();
+        
+        // Reset base64 states
+        currentUploadedClubLogoBase64 = "";
+        currentUploadedClubCoverBase64 = "";
+        
+        // Reset upload preview DOMs
+        const logoDropZone = document.getElementById("adm-club-logo-drop-zone");
+        const logoPreviewContainer = document.getElementById("adm-club-logo-preview-container");
+        if (logoDropZone) logoDropZone.style.display = "flex";
+        if (logoPreviewContainer) logoPreviewContainer.style.display = "none";
+        
+        const coverDropZone = document.getElementById("adm-club-cover-drop-zone");
+        const coverPreviewContainer = document.getElementById("adm-club-cover-preview-container");
+        if (coverDropZone) coverDropZone.style.display = "flex";
+        if (coverPreviewContainer) coverPreviewContainer.style.display = "none";
+
         if (addClubModal) addClubModal.style.display = 'none';
         await loadDataFromApi();
         renderClubs();
@@ -4699,30 +5243,42 @@ function setupAdminClubsConsole() {
           const res = await fetch('/api/clubs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, address, owner, phone, tables })
+            body: JSON.stringify({
+              name,
+              address,
+              owner,
+              phone,
+              tables,
+              logo: currentUploadedClubLogoBase64 || null,
+              cover: currentUploadedClubCoverBase64 || null
+            })
           });
           if (res.ok) {
             await onSuccess();
           } else {
             const errJson = await res.json();
-            alert(`Gagal: ${errJson.error || 'Server error'}`);
+            showCustomToast(`Gagal: ${errJson.error || 'Server error'}`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi: ${err.message}`);
+          showCustomToast(`Error koneksi: ${err.message}`, "error");
         }
       } else {
         const tempId = `C_TEMP_${(appData.clubs || []).length + 1}`;
-        const newClub = { id: tempId, name, address, owner: owner || '-', phone: phone || '-', tables, status: 'Aktif' };
+        const newClub = {
+          id: tempId,
+          name,
+          address,
+          owner: owner || '-',
+          phone: phone || '-',
+          tables,
+          status: 'Aktif',
+          logo: currentUploadedClubLogoBase64 || null,
+          cover: currentUploadedClubCoverBase64 || null
+        };
         if (!appData.clubs) appData.clubs = [];
         appData.clubs.push(newClub);
-        alert(`Mode Luring: Klub "${name}" ditambahkan ke memori sementara!`);
-        formClub.reset();
-        if (addClubModal) addClubModal.style.display = 'none';
-        renderClubs();
-        renderAdminClubPreview();
-        updateWorkspaceStats();
-        loadStatistics();
-        populateClubFilters();
+        showCustomToast(`Mode Luring: Klub "${name}" ditambahkan ke memori sementara!`, "info");
+        await onSuccess();
       }
     });
   }
@@ -5161,6 +5717,26 @@ window.selectClubRow = function(clubId, element) {
   if (tablesTag) tablesTag.textContent = `${club.tables || 0} Meja Biliar`;
   if (tablesCountEl) tablesCountEl.textContent = club.tables || 0;
 
+  // Update logo and cover banner dynamically
+  const logoEl = document.getElementById('pm-club-detail-logo');
+  const coverEl = document.getElementById('pm-club-detail-cover');
+  const statusTagEl = document.getElementById('pm-club-detail-status-tag');
+
+  if (logoEl) {
+    logoEl.src = club.logo ? club.logo : 'images/club-avatar.png';
+  }
+  if (coverEl) {
+    if (club.cover) {
+      coverEl.style.backgroundImage = `url(${club.cover})`;
+    } else {
+      coverEl.style.backgroundImage = 'linear-gradient(135deg, #1e3a8a, #3b82f6)';
+    }
+  }
+  if (statusTagEl) {
+    statusTagEl.textContent = club.status || 'Aktif';
+    statusTagEl.className = `pm-tag ${(club.status || 'Aktif') === 'Aktif' ? 'green' : 'red'}`;
+  }
+
   // Info tab
   const addressVal = document.getElementById('pm-club-info-address');
   const ownerVal = document.getElementById('pm-club-info-owner');
@@ -5287,8 +5863,8 @@ function renderAdminClubPreview(searchQuery = '') {
         </td>
         <td>
           <div class="pm-cell-player">
-            <div class="pm-cell-avatar" style="display: flex; align-items: center; justify-content: center; border-radius: 10px;">
-              <i class="fa-solid fa-building" style="font-size: 1.1rem; color: #60a5fa;"></i>
+            <div class="pm-cell-avatar" style="display: flex; align-items: center; justify-content: center; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.04);">
+              ${c.logo ? `<img src="${c.logo}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-building" style="font-size: 1.1rem; color: #60a5fa;"></i>`}
             </div>
             <div class="pm-cell-name-wrap">
               <span class="pm-cell-name">${c.name}</span>
@@ -6807,6 +7383,51 @@ window.renderAdminBocConsole = function() {
   if (cutoffPointsEl) cutoffPointsEl.textContent = `${cutoffPoints} Pts`;
   if (tiedCountEl) tiedCountEl.textContent = tiedCount > 1 ? tiedCount : 0;
 
+  const completedHtsEl = document.getElementById("boc-metrics-completed-hts");
+  if (completedHtsEl) {
+    const completedSirkuits = (bocSirkuits || []).map((s, idx) => ({ name: s, index: idx })).filter(item => {
+      const sName = item.name.toUpperCase().trim();
+      let sKeyword = sName.split(" ")[0];
+      const keywordMap = {
+        "LMS": "LUMINOUS",
+        "SYP": "SURYA",
+        "PLT": "PLATINUM"
+      };
+      sKeyword = keywordMap[sKeyword] || sKeyword;
+
+      let sSeries = "1";
+      const sMatch = sName.match(/\((\d+)\)/);
+      if (sMatch) {
+        sSeries = sMatch[1];
+      } else if (sName.includes(" 2")) {
+        sSeries = "2";
+      } else if (sName.includes(" 3")) {
+        sSeries = "3";
+      }
+
+      const matches = (appData.events || []).filter(e => {
+        if (!e.title) return false;
+        const eTitle = e.title.toUpperCase();
+        const words = eTitle.split(/[^A-Z0-9]+/);
+        if (!words.includes(sKeyword)) return false;
+        const isHtEvent = eTitle.includes("HOME") || eTitle.includes("HT") || eTitle.includes("CLUB");
+        const isHtSirkuit = sName.includes("HT");
+        if (isHtEvent !== isHtSirkuit) return false;
+        if (eTitle.includes(" 2") || eTitle.includes("(2)")) {
+          return sSeries === "2";
+        }
+        if (eTitle.includes(" 3") || eTitle.includes("(3)")) {
+          return sSeries === "3";
+        }
+        return sSeries === "1";
+      });
+
+      return matches.some(m => m.status === "Selesai");
+    });
+
+    completedHtsEl.textContent = `${completedSirkuits.length} / ${bocSirkuits.length}`;
+  }
+
   // Render Playoff Advisor Widget
   const advisorWidget = document.getElementById("boc-advisor-widget");
   if (advisorWidget) {
@@ -7236,21 +7857,21 @@ function setupBocAdminListeners() {
     }
     
     // Set defaults or prefill from bocSettings
-    const saved = bocSettings.playoff_schedule;
+    const schedule = bocSettings.playoff_schedule;
     const inpDate = document.getElementById("inp-boc-schedule-date");
     const inpTime = document.getElementById("inp-boc-schedule-time");
     const inpVenue = document.getElementById("inp-boc-schedule-venue");
     const scheduleDatePicker = document.getElementById("inp-boc-schedule-date-wrapper")?._flatpickr;
 
-    if (saved) {
-      const schedule = typeof saved === 'string' ? JSON.parse(saved) : saved;
+    if (schedule) {
+      const parsedSchedule = typeof schedule === 'string' ? JSON.parse(schedule) : schedule;
       if (scheduleDatePicker) {
-        scheduleDatePicker.setDate(schedule.date || "");
+        scheduleDatePicker.setDate(parsedSchedule.date || "");
       } else if (inpDate) {
-        inpDate.value = schedule.date || "";
+        inpDate.value = parsedSchedule.date || "";
       }
-      if (inpTime) inpTime.value = schedule.time || "";
-      if (inpVenue) inpVenue.value = schedule.venue || "";
+      if (inpTime) inpTime.value = parsedSchedule.time || "";
+      if (inpVenue) inpVenue.value = parsedSchedule.venue || "";
     } else {
       if (scheduleDatePicker) {
         scheduleDatePicker.setDate("");
@@ -7275,8 +7896,8 @@ function setupBocAdminListeners() {
     if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
     if (bocYearInput) bocYearInput.value = currentBocYear || "2026";
 
-    const prizes = saved ? (bocSettings.prizes || {}) : {};
-    const rules = saved ? (bocSettings.rules || "") : "";
+    const prizes = bocSettings.prizes || {};
+    const rules = bocSettings.rules || "";
 
     if (bocPrize1Input) bocPrize1Input.value = formatRupiah(prizes.juara1 || "");
     if (bocPrize2Input) bocPrize2Input.value = formatRupiah(prizes.juara2 || "");
@@ -7291,7 +7912,7 @@ function setupBocAdminListeners() {
     const bocCoverPreviewFilename = document.getElementById("boc-cover-preview-filename");
     const bocCoverFileInput = document.getElementById("set-boc-cover-file");
 
-    if (saved && bocSettings.cover) {
+    if (bocSettings.cover) {
       window.currentUploadedBocCoverBase64 = bocSettings.cover;
       if (bocCoverPreviewImg) bocCoverPreviewImg.src = bocSettings.cover;
       if (bocCoverPreviewFilename) bocCoverPreviewFilename.textContent = "boc_cover.png";
@@ -7311,7 +7932,7 @@ function setupBocAdminListeners() {
     const bocRecapPreviewFilename = document.getElementById("boc-recap-preview-filename");
     const bocRecapFileInput = document.getElementById("set-boc-recap-file");
 
-    if (saved && bocSettings.recap_cover) {
+    if (bocSettings.recap_cover) {
       window.currentUploadedBocRecapBase64 = bocSettings.recap_cover;
       if (bocRecapPreviewImg) bocRecapPreviewImg.src = bocSettings.recap_cover;
       if (bocRecapPreviewFilename) bocRecapPreviewFilename.textContent = "recap_cover.png";
@@ -7655,7 +8276,7 @@ function setupBocAdminListeners() {
 
         const newEventId = "E" + String(Date.now()).slice(-3) + String(Math.floor(Math.random() * 10));
         
-        let calculatedPrizePool = "Rp 15.000.000";
+        let calculatedPrizePool = "Rp 0";
         if (typeof bocSettings !== 'undefined' && bocSettings.prizes) {
           const prizes = bocSettings.prizes;
           const extractNumber = (str) => {
@@ -8627,7 +9248,7 @@ function renderBocPlayoffConsole(event) {
 
   const prizeValEl = document.getElementById("boc-playoff-prize-val");
   if (prizeValEl) {
-    prizeValEl.textContent = event.prizePool || "Rp 15.000.000";
+    prizeValEl.textContent = event.prizePool || "Rp 0";
   }
 
   // Parse participants
@@ -9089,7 +9710,7 @@ function renderBocPodium3D(event, bracketObj) {
 
   // Compute prizes
   const prizes = (typeof bocSettings !== 'undefined' && bocSettings.prizes) ? bocSettings.prizes : {};
-  const totalPrize = parseFloat((event.prizePool || "15.000.000").replace(/[^0-9]/g, '')) || 15000000;
+  const totalPrize = parseFloat((event.prizePool || "0").replace(/[^0-9]/g, '')) || 0;
   
   const prize1st = prizes.juara1 ? formatRupiah(prizes.juara1) : `Rp ${(totalPrize * 0.5).toLocaleString('id-ID')}`;
   const prize2nd = prizes.juara2 ? formatRupiah(prizes.juara2) : `Rp ${(totalPrize * 0.3).toLocaleString('id-ID')}`;
@@ -18711,6 +19332,16 @@ function setupSystemSettings() {
   const whatsappInput = document.getElementById("set-org-whatsapp");
   const addressInput = document.getElementById("set-org-address");
 
+  const orgPelindungInput = document.getElementById("set-org-pelindung");
+  const orgKetuaInput = document.getElementById("set-org-ketua-umum");
+  const orgWakilInput = document.getElementById("set-org-wakil-ketua");
+  const orgSekretarisInput = document.getElementById("set-org-sekretaris");
+  const orgBendaharaInput = document.getElementById("set-org-bendahara");
+  const orgKomisiTeknikInput = document.getElementById("set-org-komisi-teknik");
+  const orgKomisiPrestasiInput = document.getElementById("set-org-komisi-prestasi");
+  const orgKomisiWasitInput = document.getElementById("set-org-komisi-wasit");
+  const formOrgStructure = document.getElementById("form-settings-org-structure");
+
   const bocCutoffInput = document.getElementById("set-boc-cutoff");
   const bocMaxhcInput = document.getElementById("set-boc-maxhc");
   const bocYearInput = document.getElementById("set-boc-year");
@@ -18760,6 +19391,117 @@ function setupSystemSettings() {
   if (whatsappInput) whatsappInput.value = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
   if (addressInput) addressInput.value = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
 
+  if (orgPelindungInput) orgPelindungInput.value = localStorage.getItem("org_role_pelindung") || "Ketua KONI Banjarnegara";
+  if (orgKetuaInput) orgKetuaInput.value = localStorage.getItem("org_role_ketua") || "Wahyu Hidayat, S.E.";
+  if (orgWakilInput) orgWakilInput.value = localStorage.getItem("org_role_wakil") || "FX. Bambang Setyono";
+  if (orgSekretarisInput) orgSekretarisInput.value = localStorage.getItem("org_role_sekretaris") || "Yanto, S.Kom";
+  if (orgBendaharaInput) orgBendaharaInput.value = localStorage.getItem("org_role_bendahara") || "Heri Purwanto";
+  if (orgKomisiTeknikInput) orgKomisiTeknikInput.value = localStorage.getItem("org_role_komisi_teknik") || "Slamet Riyadi";
+  if (orgKomisiPrestasiInput) orgKomisiPrestasiInput.value = localStorage.getItem("org_role_komisi_prestasi") || "Edy Susanto, S.Pd.";
+  if (orgKomisiWasitInput) orgKomisiWasitInput.value = localStorage.getItem("org_role_komisi_wasit") || "Joko Wahyono";
+
+  // Initialize dynamic organizational structure avatars state
+  let orgAvatarsState = {
+    pelindung: localStorage.getItem("org_avatar_pelindung") || "",
+    ketua: localStorage.getItem("org_avatar_ketua") || "",
+    wakil: localStorage.getItem("org_avatar_wakil") || "",
+    sekretaris: localStorage.getItem("org_avatar_sekretaris") || "",
+    bendahara: localStorage.getItem("org_avatar_bendahara") || "",
+    komisi_teknik: localStorage.getItem("org_avatar_komisi_teknik") || "",
+    komisi_prestasi: localStorage.getItem("org_avatar_komisi_prestasi") || "",
+    komisi_wasit: localStorage.getItem("org_avatar_komisi_wasit") || ""
+  };
+
+  const orgAvatarConfig = [
+    { key: "pelindung", fileId: "upload-avatar-pelindung", previewId: "preview-avatar-pelindung", nameId: "set-org-pelindung", defaultIcon: '<i class="fa-solid fa-shield-halved"></i>' },
+    { key: "ketua", fileId: "upload-avatar-ketua", previewId: "preview-avatar-ketua", nameId: "set-org-ketua-umum" },
+    { key: "wakil", fileId: "upload-avatar-wakil", previewId: "preview-avatar-wakil", nameId: "set-org-wakil-ketua" },
+    { key: "sekretaris", fileId: "upload-avatar-sekretaris", previewId: "preview-avatar-sekretaris", nameId: "set-org-sekretaris" },
+    { key: "bendahara", fileId: "upload-avatar-bendahara", previewId: "preview-avatar-bendahara", nameId: "set-org-bendahara" },
+    { key: "komisi_teknik", fileId: "upload-avatar-komisi-teknik", previewId: "preview-avatar-komisi-teknik", nameId: "set-org-komisi-teknik" },
+    { key: "komisi_prestasi", fileId: "upload-avatar-komisi-prestasi", previewId: "preview-avatar-komisi-prestasi", nameId: "set-org-komisi-prestasi" },
+    { key: "komisi_wasit", fileId: "upload-avatar-komisi-wasit", previewId: "preview-avatar-komisi-wasit", nameId: "set-org-komisi-wasit" }
+  ];
+
+  // Initialize previews and events
+  orgAvatarConfig.forEach(item => {
+    const elPreview = document.getElementById(item.previewId);
+    const elInput = document.getElementById(item.nameId);
+    const elFile = document.getElementById(item.fileId);
+
+    if (elPreview) {
+      const updatePreview = () => {
+        const savedAvatar = orgAvatarsState[item.key];
+        if (savedAvatar) {
+          elPreview.innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+        } else {
+          if (item.defaultIcon) {
+            elPreview.innerHTML = item.defaultIcon;
+          } else {
+            const nameVal = elInput ? elInput.value : "";
+            elPreview.innerHTML = "";
+            elPreview.textContent = getInitialsForAvatar(nameVal);
+          }
+        }
+      };
+
+      // Initial run
+      updatePreview();
+
+      // Listen for name typing updates if there is no custom avatar
+      if (elInput) {
+        elInput.addEventListener("input", () => {
+          if (!orgAvatarsState[item.key]) {
+            updatePreview();
+          }
+        });
+      }
+
+      // Add click to clear avatar feature
+      elPreview.style.cursor = "pointer";
+      elPreview.title = "Klik untuk menghapus foto avatar";
+      elPreview.addEventListener("click", () => {
+        if (currentRole === "staff") return; // Staff cannot edit/delete
+        if (orgAvatarsState[item.key]) {
+          if (confirm(`Hapus foto avatar untuk ${item.key.replace("_", " ")}?`)) {
+            orgAvatarsState[item.key] = "";
+            updatePreview();
+            if (elFile) elFile.value = "";
+            showCustomToast("Foto avatar dihapus dari form", "info");
+          }
+        }
+      });
+    }
+
+    // Handle File Upload Select and Base64 conversion
+    if (elFile && elPreview) {
+      elFile.addEventListener("change", (e) => {
+        if (currentRole === "staff") {
+          showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah foto avatar.", "error");
+          elFile.value = "";
+          return;
+        }
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+          showCustomToast("Ukuran foto terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
+          elFile.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const base64Data = ev.target.result;
+          orgAvatarsState[item.key] = base64Data;
+          elPreview.innerHTML = `<img src="${base64Data}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+          showCustomToast("Foto avatar berhasil dimuat!", "success");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+
   if (bocCutoffInput) bocCutoffInput.value = bocSettings.cutoff_limit || "16";
   if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
   if (bocYearInput) bocYearInput.value = localStorage.getItem("currentBocYear") || "2026";
@@ -18783,6 +19525,9 @@ function setupSystemSettings() {
     // Disable inputs in rules and org profiles
     if (formOrg) {
       formOrg.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    }
+    if (formOrgStructure) {
+      formOrgStructure.querySelectorAll("input, button").forEach(el => el.disabled = true);
     }
     if (formRules) {
       formRules.querySelectorAll("input, select, button").forEach(el => el.disabled = true);
@@ -18828,7 +19573,39 @@ function setupSystemSettings() {
     });
   }
 
-  // Form Submit: BOC Rules
+  // Form Submit: Org Structure
+  if (formOrgStructure) {
+    formOrgStructure.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah struktur organisasi.", "error");
+        return;
+      }
+      localStorage.setItem("org_role_pelindung", orgPelindungInput.value.trim());
+      localStorage.setItem("org_role_ketua", orgKetuaInput.value.trim());
+      localStorage.setItem("org_role_wakil", orgWakilInput.value.trim());
+      localStorage.setItem("org_role_sekretaris", orgSekretarisInput.value.trim());
+      localStorage.setItem("org_role_bendahara", orgBendaharaInput.value.trim());
+      localStorage.setItem("org_role_komisi_teknik", orgKomisiTeknikInput.value.trim());
+      localStorage.setItem("org_role_komisi_prestasi", orgKomisiPrestasiInput.value.trim());
+      localStorage.setItem("org_role_komisi_wasit", orgKomisiWasitInput.value.trim());
+
+      // Save avatars
+      localStorage.setItem("org_avatar_pelindung", orgAvatarsState.pelindung);
+      localStorage.setItem("org_avatar_ketua", orgAvatarsState.ketua);
+      localStorage.setItem("org_avatar_wakil", orgAvatarsState.wakil);
+      localStorage.setItem("org_avatar_sekretaris", orgAvatarsState.sekretaris);
+      localStorage.setItem("org_avatar_bendahara", orgAvatarsState.bendahara);
+      localStorage.setItem("org_avatar_komisi_teknik", orgAvatarsState.komisi_teknik);
+      localStorage.setItem("org_avatar_komisi_prestasi", orgAvatarsState.komisi_prestasi);
+      localStorage.setItem("org_avatar_komisi_wasit", orgAvatarsState.komisi_wasit);
+
+      showCustomToast("Struktur organisasi berhasil diperbarui!", "success");
+      
+      // Update public page texts immediately
+      renderDynamicOrgChart();
+    });
+  }
   if (formRules) {
     formRules.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -19161,10 +19938,60 @@ function applySettingsToDOM() {
   if (footerCopyright) {
     footerCopyright.innerHTML = `&copy; 2026 ${orgName}. Hak Cipta Dilindungi. Didukung oleh KONI Kabupaten Banjarnegara.`;
   }
+
+  // Render the Dynamic Organization Structure
+  renderDynamicOrgChart();
+}
+
+function renderDynamicOrgChart() {
+  const roles = [
+    { key: "pelindung", id: "org-name-pelindung", defaultVal: "Ketua KONI Banjarnegara", defaultAvatar: '<i class="fa-solid fa-shield-halved"></i>' },
+    { key: "ketua", id: "org-name-ketua", defaultVal: "Wahyu Hidayat, S.E." },
+    { key: "wakil", id: "org-name-wakil", defaultVal: "FX. Bambang Setyono" },
+    { key: "sekretaris", id: "org-name-sekretaris", defaultVal: "Yanto, S.Kom" },
+    { key: "bendahara", id: "org-name-bendahara", defaultVal: "Heri Purwanto" },
+    { key: "komisi_teknik", id: "org-name-komisi-teknik", defaultVal: "Slamet Riyadi" },
+    { key: "komisi_prestasi", id: "org-name-komisi-prestasi", defaultVal: "Edy Susanto, S.Pd." },
+    { key: "komisi_wasit", id: "org-name-komisi-wasit", defaultVal: "Joko Wahyono" }
+  ];
+
+  roles.forEach(role => {
+    const nameVal = localStorage.getItem(`org_role_${role.key}`) || role.defaultVal;
+    const avatarVal = localStorage.getItem(`org_avatar_${role.key}`);
+    const elName = document.getElementById(role.id);
+    if (elName) {
+      elName.textContent = nameVal;
+      const node = elName.closest(".org-node");
+      const avatarContainer = node ? node.querySelector(".org-avatar") : null;
+      if (avatarContainer) {
+        if (avatarVal) {
+          avatarContainer.innerHTML = `<img src="${avatarVal}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+        } else {
+          if (role.defaultAvatar) {
+            avatarContainer.innerHTML = role.defaultAvatar;
+          } else {
+            avatarContainer.textContent = getInitialsForAvatar(nameVal);
+          }
+        }
+      }
+    }
+  });
+}
+
+function getInitialsForAvatar(name) {
+  if (!name) return "";
+  // Strip common titles/academic acronyms
+  let cleaned = name.replace(/(?:S\.?E\.?|S\.?Kom|S\.?Pd\.?|FX\.)/gi, "").trim();
+  const parts = cleaned.split(/\s+/).filter(p => p.length > 0);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0] ? parts[0].substring(0, 2).toUpperCase() : "";
 }
 
 window.setupSystemSettings = setupSystemSettings;
 window.applySettingsToDOM = applySettingsToDOM;
+window.renderDynamicOrgChart = renderDynamicOrgChart;
 
 // ==========================================================================
 // ACTIVITY LOGS AND DB SYNCHRONIZATION OVERHAUL (BOC 2026 DESIGN SYSTEM)
