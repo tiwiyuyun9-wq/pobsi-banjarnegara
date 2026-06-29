@@ -7297,13 +7297,15 @@ function renderClubDetail(clubId) {
   // 1. Cover backdrop
   const coverEl = document.getElementById("ad-club-detail-cover");
   if (coverEl) {
-    coverEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('images/club-cover.png')`;
+    const coverUrl = club.cover || 'images/club-cover.png';
+    coverEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${coverUrl}')`;
   }
 
-  // 1b. Avatar fallback emblem
+  // 1b. Avatar / logo
   const avatarEl = document.getElementById("ad-club-detail-avatar");
   if (avatarEl) {
-    avatarEl.src = "images/club-avatar.png";
+    avatarEl.src = club.logo || "images/club-avatar.png";
+    avatarEl.onerror = function() { this.src = "images/club-avatar.png"; };
   }
 
   // 2. Large profile header meta
