@@ -5875,35 +5875,44 @@ window.editClub = function(clubId) {
 };
 
 window.deleteClub = async function(clubId) {
-  if (!confirm('Yakin ingin menghapus klub ini?')) return;
+  const club = (appData.clubs || []).find(c => c.id.toString() === clubId.toString());
+  const clubName = club ? club.name : clubId;
 
-  if (isServerOnline) {
-    try {
-      const res = await fetch(`/api/clubs/${clubId}`, { method: 'DELETE' });
-      if (res.ok) {
-        alert('Klub berhasil dihapus!');
-        await loadDataFromApi();
+  showCustomConfirm(
+    "Hapus Klub",
+    `Yakin ingin menghapus klub <strong>"${clubName}"</strong> secara permanen dari database resmi POBSI? Tindakan ini tidak dapat dibatalkan.`,
+    async () => {
+      if (isServerOnline) {
+        try {
+          const res = await fetch(`/api/clubs/${clubId}`, { method: 'DELETE' });
+          if (res.ok) {
+            showCustomToast(`Klub "${clubName}" berhasil dihapus!`, "success");
+            await loadDataFromApi();
+            renderClubs();
+            renderAdminClubPreview();
+            updateWorkspaceStats();
+            loadStatistics();
+            populateClubFilters();
+          } else {
+            const errJson = await res.json();
+            showCustomToast(`Gagal menghapus: ${errJson.error}`, "error");
+          }
+        } catch (err) {
+          showCustomToast(`Error: ${err.message}`, "error");
+        }
+      } else {
+        appData.clubs = (appData.clubs || []).filter(c => c.id !== clubId);
+        showCustomToast(`Klub "${clubName}" dihapus dari memori sementara!`, "success");
         renderClubs();
         renderAdminClubPreview();
         updateWorkspaceStats();
         loadStatistics();
         populateClubFilters();
-      } else {
-        const errJson = await res.json();
-        alert(`Gagal: ${errJson.error}`);
       }
-    } catch (err) {
-      alert(`Error: ${err.message}`);
-    }
-  } else {
-    appData.clubs = (appData.clubs || []).filter(c => c.id !== clubId);
-    alert('Klub dihapus dari memori sementara!');
-    renderClubs();
-    renderAdminClubPreview();
-    updateWorkspaceStats();
-    loadStatistics();
-    populateClubFilters();
-  }
+    },
+    "Hapus Permanen",
+    "danger"
+  );
 };
 
 window.selectClubRow = function(clubId, element) {
@@ -7491,12 +7500,45 @@ function setupClubDetailActions() {
     const club = appData.clubs.find(c => c.id.toString() === adActiveClubId.toString());
     if (!club) return;
     
-    if (confirm(`Yakin ingin menghapus klub "${club.name}" secara permanen dari database resmi POBSI?`)) {
-      deleteClub(adActiveClubId).then(() => {
-        window.history.pushState({}, "", "/admin");
-        switchAdminPane("pane-clubs");
-      });
-    }
+    showCustomConfirm(
+      "Hapus Klub",
+      `Yakin ingin menghapus klub <strong>"${club.name}"</strong> secara permanen dari database resmi POBSI? Tindakan ini tidak dapat dibatalkan.`,
+      async () => {
+        if (isServerOnline) {
+          try {
+            const res = await fetch(`/api/clubs/${adActiveClubId}`, { method: 'DELETE' });
+            if (res.ok) {
+              showCustomToast(`Klub "${club.name}" berhasil dihapus!`, "success");
+              await loadDataFromApi();
+              renderClubs();
+              renderAdminClubPreview();
+              updateWorkspaceStats();
+              loadStatistics();
+              populateClubFilters();
+              window.history.pushState({}, "", "/admin");
+              switchAdminPane("pane-clubs");
+            } else {
+              const errJson = await res.json();
+              showCustomToast(`Gagal menghapus: ${errJson.error}`, "error");
+            }
+          } catch (err) {
+            showCustomToast(`Error: ${err.message}`, "error");
+          }
+        } else {
+          appData.clubs = (appData.clubs || []).filter(c => c.id !== adActiveClubId);
+          showCustomToast(`Klub "${club.name}" dihapus dari memori sementara!`, "success");
+          renderClubs();
+          renderAdminClubPreview();
+          updateWorkspaceStats();
+          loadStatistics();
+          populateClubFilters();
+          window.history.pushState({}, "", "/admin");
+          switchAdminPane("pane-clubs");
+        }
+      },
+      "Hapus Permanen",
+      "danger"
+    );
   };
 
   const btnDelete = document.getElementById("ad-club-btn-delete");
