@@ -246,9 +246,139 @@ async function initApp() {
   // Load Admin Panel Control
   setupAdminPanel();
 
+  // Setup SSOT for Event Title inputs in modals
+  setupEventPopupTitleSSOT();
+
   // Jalankan routing hash awal setelah semua data API dan pengaturan BOC termuat
   if (typeof window.checkInitialRoute === 'function') {
     window.checkInitialRoute();
+  }
+}
+
+// Setup SSOT for Event Title inputs in modals (Home Tournament / Sirkuit BOC)
+function setupEventPopupTitleSSOT() {
+  const admEvtType = document.getElementById("adm-evt-type");
+  const admEvtTitle = document.getElementById("adm-evt-title");
+  const admEvtTitleSelect = document.getElementById("adm-evt-title-select");
+
+  const syncAddEventTitleOptions = () => {
+    if (!admEvtTitleSelect) return;
+    admEvtTitleSelect.innerHTML = "";
+    if (bocSirkuits && bocSirkuits.length > 0) {
+      bocSirkuits.forEach(sirkuitName => {
+        const opt = document.createElement("option");
+        opt.value = sirkuitName;
+        opt.textContent = sirkuitName;
+        admEvtTitleSelect.appendChild(opt);
+      });
+      if (admEvtType && admEvtType.value === "Home Tournament" && admEvtTitle) {
+        admEvtTitle.value = admEvtTitleSelect.value;
+      }
+    } else {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Belum Ada Sirkuit Terdaftar --";
+      admEvtTitleSelect.appendChild(opt);
+    }
+  };
+
+  const handleAddEventTypeChange = () => {
+    if (!admEvtType || !admEvtTitle || !admEvtTitleSelect) return;
+    if (admEvtType.value === "Home Tournament") {
+      admEvtTitle.style.display = "none";
+      admEvtTitleSelect.style.display = "block";
+      syncAddEventTitleOptions();
+    } else {
+      admEvtTitle.style.display = "block";
+      admEvtTitleSelect.style.display = "none";
+    }
+  };
+
+  if (admEvtType) {
+    admEvtType.addEventListener("change", handleAddEventTypeChange);
+  }
+  if (admEvtTitleSelect && admEvtTitle) {
+    admEvtTitleSelect.addEventListener("change", () => {
+      admEvtTitle.value = admEvtTitleSelect.value;
+    });
+  }
+
+  const btnOpenAdd = document.getElementById("btn-open-add-event-modal");
+  if (btnOpenAdd) {
+    btnOpenAdd.addEventListener("click", () => {
+      syncAddEventTitleOptions();
+      handleAddEventTypeChange();
+    });
+  }
+
+  // Bind to global window helper so calendar clicks also sync
+  window.syncEventPopupTitleOptions = () => {
+    syncAddEventTitleOptions();
+    handleAddEventTypeChange();
+  };
+
+  const editEvtType = document.getElementById("edit-evt-type");
+  const editEvtTitle = document.getElementById("edit-evt-title");
+  const editEvtTitleSelect = document.getElementById("edit-evt-title-select");
+
+  const syncEditEventTitleOptions = (currentVal) => {
+    if (!editEvtTitleSelect) return;
+    editEvtTitleSelect.innerHTML = "";
+    
+    const list = [...(bocSirkuits || [])];
+    if (currentVal && !list.includes(currentVal)) {
+      list.push(currentVal);
+    }
+
+    if (list.length > 0) {
+      list.forEach(sirkuitName => {
+        const opt = document.createElement("option");
+        opt.value = sirkuitName;
+        opt.textContent = sirkuitName;
+        editEvtTitleSelect.appendChild(opt);
+      });
+      if (currentVal) {
+        editEvtTitleSelect.value = currentVal;
+      }
+    } else {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Belum Ada Sirkuit Terdaftar --";
+      editEvtTitleSelect.appendChild(opt);
+    }
+  };
+
+  const handleEditEventTypeChange = () => {
+    if (!editEvtType || !editEvtTitle || !editEvtTitleSelect) return;
+    if (editEvtType.value === "Home Tournament") {
+      editEvtTitle.style.display = "none";
+      editEvtTitleSelect.style.display = "block";
+      if (editEvtTitleSelect.value) {
+        editEvtTitle.value = editEvtTitleSelect.value;
+      }
+    } else {
+      editEvtTitle.style.display = "block";
+      editEvtTitleSelect.style.display = "none";
+    }
+  };
+
+  if (editEvtType) {
+    editEvtType.addEventListener("change", handleEditEventTypeChange);
+  }
+  if (editEvtTitleSelect && editEvtTitle) {
+    editEvtTitleSelect.addEventListener("change", () => {
+      editEvtTitle.value = editEvtTitleSelect.value;
+    });
+  }
+
+  const btnEditDetail = document.getElementById("btn-event-detail-edit");
+  if (btnEditDetail) {
+    btnEditDetail.addEventListener("click", () => {
+      const event = appData.events.find(evt => evt.id === currentActiveEventId);
+      if (!event) return;
+      syncEditEventTitleOptions(event.title);
+      handleEditEventTypeChange();
+    });
   }
 }
 
@@ -18706,6 +18836,11 @@ window.openAddEventFromCalendar = function(dateStr) {
   // Reset wizard to Step 1
   if (typeof window.resetAddEventWizard === "function") {
     window.resetAddEventWizard();
+  }
+
+  // Sync title options and handle initial event type logic
+  if (typeof window.syncEventPopupTitleOptions === "function") {
+    window.syncEventPopupTitleOptions();
   }
 
   // Tampilkan modal
