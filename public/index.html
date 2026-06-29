@@ -2229,7 +2229,7 @@
             <div class="dashboard-col activity-col">
               <div class="col-header">
                 <h3 class="col-title"><i class="fa-solid fa-clock-rotate-left text-muted" style="margin-right:6px"></i> RIWAYAT AKTIVITAS</h3>
-                <button class="btn-col-action" id="btn-open-activity-modal">Log Lengkap</button>
+                <button class="btn-col-action" id="btn-open-activity-modal" onclick="if(window.openFullActivityLogsModal) window.openFullActivityLogsModal()">Log Lengkap</button>
               </div>
               <div class="col-body list-wrapper" id="dashboard-activity-list">
                 <div class="activity-item">
@@ -6092,6 +6092,6 @@
 
   <!-- Loaded Data and Script files -->
   <script src="js/data.js"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/app.js?v=17"></script>
 </body>
 </html>

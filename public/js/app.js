@@ -18934,13 +18934,21 @@ window.openFullActivityLogsModal = function() {
 
 // Bind modal listeners
 document.addEventListener("click", (e) => {
-  if (e.target && e.target.id === "btn-open-activity-modal") {
+  // Open modal
+  if (e.target && (e.target.id === "btn-open-activity-modal" || e.target.closest("#btn-open-activity-modal"))) {
+    e.preventDefault();
+    e.stopPropagation();
     window.openFullActivityLogsModal();
+    return;
   }
+  // Close modal via X button
   if (e.target && (e.target.id === "pm-activity-logs-modal-close" || e.target.closest("#pm-activity-logs-modal-close"))) {
     const modal = document.getElementById("pm-activity-logs-modal");
     if (modal) modal.style.display = "none";
+    return;
+  }
+  // Close modal via overlay background click
+  if (e.target && e.target.id === "pm-activity-logs-modal") {
+    e.target.style.display = "none";
   }
 });
-
-
