@@ -9994,6 +9994,28 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
+.add-player-step-pane {
+  display: none;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
+}
+
+.add-player-step-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-club-step-pane {
+  display: none;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
+}
+
+.add-club-step-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @keyframes stepPaneFadeIn {
   from {
     opacity: 0;
@@ -11702,9 +11724,6 @@ tr:hover td.sticky-col {
   }
 }
 .org-node.node-commission {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
   min-width: 0;
 }
 

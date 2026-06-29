@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=19">
+  <link rel="stylesheet" href="css/index.css?v=22">
   
   <!-- Flatpickr for premium Date Picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -162,21 +162,21 @@
               
               <div style="display: flex; flex-direction: column; gap: 2px;">
                 <span style="font-size: 0.65rem; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL PRIZE POOL</span>
-                <span id="hero-boc-prizepool-total" class="prize-pool-glorious-text" style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(251, 191, 36, 0.2); font-family: var(--font-headers);">RP 15.000.000</span>
+                <span id="hero-boc-prizepool-total" class="prize-pool-glorious-text" style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(251, 191, 36, 0.2); font-family: var(--font-headers);">RP 0</span>
               </div>
               
               <div style="display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #fbbf24; font-weight: 800; letter-spacing: 0.3px;">JUARA 1</span>
-                  <span id="hero-boc-prize-1" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 7,5 JT</span>
+                  <span id="hero-boc-prize-1" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 0</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #e2e8f0; font-weight: 800; letter-spacing: 0.3px;">JUARA 2</span>
-                  <span id="hero-boc-prize-2" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 4,5 JT</span>
+                  <span id="hero-boc-prize-2" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 0</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; text-align: left;">
                   <span style="font-size: 0.58rem; color: #f97316; font-weight: 800; letter-spacing: 0.3px;">JUARA 3</span>
-                  <span id="hero-boc-prize-3" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 3,0 JT</span>
+                  <span id="hero-boc-prize-3" style="font-size: 0.75rem; color: #fff; font-weight: 800; font-family: var(--font-headers);">RP 0</span>
                 </div>
               </div>
             </div>
@@ -230,16 +230,16 @@
         <div class="stats-bar-item">
           <div class="stats-bar-icon"><i class="fa-solid fa-ranking-star"></i></div>
           <div class="stats-bar-info">
-            <span class="stats-bar-value">250+</span>
+            <span class="stats-bar-value" id="stat-matches-count">250+</span>
             <span class="stats-bar-label">Pertandingan<br><small>Tercatat</small></span>
           </div>
         </div>
         <div class="stats-bar-divider"></div>
         <div class="stats-bar-item">
-          <div class="stats-bar-icon"><i class="fa-solid fa-star"></i></div>
+          <div class="stats-bar-icon"><i class="fa-solid fa-sack-dollar"></i></div>
           <div class="stats-bar-info">
-            <span class="stats-bar-value">15+</span>
-            <span class="stats-bar-label">Atlet Berprestasi<br><small>Tingkat Nasional</small></span>
+            <span class="stats-bar-value" id="stat-total-prizepool">Rp 0</span>
+            <span class="stats-bar-label">Total Prize Pool<br><small>Semua Event <span class="dynamic-boc-year">2026</span></small></span>
           </div>
         </div>
       </div>
@@ -433,7 +433,7 @@
                     </div>
                     <div style="display: flex; flex-direction: column;">
                       <span style="font-size: 0.56rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.5px;">ESTIMASI PRIZE</span>
-                      <span id="boc-hero-stat-prizepool" style="font-size: 1.05rem; color: var(--color-green); font-weight: 800; font-family: var(--font-headers);">Rp 15.000.000</span>
+                      <span id="boc-hero-stat-prizepool" style="font-size: 1.05rem; color: var(--color-green); font-weight: 800; font-family: var(--font-headers);">Rp 0</span>
                     </div>
                   </div>
                 </div>
@@ -791,7 +791,7 @@
             <div class="org-avatar" style="border-color: #94a3b8; color: #94a3b8;"><i class="fa-solid fa-shield-halved"></i></div>
             <div class="org-node-details">
               <span class="org-node-role badge-commission">Pelindung</span>
-              <span class="org-node-name">Ketua KONI Banjarnegara</span>
+              <span class="org-node-name" id="org-name-pelindung">Ketua KONI Banjarnegara</span>
             </div>
           </div>
 
@@ -802,7 +802,7 @@
             <div class="org-avatar">WH</div>
             <div class="org-node-details">
               <span class="org-node-role badge-gold">Ketua Umum</span>
-              <span class="org-node-name">Wahyu Hidayat, S.E.</span>
+              <span class="org-node-name" id="org-name-ketua">Wahyu Hidayat, S.E.</span>
             </div>
           </div>
 
@@ -813,7 +813,7 @@
             <div class="org-avatar">BS</div>
             <div class="org-node-details">
               <span class="org-node-role badge-blue">Wakil Ketua</span>
-              <span class="org-node-name">FX. Bambang Setyono</span>
+              <span class="org-node-name" id="org-name-wakil">FX. Bambang Setyono</span>
             </div>
           </div>
 
@@ -825,7 +825,7 @@
               <div class="org-avatar">YT</div>
               <div class="org-node-details">
                 <span class="org-node-role badge-green">Sekretaris Umum</span>
-                <span class="org-node-name">Yanto, S.Kom</span>
+                <span class="org-node-name" id="org-name-sekretaris">Yanto, S.Kom</span>
               </div>
             </div>
 
@@ -833,7 +833,7 @@
               <div class="org-avatar">HP</div>
               <div class="org-node-details">
                 <span class="org-node-role badge-purple">Bendahara Umum</span>
-                <span class="org-node-name">Heri Purwanto</span>
+                <span class="org-node-name" id="org-name-bendahara">Heri Purwanto</span>
               </div>
             </div>
           </div>
@@ -843,16 +843,25 @@
           <!-- Komisi-Komisi -->
           <div class="org-commissions-grid">
             <div class="org-node node-commission">
-              <span class="org-node-role badge-commission">Komisi Teknik & Handicap</span>
-              <span class="org-node-name">Slamet Riyadi</span>
+              <div class="org-avatar">SR</div>
+              <div class="org-node-details">
+                <span class="org-node-role badge-commission">Komisi Teknik & Handicap</span>
+                <span class="org-node-name" id="org-name-komisi-teknik">Slamet Riyadi</span>
+              </div>
             </div>
             <div class="org-node node-commission">
-              <span class="org-node-role badge-commission">Komisi Pembinaan Prestasi</span>
-              <span class="org-node-name">Edy Susanto, S.Pd.</span>
+              <div class="org-avatar">ES</div>
+              <div class="org-node-details">
+                <span class="org-node-role badge-commission">Komisi Pembinaan Prestasi</span>
+                <span class="org-node-name" id="org-name-komisi-prestasi">Edy Susanto, S.Pd.</span>
+              </div>
             </div>
             <div class="org-node node-commission">
-              <span class="org-node-role badge-commission">Komisi Wasit & Pertandingan</span>
-              <span class="org-node-name">Joko Wahyono</span>
+              <div class="org-avatar">JW</div>
+              <div class="org-node-details">
+                <span class="org-node-role badge-commission">Komisi Wasit & Pertandingan</span>
+                <span class="org-node-name" id="org-name-komisi-wasit">Joko Wahyono</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1216,7 +1225,7 @@
                   <div class="boc-playoff-stat-capsule gold-glow">
                     <i class="fa-solid fa-award text-gold" style="font-size: 1.2rem; color: #fbbf24;"></i>
                     <div style="display: flex; flex-direction: column; text-align: left;">
-                      <span class="boc-playoff-stat-capsule-val text-gold" id="boc-playoff-prize-val">Rp 15.000.000</span>
+                      <span class="boc-playoff-stat-capsule-val text-gold" id="boc-playoff-prize-val">Rp 0</span>
                       <span class="boc-playoff-stat-capsule-lbl">Prize Pool</span>
                     </div>
                   </div>
@@ -1308,7 +1317,7 @@
                     </div>
                     <div class="prizepool-details">
                       <span class="prizepool-lbl">TOTAL PRIZE POOL</span>
-                      <span id="boc-playoff-podium-total-prize" class="prizepool-val">Rp 15.000.000</span>
+                      <span id="boc-playoff-podium-total-prize" class="prizepool-val">Rp 0</span>
                     </div>
                   </div>
                 </div>
@@ -1738,10 +1747,10 @@
       <div class="footer-links-col">
         <h4 class="footer-title">Tautan Navigasi</h4>
         <ul class="footer-links-list">
-          <li><a href="#" onclick="switchTab('tab-home')">Beranda Utama</a></li>
-          <li><a href="#" onclick="switchTab('tab-about')">Tentang Kami</a></li>
-          <li><a href="#" onclick="switchTab('tab-privacy')">Kebijakan Privasi</a></li>
-          <li><a href="#" onclick="switchTab('tab-terms')">Syarat & Ketentuan</a></li>
+          <li><a href="#home">Beranda Utama</a></li>
+          <li><a href="#about">Tentang Kami</a></li>
+          <li><a href="#privacy">Kebijakan Privasi</a></li>
+          <li><a href="#terms">Syarat & Ketentuan</a></li>
         </ul>
       </div>
 
@@ -1750,11 +1759,11 @@
         <ul class="footer-contact-list">
           <li>
             <i class="fa-solid fa-location-dot contact-icon"></i>
-            <span>Jl. Dewi Sartika No. 1 Sokanandi Banjarnegara Jawa Tengah</span>
+            <span id="footer-contact-address">Jl. Dewi Sartika No. 1 Sokanandi Banjarnegara Jawa Tengah</span>
           </li>
           <li>
             <i class="fa-solid fa-phone contact-icon"></i>
-            <span>0813-2233-4455 (Humas Pengcab)</span>
+            <span id="footer-contact-phone">0813-2233-4455 (Humas Pengcab)</span>
           </li>
           <li>
             <i class="fa-solid fa-clock contact-icon"></i>
@@ -1767,7 +1776,7 @@
       <div class="footer-map-col" style="display: flex; flex-direction: column; gap: 20px;">
         <h4 class="footer-title">Lokasi Sekretariat</h4>
         <div class="footer-map-wrapper" style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); height: 150px; background: rgba(15, 23, 42, 0.4);">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <iframe id="footer-map-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.883764835848!2d109.7027424!3d-7.366965499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700a0dc2b2be0d%3A0x6b4f738f6d8926eb!2sJl.%20Dewi%20Sartika%20No.1%2C%20Sokanandi%2C%20Kec.%20Banjarnegara%2C%20Kab.%20Banjarnegara%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1780000000000!5m2!1sid!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
     </div>
@@ -2528,151 +2537,7 @@
             </div>
           </div>
 
-          <!-- Add Player Modal Overlay -->
-          <div class="pm-modal-overlay" id="pm-add-player-modal" style="display:none;">
-            <div class="pm-modal">
-              <div class="pm-modal-header">
-                <h3><i class="fa-solid fa-user-plus text-accent"></i> Tambah Atlet Baru</h3>
-                <button class="pm-modal-close" id="pm-modal-close"><i class="fa-solid fa-xmark"></i></button>
-              </div>
-              <div class="pm-modal-body">
-                <!-- Role Restriction Overlay for Staff -->
-                <div class="role-restriction-overlay" id="restrict-players-overlay" style="display: none;">
-                  <div class="restriction-message">
-                    <i class="fa-solid fa-lock restriction-lock-icon"></i>
-                    <h3>Akses Terbatas (Staff)</h3>
-                    <p>Peran Anda hanya diizinkan untuk mengelola agenda event. Penambahan data atlet resmi dibatasi untuk Admin/Super Admin.</p>
-                  </div>
-                </div>
-                <form id="form-admin-add-player" class="admin-form-element">
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-name">Nama Lengkap Atlet</label>
-                      <input type="text" id="adm-player-name" required placeholder="Contoh: Budi Prasetyo">
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-club">Klub / Arena Biliar</label>
-                      <input type="text" id="adm-player-club" required placeholder="Contoh: Golden Banjarnegara">
-                    </div>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-hc">Handicap Resmi</label>
-                      <div class="select-wrapper width-100">
-                        <select id="adm-player-hc" required style="width: 100%; padding-left: 16px;">
-                          <option value="3B">Handicap 3B</option>
-                          <option value="3N">Handicap 3N</option>
-                          <option value="3A">Handicap 3A</option>
-                          <option value="4B" selected>Handicap 4B</option>
-                          <option value="4A">Handicap 4A</option>
-                          <option value="5B">Handicap 5B</option>
-                          <option value="5A">Handicap 5A</option>
-                          <option value="6">Handicap 6</option>
-                          <option value="7">Handicap 7</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-points">Poin Berjalan (Kenaikan HC)</label>
-                      <input type="number" id="adm-player-points" value="0" min="0" placeholder="Poin berjalan (contoh: 30)" required>
-                    </div>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-gender">Jenis Kelamin</label>
-                      <div class="select-wrapper width-100">
-                        <select id="adm-player-gender" required style="width: 100%; padding-left: 16px; background: var(--bg-input);">
-                          <option value="Laki-laki" selected>Laki-laki</option>
-                          <option value="Perempuan">Perempuan</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-age">Umur Atlet (Tahun)</label>
-                      <input type="number" id="adm-player-age" value="24" min="12" max="80" placeholder="Umur (contoh: 24)" required>
-                    </div>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-phone">No. Telepon / WhatsApp</label>
-                      <input type="tel" id="adm-player-phone" placeholder="Contoh: 0812-3456-7890" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth);">
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-player-address">Alamat Lengkap</label>
-                      <textarea id="adm-player-address" placeholder="Contoh: Jl. Letjen Suprapto No. 12, Banjarnegara" required style="width: 100%; min-height: 52px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth); resize: vertical;"></textarea>
-                    </div>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl">Foto / Avatar Atlet (Opsional)</label>
-                    <input type="file" id="adm-player-avatar-file" accept="image/*" style="display: none;">
-                    <div class="avatar-upload-zone" id="avatar-drop-zone">
-                      <i class="fa-solid fa-cloud-arrow-up upload-zone-icon"></i>
-                      <span class="upload-zone-text">Tarik foto ke sini atau <strong>klik untuk upload</strong></span>
-                      <span class="upload-zone-sub">Format: JPG, PNG, WebP (Maks. 2MB)</span>
-                    </div>
-                    <div class="avatar-upload-preview" id="avatar-preview-container" style="display: none;">
-                      <div class="preview-avatar-wrapper">
-                        <img id="avatar-preview-img" src="" alt="Preview Avatar">
-                        <button type="button" class="btn-remove-avatar" id="btn-clear-avatar" title="Hapus Gambar">
-                          <i class="fa-solid fa-xmark"></i>
-                        </button>
-                      </div>
-                      <span class="preview-avatar-filename" id="avatar-preview-filename">filename.png</span>
-                    </div>
-                  </div>
-
-                  <!-- Add Player Cover & KTP Media Areas (Upgraded) -->
-                  <div class="pm-form-row" style="margin-top: 12px; margin-bottom: 12px;">
-                    <div class="form-group-item">
-                      <label class="form-lbl">Foto Cover Banner (Opsional)</label>
-                      <input type="file" id="adm-player-cover-file" accept="image/*" style="display: none;">
-                      <div class="avatar-upload-zone" id="adm-cover-drop-zone" style="padding: 16px 12px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
-                        <i class="fa-solid fa-panorama upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px;"></i>
-                        <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik atau <strong>klik upload cover</strong></span>
-                        <span class="upload-zone-sub" style="font-size: 0.65rem;">Format: JPG, PNG (Maks. 2MB)</span>
-                      </div>
-                      <div class="avatar-upload-preview" id="adm-cover-preview-container" style="display: none;">
-                        <div class="preview-avatar-wrapper" style="width: 100%; height: 50px; border-radius: 8px; position: relative;">
-                          <img id="adm-cover-preview-img" src="" alt="Preview Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                          <button type="button" class="btn-remove-avatar" id="adm-btn-clear-cover" title="Hapus Gambar" style="position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; font-size: 0.7rem;">
-                            <i class="fa-solid fa-xmark"></i>
-                          </button>
-                        </div>
-                        <span class="preview-avatar-filename" id="adm-cover-preview-filename" style="font-size: 0.7rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
-                      </div>
-                    </div>
-
-                    <div class="form-group-item">
-                      <label class="form-lbl">Dokumen KTP <span style="color: #fbbf24; font-weight: bold;">*</span></label>
-                      <input type="file" id="adm-player-ktp-file" accept="image/*,application/pdf" style="display: none;">
-                      <div class="avatar-upload-zone" id="adm-ktp-drop-zone" style="padding: 16px 12px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-color: rgba(251, 191, 36, 0.3); cursor: pointer;">
-                        <i class="fa-solid fa-address-card upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px; color: #fbbf24;"></i>
-                        <span class="upload-zone-text" style="font-size: 0.75rem; color: #fbbf24;">Tarik atau <strong>klik upload KTP</strong></span>
-                        <span class="upload-zone-sub" style="font-size: 0.65rem; color: var(--text-muted);">Format: Gambar atau PDF (Maks. 5MB)</span>
-                      </div>
-                      <div class="avatar-upload-preview" id="adm-ktp-preview-container" style="display: none;">
-                        <div class="preview-avatar-wrapper" style="width: 100%; height: 50px; border-radius: 8px; border-color: rgba(251,191,36,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2);">
-                          <img id="adm-ktp-preview-img" src="" alt="Preview KTP" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: none;">
-                          <div id="adm-ktp-pdf-preview-icon" style="display: none; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-file-pdf" style="font-size: 1.2rem; color: #ef4444;"></i>
-                            <span style="font-size: 0.72rem; color: #fbbf24; font-weight: 700;">PDF KTP</span>
-                          </div>
-                          <button type="button" class="btn-remove-avatar" id="adm-btn-clear-ktp" title="Hapus Dokumen" style="position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; font-size: 0.7rem;">
-                            <i class="fa-solid fa-xmark"></i>
-                          </button>
-                        </div>
-                        <span class="preview-avatar-filename" id="adm-ktp-preview-filename" style="font-size: 0.7rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button type="submit" class="btn btn-primary btn-block" style="margin-top: 15px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan ke Database
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
+          <!-- Add Player Modal Overlay (Moved to Body Root) -->
         </div>
         
         <!-- PANE 2B: DETAIL ATLET — Dedicated Athlete Profile Page Overhaul -->
@@ -5155,13 +5020,15 @@
               </div>
               <div class="pm-sidebar-content" id="pm-club-sidebar-content" style="display:none;">
                 <!-- Profile Card -->
-                <div class="pm-profile-card">
-                  <div class="pm-profile-avatar-wrap" style="border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 12px; border: 2px solid rgba(59, 130, 246, 0.25); overflow: hidden;">
-                    <img src="images/club-avatar.png" alt="Emblem" style="width: 100%; height: 100%; object-fit: cover;">
+                <!-- Profile Card -->
+                <div class="pm-profile-card" style="position: relative; overflow: hidden; border-radius: var(--radius-md); padding-top: 40px;">
+                  <div id="pm-club-detail-cover" style="position: absolute; top: 0; left: 0; right: 0; height: 75px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); background-size: cover; background-position: center; z-index: 1;"></div>
+                  <div class="pm-profile-avatar-wrap" style="position: relative; border-radius: 50%; width: 70px; height: 70px; margin: 0 auto 10px; border: 3px solid var(--bg-secondary); overflow: hidden; z-index: 2; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">
+                    <img id="pm-club-detail-logo" src="images/club-avatar.png" alt="Emblem" style="width: 100%; height: 100%; object-fit: cover;">
                   </div>
-                  <h3 class="pm-profile-name" id="pm-club-detail-name"></h3>
-                  <span class="pm-profile-id" id="pm-club-detail-id"></span>
-                  <div class="pm-profile-tags" style="margin-top: 8px;">
+                  <h3 class="pm-profile-name" id="pm-club-detail-name" style="position: relative; z-index: 2;"></h3>
+                  <span class="pm-profile-id" id="pm-club-detail-id" style="position: relative; z-index: 2;"></span>
+                  <div class="pm-profile-tags" style="margin-top: 8px; position: relative; z-index: 2;">
                     <span class="pm-tag green" id="pm-club-detail-status-tag">Aktif</span>
                     <span class="pm-tag blue" id="pm-club-detail-tables-tag"></span>
                   </div>
@@ -5227,107 +5094,7 @@
             </div>
           </div>
 
-          <!-- Add Club Modal Overlay -->
-          <div class="pm-modal-overlay" id="pm-add-club-modal" style="display:none;">
-            <div class="pm-modal" style="max-width: 500px;">
-              <div class="pm-modal-header">
-                <h3><i class="fa-solid fa-building-circle-plus text-accent"></i> Tambah Klub Baru</h3>
-                <button class="pm-modal-close" id="pm-add-club-modal-close"><i class="fa-solid fa-xmark"></i></button>
-              </div>
-              <div class="pm-modal-body" style="position: relative;">
-                <!-- Role Restriction Overlay for Staff -->
-                <div class="role-restriction-overlay" id="restrict-clubs-overlay" style="display: none;">
-                  <div class="restriction-message">
-                    <i class="fa-solid fa-lock restriction-lock-icon"></i>
-                    <h3>Akses Terbatas (Staff)</h3>
-                    <p>Pengelolaan klub resmi dibatasi untuk Admin/Super Admin. Hubungi administrator jika diperlukan.</p>
-                  </div>
-                </div>
-                <form id="form-admin-add-club" class="admin-form-element">
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="adm-club-name">Nama Klub</label>
-                    <input type="text" id="adm-club-name" placeholder="Contoh: Golden Banjarnegara" required>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="adm-club-address">Alamat Lengkap</label>
-                    <input type="text" id="adm-club-address" placeholder="Jl. S. Parman No. 45, Banjarnegara" required>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-club-owner">Pemilik / Penanggung Jawab</label>
-                      <input type="text" id="adm-club-owner" placeholder="Nama pemilik">
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="adm-club-phone">No. Telepon</label>
-                      <input type="text" id="adm-club-phone" placeholder="0812-xxxx-xxxx">
-                    </div>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="adm-club-tables">Jumlah Meja Biliar</label>
-                    <input type="number" id="adm-club-tables" placeholder="0" min="0" required>
-                  </div>
-                  <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center; margin-top: 10px;"><i class="fa-solid fa-plus"></i> Tambah Klub</button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Edit Club Modal Overlay -->
-          <div class="pm-modal-overlay" id="pm-edit-club-modal" style="display:none;">
-            <div class="pm-modal" style="max-width: 500px;">
-              <div class="pm-modal-header">
-                <h3><i class="fa-solid fa-building-circle-gear text-accent"></i> Edit Data Klub</h3>
-                <button class="pm-modal-close" id="pm-edit-club-modal-close"><i class="fa-solid fa-xmark"></i></button>
-              </div>
-              <div class="pm-modal-body" style="position: relative;">
-                <!-- Role Restriction Overlay for Staff -->
-                <div class="role-restriction-overlay" id="restrict-edit-clubs-overlay" style="display: none;">
-                  <div class="restriction-message">
-                    <i class="fa-solid fa-lock restriction-lock-icon"></i>
-                    <h3>Akses Terbatas (Staff)</h3>
-                    <p>Pengelolaan klub resmi dibatasi untuk Admin/Super Admin. Hubungi administrator jika diperlukan.</p>
-                  </div>
-                </div>
-                <form id="form-admin-edit-club" class="admin-form-element">
-                  <input type="hidden" id="edit-club-id">
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="edit-club-name">Nama Klub</label>
-                    <input type="text" id="edit-club-name" placeholder="Contoh: Golden Banjarnegara" required>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="edit-club-address">Alamat Lengkap</label>
-                    <input type="text" id="edit-club-address" placeholder="Jl. S. Parman No. 45, Banjarnegara" required>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="edit-club-owner">Pemilik / Penanggung Jawab</label>
-                      <input type="text" id="edit-club-owner" placeholder="Nama pemilik">
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="edit-club-phone">No. Telepon</label>
-                      <input type="text" id="edit-club-phone" placeholder="0812-xxxx-xxxx">
-                    </div>
-                  </div>
-                  <div class="pm-form-row">
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="edit-club-tables">Jumlah Meja Biliar</label>
-                      <input type="number" id="edit-club-tables" placeholder="0" min="0" required>
-                    </div>
-                    <div class="form-group-item">
-                      <label class="form-lbl" for="edit-club-status">Status Klub</label>
-                      <div class="select-wrapper width-100">
-                        <select id="edit-club-status" style="width: 100%; padding-left: 16px; background: var(--bg-input);">
-                          <option value="Aktif" selected>Aktif</option>
-                          <option value="Nonaktif">Nonaktif</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center; margin-top: 10px;"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
-                </form>
-              </div>
-            </div>
-          </div>
+          <!-- Add & Edit Club Modal Overlays (Moved to Body Root) -->
         </div>
 
         <!-- PANE 6: DOCS — Document Management Console -->
@@ -5681,6 +5448,9 @@
                 <button type="button" class="settings-sub-link active" data-sub="sub-org">
                   <i class="fa-solid fa-building" style="margin-right: 8px; width: 16px; text-align: center;"></i> Profil Organisasi
                 </button>
+                <button type="button" class="settings-sub-link" data-sub="sub-org-structure">
+                  <i class="fa-solid fa-sitemap" style="margin-right: 8px; width: 16px; text-align: center;"></i> Struktur Kepengurusan
+                </button>
                 <button type="button" class="settings-sub-link" data-sub="sub-pwd">
                   <i class="fa-solid fa-key" style="margin-right: 8px; width: 16px; text-align: center;"></i> Keamanan & Sandi
                 </button>
@@ -5733,8 +5503,153 @@
                         <input type="text" id="set-org-address" required placeholder="Contoh: Banjarnegara, Jawa Tengah">
                       </div>
 
+                      <div class="form-group-item">
+                        <label class="form-lbl" for="set-org-maps">URL Google Map Embed (src Iframe)</label>
+                        <input type="text" id="set-org-maps" placeholder="Masukkan URL Google Maps Embed (iframe src)">
+                        <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Panduan: Buka Google Maps -> Bagikan -> Sematkan Peta -> Salin URL di dalam atribut <code>src="..."</code></span>
+                      </div>
+                      
+                      <!-- Live Map Preview Wrapper -->
+                      <div class="form-group-item" style="margin-top: 6px;">
+                        <label class="form-lbl">Pratinjau Peta Lokasi</label>
+                        <div id="settings-map-preview-wrapper" style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); height: 160px; background: rgba(0, 0, 0, 0.25);">
+                          <iframe id="settings-map-preview-iframe" src="" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                      </div>
+
                       <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Sub-pane: Struktur Kepengurusan -->
+                <div class="settings-pane-card" id="sub-org-structure">
+                  <div class="pm-card" style="background: rgba(15, 26, 46, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 24px;">
+                    <h3 style="font-family: var(--font-headers); font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                      <i class="fa-solid fa-sitemap text-gold" style="color: #fbbf24;"></i> Struktur Organisasi POBSI
+                    </h3>
+                    
+                    <form id="form-settings-org-structure" class="admin-form-element" style="display: flex; flex-direction: column; gap: 20px;">
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-pelindung">Pelindung</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-pelindung" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <input type="text" id="set-org-pelindung" required placeholder="Contoh: Ketua KONI Banjarnegara" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-pelindung" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-ketua-umum">Ketua Umum</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-ketua" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              WH
+                            </div>
+                            <input type="text" id="set-org-ketua-umum" required placeholder="Contoh: Wahyu Hidayat, S.E." style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-ketua" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-wakil-ketua">Wakil Ketua</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-wakil" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              BS
+                            </div>
+                            <input type="text" id="set-org-wakil-ketua" required placeholder="Contoh: FX. Bambang Setyono" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-wakil" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-sekretaris">Sekretaris Umum</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-sekretaris" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              YT
+                            </div>
+                            <input type="text" id="set-org-sekretaris" required placeholder="Contoh: Yanto, S.Kom" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-sekretaris" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-bendahara">Bendahara Umum</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-bendahara" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              HP
+                            </div>
+                            <input type="text" id="set-org-bendahara" required placeholder="Contoh: Heri Purwanto" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-bendahara" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-komisi-teknik">Komisi Teknik & Handicap</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-komisi-teknik" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              SR
+                            </div>
+                            <input type="text" id="set-org-komisi-teknik" required placeholder="Contoh: Slamet Riyadi" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-komisi-teknik" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-komisi-prestasi">Komisi Pembinaan Prestasi</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-komisi-prestasi" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              ES
+                            </div>
+                            <input type="text" id="set-org-komisi-prestasi" required placeholder="Contoh: Edy Susanto, S.Pd." style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-komisi-prestasi" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                        <div class="form-group-item">
+                          <label class="form-lbl" for="set-org-komisi-wasit">Komisi Wasit & Pertandingan</label>
+                          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <div id="preview-avatar-komisi-wasit" class="org-avatar" style="width: 38px; height: 38px; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); flex-shrink: 0;">
+                              JW
+                            </div>
+                            <input type="text" id="set-org-komisi-wasit" required placeholder="Contoh: Joko Wahyono" style="flex: 1; margin: 0;">
+                            <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                              <i class="fa-solid fa-upload"></i>
+                              <input type="file" id="upload-avatar-komisi-wasit" accept="image/*" style="display: none;">
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Struktur
                       </button>
                     </form>
                   </div>
@@ -6064,6 +5979,370 @@
     </div>
   </div>
 
+  <!-- Moved Root Modal Overlays (To fix transformed context layout alignment) -->
+  <!-- Add Player Modal Overlay -->
+  <div class="pm-modal-overlay" id="pm-add-player-modal" style="display:none; justify-content: center; align-items: center;">
+    <div class="pm-modal" style="width: 580px; max-width: 95%;">
+      <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+        <div>
+          <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <i class="fa-solid fa-user-plus text-accent"></i> Tambah Atlet Baru
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">Kelola data pribadi, tingkat handicap resmi, dan unggahan dokumen KTP atlet.</p>
+        </div>
+        <button class="pm-modal-close" id="pm-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="pm-modal-body" style="padding: 0;">
+        <!-- Role Restriction Overlay for Staff -->
+        <div class="role-restriction-overlay" id="restrict-players-overlay" style="display: none; border-radius: var(--radius-md);">
+          <div class="restriction-message">
+            <i class="fa-solid fa-lock restriction-lock-icon"></i>
+            <h3>Akses Terbatas (Staff)</h3>
+            <p>Peran Anda hanya diizinkan untuk mengelola agenda event. Penambahan data atlet resmi dibatasi untuk Admin/Super Admin.</p>
+          </div>
+        </div>
+
+        <!-- Wizard Stepper Indicators -->
+        <div class="wizard-stepper" id="add-player-wizard-stepper" style="margin-top: 20px;">
+          <div class="wizard-progress-bar" id="add-player-wizard-progress" style="width: 0%;"></div>
+          <div class="wizard-step active" data-step="1">
+            <div class="wizard-step-circle">1</div>
+            <div class="wizard-step-label">Data Pribadi</div>
+          </div>
+          <div class="wizard-step" data-step="2">
+            <div class="wizard-step-circle">2</div>
+            <div class="wizard-step-label">Handicap & Klub</div>
+          </div>
+          <div class="wizard-step" data-step="3">
+            <div class="wizard-step-circle">3</div>
+            <div class="wizard-step-label">Dokumen & Foto</div>
+          </div>
+        </div>
+
+        <form id="form-admin-add-player" class="admin-form-element" style="padding: 20px 24px 24px 24px; gap: 20px;">
+          <!-- STEP 1: Data Pribadi -->
+          <div class="add-player-step-pane active" data-step="1">
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-player-name">Nama Lengkap Atlet <span style="color: var(--red);">*</span></label>
+              <input type="text" id="adm-player-name" required placeholder="Contoh: Budi Prasetyo">
+            </div>
+            <div class="form-row-double">
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-player-gender">Jenis Kelamin <span style="color: var(--red);">*</span></label>
+                <div class="select-wrapper width-100">
+                  <select id="adm-player-gender" required style="width: 100%; padding-left: 16px; background: var(--bg-input);">
+                    <option value="Laki-laki" selected>Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-player-age">Umur Atlet (Tahun) <span style="color: var(--red);">*</span></label>
+                <input type="number" id="adm-player-age" value="24" min="12" max="80" placeholder="Umur (contoh: 24)" required>
+              </div>
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-player-phone">No. Telepon / WhatsApp <span style="color: var(--red);">*</span></label>
+              <input type="tel" id="adm-player-phone" placeholder="Contoh: 0812-3456-7890" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth);">
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-player-address">Alamat Lengkap <span style="color: var(--red);">*</span></label>
+              <textarea id="adm-player-address" placeholder="Contoh: Jl. Letjen Suprapto No. 12, Banjarnegara" required style="width: 100%; min-height: 70px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth); resize: vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 2: Handicap & Klub -->
+          <div class="add-player-step-pane" data-step="2">
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-player-club">Klub / Arena Biliar <span style="color: var(--red);">*</span></label>
+              <input type="text" id="adm-player-club" required placeholder="Contoh: Golden Banjarnegara">
+            </div>
+            <div class="form-row-double">
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-player-hc">Handicap Resmi <span style="color: var(--red);">*</span></label>
+                <div class="select-wrapper width-100">
+                  <select id="adm-player-hc" required style="width: 100%; padding-left: 16px;">
+                    <option value="3B">Handicap 3B</option>
+                    <option value="3N">Handicap 3N</option>
+                    <option value="3A">Handicap 3A</option>
+                    <option value="4B" selected>Handicap 4B</option>
+                    <option value="4A">Handicap 4A</option>
+                    <option value="5B">Handicap 5B</option>
+                    <option value="5A">Handicap 5A</option>
+                    <option value="6">Handicap 6</option>
+                    <option value="7">Handicap 7</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-player-points">Poin Berjalan (Kenaikan HC) <span style="color: var(--red);">*</span></label>
+                <input type="number" id="adm-player-points" value="0" min="0" placeholder="Poin berjalan (contoh: 30)" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Dokumen & Foto -->
+          <div class="add-player-step-pane" data-step="3">
+            <div class="form-group-item">
+              <label class="form-lbl">Foto / Avatar Atlet (Opsional)</label>
+              <input type="file" id="adm-player-avatar-file" accept="image/*" style="display: none;">
+              <div class="avatar-upload-zone" id="avatar-drop-zone" style="min-height: 80px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="font-size: 1.3rem;"></i>
+                <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik foto ke sini atau <strong>klik untuk upload</strong></span>
+                <span class="upload-zone-sub" style="font-size: 0.62rem;">Format: JPG, PNG, WebP (Maks. 2MB)</span>
+              </div>
+              <div class="avatar-upload-preview" id="avatar-preview-container" style="display: none; padding: 6px;">
+                <div class="preview-avatar-wrapper" style="width: 50px; height: 50px; position: relative;">
+                  <img id="avatar-preview-img" src="" alt="Preview Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                  <button type="button" class="btn-remove-avatar" id="btn-clear-avatar" title="Hapus Gambar" style="position: absolute; top:-2px; right:-2px; width: 18px; height: 18px; font-size: 0.65rem;">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <span class="preview-avatar-filename" id="avatar-preview-filename" style="font-size: 0.65rem;">filename.png</span>
+              </div>
+            </div>
+
+            <div class="form-row-double" style="gap: 16px; margin-top: 6px;">
+              <div class="form-group-item">
+                <label class="form-lbl">Foto Cover Banner (Opsional)</label>
+                <input type="file" id="adm-player-cover-file" accept="image/*" style="display: none;">
+                <div class="avatar-upload-zone" id="adm-cover-drop-zone" style="padding: 12px 10px; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                  <i class="fa-solid fa-panorama upload-zone-icon" style="font-size: 1.2rem; margin-bottom: 2px;"></i>
+                  <span class="upload-zone-text" style="font-size: 0.7rem;">Tarik atau <strong>klik cover</strong></span>
+                  <span class="upload-zone-sub" style="font-size: 0.58rem;">Format: JPG, PNG (Maks. 2MB)</span>
+                </div>
+                <div class="avatar-upload-preview" id="adm-cover-preview-container" style="display: none; padding: 4px;">
+                  <div class="preview-avatar-wrapper" style="width: 100%; height: 40px; border-radius: 6px; position: relative;">
+                    <img id="adm-cover-preview-img" src="" alt="Preview Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                    <button type="button" class="btn-remove-avatar" id="adm-btn-clear-cover" title="Hapus Gambar" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; font-size: 0.65rem;">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <span class="preview-avatar-filename" id="adm-cover-preview-filename" style="font-size: 0.62rem; margin-top: 2px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
+                </div>
+              </div>
+
+              <div class="form-group-item">
+                <label class="form-lbl">Dokumen KTP <span style="color: #fbbf24; font-weight: bold;">*</span></label>
+                <input type="file" id="adm-player-ktp-file" accept="image/*,application/pdf" style="display: none;">
+                <div class="avatar-upload-zone" id="adm-ktp-drop-zone" style="padding: 12px 10px; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-color: rgba(251, 191, 36, 0.3); cursor: pointer;">
+                  <i class="fa-solid fa-address-card upload-zone-icon" style="font-size: 1.2rem; margin-bottom: 2px; color: #fbbf24;"></i>
+                  <span class="upload-zone-text" style="font-size: 0.7rem; color: #fbbf24;">Tarik atau <strong>klik upload KTP</strong></span>
+                  <span class="upload-zone-sub" style="font-size: 0.58rem; color: var(--text-muted);">Gambar atau PDF (Maks. 5MB)</span>
+                </div>
+                <div class="avatar-upload-preview" id="adm-ktp-preview-container" style="display: none; padding: 4px;">
+                  <div class="preview-avatar-wrapper" style="width: 100%; height: 40px; border-radius: 6px; border-color: rgba(251,191,36,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2);">
+                    <img id="adm-ktp-preview-img" src="" alt="Preview KTP" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: none;">
+                    <div id="adm-ktp-pdf-preview-icon" style="display: none; align-items: center; gap: 4px;">
+                      <i class="fa-solid fa-file-pdf" style="font-size: 1rem; color: #ef4444;"></i>
+                      <span style="font-size: 0.65rem; color: #fbbf24; font-weight: 700;">PDF KTP</span>
+                    </div>
+                    <button type="button" class="btn-remove-avatar" id="adm-btn-clear-ktp" title="Hapus Dokumen" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; font-size: 0.65rem;">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <span class="preview-avatar-filename" id="adm-ktp-preview-filename" style="font-size: 0.62rem; margin-top: 2px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer buttons -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" class="btn btn-secondary" id="add-player-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+            <button type="button" class="btn btn-secondary" id="add-player-modal-btn-prev" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); display: none;"><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>
+            <button type="button" class="btn btn-primary" id="add-player-modal-btn-next" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff;">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+            <button type="submit" class="btn btn-primary" id="add-player-modal-btn-submit" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff; display: none;"><i class="fa-solid fa-floppy-disk"></i> Simpan Atlet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Club Modal Overlay -->
+  <div class="pm-modal-overlay" id="pm-add-club-modal" style="display:none; justify-content: center; align-items: center;">
+    <div class="pm-modal" style="width: 580px; max-width: 95%;">
+      <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+        <div>
+          <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <i class="fa-solid fa-building-circle-plus text-accent"></i> Tambah Klub Baru
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">Kelola data profil klub, alamat lengkap, dan unggahan foto/logo resmi klub.</p>
+        </div>
+        <button class="pm-modal-close" id="pm-add-club-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="pm-modal-body" style="padding: 0;">
+        <!-- Role Restriction Overlay for Staff -->
+        <div class="role-restriction-overlay" id="restrict-clubs-overlay" style="display: none; border-radius: var(--radius-md);">
+          <div class="restriction-message">
+            <i class="fa-solid fa-lock restriction-lock-icon"></i>
+            <h3>Akses Terbatas (Staff)</h3>
+            <p>Pengelolaan klub resmi dibatasi untuk Admin/Super Admin. Hubungi administrator jika diperlukan.</p>
+          </div>
+        </div>
+
+        <!-- Wizard Stepper Indicators -->
+        <div class="wizard-stepper" id="add-club-wizard-stepper" style="margin-top: 20px;">
+          <div class="wizard-progress-bar" id="add-club-wizard-progress" style="width: 0%;"></div>
+          <div class="wizard-step active" data-step="1">
+            <div class="wizard-step-circle">1</div>
+            <div class="wizard-step-label">Data Klub</div>
+          </div>
+          <div class="wizard-step" data-step="2">
+            <div class="wizard-step-circle">2</div>
+            <div class="wizard-step-label">Alamat & Lokasi</div>
+          </div>
+          <div class="wizard-step" data-step="3">
+            <div class="wizard-step-circle">3</div>
+            <div class="wizard-step-label">Media & Logo</div>
+          </div>
+        </div>
+
+        <form id="form-admin-add-club" class="admin-form-element" style="padding: 20px 24px 24px 24px; gap: 20px;">
+          <!-- STEP 1: Data Klub -->
+          <div class="add-club-step-pane active" data-step="1">
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-club-name">Nama Klub <span style="color: var(--red);">*</span></label>
+              <input type="text" id="adm-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+            </div>
+            <div class="form-row-double">
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-club-owner">Pemilik / Penanggung Jawab</label>
+                <input type="text" id="adm-club-owner" placeholder="Nama pemilik">
+              </div>
+              <div class="form-group-item">
+                <label class="form-lbl" for="adm-club-phone">No. Telepon / WhatsApp</label>
+                <input type="text" id="adm-club-phone" placeholder="0812-xxxx-xxxx">
+              </div>
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-club-tables">Jumlah Meja Biliar <span style="color: var(--red);">*</span></label>
+              <input type="number" id="adm-club-tables" placeholder="0" min="0" required>
+            </div>
+          </div>
+
+          <!-- STEP 2: Alamat & Lokasi -->
+          <div class="add-club-step-pane" data-step="2">
+            <div class="form-group-item">
+              <label class="form-lbl" for="adm-club-address">Alamat Lengkap <span style="color: var(--red);">*</span></label>
+              <textarea id="adm-club-address" placeholder="Jl. S. Parman No. 45, Banjarnegara" required style="width: 100%; min-height: 100px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth); resize: vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 3: Media & Logo -->
+          <div class="add-club-step-pane" data-step="3">
+            <div class="form-row-double" style="gap: 20px;">
+              <!-- Club Logo Upload -->
+              <div class="form-group-item">
+                <label class="form-lbl">Logo / Avatar Klub (Opsional)</label>
+                <input type="file" id="adm-club-logo-file" accept="image/*" style="display: none;">
+                <div class="avatar-upload-zone" id="adm-club-logo-drop-zone" style="padding: 16px 12px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                  <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px;"></i>
+                  <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik atau <strong>klik upload logo</strong></span>
+                  <span class="upload-zone-sub" style="font-size: 0.65rem;">Format: JPG, PNG (Maks. 2MB)</span>
+                </div>
+                <div class="avatar-upload-preview" id="adm-club-logo-preview-container" style="display: none; padding: 4px;">
+                  <div class="preview-avatar-wrapper" style="width: 50px; height: 50px; position: relative; margin: 0 auto;">
+                    <img id="adm-club-logo-preview-img" src="" alt="Preview Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <button type="button" class="btn-remove-avatar" id="adm-btn-clear-club-logo" title="Hapus Gambar" style="position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; font-size: 0.65rem;">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <span class="preview-avatar-filename" id="adm-club-logo-preview-filename" style="font-size: 0.65rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;">filename.png</span>
+                </div>
+              </div>
+
+              <!-- Club Cover Upload -->
+              <div class="form-group-item">
+                <label class="form-lbl">Foto Cover Banner Klub (Opsional)</label>
+                <input type="file" id="adm-club-cover-file" accept="image/*" style="display: none;">
+                <div class="avatar-upload-zone" id="adm-club-cover-drop-zone" style="padding: 16px 12px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                  <i class="fa-solid fa-panorama upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px;"></i>
+                  <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik atau <strong>klik upload cover</strong></span>
+                  <span class="upload-zone-sub" style="font-size: 0.65rem;">Format: JPG, PNG (Maks. 2MB)</span>
+                </div>
+                <div class="avatar-upload-preview" id="adm-club-cover-preview-container" style="display: none; padding: 4px;">
+                  <div class="preview-avatar-wrapper" style="width: 100%; height: 50px; border-radius: 8px; position: relative;">
+                    <img id="adm-club-cover-preview-img" src="" alt="Preview Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    <button type="button" class="btn-remove-avatar" id="adm-btn-clear-club-cover" title="Hapus Gambar" style="position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; font-size: 0.7rem;">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <span class="preview-avatar-filename" id="adm-club-cover-preview-filename" style="font-size: 0.65rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer buttons -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" class="btn btn-secondary" id="add-club-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+            <button type="button" class="btn btn-secondary" id="add-club-modal-btn-prev" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); display: none;"><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>
+            <button type="button" class="btn btn-primary" id="add-club-wizard-btn-next" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff;">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+            <button type="submit" class="btn btn-primary" id="add-club-modal-btn-submit" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff; display: none;"><i class="fa-solid fa-floppy-disk"></i> Simpan Klub</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Club Modal Overlay -->
+  <div class="pm-modal-overlay" id="pm-edit-club-modal" style="display:none; justify-content: center; align-items: center;">
+    <div class="pm-modal" style="max-width: 500px;">
+      <div class="pm-modal-header">
+        <h3><i class="fa-solid fa-building-circle-gear text-accent"></i> Edit Data Klub</h3>
+        <button class="pm-modal-close" id="pm-edit-club-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="pm-modal-body" style="position: relative;">
+        <!-- Role Restriction Overlay for Staff -->
+        <div class="role-restriction-overlay" id="restrict-edit-clubs-overlay" style="display: none;">
+          <div class="restriction-message">
+            <i class="fa-solid fa-lock restriction-lock-icon"></i>
+            <h3>Akses Terbatas (Staff)</h3>
+            <p>Pengelolaan klub resmi dibatasi untuk Admin/Super Admin. Hubungi administrator jika diperlukan.</p>
+          </div>
+        </div>
+        <form id="form-admin-edit-club" class="admin-form-element">
+          <input type="hidden" id="edit-club-id">
+          <div class="form-group-item">
+            <label class="form-lbl" for="edit-club-name">Nama Klub</label>
+            <input type="text" id="edit-club-name" placeholder="Contoh: Golden Banjarnegara" required>
+          </div>
+          <div class="form-group-item">
+            <label class="form-lbl" for="edit-club-address">Alamat Lengkap</label>
+            <input type="text" id="edit-club-address" placeholder="Jl. S. Parman No. 45, Banjarnegara" required>
+          </div>
+          <div class="pm-form-row">
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-owner">Pemilik / Penanggung Jawab</label>
+              <input type="text" id="edit-club-owner" placeholder="Nama pemilik">
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-phone">No. Telepon</label>
+              <input type="text" id="edit-club-phone" placeholder="0812-xxxx-xxxx">
+            </div>
+          </div>
+          <div class="pm-form-row">
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-tables">Jumlah Meja Biliar</label>
+              <input type="number" id="edit-club-tables" placeholder="0" min="0" required>
+            </div>
+            <div class="form-group-item">
+              <label class="form-lbl" for="edit-club-status">Status Klub</label>
+              <div class="select-wrapper width-100">
+                <select id="edit-club-status" style="width: 100%; padding-left: 16px; background: var(--bg-input);">
+                  <option value="Aktif" selected>Aktif</option>
+                  <option value="Nonaktif">Nonaktif</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center; margin-top: 10px;"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Full Activity Logs Modal Overlay -->
   <div class="pm-modal-overlay" id="pm-activity-logs-modal" style="display:none; justify-content: center; align-items: center; z-index: 11000;">
     <div class="pm-modal" style="max-width: 600px; width: calc(100% - 32px);">
@@ -6085,6 +6364,6 @@
 
   <!-- Loaded Data and Script files -->
   <script src="js/data.js"></script>
-  <script src="js/app.js?v=23"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>

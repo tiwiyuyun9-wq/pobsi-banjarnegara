@@ -11,7 +11,7 @@ exports.getClubs = async (req, res) => {
 };
 
 exports.addClub = async (req, res) => {
-  const { name, address, owner, phone, tables } = req.body;
+  const { name, address, owner, phone, tables, logo, cover } = req.body;
   if (!name || !address) {
     return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
   }
@@ -37,12 +37,14 @@ exports.addClub = async (req, res) => {
       owner: owner || '-',
       phone: phone || '-',
       tables: parseInt(tables || 0),
-      status: 'Aktif'
+      status: 'Aktif',
+      logo: logo || null,
+      cover: cover || null
     };
 
     await dbRun(
-      `INSERT INTO clubs (id, name, address, owner, phone, tables, status) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [newClub.id, newClub.name, newClub.address, newClub.owner, newClub.phone, newClub.tables, newClub.status]
+      `INSERT INTO clubs (id, name, address, owner, phone, tables, status, logo, cover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [newClub.id, newClub.name, newClub.address, newClub.owner, newClub.phone, newClub.tables, newClub.status, newClub.logo, newClub.cover]
     );
 
     await logActivity("Klub baru ditambahkan", `${newClub.name} terdaftar sebagai klub terafiliasi`, "success", "fa-building");
@@ -77,15 +79,15 @@ exports.deleteClub = async (req, res) => {
 
 exports.updateClub = async (req, res) => {
   const { id } = req.params;
-  const { name, address, owner, phone, tables, status } = req.body;
+  const { name, address, owner, phone, tables, status, logo, cover } = req.body;
   if (!name || !address) {
     return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
   }
 
   try {
     const result = await dbRun(
-      `UPDATE clubs SET name = ?, address = ?, owner = ?, phone = ?, tables = ?, status = ? WHERE id = ?`,
-      [name, address, owner || '-', phone || '-', parseInt(tables || 0), status || 'Aktif', id]
+      `UPDATE clubs SET name = ?, address = ?, owner = ?, phone = ?, tables = ?, status = ?, logo = ?, cover = ? WHERE id = ?`,
+      [name, address, owner || '-', phone || '-', parseInt(tables || 0), status || 'Aktif', logo || null, cover || null, id]
     );
     if (result.changes === 0) {
       return res.status(404).json({ error: "Klub tidak ditemukan!" });

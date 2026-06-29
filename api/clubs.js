@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
        POST: Menambahkan Klub Baru
        ========================================================================== */
     if (req.method === 'POST') {
-      const { name, address, owner, phone, tables } = req.body;
+      const { name, address, owner, phone, tables, logo, cover } = req.body;
       if (!name || !address) {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
@@ -75,7 +75,9 @@ module.exports = async (req, res) => {
         owner: owner || '-',
         phone: phone || '-',
         tables: parseInt(tables || 0, 10),
-        status: 'Aktif'
+        status: 'Aktif',
+        logo: logo || null,
+        cover: cover || null
       };
 
       const { data, error } = await supabase
@@ -97,7 +99,7 @@ module.exports = async (req, res) => {
     if (req.method === 'PUT') {
       if (!id) return res.status(400).json({ error: "ID klub wajib diberikan!" });
 
-      const { name, address, owner, phone, tables, status } = req.body;
+      const { name, address, owner, phone, tables, status, logo, cover } = req.body;
       if (!name || !address) {
         return res.status(400).json({ error: "Nama klub dan alamat wajib diisi!" });
       }
@@ -108,7 +110,9 @@ module.exports = async (req, res) => {
         owner: owner || '-',
         phone: phone || '-',
         tables: parseInt(tables || 0, 10),
-        status: status || 'Aktif'
+        status: status || 'Aktif',
+        logo: logo || null,
+        cover: cover || null
       };
 
       const { error } = await supabase
