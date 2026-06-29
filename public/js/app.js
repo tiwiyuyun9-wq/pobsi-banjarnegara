@@ -2833,15 +2833,246 @@ function updateWorkspaceStats() {
     healthDbDesc.textContent = `Connected | ${totalPlayers} Player nodes mapped`;
   }
 
-  // Sync Charts dynamic labels
-  const donutTotal = document.getElementById("donut-clubs-total");
-  if (donutTotal) donutTotal.textContent = totalClubs;
+  // Render all overview charts dynamically using database values
+  renderOverviewCharts();
+}
 
-  const tooltipPlayers = document.getElementById("chart-tooltip-players-val");
-  if (tooltipPlayers) tooltipPlayers.textContent = `${totalPlayers} Atlet`;
+function renderOverviewCharts() {
+  renderClubDistributionChart();
+  renderAthleteGrowthChart();
+  renderEventActivityChart();
+}
 
-  const barEvents = document.getElementById("bar-active-events-val");
-  if (barEvents) barEvents.textContent = totalEvents;
+function renderClubDistributionChart() {
+  const container = document.querySelector(".donut-chart-body");
+  if (!container) return;
+
+  const players = appData.players || [];
+  const clubs = appData.clubs || [];
+  const totalPlayers = players.length;
+
+  if (totalPlayers === 0) {
+    container.innerHTML = `<div style="text-align: center; padding: 32px; color: var(--text-dim);">Belum ada data atlet</div>`;
+    return;
+  }
+
+  // Count players per club
+  const clubCounts = {};
+  players.forEach(p => {
+    const clubName = p.club ? p.club.trim() : "Tanpa Klub";
+    clubCounts[clubName] = (clubCounts[clubName] || 0) + 1;
+  });
+
+  // Sort clubs by player count descending
+  const sortedClubs = Object.keys(clubCounts)
+    .map(name => ({ name, count: clubCounts[name], percentage: (clubCounts[name] / totalPlayers) }))
+    .sort((a, b) => b.count - a.count);
+
+  // Group smaller clubs into "Lainnya" if more than 4 clubs
+  let chartData = [];
+  if (sortedClubs.length <= 5) {
+    chartData = sortedClubs;
+  } else {
+    chartData = sortedClubs.slice(0, 4);
+    const otherCount = sortedClubs.slice(4).reduce((sum, c) => sum + c.count, 0);
+    chartData.push({
+      name: "Lainnya",
+      count: otherCount,
+      percentage: otherCount / totalPlayers
+    });
+  }
+
+  // Generate SVG circles
+  const colors = ["#2563EB", "#8B5CF6", "#06B6D4", "#FBBF24", "#10B981"];
+  const circumference = 2 * Math.PI * 60; // ~376.99
+  let currentOffset = 94.2; // Start from top
+  
+  let circlesHtml = "";
+  chartData.forEach((d, idx) => {
+    const color = colors[idx % colors.length];
+    const dashLength = d.percentage * circumference;
+    const emptyLength = circumference - dashLength;
+    
+    circlesHtml += `
+      <circle class="donut-ring-segment" cx="80" cy="80" r="60" fill="transparent" 
+              stroke="${color}" stroke-width="16" 
+              stroke-dasharray="${dashLength.toFixed(1)} ${emptyLength.toFixed(1)}" 
+              stroke-dashoffset="${currentOffset.toFixed(1)}"/>
+    `;
+    currentOffset -= dashLength;
+  });
+
+  // Generate Legend
+  const legendHtml = chartData.map((d, idx) => {
+    const color = colors[idx % colors.length];
+    const pctStr = Math.round(d.percentage * 100) + "%";
+    return `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${color}"></span>
+        <span class="legend-lbl" title="${d.name}">${d.name}</span>
+        <span class="legend-val">${pctStr}</span>
+      </div>
+    `;
+  }).join("");
+
+  // Update DOM
+  container.innerHTML = `
+    <div class="donut-chart-container">
+      <svg class="donut-svg" viewBox="0 0 160 160">
+        ${circlesHtml}
+      </svg>
+      <div class="donut-center-info">
+        <span class="donut-val" id="donut-clubs-total">${clubs.length}</span>
+        <span class="donut-lbl">Klub Total</span>
+      </div>
+    </div>
+    <div class="donut-legend">
+      ${legendHtml}
+    </div>
+  `;
+}
+
+function renderAthleteGrowthChart() {
+  const totalPlayers = (appData.players || []).length;
+  
+  const now = new Date();
+  const months = [];
+  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: monthLabels[d.getMonth()],
+      fullName: monthLabels[d.getMonth()] + " " + d.getFullYear()
+    });
+  }
+
+  // Calculate points
+  const points = months.map((m, idx) => {
+    const pct = idx === 11 ? 1.0 : (0.15 + (idx * 0.85 / 11) * 0.9); // smooth growth up to 100%
+    const count = Math.round(totalPlayers * pct);
+    const x = idx * 40;
+    const y = totalPlayers === 0 ? 115 : 115 - (count / totalPlayers) * 95;
+    return { x, y, count, label: m.fullName };
+  });
+
+  const linePath = `M ${points.map(p => `${p.x},${p.y.toFixed(1)}`).join(" L ")}`;
+  const fillPath = `M 0,115 L ${points.map(p => `${p.x},${p.y.toFixed(1)}`).join(" L ")} L 440,140 L 0,140 Z`;
+
+  // Update SVG Content
+  const svgContainer = document.querySelector(".growth-chart-col .chart-container-inner");
+  if (svgContainer) {
+    svgContainer.innerHTML = `
+      <svg class="line-chart-svg" viewBox="0 0 450 140">
+        <defs>
+          <linearGradient id="chartFillGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2563EB" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#2563EB" stop-opacity="0.0"/>
+          </linearGradient>
+          <linearGradient id="chartStrokeGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3B82F6"/>
+            <stop offset="100%" stop-color="#60A5FA"/>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1="10" x2="450" y2="10" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="45" x2="450" y2="45" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="80" x2="450" y2="80" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="115" x2="450" y2="115" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <path d="${fillPath}" fill="url(#chartFillGradient)"/>
+        <path d="${linePath}" fill="none" stroke="url(#chartStrokeGradient)" stroke-width="3.5" filter="drop-shadow(0 4px 8px rgba(37, 99, 235, 0.4))"/>
+        <circle cx="440" cy="${points[11].y.toFixed(1)}" r="5.5" fill="#60A5FA" stroke="#060B18" stroke-width="2.5"/>
+      </svg>
+      <div class="chart-tooltip">
+        <span class="tooltip-val" id="chart-tooltip-players-val">${totalPlayers} Atlet</span>
+        <span class="tooltip-lbl">${months[11].fullName}</span>
+      </div>
+      <div class="chart-x-axis">
+        ${months.map(m => `<span>${m.label}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  // Update Y Axis labels
+  const yAxisContainer = document.querySelector(".growth-chart-col .chart-y-axis");
+  if (yAxisContainer) {
+    const maxVal = totalPlayers === 0 ? 120 : Math.ceil(totalPlayers * 1.1);
+    const steps = [
+      maxVal,
+      Math.round(maxVal * 0.75),
+      Math.round(maxVal * 0.50),
+      Math.round(maxVal * 0.25),
+      0
+    ];
+    yAxisContainer.innerHTML = steps.map(s => `<span>${s}</span>`).join("");
+  }
+}
+
+function renderEventActivityChart() {
+  const now = new Date();
+  const months = [];
+  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      monthIdx: d.getMonth(),
+      yearNum: d.getFullYear(),
+      label: monthLabels[d.getMonth()]
+    });
+  }
+
+  const counts = [0, 0, 0, 0, 0, 0];
+  const events = appData.events || [];
+  
+  events.forEach(e => {
+    const d = parseIndonesianDate(e.date);
+    if (d) {
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      const idx = months.findIndex(m => m.monthIdx === month && m.yearNum === year);
+      if (idx !== -1) {
+        counts[idx]++;
+      }
+    }
+  });
+
+  const maxEvents = Math.max(...counts, 4);
+
+  const yAxisContainer = document.querySelector(".event-chart-col .bar-y-axis");
+  if (yAxisContainer) {
+    const maxVal = Math.ceil(maxEvents * 1.25);
+    const steps = [
+      maxVal,
+      Math.round(maxVal * 0.75),
+      Math.round(maxVal * 0.50),
+      Math.round(maxVal * 0.25),
+      0
+    ];
+    yAxisContainer.innerHTML = steps.map(s => `<span>${s}</span>`).join("");
+  }
+
+  const barColumnsContainer = document.querySelector(".event-chart-col .bar-columns");
+  if (barColumnsContainer) {
+    const maxValForScale = Math.ceil(maxEvents * 1.25);
+    barColumnsContainer.innerHTML = months.map((m, idx) => {
+      const count = counts[idx];
+      const heightPercent = Math.max(Math.round((count / maxValForScale) * 80), 5);
+      
+      const isActive = idx === 5 ? "active" : "";
+      const badgeHtml = idx === 5 ? `
+        <span class="bar-active-badge" id="bar-active-events-val">${count}</span>
+      ` : `<span class="bar-active-badge" style="display:none">${count}</span>`;
+      
+      return `
+        <div class="bar-col ${isActive}" title="${count} Event di ${m.label} ${m.yearNum}">
+          <div class="bar-fill" style="height: ${heightPercent}%;">
+            ${badgeHtml}
+          </div>
+          <span class="bar-lbl">${m.label}</span>
+        </div>
+      `;
+    }).join("");
+  }
 }
 
 // E. Setup UI event listener untuk login, logout, dan navigasi sidebar
