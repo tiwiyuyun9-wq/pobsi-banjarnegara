@@ -695,6 +695,58 @@ function loadStatistics() {
   const totalEvents = appData.events.length;
   document.getElementById("stat-events-count").textContent = totalEvents;
 
+  // Calculate Cumulative Total Prize Pool for currentBocYear (including sirkuit and BOC playoff)
+  let cumulativePrize = 0;
+  let hasBocEvent = false;
+  
+  const currentYearEvents = (appData.events || []).filter(e => {
+    const titleMatch = e.title && e.title.includes(currentBocYear);
+    const descMatch = e.description && e.description.includes(currentBocYear);
+    const dateMatch = e.date && e.date.includes(currentBocYear);
+    const matchesYear = titleMatch || descMatch || dateMatch;
+    return matchesYear && e.status !== 'Cancelled';
+  });
+
+  currentYearEvents.forEach(e => {
+    if (e.elimination_type === 'boc') {
+      hasBocEvent = true;
+    }
+    if (e.prizePool) {
+      const clean = e.prizePool.toString().replace(/[^0-9]/g, "");
+      cumulativePrize += (parseInt(clean, 10) || 0);
+    }
+  });
+
+  if (!hasBocEvent && typeof bocSettings !== 'undefined' && bocSettings.prizes) {
+    const prizes = bocSettings.prizes;
+    const extractNumber = (str) => {
+      if (!str) return 0;
+      const clean = str.toString().replace(/[^0-9]/g, "");
+      return parseInt(clean, 10) || 0;
+    };
+    const p1 = extractNumber(prizes.juara1);
+    const p2 = extractNumber(prizes.juara2);
+    const p3 = extractNumber(prizes.juara3);
+    const pb = extractNumber(prizes.best_game);
+    const bocTotal = p1 + p2 + p3 + pb;
+    cumulativePrize += bocTotal;
+  }
+
+  const formatCompactPrize = (val) => {
+    if (val === 0) return "Rp 0";
+    if (val >= 1000000) {
+      const million = val / 1000000;
+      const formatted = million % 1 === 0 ? million.toFixed(0) : million.toFixed(1);
+      return `Rp ${formatted} JT+`;
+    }
+    return `Rp ${val.toLocaleString('id-ID')}`;
+  };
+
+  const statTotalPrizepoolEl = document.getElementById("stat-total-prizepool");
+  if (statTotalPrizepoolEl) {
+    statTotalPrizepoolEl.textContent = formatCompactPrize(cumulativePrize);
+  }
+
   // Rata-rata Handicap (Weighted)
   const hcWeight = { '3B': 3, '3N': 3.3, '3A': 3.7, '4B': 4.2, '4A': 4.7 };
   const hcSum = appData.players.reduce((sum, p) => {
