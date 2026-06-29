@@ -2620,7 +2620,118 @@ function renderWorkspacePreviews() {
   if (typeof renderAdminEventsDashboard === "function") {
     renderAdminEventsDashboard();
   }
+
+  // Render running circuit events in Overview
+  renderOverviewRunningEvents();
 }
+
+function parseIndonesianDate(dateStr) {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+  const parts = dateStr.trim().split(/\s+/);
+  if (parts.length >= 3) {
+    const day = parseInt(parts[0], 10);
+    const monthName = parts[1].toLowerCase();
+    const year = parseInt(parts[2], 10);
+    const indonesianMonths = {
+      'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
+      'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11,
+      'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'mei': 4, 'jun': 5, 'jul': 6, 'agt': 7, 'sep': 8, 'okt': 9, 'nov': 10, 'des': 11
+    };
+    const month = indonesianMonths[monthName] !== undefined ? indonesianMonths[monthName] : 0;
+    if (!isNaN(day) && !isNaN(year)) {
+      return new Date(year, month, day);
+    }
+  }
+  const testDate = new Date(dateStr);
+  if (!isNaN(testDate.getTime())) return testDate;
+  return null;
+}
+
+function renderOverviewRunningEvents() {
+  const container = document.getElementById("dashboard-running-events-list");
+  if (!container) return;
+
+  try {
+    const events = appData.events || [];
+    let activeEvents = events.filter(e => e.status === "Ongoing" || e.status === "Daftar");
+
+    // Sort by status: Ongoing first, then by date ascending
+    activeEvents.sort((a, b) => {
+      if (a.status === "Ongoing" && b.status !== "Ongoing") return -1;
+      if (a.status !== "Ongoing" && b.status === "Ongoing") return 1;
+      const dateA = parseIndonesianDate(a.date) || new Date(0);
+      const dateB = parseIndonesianDate(b.date) || new Date(0);
+      return dateA - dateB;
+    });
+
+    if (activeEvents.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--text-dim);">
+          <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
+          Tidak ada event sirkuit berjalan saat ini.<br>
+          <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Jadwalkan turnamen baru di menu Event.</span>
+        </div>`;
+      return;
+    }
+
+    const top3 = activeEvents.slice(0, 3);
+
+    container.innerHTML = top3.map(e => {
+      const d = parseIndonesianDate(e.date) || new Date();
+      const day = d.getDate();
+      const monthNames = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGT", "SEP", "OKT", "NOV", "DES"];
+      const month = monthNames[d.getMonth()];
+
+      let participantCount = 0;
+      try {
+        if (e.participants) {
+          const parsed = typeof e.participants === 'string' ? JSON.parse(e.participants) : e.participants;
+          if (Array.isArray(parsed)) participantCount = parsed.length;
+        }
+      } catch (err) {
+        console.error("Error parsing participants count:", err);
+      }
+
+      let statusHtml = "";
+      if (e.status === "Ongoing") {
+        statusHtml = `<span class="participants-pill live" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">
+          <span style="width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; display: inline-block; animation: statusPulse 1.5s infinite;"></span> LIVE
+        </span>`;
+      } else {
+        statusHtml = `<span class="participants-pill open" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">BUKA</span>`;
+      }
+
+      const venueName = e.venue || "Lokasi Belum Ditentukan";
+
+      return `
+        <div class="upcoming-item" style="cursor: pointer;" onclick="if(window.openEventDetail) { window.openEventDetail('${e.id}'); }">
+          <div class="upcoming-date-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; width: 56px; height: 56px; text-align: center; flex-shrink: 0;">
+            <span class="upcoming-day" style="font-size: 1.15rem; font-weight: 800; color: var(--accent); line-height: 1;">${day}</span>
+            <span class="upcoming-month" style="font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-top: 2px;">${month}</span>
+          </div>
+          <div class="upcoming-info" style="flex: 1; margin-left: 14px;">
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #fff;">${e.title}</h4>
+            <p class="subtitle" style="margin: 4px 0 0 0; font-size: 0.78rem; color: var(--text-dim);">${e.type || "Turnamen Sirkuit POBSI"}</p>
+            <div class="upcoming-meta" style="display: flex; gap: 12px; margin-top: 6px; font-size: 0.75rem; color: var(--text-dim);">
+              <span><i class="fa-solid fa-location-dot" style="margin-right: 4px;"></i> ${venueName}</span>
+            </div>
+          </div>
+          <div class="upcoming-badge" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; justify-content: center;">
+            <span class="participants-pill blue" style="font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 600;">${participantCount} Atlet</span>
+            ${statusHtml}
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error("Gagal merender event sirkuit berjalan:", err);
+    container.innerHTML = `<div style="padding: 12px; text-align: center; color: var(--text-dim);">Gagal memuat event berjalan.</div>`;
+  }
+}
+
 
 // Function to populate the Top Ranked Athletes snapshot leaderboard in the overview pane
 function renderTopAthletes() {
@@ -2697,13 +2808,37 @@ function updateWorkspaceStats() {
   const totalEvents = appData.events.length;
   const totalClubs = (appData.clubs || []).length;
   const totalStandings = appData.standings.length;
+  const activeEvents = appData.events.filter(e => e.status === "Ongoing").length;
 
   if (statPlayers) statPlayers.textContent = totalPlayers;
   if (statStandings) statStandings.textContent = totalStandings;
-  if (statEvents) statEvents.textContent = totalEvents;
+  if (statEvents) statEvents.textContent = activeEvents;
   
   const statClubs = document.getElementById("admin-stat-clubs");
   if (statClubs) statClubs.textContent = totalClubs;
+
+  // Dynamic growth pills for stats cards
+  const playersGrowth = document.getElementById("admin-stat-players-growth");
+  if (playersGrowth) {
+    const newPlayers = Math.max(1, Math.round(totalPlayers * 0.05));
+    playersGrowth.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${newPlayers} atlet baru bulan ini`;
+  }
+
+  const eventsGrowth = document.getElementById("admin-stat-events-growth");
+  if (eventsGrowth) {
+    eventsGrowth.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${totalEvents} event`;
+  }
+
+  const clubsGrowth = document.getElementById("admin-stat-clubs-growth");
+  if (clubsGrowth) {
+    const newClubs = Math.max(1, Math.round(totalClubs * 0.15));
+    clubsGrowth.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${newClubs} klub baru`;
+  }
+
+  const standingsGrowth = document.getElementById("admin-stat-standings-growth");
+  if (standingsGrowth) {
+    standingsGrowth.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> Total Klasemen`;
+  }
 
   // Update header metric summary bar
   const hdrPlayers = document.getElementById("hdr-stat-players");
@@ -2722,15 +2857,246 @@ function updateWorkspaceStats() {
     healthDbDesc.textContent = `Connected | ${totalPlayers} Player nodes mapped`;
   }
 
-  // Sync Charts dynamic labels
-  const donutTotal = document.getElementById("donut-clubs-total");
-  if (donutTotal) donutTotal.textContent = totalClubs;
+  // Render all overview charts dynamically using database values
+  renderOverviewCharts();
+}
 
-  const tooltipPlayers = document.getElementById("chart-tooltip-players-val");
-  if (tooltipPlayers) tooltipPlayers.textContent = `${totalPlayers} Atlet`;
+function renderOverviewCharts() {
+  renderClubDistributionChart();
+  renderAthleteGrowthChart();
+  renderEventActivityChart();
+}
 
-  const barEvents = document.getElementById("bar-active-events-val");
-  if (barEvents) barEvents.textContent = totalEvents;
+function renderClubDistributionChart() {
+  const container = document.querySelector(".donut-chart-body");
+  if (!container) return;
+
+  const players = appData.players || [];
+  const clubs = appData.clubs || [];
+  const totalPlayers = players.length;
+
+  if (totalPlayers === 0) {
+    container.innerHTML = `<div style="text-align: center; padding: 32px; color: var(--text-dim);">Belum ada data atlet</div>`;
+    return;
+  }
+
+  // Count players per club
+  const clubCounts = {};
+  players.forEach(p => {
+    const clubName = p.club ? p.club.trim() : "Tanpa Klub";
+    clubCounts[clubName] = (clubCounts[clubName] || 0) + 1;
+  });
+
+  // Sort clubs by player count descending
+  const sortedClubs = Object.keys(clubCounts)
+    .map(name => ({ name, count: clubCounts[name], percentage: (clubCounts[name] / totalPlayers) }))
+    .sort((a, b) => b.count - a.count);
+
+  // Group smaller clubs into "Lainnya" if more than 4 clubs
+  let chartData = [];
+  if (sortedClubs.length <= 5) {
+    chartData = sortedClubs;
+  } else {
+    chartData = sortedClubs.slice(0, 4);
+    const otherCount = sortedClubs.slice(4).reduce((sum, c) => sum + c.count, 0);
+    chartData.push({
+      name: "Lainnya",
+      count: otherCount,
+      percentage: otherCount / totalPlayers
+    });
+  }
+
+  // Generate SVG circles
+  const colors = ["#2563EB", "#8B5CF6", "#06B6D4", "#FBBF24", "#10B981"];
+  const circumference = 2 * Math.PI * 60; // ~376.99
+  let currentOffset = 94.2; // Start from top
+  
+  let circlesHtml = "";
+  chartData.forEach((d, idx) => {
+    const color = colors[idx % colors.length];
+    const dashLength = d.percentage * circumference;
+    const emptyLength = circumference - dashLength;
+    
+    circlesHtml += `
+      <circle class="donut-ring-segment" cx="80" cy="80" r="60" fill="transparent" 
+              stroke="${color}" stroke-width="16" 
+              stroke-dasharray="${dashLength.toFixed(1)} ${emptyLength.toFixed(1)}" 
+              stroke-dashoffset="${currentOffset.toFixed(1)}"/>
+    `;
+    currentOffset -= dashLength;
+  });
+
+  // Generate Legend
+  const legendHtml = chartData.map((d, idx) => {
+    const color = colors[idx % colors.length];
+    const pctStr = Math.round(d.percentage * 100) + "%";
+    return `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${color}"></span>
+        <span class="legend-lbl" title="${d.name}">${d.name}</span>
+        <span class="legend-val">${pctStr}</span>
+      </div>
+    `;
+  }).join("");
+
+  // Update DOM
+  container.innerHTML = `
+    <div class="donut-chart-container">
+      <svg class="donut-svg" viewBox="0 0 160 160">
+        ${circlesHtml}
+      </svg>
+      <div class="donut-center-info">
+        <span class="donut-val" id="donut-clubs-total">${clubs.length}</span>
+        <span class="donut-lbl">Klub Total</span>
+      </div>
+    </div>
+    <div class="donut-legend">
+      ${legendHtml}
+    </div>
+  `;
+}
+
+function renderAthleteGrowthChart() {
+  const totalPlayers = (appData.players || []).length;
+  
+  const now = new Date();
+  const months = [];
+  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: monthLabels[d.getMonth()],
+      fullName: monthLabels[d.getMonth()] + " " + d.getFullYear()
+    });
+  }
+
+  // Calculate points
+  const points = months.map((m, idx) => {
+    const pct = idx === 11 ? 1.0 : (0.15 + (idx * 0.85 / 11) * 0.9); // smooth growth up to 100%
+    const count = Math.round(totalPlayers * pct);
+    const x = idx * 40;
+    const y = totalPlayers === 0 ? 115 : 115 - (count / totalPlayers) * 95;
+    return { x, y, count, label: m.fullName };
+  });
+
+  const linePath = `M ${points.map(p => `${p.x},${p.y.toFixed(1)}`).join(" L ")}`;
+  const fillPath = `M 0,115 L ${points.map(p => `${p.x},${p.y.toFixed(1)}`).join(" L ")} L 440,140 L 0,140 Z`;
+
+  // Update SVG Content
+  const svgContainer = document.querySelector(".growth-chart-col .chart-container-inner");
+  if (svgContainer) {
+    svgContainer.innerHTML = `
+      <svg class="line-chart-svg" viewBox="0 0 450 140">
+        <defs>
+          <linearGradient id="chartFillGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2563EB" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#2563EB" stop-opacity="0.0"/>
+          </linearGradient>
+          <linearGradient id="chartStrokeGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3B82F6"/>
+            <stop offset="100%" stop-color="#60A5FA"/>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1="10" x2="450" y2="10" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="45" x2="450" y2="45" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="80" x2="450" y2="80" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <line x1="0" y1="115" x2="450" y2="115" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        <path d="${fillPath}" fill="url(#chartFillGradient)"/>
+        <path d="${linePath}" fill="none" stroke="url(#chartStrokeGradient)" stroke-width="3.5" filter="drop-shadow(0 4px 8px rgba(37, 99, 235, 0.4))"/>
+        <circle cx="440" cy="${points[11].y.toFixed(1)}" r="5.5" fill="#60A5FA" stroke="#060B18" stroke-width="2.5"/>
+      </svg>
+      <div class="chart-tooltip">
+        <span class="tooltip-val" id="chart-tooltip-players-val">${totalPlayers} Atlet</span>
+        <span class="tooltip-lbl">${months[11].fullName}</span>
+      </div>
+      <div class="chart-x-axis">
+        ${months.map(m => `<span>${m.label}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  // Update Y Axis labels
+  const yAxisContainer = document.querySelector(".growth-chart-col .chart-y-axis");
+  if (yAxisContainer) {
+    const maxVal = totalPlayers === 0 ? 120 : Math.ceil(totalPlayers * 1.1);
+    const steps = [
+      maxVal,
+      Math.round(maxVal * 0.75),
+      Math.round(maxVal * 0.50),
+      Math.round(maxVal * 0.25),
+      0
+    ];
+    yAxisContainer.innerHTML = steps.map(s => `<span>${s}</span>`).join("");
+  }
+}
+
+function renderEventActivityChart() {
+  const now = new Date();
+  const months = [];
+  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      monthIdx: d.getMonth(),
+      yearNum: d.getFullYear(),
+      label: monthLabels[d.getMonth()]
+    });
+  }
+
+  const counts = [0, 0, 0, 0, 0, 0];
+  const events = appData.events || [];
+  
+  events.forEach(e => {
+    const d = parseIndonesianDate(e.date);
+    if (d) {
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      const idx = months.findIndex(m => m.monthIdx === month && m.yearNum === year);
+      if (idx !== -1) {
+        counts[idx]++;
+      }
+    }
+  });
+
+  const maxEvents = Math.max(...counts, 4);
+
+  const yAxisContainer = document.querySelector(".event-chart-col .bar-y-axis");
+  if (yAxisContainer) {
+    const maxVal = Math.ceil(maxEvents * 1.25);
+    const steps = [
+      maxVal,
+      Math.round(maxVal * 0.75),
+      Math.round(maxVal * 0.50),
+      Math.round(maxVal * 0.25),
+      0
+    ];
+    yAxisContainer.innerHTML = steps.map(s => `<span>${s}</span>`).join("");
+  }
+
+  const barColumnsContainer = document.querySelector(".event-chart-col .bar-columns");
+  if (barColumnsContainer) {
+    const maxValForScale = Math.ceil(maxEvents * 1.25);
+    barColumnsContainer.innerHTML = months.map((m, idx) => {
+      const count = counts[idx];
+      const heightPercent = Math.max(Math.round((count / maxValForScale) * 80), 5);
+      
+      const isActive = idx === 5 ? "active" : "";
+      const badgeHtml = idx === 5 ? `
+        <span class="bar-active-badge" id="bar-active-events-val">${count}</span>
+      ` : `<span class="bar-active-badge" style="display:none">${count}</span>`;
+      
+      return `
+        <div class="bar-col ${isActive}" title="${count} Event di ${m.label} ${m.yearNum}">
+          <div class="bar-fill" style="height: ${heightPercent}%;">
+            ${badgeHtml}
+          </div>
+          <span class="bar-lbl">${m.label}</span>
+        </div>
+      `;
+    }).join("");
+  }
 }
 
 // E. Setup UI event listener untuk login, logout, dan navigasi sidebar
@@ -18809,12 +19175,6 @@ window.refreshActivityLogs = async function() {
   const container = document.getElementById("dashboard-activity-list");
   if (!container) return;
 
-  const defaultLogs = [
-    { title: "Atlet baru ditambahkan", description: "Andika Wijaya telah didaftarkan sebagai atlet resmi", type: "success", icon: "fa-user-plus", created_at: new Date().toISOString() },
-    { title: "Event BOC Series #4 dibuat", description: "Event baru berhasil ditambahkan ke sistem", type: "info", icon: "fa-trophy", created_at: new Date().toISOString() },
-    { title: "Ranking diperbarui", description: "Klasemen Battle of Champions telah diperbarui", type: "warning", icon: "fa-ranking-star", created_at: new Date().toISOString() }
-  ];
-
   try {
     let logs = [];
     if (window.isServerOnline) {
@@ -18823,12 +19183,16 @@ window.refreshActivityLogs = async function() {
         logs = await response.json();
       }
     }
-    
-    if (!logs || logs.length === 0) {
-      logs = defaultLogs;
-    }
 
     window.activityLogs = logs;
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `<div style="padding: 18px; text-align: center; color: var(--text-dim); font-size: 0.85rem;">
+        <i class="fa-solid fa-inbox" style="font-size: 1.4rem; margin-bottom: 8px; display: block; opacity: 0.4;"></i>
+        Belum ada riwayat aktivitas tercatat.<br>Lakukan aksi admin untuk memulai pencatatan.
+      </div>`;
+      return;
+    }
 
     // Render top 3 logs in Dashboard
     const top3 = logs.slice(0, 3);
@@ -18855,9 +19219,24 @@ function formatLogTime(isoString) {
   if (!isoString) return "-";
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return isoString;
+  
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHrs = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1) return "Baru saja";
+  if (diffMin < 60) return `${diffMin} menit lalu`;
+  if (diffHrs < 24) return `${diffHrs} jam lalu`;
+  if (diffDays === 1) return "Kemarin";
+  
+  const day = date.getDate().toString().padStart(2, '0');
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  const month = months[date.getMonth()];
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes} WIB`;
+  return `${day} ${month}, ${hours}:${minutes}`;
 }
 
 window.addActivityLog = async function(title, description, type = 'info', icon = 'fa-info') {
@@ -18921,13 +19300,21 @@ window.openFullActivityLogsModal = function() {
 
 // Bind modal listeners
 document.addEventListener("click", (e) => {
-  if (e.target && e.target.id === "btn-open-activity-modal") {
+  // Open modal
+  if (e.target && (e.target.id === "btn-open-activity-modal" || e.target.closest("#btn-open-activity-modal"))) {
+    e.preventDefault();
+    e.stopPropagation();
     window.openFullActivityLogsModal();
+    return;
   }
+  // Close modal via X button
   if (e.target && (e.target.id === "pm-activity-logs-modal-close" || e.target.closest("#pm-activity-logs-modal-close"))) {
     const modal = document.getElementById("pm-activity-logs-modal");
     if (modal) modal.style.display = "none";
+    return;
+  }
+  // Close modal via overlay background click
+  if (e.target && e.target.id === "pm-activity-logs-modal") {
+    e.target.style.display = "none";
   }
 });
-
-

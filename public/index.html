@@ -1973,7 +1973,7 @@
               </div>
               <div class="card-metric-body">
                 <span class="admin-stat-value-premium-hero" id="admin-stat-players">106</span>
-                <span class="growth-pill green"><i class="fa-solid fa-arrow-trend-up"></i> 6 atlet baru bulan ini</span>
+                <span class="growth-pill green" id="admin-stat-players-growth"><i class="fa-solid fa-arrow-trend-up"></i> 6 atlet baru bulan ini</span>
               </div>
               <!-- Decorative abstract lines inside hero card -->
               <div class="hero-card-decoration" aria-hidden="true"></div>
@@ -1989,7 +1989,7 @@
               </div>
               <div class="card-metric-body">
                 <span class="admin-stat-value-premium" id="admin-stat-events">16</span>
-                <span class="growth-pill green"><i class="fa-solid fa-arrow-trend-up"></i> 4 event</span>
+                <span class="growth-pill green" id="admin-stat-events-growth"><i class="fa-solid fa-arrow-trend-up"></i> 4 event</span>
               </div>
             </div>
 
@@ -2003,7 +2003,7 @@
               </div>
               <div class="card-metric-body">
                 <span class="admin-stat-value-premium" id="admin-stat-clubs">7</span>
-                <span class="growth-pill green"><i class="fa-solid fa-arrow-trend-up"></i> 1 klub baru</span>
+                <span class="growth-pill green" id="admin-stat-clubs-growth"><i class="fa-solid fa-arrow-trend-up"></i> 1 klub baru</span>
               </div>
             </div>
 
@@ -2017,7 +2017,7 @@
               </div>
               <div class="card-metric-body">
                 <span class="admin-stat-value-premium" id="admin-stat-standings">108</span>
-                <span class="growth-pill green"><i class="fa-solid fa-arrow-trend-up"></i> Total Klasemen</span>
+                <span class="growth-pill green" id="admin-stat-standings-growth"><i class="fa-solid fa-arrow-trend-up"></i> Total Klasemen</span>
               </div>
             </div>
           </div>
@@ -2185,7 +2185,7 @@
                 <h3 class="col-title"><i class="fa-solid fa-calendar-days text-accent" style="margin-right:6px"></i> EVENT SIRKUIT BERJALAN</h3>
                 <button class="btn-col-action" onclick="switchAdminPane('pane-events')">Lihat Semua</button>
               </div>
-              <div class="col-body list-wrapper">
+              <div class="col-body list-wrapper" id="dashboard-running-events-list">
                 <div class="upcoming-item">
                   <div class="upcoming-date-box">
                     <span class="upcoming-day">15</span>
@@ -2229,7 +2229,7 @@
             <div class="dashboard-col activity-col">
               <div class="col-header">
                 <h3 class="col-title"><i class="fa-solid fa-clock-rotate-left text-muted" style="margin-right:6px"></i> RIWAYAT AKTIVITAS</h3>
-                <button class="btn-col-action" id="btn-open-activity-modal">Log Lengkap</button>
+                <button class="btn-col-action" id="btn-open-activity-modal" onclick="if(window.openFullActivityLogsModal) window.openFullActivityLogsModal()">Log Lengkap</button>
               </div>
               <div class="col-body list-wrapper" id="dashboard-activity-list">
                 <div class="activity-item">
@@ -6072,7 +6072,7 @@
   </div>
 
   <!-- Full Activity Logs Modal Overlay -->
-  <div class="pm-modal-overlay" id="pm-activity-logs-modal" style="display:none; justify-content: center; align-items: center; z-index: 1200;">
+  <div class="pm-modal-overlay" id="pm-activity-logs-modal" style="display:none; justify-content: center; align-items: center; z-index: 11000;">
     <div class="pm-modal" style="max-width: 600px; width: calc(100% - 32px);">
       <div class="pm-modal-header">
         <h3><i class="fa-solid fa-clock-rotate-left text-accent"></i> Riwayat Aktivitas Lengkap</h3>
@@ -6092,6 +6092,6 @@
 
   <!-- Loaded Data and Script files -->
   <script src="js/data.js"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>
