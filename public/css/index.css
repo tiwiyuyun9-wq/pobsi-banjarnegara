@@ -6841,6 +6841,17 @@ tr:hover td.sticky-col {
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
 }
 
+.ad-btn-red-outline {
+  background: rgba(239, 68, 68, 0.05);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.ad-btn-red-outline:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+}
+
 /* Profile Section & KPI row */
 .ad-profile-row {
   display: grid;
