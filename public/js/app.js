@@ -2072,21 +2072,43 @@ function setupStandingsSearch() {
 }
 
 // 8. Handicap Registry Database Logic
+function populateAthleteClubDropdowns() {
+  const addPlayerClubSelect = document.getElementById("adm-player-club");
+  const editPlayerClubSelect = document.getElementById("edit-player-club");
+  
+  const clubs = appData.clubs || [];
+  
+  // Sort clubs alphabetically by name
+  const sortedClubs = [...clubs].sort((a, b) => a.name.localeCompare(b.name));
+  
+  const optionsHtml = sortedClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  
+  if (addPlayerClubSelect) {
+    addPlayerClubSelect.innerHTML = `<option value="" disabled selected>Pilih Klub / Arena</option>` + optionsHtml;
+  }
+  if (editPlayerClubSelect) {
+    editPlayerClubSelect.innerHTML = `<option value="" disabled>Pilih Klub / Arena</option>` + optionsHtml;
+  }
+}
+
 function populateClubFilters() {
   const clubSelect = document.getElementById("club-filter-select");
-  if (!clubSelect) return;
+  if (clubSelect) {
+    // Reset dropdown except the first option
+    clubSelect.innerHTML = '<option value="all">Semua Klub</option>';
 
-  // Reset dropdown except the first option
-  clubSelect.innerHTML = '<option value="all">Semua Klub</option>';
+    const clubs = [...new Set(appData.players.map(p => p.club))].sort();
+    clubs.forEach(club => {
+      if (!club) return;
+      const opt = document.createElement("option");
+      opt.value = club;
+      opt.textContent = club;
+      clubSelect.appendChild(opt);
+    });
+  }
 
-  const clubs = [...new Set(appData.players.map(p => p.club))].sort();
-  clubs.forEach(club => {
-    if (!club) return;
-    const opt = document.createElement("option");
-    opt.value = club;
-    opt.textContent = club;
-    clubSelect.appendChild(opt);
-  });
+  // Auto-refresh athlete form club selects
+  populateAthleteClubDropdowns();
 }
 
 function renderHandicapList() {
@@ -6782,7 +6804,20 @@ function setupAthleteDetailActions() {
 
     document.getElementById("edit-player-id").value = player.id;
     document.getElementById("edit-player-name").value = player.name;
-    document.getElementById("edit-player-club").value = player.club;
+    
+    const editPlayerClubSelect = document.getElementById("edit-player-club");
+    if (editPlayerClubSelect) {
+      populateAthleteClubDropdowns();
+      const exists = Array.from(editPlayerClubSelect.options).some(opt => opt.value === player.club);
+      if (!exists && player.club) {
+        const opt = document.createElement("option");
+        opt.value = player.club;
+        opt.textContent = `${player.club} (Tidak Terdaftar)`;
+        editPlayerClubSelect.appendChild(opt);
+      }
+      editPlayerClubSelect.value = player.club;
+    }
+
     document.getElementById("edit-player-hc").value = player.handicap;
     document.getElementById("edit-player-points").value = player.points || 0;
     document.getElementById("edit-player-gender").value = player.gender || "Laki-laki";
