@@ -5331,8 +5331,8 @@ function setupAdminClubsConsole() {
   const editCoverPreviewFilename = document.getElementById("edit-club-cover-preview-filename");
   const editBtnClearCover = document.getElementById("edit-btn-clear-club-cover");
 
-  // Helper: populate edit club modal from SSOT
-  function populateEditClubModal(club) {
+  // Helper: populate edit club modal from SSOT (global for detail page access)
+  window.populateEditClubModal = function populateEditClubModal(club) {
     document.getElementById('edit-club-id').value = club.id;
     document.getElementById('edit-club-name').value = club.name || '';
     document.getElementById('edit-club-abbr').value = club.abbr || '';
