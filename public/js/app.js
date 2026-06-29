@@ -6703,7 +6703,7 @@ function setupBocAdminListeners() {
       let dbType = "SQLite";
       if (isServerOnline) {
         try {
-          const statusRes = await fetch('/api/db-status').then(r => r.ok ? r.json() : null).catch(() => null);
+          const statusRes = await fetch('/api/misc?action=db-status').then(r => r.ok ? r.json() : null).catch(() => null);
           if (statusRes && statusRes.database) {
             dbType = statusRes.database;
           }
@@ -18818,7 +18818,7 @@ window.refreshActivityLogs = async function() {
   try {
     let logs = [];
     if (window.isServerOnline) {
-      const response = await fetch('/api/activity-logs?limit=15', { cache: 'no-store' });
+      const response = await fetch('/api/misc?action=activity-logs&limit=15', { cache: 'no-store' });
       if (response.ok) {
         logs = await response.json();
       }
@@ -18864,7 +18864,7 @@ window.addActivityLog = async function(title, description, type = 'info', icon =
   console.log(`📝 Menambahkan log aktivitas: "${title}"`);
   try {
     if (window.isServerOnline) {
-      const response = await fetch('/api/activity-logs', {
+      const response = await fetch('/api/misc?action=activity-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, type, icon })

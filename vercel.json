@@ -10,6 +10,8 @@
     { "source": "/api/tournament-history", "destination": "/api/athlete-data.js?type=tournament-history" },
     { "source": "/api/handicap-history", "destination": "/api/athlete-data.js?type=handicap-history" },
     { "source": "/api/ranking-history", "destination": "/api/athlete-data.js?type=ranking-history" },
+    { "source": "/api/activity-logs", "destination": "/api/misc.js?action=activity-logs" },
+    { "source": "/api/db-status", "destination": "/api/misc.js?action=db-status" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }

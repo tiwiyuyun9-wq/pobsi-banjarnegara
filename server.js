@@ -367,7 +367,7 @@ if (isSupabaseEnabled) {
   // Require Serverless Handlers
   const playersHandler = require('./api/players');
   const standingsHandler = require('./api/standings');
-  const dbStatusHandler = require('./api/db-status');
+  const dbStatusHandler = require('./api/_db-status');
   const eventsHandler = require('./api/events');
   const docsHandler = require('./api/docs');
   const clubsHandler = require('./api/clubs');
@@ -377,7 +377,8 @@ if (isSupabaseEnabled) {
   const bocSirkuitsHandler = require('./api/boc-sirkuits');
   const bocSettingsHandler = require('./api/boc-settings');
   const athleteDataHandler = require('./api/athlete-data');
-  const activityLogsHandler = require('./api/activity-logs');
+  const activityLogsHandler = require('./api/_activity-logs');
+  const miscHandler = require('./api/misc');
 
   // helper function to bridge Express API signature and Vercel Serverless signature
   const bridge = (handler, idParam = null) => {
@@ -403,11 +404,14 @@ if (isSupabaseEnabled) {
   app.all('/api/standings/reindex', bridge(standingsHandler));
   app.all('/api/standings', bridge(standingsHandler));
 
-  // Activity Logs
+  // Activity Logs (legacy route for backward compat)
   app.all('/api/activity-logs', bridge(activityLogsHandler));
 
-  // DB Status
+  // DB Status (legacy route for backward compat)
   app.all('/api/db-status', bridge(dbStatusHandler));
+
+  // Misc (consolidated endpoint for Vercel - activity-logs + db-status)
+  app.all('/api/misc', bridge(miscHandler));
 
   // Sirkuits
   app.all('/api/boc-sirkuits', bridge(bocSirkuitsHandler));
@@ -462,6 +466,22 @@ if (isSupabaseEnabled) {
   
   app.get('/api/db-status', (req, res) => {
     res.json({ database: 'SQLite' });
+  });
+
+  // Misc consolidated endpoint (mirrors Vercel structure for frontend compat)
+  app.all('/api/misc', async (req, res) => {
+    const { action } = req.query;
+    if (action === 'db-status') {
+      return res.json({ database: 'SQLite' });
+    }
+    if (action === 'activity-logs') {
+      // Forward to activity log routes
+      const activityLogController = require('./api/controllers/activityLogController');
+      if (req.method === 'GET') return activityLogController.getActivityLogs(req, res);
+      if (req.method === 'POST') return activityLogController.addActivityLog(req, res);
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+    return res.status(400).json({ error: 'Unknown action' });
   });
 
   // Rute Autentikasi Admin Rahasia (RBAC)
