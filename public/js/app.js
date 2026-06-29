@@ -5004,6 +5004,8 @@ let pmSelectedClubIds = new Set();
 window.currentAddClubStep = 1;
 let currentUploadedClubLogoBase64 = "";
 let currentUploadedClubCoverBase64 = "";
+let editClubLogoBase64 = "";
+let editClubCoverBase64 = "";
 
 window.updateAddClubWizardUI = function() {
   const step = window.currentAddClubStep;
@@ -5313,24 +5315,133 @@ function setupAdminClubsConsole() {
   const btnEditClub = document.getElementById('pm-btn-edit-club');
   const editClubModal = document.getElementById('pm-edit-club-modal');
   const editClubModalClose = document.getElementById('pm-edit-club-modal-close');
-  
+
+  // Edit Club upload DOM references
+  const editLogoDropZone = document.getElementById("edit-club-logo-drop-zone");
+  const editLogoFileInput = document.getElementById("edit-club-logo-file");
+  const editLogoPreviewContainer = document.getElementById("edit-club-logo-preview-container");
+  const editLogoPreviewImg = document.getElementById("edit-club-logo-preview-img");
+  const editLogoPreviewFilename = document.getElementById("edit-club-logo-preview-filename");
+  const editBtnClearLogo = document.getElementById("edit-btn-clear-club-logo");
+
+  const editCoverDropZone = document.getElementById("edit-club-cover-drop-zone");
+  const editCoverFileInput = document.getElementById("edit-club-cover-file");
+  const editCoverPreviewContainer = document.getElementById("edit-club-cover-preview-container");
+  const editCoverPreviewImg = document.getElementById("edit-club-cover-preview-img");
+  const editCoverPreviewFilename = document.getElementById("edit-club-cover-preview-filename");
+  const editBtnClearCover = document.getElementById("edit-btn-clear-club-cover");
+
+  // Helper: populate edit club modal from SSOT
+  function populateEditClubModal(club) {
+    document.getElementById('edit-club-id').value = club.id;
+    document.getElementById('edit-club-name').value = club.name || '';
+    document.getElementById('edit-club-abbr').value = club.abbr || '';
+    document.getElementById('edit-club-address').value = club.address || '';
+    document.getElementById('edit-club-owner').value = club.owner || '';
+    document.getElementById('edit-club-phone').value = club.phone || '';
+    document.getElementById('edit-club-tables').value = club.tables || 0;
+    document.getElementById('edit-club-status').value = club.status || 'Aktif';
+
+    // Reset upload states
+    editClubLogoBase64 = club.logo || "";
+    editClubCoverBase64 = club.cover || "";
+    if (editLogoFileInput) editLogoFileInput.value = "";
+    if (editCoverFileInput) editCoverFileInput.value = "";
+
+    // Populate logo preview
+    if (club.logo) {
+      if (editLogoPreviewImg) editLogoPreviewImg.src = club.logo;
+      if (editLogoPreviewFilename) editLogoPreviewFilename.textContent = "Logo saat ini";
+      if (editLogoDropZone) editLogoDropZone.style.display = "none";
+      if (editLogoPreviewContainer) editLogoPreviewContainer.style.display = "block";
+    } else {
+      if (editLogoDropZone) editLogoDropZone.style.display = "flex";
+      if (editLogoPreviewContainer) editLogoPreviewContainer.style.display = "none";
+    }
+
+    // Populate cover preview
+    if (club.cover) {
+      if (editCoverPreviewImg) editCoverPreviewImg.src = club.cover;
+      if (editCoverPreviewFilename) editCoverPreviewFilename.textContent = "Cover saat ini";
+      if (editCoverDropZone) editCoverDropZone.style.display = "none";
+      if (editCoverPreviewContainer) editCoverPreviewContainer.style.display = "block";
+    } else {
+      if (editCoverDropZone) editCoverDropZone.style.display = "flex";
+      if (editCoverPreviewContainer) editCoverPreviewContainer.style.display = "none";
+    }
+  }
+
+  // Wire up logo upload for edit modal
+  if (editLogoDropZone && editLogoFileInput) {
+    editLogoDropZone.onclick = () => editLogoFileInput.click();
+    editLogoDropZone.addEventListener("dragover", (e) => { e.preventDefault(); editLogoDropZone.classList.add("dragover"); });
+    ["dragleave", "drop"].forEach(ev => editLogoDropZone.addEventListener(ev, () => editLogoDropZone.classList.remove("dragover")));
+    editLogoDropZone.addEventListener("drop", (e) => { e.preventDefault(); if (e.dataTransfer.files.length > 0) handleEditLogoFile(e.dataTransfer.files[0]); });
+    editLogoFileInput.addEventListener("change", (e) => { if (e.target.files.length > 0) handleEditLogoFile(e.target.files[0]); });
+  }
+
+  function handleEditLogoFile(file) {
+    if (!file.type.startsWith("image/")) { showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG).", "error"); return; }
+    if (file.size > 2 * 1024 * 1024) { showCustomToast("Ukuran logo terlalu besar! Maksimal 2MB.", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      editClubLogoBase64 = e.target.result;
+      if (editLogoPreviewImg) editLogoPreviewImg.src = editClubLogoBase64;
+      if (editLogoPreviewFilename) editLogoPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      if (editLogoDropZone) editLogoDropZone.style.display = "none";
+      if (editLogoPreviewContainer) editLogoPreviewContainer.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (editBtnClearLogo) {
+    editBtnClearLogo.onclick = () => {
+      editClubLogoBase64 = "";
+      if (editLogoFileInput) editLogoFileInput.value = "";
+      if (editLogoDropZone) editLogoDropZone.style.display = "flex";
+      if (editLogoPreviewContainer) editLogoPreviewContainer.style.display = "none";
+    };
+  }
+
+  // Wire up cover upload for edit modal
+  if (editCoverDropZone && editCoverFileInput) {
+    editCoverDropZone.onclick = () => editCoverFileInput.click();
+    editCoverDropZone.addEventListener("dragover", (e) => { e.preventDefault(); editCoverDropZone.classList.add("dragover"); });
+    ["dragleave", "drop"].forEach(ev => editCoverDropZone.addEventListener(ev, () => editCoverDropZone.classList.remove("dragover")));
+    editCoverDropZone.addEventListener("drop", (e) => { e.preventDefault(); if (e.dataTransfer.files.length > 0) handleEditCoverFile(e.dataTransfer.files[0]); });
+    editCoverFileInput.addEventListener("change", (e) => { if (e.target.files.length > 0) handleEditCoverFile(e.target.files[0]); });
+  }
+
+  function handleEditCoverFile(file) {
+    if (!file.type.startsWith("image/")) { showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG).", "error"); return; }
+    if (file.size > 2 * 1024 * 1024) { showCustomToast("Ukuran cover terlalu besar! Maksimal 2MB.", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      editClubCoverBase64 = e.target.result;
+      if (editCoverPreviewImg) editCoverPreviewImg.src = editClubCoverBase64;
+      if (editCoverPreviewFilename) editCoverPreviewFilename.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      if (editCoverDropZone) editCoverDropZone.style.display = "none";
+      if (editCoverPreviewContainer) editCoverPreviewContainer.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (editBtnClearCover) {
+    editBtnClearCover.onclick = () => {
+      editClubCoverBase64 = "";
+      if (editCoverFileInput) editCoverFileInput.value = "";
+      if (editCoverDropZone) editCoverDropZone.style.display = "flex";
+      if (editCoverPreviewContainer) editCoverPreviewContainer.style.display = "none";
+    };
+  }
+
+  // Open edit club modal (from sidebar button)
   if (btnEditClub && editClubModal) {
     btnEditClub.addEventListener('click', () => {
       if (!currentSelectedClubId) return;
-      const clubs = appData.clubs || [];
-      const club = clubs.find(c => c.id.toString() === currentSelectedClubId.toString());
+      const club = (appData.clubs || []).find(c => c.id.toString() === currentSelectedClubId.toString());
       if (!club) return;
-      
-      // Populate fields
-      document.getElementById('edit-club-id').value = club.id;
-      document.getElementById('edit-club-name').value = club.name;
-      document.getElementById('edit-club-abbr').value = club.abbr || '';
-      document.getElementById('edit-club-address').value = club.address;
-      document.getElementById('edit-club-owner').value = club.owner || '';
-      document.getElementById('edit-club-phone').value = club.phone || '';
-      document.getElementById('edit-club-tables').value = club.tables || 0;
-      document.getElementById('edit-club-status').value = club.status || 'Aktif';
-      
+      populateEditClubModal(club);
       editClubModal.style.display = 'flex';
     });
   }
@@ -5359,9 +5470,11 @@ function setupAdminClubsConsole() {
       const phone = document.getElementById('edit-club-phone').value.trim();
       const tables = parseInt(document.getElementById('edit-club-tables').value || 0);
       const status = document.getElementById('edit-club-status').value;
+      const logo = editClubLogoBase64 || null;
+      const cover = editClubCoverBase64 || null;
 
       const onSuccess = async () => {
-        alert(`Data klub "${name}" berhasil diperbarui!`);
+        showCustomToast(`Data klub "${name}" berhasil diperbarui!`, "success");
         formEditClub.reset();
         if (editClubModal) editClubModal.style.display = 'none';
         await loadDataFromApi();
@@ -5373,6 +5486,11 @@ function setupAdminClubsConsole() {
         
         // Refresh sidebar view
         selectClubRow(id, document.querySelector(`#pm-club-table-body tr.pm-row-active`));
+
+        // Refresh detail page if currently viewing this club
+        if (typeof adActiveClubId !== 'undefined' && adActiveClubId && adActiveClubId.toString() === id.toString()) {
+          renderClubDetail(id);
+        }
       };
 
       if (isServerOnline) {
@@ -5380,23 +5498,23 @@ function setupAdminClubsConsole() {
           const res = await fetch(`/api/clubs/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, abbr, address, owner, phone, tables, status })
+            body: JSON.stringify({ name, abbr, address, owner, phone, tables, status, logo, cover })
           });
           if (res.ok) {
             await onSuccess();
           } else {
             const errJson = await res.json();
-            alert(`Gagal: ${errJson.error || 'Server error'}`);
+            showCustomToast(`Gagal: ${errJson.error || 'Server error'}`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi: ${err.message}`);
+          showCustomToast(`Error koneksi: ${err.message}`, "error");
         }
       } else {
         const clubs = appData.clubs || [];
         const index = clubs.findIndex(c => c.id.toString() === id.toString());
         if (index !== -1) {
-          clubs[index] = { ...clubs[index], name, abbr: abbr || '-', address, owner, phone, tables, status };
-          alert(`Mode Luring: Data klub "${name}" diperbarui di memori sementara!`);
+          clubs[index] = { ...clubs[index], name, abbr: abbr || '-', address, owner, phone, tables, status, logo, cover };
+          showCustomToast(`Mode Luring: Data klub "${name}" diperbarui di memori sementara!`, "success");
           formEditClub.reset();
           if (editClubModal) editClubModal.style.display = 'none';
           renderClubs();
@@ -5405,6 +5523,9 @@ function setupAdminClubsConsole() {
           loadStatistics();
           populateClubFilters();
           selectClubRow(id, document.querySelector(`#pm-club-table-body tr.pm-row-active`));
+          if (typeof adActiveClubId !== 'undefined' && adActiveClubId && adActiveClubId.toString() === id.toString()) {
+            renderClubDetail(id);
+          }
         }
       }
     });
@@ -7479,15 +7600,7 @@ function setupClubDetailActions() {
     const club = appData.clubs.find(c => c.id.toString() === adActiveClubId.toString());
     if (!club) return;
 
-    document.getElementById('edit-club-id').value = club.id;
-    document.getElementById('edit-club-name').value = club.name;
-    document.getElementById('edit-club-abbr').value = club.abbr || '';
-    document.getElementById('edit-club-address').value = club.address;
-    document.getElementById('edit-club-owner').value = club.owner || '';
-    document.getElementById('edit-club-phone').value = club.phone || '';
-    document.getElementById('edit-club-tables').value = club.tables || 0;
-    document.getElementById('edit-club-status').value = club.status || 'Aktif';
-
+    populateEditClubModal(club);
     const editModal = document.getElementById('pm-edit-club-modal');
     if (editModal) editModal.style.display = 'flex';
   };

@@ -6304,12 +6304,12 @@
 
   <!-- Edit Club Modal Overlay -->
   <div class="pm-modal-overlay" id="pm-edit-club-modal" style="display:none; justify-content: center; align-items: center;">
-    <div class="pm-modal" style="max-width: 500px;">
+    <div class="pm-modal" style="max-width: 560px;">
       <div class="pm-modal-header">
         <h3><i class="fa-solid fa-building-circle-gear text-accent"></i> Edit Data Klub</h3>
         <button class="pm-modal-close" id="pm-edit-club-modal-close"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="pm-modal-body" style="position: relative;">
+      <div class="pm-modal-body" style="position: relative; max-height: 70vh; overflow-y: auto; padding-right: 8px;">
         <!-- Role Restriction Overlay for Staff -->
         <div class="role-restriction-overlay" id="restrict-edit-clubs-overlay" style="display: none;">
           <div class="restriction-message">
@@ -6359,6 +6359,50 @@
               </div>
             </div>
           </div>
+
+          <!-- Logo & Cover Upload -->
+          <div class="form-row-double" style="gap: 20px; margin-top: 8px;">
+            <!-- Club Logo Upload -->
+            <div class="form-group-item">
+              <label class="form-lbl">Logo / Avatar Klub</label>
+              <input type="file" id="edit-club-logo-file" accept="image/*" style="display: none;">
+              <div class="avatar-upload-zone" id="edit-club-logo-drop-zone" style="padding: 16px 12px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                <i class="fa-solid fa-cloud-arrow-up upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px;"></i>
+                <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik atau <strong>klik upload logo</strong></span>
+                <span class="upload-zone-sub" style="font-size: 0.65rem;">Format: JPG, PNG (Maks. 2MB)</span>
+              </div>
+              <div class="avatar-upload-preview" id="edit-club-logo-preview-container" style="display: none; padding: 4px;">
+                <div class="preview-avatar-wrapper" style="width: 50px; height: 50px; position: relative; margin: 0 auto;">
+                  <img id="edit-club-logo-preview-img" src="" alt="Preview Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                  <button type="button" class="btn-remove-avatar" id="edit-btn-clear-club-logo" title="Hapus Gambar" style="position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; font-size: 0.65rem;">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <span class="preview-avatar-filename" id="edit-club-logo-preview-filename" style="font-size: 0.65rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;">filename.png</span>
+              </div>
+            </div>
+
+            <!-- Club Cover Upload -->
+            <div class="form-group-item">
+              <label class="form-lbl">Foto Cover Banner Klub</label>
+              <input type="file" id="edit-club-cover-file" accept="image/*" style="display: none;">
+              <div class="avatar-upload-zone" id="edit-club-cover-drop-zone" style="padding: 16px 12px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                <i class="fa-solid fa-panorama upload-zone-icon" style="font-size: 1.4rem; margin-bottom: 2px;"></i>
+                <span class="upload-zone-text" style="font-size: 0.75rem;">Tarik atau <strong>klik upload cover</strong></span>
+                <span class="upload-zone-sub" style="font-size: 0.65rem;">Format: JPG, PNG (Maks. 2MB)</span>
+              </div>
+              <div class="avatar-upload-preview" id="edit-club-cover-preview-container" style="display: none; padding: 4px;">
+                <div class="preview-avatar-wrapper" style="width: 100%; height: 50px; border-radius: 8px; position: relative;">
+                  <img id="edit-club-cover-preview-img" src="" alt="Preview Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                  <button type="button" class="btn-remove-avatar" id="edit-btn-clear-club-cover" title="Hapus Gambar" style="position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; font-size: 0.7rem;">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <span class="preview-avatar-filename" id="edit-club-cover-preview-filename" style="font-size: 0.65rem; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.png</span>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="pm-btn pm-btn-primary pm-btn-block" style="width: 100%; justify-content: center; margin-top: 10px;"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
         </form>
       </div>
