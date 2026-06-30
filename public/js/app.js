@@ -9403,23 +9403,51 @@ function generateSlug(name) {
 function findAthleteBySlug(slug) {
   // Search in standings (primary source for BOC data)
   const standing = appData.standings.find(s => generateSlug(s.name) === slug);
-  if (!standing) return null;
+  
+  if (standing) {
+    // Enrich with player data if available
+    const player = appData.players.find(p => 
+      p.name.toLowerCase() === standing.name.toLowerCase()
+    );
 
-  // Enrich with player data if available
-  const player = appData.players.find(p => 
-    p.name.toLowerCase() === standing.name.toLowerCase()
-  );
+    return {
+      ...standing,
+      id: player ? player.id : null,
+      avatar: player ? player.avatar : null,
+      cover: player ? player.cover : null,
+      gender: player ? player.gender : 'Laki-laki',
+      age: player ? player.age : null,
+      phone: player ? player.phone : null,
+      address: player ? player.address : null,
+      status: player ? player.status : 'Aktif'
+    };
+  }
 
-  return {
-    ...standing,
-    id: player ? player.id : null,
-    avatar: player ? player.avatar : null,
-    gender: player ? player.gender : 'Laki-laki',
-    age: player ? player.age : null,
-    phone: player ? player.phone : null,
-    address: player ? player.address : null,
-    status: player ? player.status : 'Aktif'
-  };
+  // Fallback: Search in players (for registered players without standings yet)
+  const player = appData.players.find(p => generateSlug(p.name) === slug);
+  if (player) {
+    return {
+      id: player.id,
+      name: player.name,
+      club: player.club || 'Independen',
+      handicap: player.handicap || '3B',
+      points: 0, // Standings points (BOC points) is 0 for athletes not in standings
+      played: 0,
+      won: 0,
+      lost: 0,
+      winRate: '0%',
+      rank: 999,
+      avatar: player.avatar || null,
+      cover: player.cover || null,
+      gender: player.gender || 'Laki-laki',
+      age: player.age || null,
+      phone: player.phone || null,
+      address: player.address || null,
+      status: player.status || 'Aktif'
+    };
+  }
+
+  return null;
 }
 
 // Open the public athlete profile page
