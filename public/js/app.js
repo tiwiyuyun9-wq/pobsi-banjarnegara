@@ -11583,6 +11583,7 @@ function renderAthleteProfile(athlete) {
   if (!athlete) return;
 
   const rank = athlete.rank || 999;
+  const isRanked = rank < 999;
   const name = athlete.name || 'Unknown';
   const club = athlete.club || '-';
   const hc = athlete.handicap || '-';
@@ -11626,12 +11627,13 @@ function renderAthleteProfile(athlete) {
     if (rank === 1) avatarRankBadge.textContent = '🥇';
     else if (rank === 2) avatarRankBadge.textContent = '🥈';
     else if (rank === 3) avatarRankBadge.textContent = '🥉';
-    else avatarRankBadge.textContent = '#' + rank;
+    else if (isRanked) avatarRankBadge.textContent = '#' + rank;
+    else avatarRankBadge.textContent = '-';
   }
 
   // Set small elegant laurels rank badge next to name
   const laurelRank = document.getElementById('ap-laurel-rank-text');
-  if (laurelRank) laurelRank.textContent = '#' + rank;
+  if (laurelRank) laurelRank.textContent = isRanked ? '#' + rank : '-';
 
   // Hero name & breadcrumb
   const nameEl = document.getElementById('ap-hero-name');
@@ -11656,7 +11658,9 @@ function renderAthleteProfile(athlete) {
   const kpiPoints = document.getElementById('ap-kpi-points');
   if (kpiPoints) kpiPoints.textContent = points;
   const kpiRank = document.getElementById('ap-kpi-rank');
-  if (kpiRank) kpiRank.textContent = '#' + rank;
+  if (kpiRank) kpiRank.textContent = isRanked ? '#' + rank : '-';
+  const kpiRankSub = document.getElementById('ap-kpi-rank-sub');
+  if (kpiRankSub) kpiRankSub.textContent = isRanked ? 'Dari Seluruh Atlet' : 'Belum Berperingkat';
 
   const eventScores = getPlayerEventScores(name, points);
   const eventsPlayed = eventScores.filter(s => s !== "").length;
