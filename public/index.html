@@ -2848,14 +2848,19 @@
           </div>
         </div>
 
-        <!-- Notion-style Edit Athlete Slide-over Drawer -->
-        <div class="ad-drawer-overlay" id="ad-edit-drawer" style="display: none;">
-          <div class="ad-drawer">
-            <div class="ad-drawer-header">
-              <h3><i class="fa-solid fa-user-pen text-accent"></i> Edit Profil Atlet</h3>
-              <button class="ad-drawer-close" id="ad-drawer-close"><i class="fa-solid fa-xmark"></i></button>
+        <!-- Upgraded Edit Athlete Modal (SSOT: pm-modal) -->
+        <div class="pm-modal-overlay" id="ad-edit-drawer" style="display: none; justify-content: center; align-items: center;">
+          <div class="pm-modal" style="width: 680px; max-width: 95%;">
+            <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+              <div>
+                <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <i class="fa-solid fa-user-pen text-accent"></i> Edit Profil Atlet
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">Ubah informasi profil, status keanggotaan, dan berkas/dokumen resmi atlet.</p>
+              </div>
+              <button class="pm-modal-close" id="ad-drawer-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="ad-drawer-body">
+            <div class="pm-modal-body" style="padding: 20px 24px 24px 24px; max-height: 75vh; overflow-y: auto;">
               <form id="form-admin-edit-player" class="admin-form-element">
                 <input type="hidden" id="edit-player-id">
                 <div class="form-group-item">
@@ -2970,9 +2975,12 @@
                   </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
-                  <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
-                </button>
+                <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('ad-edit-drawer').style.display = 'none'" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+                  <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff;">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                  </button>
+                </div>
               </form>
             </div>
           </div>
