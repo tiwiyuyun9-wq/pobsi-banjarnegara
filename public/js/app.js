@@ -11767,10 +11767,30 @@ function renderPointBreakdown(eventScores) {
   }, 100);
 }
 
-// Render ranking history SVG chart (simulated progression)
 function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   const container = document.getElementById('ap-ranking-chart');
   if (!container) return;
+
+  const isUnranked = !currentRank || currentRank >= 999;
+  if (isUnranked) {
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.minHeight = '220px';
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 0.85rem; width: 100%; opacity: 0.85;">
+        <i class="fa-solid fa-chart-line" style="font-size: 1.5rem; margin-bottom: 10px; display: block; color: var(--text-muted);"></i>
+        Belum ada riwayat peringkat untuk atlet ini pada musim BOC
+      </div>
+    `;
+    return;
+  }
+
+  // Restore layout in case it was set to flex
+  container.style.display = '';
+  container.style.alignItems = '';
+  container.style.justifyContent = '';
+  container.style.minHeight = '';
 
   const numPoints = 4;
   const dataPoints = [];
@@ -11786,7 +11806,13 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   }
   dataPoints[numPoints - 1] = currentRank;
 
-  const xLabels = ['BOC #1', 'BOC #2', 'BOC #3', 'BOC #4'];
+  const baseYear = parseInt(currentBocYear) || 2026;
+  const xLabels = [
+    `BOC ${baseYear - 3}`,
+    `BOC ${baseYear - 2}`,
+    `BOC ${baseYear - 1}`,
+    `BOC ${baseYear}`
+  ];
 
   const isMobile = window.innerWidth < 768;
   const w = isMobile ? 360 : 780;
@@ -11799,7 +11825,7 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   const plotH = h - padTop - padBottom;
 
   const minVal = 1;
-  const maxVal = 20;
+  const maxVal = Math.max(20, ...dataPoints);
   const range = maxVal - minVal;
 
   const points = dataPoints.map((rank, i) => {
@@ -11824,7 +11850,16 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   let areaD = pathD + ` L ${lastPt.x} ${h - padBottom} L ${firstPt.x} ${h - padBottom} Z`;
 
   let gridLines = '';
-  const yLabels = [1, 5, 10, 15, 20];
+  // Generate dynamic Y labels evenly spaced
+  const stepY = range / 4;
+  const yLabels = [
+    1,
+    Math.round(minVal + stepY),
+    Math.round(minVal + stepY * 2),
+    Math.round(minVal + stepY * 3),
+    maxVal
+  ];
+
   yLabels.forEach(yVal => {
     const percentage = (yVal - minVal) / range;
     const y = padTop + percentage * plotH;
