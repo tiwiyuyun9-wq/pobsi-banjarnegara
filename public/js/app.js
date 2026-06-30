@@ -7438,8 +7438,23 @@ function setupAthleteDetailActions() {
     selectSource.value = "Tournament Result";
     selectNew.value = player.handicap || "4B";
 
+    const pointsInput = document.getElementById("hc-modal-input-points");
+    if (pointsInput) {
+      pointsInput.value = player.points || 0;
+    }
+
     selectNew.onchange = function() {
       newBadge.textContent = selectNew.value;
+      const hcOrder = ["3B", "3N", "3A", "4B", "4A", "5B", "5A", "6", "7"];
+      const oldIndex = hcOrder.indexOf(player.handicap || "4B");
+      const newIndex = hcOrder.indexOf(selectNew.value);
+      if (pointsInput) {
+        if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1) {
+          pointsInput.value = 0;
+        } else {
+          pointsInput.value = player.points || 0;
+        }
+      }
     };
 
     // Render Recent Changes History snapshot in the modal — fetch from DB
@@ -7510,6 +7525,7 @@ function setupAthleteDetailActions() {
 
       const playerId = document.getElementById("hc-modal-player-id").value;
       const newHC = document.getElementById("hc-modal-select-new").value;
+      const newPoints = parseFloat(document.getElementById("hc-modal-input-points").value || 0);
       const source = document.getElementById("hc-modal-select-source").value;
       const reason = document.getElementById("hc-modal-reason").value;
 
@@ -7517,9 +7533,10 @@ function setupAthleteDetailActions() {
       if (!player) return;
 
       const oldHC = player.handicap || "4B";
+      const oldPoints = player.points || 0;
 
-      if (newHC === oldHC) {
-        alert("Handicap baru sama dengan handicap saat ini!");
+      if (newHC === oldHC && newPoints === oldPoints) {
+        alert("Tidak ada perubahan tingkat handicap maupun poin berjalan!");
         return;
       }
 
@@ -7529,11 +7546,15 @@ function setupAthleteDetailActions() {
       const newIndex = hcOrder.indexOf(newHC);
       
       const fullReason = reason ? `${source} — ${reason}` : source;
-      const payload = { handicap: newHC, hcChangeReason: fullReason, hcChangeAdmin: "Super Admin POBSI" };
-      let pointsReset = false;
+      const payload = { 
+        handicap: newHC, 
+        points: newPoints,
+        hcChangeReason: fullReason, 
+        hcChangeAdmin: "Super Admin POBSI" 
+      };
       
-      if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1) {
-        payload.points = 0.0;
+      let pointsReset = false;
+      if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1 && newPoints === 0 && oldPoints > 0) {
         pointsReset = true;
       }
 
@@ -7547,7 +7568,7 @@ function setupAthleteDetailActions() {
             if (pointsReset) {
               alert(`Handicap berhasil diperbarui menjadi HC ${newHC}! Poin handicap otomatis di-reset ke 0 karena atlet naik tingkat.`);
             } else {
-              alert(`Handicap berhasil diperbarui menjadi HC ${newHC}!`);
+              alert(`Data handicap & poin atlet berhasil diperbarui!`);
             }
             if (hcModal) hcModal.style.display = "none";
             loadDataFromApi().then(() => {
@@ -7558,11 +7579,9 @@ function setupAthleteDetailActions() {
         }).catch(err => alert(`Error: ${err.message}`));
       } else {
         player.handicap = newHC;
-        if (pointsReset) {
-          player.points = 0.0;
-        }
+        player.points = newPoints;
         
-        // Also update standings if names match and points are reset
+        // Also update standings if names match
         const std = appData.standings.find(s => s.name === player.name);
         if (std) {
           std.handicap = newHC;
@@ -7584,7 +7603,7 @@ function setupAthleteDetailActions() {
         if (pointsReset) {
           alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin di-reset ke 0 (Naik Tingkat).`);
         } else {
-          alert(`Luring: Handicap diperbarui menjadi HC ${newHC}`);
+          alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin disesuaikan menjadi ${newPoints}.`);
         }
         if (hcModal) hcModal.style.display = "none";
         renderAthleteDetail(playerId);

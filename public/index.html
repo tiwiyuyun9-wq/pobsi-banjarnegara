@@ -3068,17 +3068,22 @@
                     </select>
                   </div>
                 </div>
-                
+
                 <div class="form-group-item">
-                  <label class="form-lbl" for="hc-modal-select-source">Update Source / Category</label>
-                  <div class="select-wrapper width-100">
-                    <select id="hc-modal-select-source" required style="width: 100%; padding-left: 16px;">
-                      <option value="Tournament Result">Tournament Result</option>
-                      <option value="Admin Review">Admin Review</option>
-                      <option value="Manual Correction">Manual Correction</option>
-                      <option value="Committee Decision">Committee Decision</option>
-                    </select>
-                  </div>
+                  <label class="form-lbl" for="hc-modal-input-points">Poin Berjalan (Kenaikan HC) <span style="color: var(--red);">*</span></label>
+                  <input type="number" id="hc-modal-input-points" min="0" placeholder="Poin berjalan" required>
+                </div>
+              </div>
+              
+              <div class="form-group-item">
+                <label class="form-lbl" for="hc-modal-select-source">Update Source / Category</label>
+                <div class="select-wrapper width-100">
+                  <select id="hc-modal-select-source" required style="width: 100%; padding-left: 16px;">
+                    <option value="Tournament Result">Tournament Result</option>
+                    <option value="Admin Review">Admin Review</option>
+                    <option value="Manual Correction">Manual Correction</option>
+                    <option value="Committee Decision">Committee Decision</option>
+                  </select>
                 </div>
               </div>
               
