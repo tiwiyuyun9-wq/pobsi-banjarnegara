@@ -5227,6 +5227,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const athleteResultsCloseBtn = document.getElementById('pub-athlete-results-modal-close');
+  const athleteResultsModal = document.getElementById('pub-athlete-results-modal');
+  if (athleteResultsCloseBtn && athleteResultsModal) {
+    athleteResultsCloseBtn.addEventListener('click', () => {
+      athleteResultsModal.style.display = 'none';
+    });
+    athleteResultsModal.addEventListener('click', (e) => {
+      if (e.target === athleteResultsModal) {
+        athleteResultsModal.style.display = 'none';
+      }
+    });
+  }
 });
 
 function setupClubSearch() {
@@ -11688,6 +11701,7 @@ function renderAthleteProfile(athlete) {
   renderRankingHistoryChart(rank, points, eventsPlayed);
 
   // Tournament Results Table & Recent Results List
+  window.currentAthleteEventScores = eventScores;
   renderTournamentResults(name, eventScores);
 
   // Club Information
@@ -12141,13 +12155,122 @@ function renderQualificationBanner(rank) {
   }
 }
 
-// Scroll smoothly to results table
-function scrollToBocResults() {
-  const table = document.querySelector('.ap-col-boc-table');
-  if (table) {
-    table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// Open the public athlete tournament results modal
+function openAthleteResultsModal(athleteName, eventScores, avatarUrl, clubName, totalPoints, handicap) {
+  const modal = document.getElementById('pub-athlete-results-modal');
+  const nameEl = document.getElementById('pub-athlete-results-name');
+  const avatarEl = document.getElementById('pub-athlete-results-avatar');
+  const hcEl = document.getElementById('pub-athlete-results-hc');
+  const clubEl = document.getElementById('pub-athlete-results-club');
+  const pointsEl = document.getElementById('pub-athlete-results-points');
+  const tbody = document.getElementById('pub-athlete-results-tbody');
+
+  if (!modal || !tbody) return;
+
+  if (nameEl) nameEl.textContent = athleteName;
+  if (avatarEl) {
+    avatarEl.src = avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(athleteName)}`;
   }
+  if (hcEl) {
+    hcEl.textContent = `HC ${handicap || '3B'}`;
+    hcEl.className = `table-badge-hc ${getHandicapColorClass(handicap)}`;
+  }
+  if (clubEl) clubEl.textContent = clubName || 'Independen';
+  if (pointsEl) pointsEl.textContent = `${totalPoints || 0} Pts`;
+
+  const results = [];
+  const activeSirkuits = (bocSirkuits && bocSirkuits.length > 0) ? bocSirkuits : [];
+
+  eventScores.forEach((score, idx) => {
+    if (score !== "" && score !== undefined && score !== null && idx < activeSirkuits.length) {
+      const sirkuitName = activeSirkuits[idx];
+      const matchEvent = appData.events.find(e => e.title && e.title.toUpperCase().includes(sirkuitName.toUpperCase()));
+      let dateStr = '';
+      if (matchEvent && matchEvent.date) {
+        dateStr = matchEvent.date;
+      } else {
+        const mockMonths = ['Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const month = mockMonths[idx % mockMonths.length];
+        const day = 10 + (idx * 2) % 18;
+        dateStr = `${day} ${month} ${currentBocYear || '2026'}`;
+      }
+
+      results.push({ 
+        event: sirkuitName, 
+        score: parseInt(score, 10), 
+        date: dateStr,
+        status: matchEvent && matchEvent.status ? matchEvent.status : 'Selesai',
+        idx 
+      });
+    }
+  });
+
+  results.sort((a, b) => b.score - a.score);
+
+  if (results.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 16px;">
+          <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; display: block; opacity: 0.6;"></i>
+          Belum ada riwayat hasil turnamen untuk atlet ini
+        </td>
+      </tr>
+    `;
+  } else {
+    const getMockPositionLocal = (score) => {
+      if (score === 12) return { text: 'Champion', badge: 'ap-badge-champion', ptsClass: '' };
+      if (score === 9) return { text: 'Runner-Up', badge: 'ap-badge-runner', ptsClass: 'points-silver' };
+      if (score === 7) return { text: 'Semifinal', badge: 'ap-badge-top8', ptsClass: 'points-blue' };
+      if (score === 5) return { text: 'Top 8', badge: 'ap-badge-top8', ptsClass: 'points-blue' };
+      if (score === 3) return { text: 'Top 16', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+      if (score === 1) return { text: 'Top 32', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+      return { text: 'Peserta', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+    };
+
+    const getStatusPillLocal = (status) => {
+      const norm = (status || '').toLowerCase().trim();
+      if (norm === 'ongoing' || norm === 'berlangsung' || norm === 'daftar') {
+        return `<span class="ap-status-pill status-ongoing">Berlangsung</span>`;
+      }
+      if (norm === 'cancelled' || norm === 'batal') {
+        return `<span class="ap-status-pill status-cancelled">Batal</span>`;
+      }
+      return `<span class="ap-status-pill">Selesai</span>`;
+    };
+
+    tbody.innerHTML = results.map(r => {
+      const pos = getMockPositionLocal(r.score);
+      const posText = r.score === 12 ? '🥇 Champion' : (r.score === 9 ? '🥈 Runner-Up' : pos.text);
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+          <td style="padding: 12px 16px; font-weight: 600; color: #fff;">${r.event}</td>
+          <td style="padding: 12px 16px; color: var(--text-muted);">${r.date}</td>
+          <td style="padding: 12px 16px; font-weight: 700; color: ${r.score === 12 ? '#fbbf24' : '#fff'};">${posText}</td>
+          <td style="padding: 12px 16px; text-align: center; font-weight: 900; color: #fbbf24;">${r.score}</td>
+          <td style="padding: 12px 16px; text-align: center;">${getStatusPillLocal(r.status)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  modal.style.display = 'flex';
 }
+
+// Scroll smoothly to results table or open results modal
+function scrollToBocResults() {
+  const athleteName = document.getElementById('ap-hero-name')?.textContent || '';
+  const avatarUrl = document.getElementById('ap-hero-portrait')?.src || '';
+  const clubName = document.getElementById('ap-club-title')?.textContent || 'Independen';
+  const totalPoints = parseInt(document.getElementById('ap-total-pts-value')?.textContent, 10) || 0;
+  const handicap = document.getElementById('ap-hero-hc')?.textContent?.replace('HC ', '') || '3B';
+  const scores = window.currentAthleteEventScores || [];
+
+  openAthleteResultsModal(athleteName, scores, avatarUrl, clubName, totalPoints, handicap);
+}
+
+// Bind to window context
+window.scrollToBocResults = scrollToBocResults;
+window.openAthleteResultsModal = openAthleteResultsModal;
 
 // Share athlete profile
 function shareAthleteProfile(platform) {
