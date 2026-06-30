@@ -9431,7 +9431,7 @@ function findAthleteBySlug(slug) {
       name: player.name,
       club: player.club || 'Independen',
       handicap: player.handicap || '3B',
-      points: parseFloat(player.points || 0), // Handicap points from player database
+      points: 0, // Standings points (BOC points) is 0 for athletes not in standings of the current year series
       played: 0,
       won: 0,
       lost: 0,
@@ -9443,8 +9443,7 @@ function findAthleteBySlug(slug) {
       age: player.age || null,
       phone: player.phone || null,
       address: player.address || null,
-      status: player.status || 'Aktif',
-      _fromPlayers: true // Flag to distinguish data source
+      status: player.status || 'Aktif'
     };
   }
 
@@ -11659,7 +11658,7 @@ function renderAthleteProfile(athlete) {
   const kpiPoints = document.getElementById('ap-kpi-points');
   if (kpiPoints) kpiPoints.textContent = points;
   const kpiPointsSub = document.getElementById('ap-kpi-points-sub');
-  if (kpiPointsSub) kpiPointsSub.textContent = athlete._fromPlayers ? 'Poin Berjalan' : 'Poin BOC';
+  if (kpiPointsSub) kpiPointsSub.textContent = 'Poin BOC';
 
   const kpiRank = document.getElementById('ap-kpi-rank');
   if (kpiRank) kpiRank.textContent = isRanked ? '#' + rank : '-';
