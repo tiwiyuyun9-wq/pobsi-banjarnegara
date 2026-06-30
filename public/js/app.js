@@ -12260,9 +12260,9 @@ function openAthleteResultsModal(athleteName, eventScores, avatarUrl, clubName, 
 function scrollToBocResults() {
   const athleteName = document.getElementById('ap-hero-name')?.textContent || '';
   const avatarUrl = document.getElementById('ap-hero-portrait')?.src || '';
-  const clubName = document.getElementById('ap-club-title')?.textContent || 'Independen';
-  const totalPoints = parseInt(document.getElementById('ap-total-pts-value')?.textContent, 10) || 0;
-  const handicap = document.getElementById('ap-hero-hc')?.textContent?.replace('HC ', '') || '3B';
+  const clubName = document.getElementById('ap-club-badge')?.textContent?.trim() || 'Independen';
+  const totalPoints = parseInt(document.getElementById('ap-kpi-points')?.textContent, 10) || 0;
+  const handicap = document.getElementById('ap-hc-badge')?.textContent?.replace('HC ', '')?.trim() || '3B';
   const scores = window.currentAthleteEventScores || [];
 
   openAthleteResultsModal(athleteName, scores, avatarUrl, clubName, totalPoints, handicap);
