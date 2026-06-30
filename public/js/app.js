@@ -11935,19 +11935,85 @@ function renderClubInfo(clubName) {
   const athleteCountEl = document.getElementById('ap-club-athlete-count');
   const topRankEl = document.getElementById('ap-club-top-rank');
   const joinDateEl = document.getElementById('ap-club-join-date');
+  const logoContainer = document.getElementById('ap-club-logo-container');
+  const detailBtn = document.getElementById('ap-club-detail-btn');
+
+  // Find club in appData.clubs
+  const club = (appData.clubs || []).find(c => c.name.toLowerCase() === clubName.toLowerCase());
 
   if (titleEl) titleEl.textContent = clubName;
-  if (locationEl) locationEl.textContent = 'Banjarnegara, Jawa Tengah';
-  if (joinDateEl) joinDateEl.textContent = 'Januari 2025';
+  if (locationEl) locationEl.textContent = club ? (club.address || 'Banjarnegara, Jawa Tengah') : 'Banjarnegara, Jawa Tengah';
+  
+  if (joinDateEl) {
+    if (club && club.created_at) {
+      try {
+        const joinDate = new Date(club.created_at);
+        if (!isNaN(joinDate.getTime())) {
+          joinDateEl.textContent = joinDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        } else {
+          joinDateEl.textContent = 'Januari 2025';
+        }
+      } catch(e) {
+        joinDateEl.textContent = 'Januari 2025';
+      }
+    } else {
+      joinDateEl.textContent = 'Januari 2025';
+    }
+  }
 
-  const clubAthletes = appData.standings.filter(s => 
-    s.club && s.club.toLowerCase() === clubName.toLowerCase()
+  // Calculate real athlete count from registered players
+  const clubAthletes = appData.players.filter(p => 
+    p.club && p.club.toLowerCase() === clubName.toLowerCase()
   );
   if (athleteCountEl) athleteCountEl.textContent = clubAthletes.length + ' Atlet';
   
+  // Calculate best rank from standings for these athletes
   if (topRankEl) {
-    const bestRank = clubAthletes.reduce((min, a) => Math.min(min, a.rank || 999), 999);
+    const clubAthleteNames = clubAthletes.map(p => p.name.toLowerCase());
+    const standingsAthletes = appData.standings.filter(s => 
+      clubAthleteNames.includes(s.name.toLowerCase())
+    );
+    const bestRank = standingsAthletes.reduce((min, a) => Math.min(min, a.rank || 999), 999);
     topRankEl.textContent = bestRank < 999 ? '#' + bestRank + ' BOC Ranking' : '-';
+  }
+
+  // Handle club logo rendering
+  if (logoContainer) {
+    if (club && club.logo) {
+      logoContainer.innerHTML = `<img src="${club.logo}" alt="${clubName}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+    } else {
+      const displayAbbr = club ? (club.abbr || club.name.substring(0, 7).toUpperCase()) : 'VICTORY';
+      logoContainer.innerHTML = `
+        <svg viewBox="0 0 100 120" width="100%" height="100%">
+          <defs>
+            <linearGradient id="club-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffe259" />
+              <stop offset="100%" stop-color="#ca8a04" />
+            </linearGradient>
+          </defs>
+          <path d="M 15 10 L 85 10 C 85 10, 88 55, 70 85 C 58 105, 50 112, 50 112 C 50 112, 42 105, 30 85 C 12 55, 15 10, 15 10 Z" fill="#070c19" stroke="url(#club-gold)" stroke-width="2"/>
+          <line x1="26" y1="94" x2="74" y2="26" stroke="url(#club-gold)" stroke-width="1.2" stroke-opacity="0.6"/>
+          <line x1="74" y1="94" x2="26" y2="26" stroke="url(#club-gold)" stroke-width="1.2" stroke-opacity="0.6"/>
+          <text x="50" y="42" fill="url(#club-gold)" font-size="9.5" font-family="Outfit" font-weight="900" text-anchor="middle" letter-spacing="0.8">${displayAbbr}</text>
+          <circle cx="50" cy="68" r="13" fill="#111" stroke="url(#club-gold)" stroke-width="1.2"/>
+          <circle cx="50" cy="68" r="6.5" fill="#fff"/>
+          <text x="50" y="71.5" fill="#111" font-size="8.5" font-family="Inter" font-weight="900" text-anchor="middle">8</text>
+        </svg>
+      `;
+    }
+  }
+
+  // Handle button navigation
+  if (detailBtn) {
+    if (club) {
+      detailBtn.onclick = function() {
+        window.openPublicClubDetail(club.id);
+      };
+    } else {
+      detailBtn.onclick = function() {
+        switchTab('tab-clubs');
+      };
+    }
   }
 }
 
