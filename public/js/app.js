@@ -7438,9 +7438,19 @@ function setupAthleteDetailActions() {
     selectSource.value = "Tournament Result";
     selectNew.value = player.handicap || "4B";
 
+    const previewCurrentPoints = document.getElementById("hc-preview-current-points");
+    const previewNewPoints = document.getElementById("hc-preview-new-points");
+    if (previewCurrentPoints) previewCurrentPoints.textContent = `${player.points || 0} Poin`;
+    if (previewNewPoints) previewNewPoints.textContent = `${player.points || 0} Poin`;
+
     const pointsInput = document.getElementById("hc-modal-input-points");
     if (pointsInput) {
       pointsInput.value = player.points || 0;
+      pointsInput.oninput = function() {
+        if (previewNewPoints) {
+          previewNewPoints.textContent = `${pointsInput.value || 0} Poin`;
+        }
+      };
     }
 
     selectNew.onchange = function() {
@@ -7453,6 +7463,9 @@ function setupAthleteDetailActions() {
           pointsInput.value = 0;
         } else {
           pointsInput.value = player.points || 0;
+        }
+        if (previewNewPoints) {
+          previewNewPoints.textContent = `${pointsInput.value} Poin`;
         }
       }
     };
