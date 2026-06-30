@@ -4194,6 +4194,69 @@ async function setupAdminPanel() {
 // PLAYER MANAGEMENT CONSOLE — Full JS Logic
 // ============================================================================
 window.currentAddPlayerStep = 1;
+window.currentEditPlayerStep = 1;
+
+window.updateEditPlayerWizardUI = function() {
+  const step = window.currentEditPlayerStep;
+  const panes = document.querySelectorAll(".edit-player-step-pane");
+  panes.forEach(pane => {
+    const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+    if (paneStep === step) {
+      pane.classList.add("active");
+    } else {
+      pane.classList.remove("active");
+    }
+  });
+
+  const steps = document.querySelectorAll("#edit-player-wizard-stepper .wizard-step");
+  steps.forEach(s => {
+    const sStep = parseInt(s.getAttribute("data-step"), 10);
+    const circle = s.querySelector(".wizard-step-circle");
+    s.classList.remove("active", "completed");
+    if (sStep === step) {
+      s.classList.add("active");
+      if (circle) circle.innerHTML = sStep;
+    } else if (sStep < step) {
+      s.classList.add("completed");
+      if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+    } else {
+      if (circle) circle.innerHTML = sStep;
+    }
+  });
+
+  const progress = document.getElementById("edit-player-wizard-progress");
+  if (progress && steps.length > 1) {
+    const percent = ((step - 1) / (steps.length - 1)) * 100;
+    progress.style.width = `${percent}%`;
+  }
+
+  const btnCancel = document.getElementById("edit-player-modal-btn-cancel");
+  const btnPrev = document.getElementById("edit-player-modal-btn-prev");
+  const btnNext = document.getElementById("edit-player-modal-btn-next");
+  const btnSubmit = document.getElementById("edit-player-modal-btn-submit");
+
+  if (step === 1) {
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (btnPrev) btnPrev.style.display = "none";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 2) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 3) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "none";
+    if (btnSubmit) btnSubmit.style.display = "inline-block";
+  }
+};
+
+window.resetEditPlayerWizard = function() {
+  window.currentEditPlayerStep = 1;
+  window.updateEditPlayerWizardUI();
+};
 
 window.updateAddPlayerWizardUI = function() {
   const step = window.currentAddPlayerStep;
@@ -7113,6 +7176,10 @@ function setupAthleteDetailActions() {
     const player = appData.players.find(p => p.id === adActivePlayerId);
     if (!player) return;
 
+    if (typeof window.resetEditPlayerWizard === 'function') {
+      window.resetEditPlayerWizard();
+    }
+
     document.getElementById("edit-player-id").value = player.id;
     document.getElementById("edit-player-name").value = player.name;
     
@@ -7166,6 +7233,57 @@ function setupAthleteDetailActions() {
     editDrawer.addEventListener("click", (e) => {
       if (e.target === editDrawer) editDrawer.style.display = "none";
     });
+  }
+
+  // Edit player wizard button click listeners
+  const btnEditPlayerPrev = document.getElementById("edit-player-modal-btn-prev");
+  const btnEditPlayerNext = document.getElementById("edit-player-modal-btn-next");
+  const btnEditPlayerCancel = document.getElementById("edit-player-modal-btn-cancel");
+
+  if (btnEditPlayerPrev) {
+    btnEditPlayerPrev.onclick = function() {
+      if (window.currentEditPlayerStep > 1) {
+        window.currentEditPlayerStep--;
+        window.updateEditPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnEditPlayerNext) {
+    btnEditPlayerNext.onclick = function() {
+      if (window.currentEditPlayerStep === 1) {
+        // Validate Step 1
+        const nameVal = document.getElementById("edit-player-name").value.trim();
+        const ageVal = document.getElementById("edit-player-age").value.trim();
+        const phoneVal = document.getElementById("edit-player-phone").value.trim();
+        const addressVal = document.getElementById("edit-player-address").value.trim();
+
+        if (!nameVal || !ageVal || !phoneVal || !addressVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang informasi pribadi wajib!", "error");
+          return;
+        }
+      } else if (window.currentEditPlayerStep === 2) {
+        // Validate Step 2
+        const clubVal = document.getElementById("edit-player-club").value.trim();
+        const hcVal = document.getElementById("edit-player-hc").value.trim();
+        const pointsVal = document.getElementById("edit-player-points").value.trim();
+        const statusVal = document.getElementById("edit-player-status").value.trim();
+
+        if (!clubVal || !hcVal || !pointsVal || !statusVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang handicap, klub, dan status wajib!", "error");
+          return;
+        }
+      }
+
+      if (window.currentEditPlayerStep < 3) {
+        window.currentEditPlayerStep++;
+        window.updateEditPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnEditPlayerCancel && editDrawer) {
+    btnEditPlayerCancel.onclick = () => { editDrawer.style.display = "none"; };
   }
 
   // Change listeners for file inputs in edit form

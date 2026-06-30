@@ -10051,6 +10051,17 @@ tr:hover td.sticky-col {
   gap: 16px;
 }
 
+.edit-player-step-pane {
+  display: none;
+  animation: stepPaneFadeIn 0.3s ease-in-out;
+}
+
+.edit-player-step-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .add-club-step-pane {
   display: none;
   animation: stepPaneFadeIn 0.3s ease-in-out;

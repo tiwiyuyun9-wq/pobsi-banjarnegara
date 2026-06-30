@@ -2860,126 +2860,146 @@
               </div>
               <button class="pm-modal-close" id="ad-drawer-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <!-- Wizard Stepper Indicators -->
+            <div class="wizard-stepper" id="edit-player-wizard-stepper" style="margin-top: 20px;">
+              <div class="wizard-progress-bar" id="edit-player-wizard-progress" style="width: 0%;"></div>
+              <div class="wizard-step active" data-step="1">
+                <div class="wizard-step-circle">1</div>
+                <div class="wizard-step-label">Data Pribadi</div>
+              </div>
+              <div class="wizard-step" data-step="2">
+                <div class="wizard-step-circle">2</div>
+                <div class="wizard-step-label">Handicap & Klub</div>
+              </div>
+              <div class="wizard-step" data-step="3">
+                <div class="wizard-step-circle">3</div>
+                <div class="wizard-step-label">Dokumen & Foto</div>
+              </div>
+            </div>
+
             <div class="pm-modal-body" style="padding: 20px 24px 24px 24px; max-height: 75vh; overflow-y: auto;">
               <form id="form-admin-edit-player" class="admin-form-element">
                 <input type="hidden" id="edit-player-id">
-                <div class="form-group-item">
-                  <label class="form-lbl" for="edit-player-name">Nama Lengkap Atlet</label>
-                  <input type="text" id="edit-player-name" required placeholder="Contoh: Rizky Pratama">
-                </div>
-                <div class="form-group-item">
-                   <label class="form-lbl" for="edit-player-club">Klub / Arena Biliar</label>
-                   <div class="select-wrapper width-100">
-                     <select id="edit-player-club" required style="width: 100%; padding-left: 16px;">
-                       <!-- Dihasilkan secara dinamis -->
-                     </select>
-                   </div>
-                 </div>
-                <div class="pm-form-row">
+
+                <!-- STEP 1: Data Pribadi -->
+                <div class="edit-player-step-pane active" data-step="1">
                   <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-hc">Handicap Resmi</label>
-                    <div class="select-wrapper width-100">
-                      <select id="edit-player-hc" required style="width: 100%; padding-left: 16px;">
-                        <option value="3B">Handicap 3B</option>
-                        <option value="3N">Handicap 3N</option>
-                        <option value="3A">Handicap 3A</option>
-                        <option value="4B">Handicap 4B</option>
-                        <option value="4A">Handicap 4A</option>
-                        <option value="5B">Handicap 5B</option>
-                        <option value="5A">Handicap 5A</option>
-                        <option value="6">Handicap 6</option>
-                        <option value="7">Handicap 7</option>
-                      </select>
+                    <label class="form-lbl" for="edit-player-name">Nama Lengkap Atlet <span style="color: var(--red);">*</span></label>
+                    <input type="text" id="edit-player-name" required placeholder="Contoh: Rizky Pratama">
+                  </div>
+                  <div class="form-row-double">
+                    <div class="form-group-item">
+                      <label class="form-lbl" for="edit-player-gender">Jenis Kelamin <span style="color: var(--red);">*</span></label>
+                      <div class="select-wrapper width-100">
+                        <select id="edit-player-gender" required style="width: 100%; padding-left: 16px; background: var(--bg-input);">
+                          <option value="Laki-laki">Laki-laki</option>
+                          <option value="Perempuan">Perempuan</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group-item">
+                      <label class="form-lbl" for="edit-player-age">Umur Atlet (Tahun) <span style="color: var(--red);">*</span></label>
+                      <input type="number" id="edit-player-age" min="12" max="80" placeholder="Umur" required>
                     </div>
                   </div>
                   <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-points">Poin Berjalan</label>
-                    <input type="number" id="edit-player-points" min="0" placeholder="Poin berjalan" required>
-                  </div>
-                </div>
-                <div class="pm-form-row">
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-gender">Jenis Kelamin</label>
-                    <div class="select-wrapper width-100">
-                      <select id="edit-player-gender" required style="width: 100%; padding-left: 16px; background: var(--bg-input);">
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-age">Umur Atlet (Tahun)</label>
-                    <input type="number" id="edit-player-age" min="12" max="80" placeholder="Umur" required>
-                  </div>
-                </div>
-                <div class="pm-form-row">
-                  <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-phone">No. Telepon / WhatsApp</label>
+                    <label class="form-lbl" for="edit-player-phone">No. Telepon / WhatsApp <span style="color: var(--red);">*</span></label>
                     <input type="tel" id="edit-player-phone" placeholder="Contoh: 0812-XXXX-XXXX" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
                   </div>
                   <div class="form-group-item">
-                    <label class="form-lbl" for="edit-player-address">Alamat Lengkap</label>
-                    <textarea id="edit-player-address" placeholder="Alamat" required style="width: 100%; min-height: 52px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; resize: vertical;"></textarea>
-                  </div>
-                </div>
-                <div class="form-group-item">
-                  <label class="form-lbl" for="edit-player-status">Status Keanggotaan</label>
-                  <div class="select-wrapper width-100">
-                    <select id="edit-player-status" required style="width: 100%; padding-left: 16px;">
-                      <option value="Aktif">Aktif</option>
-                      <option value="Nonaktif">Nonaktif</option>
-                    </select>
+                    <label class="form-lbl" for="edit-player-address">Alamat Lengkap <span style="color: var(--red);">*</span></label>
+                    <textarea id="edit-player-address" placeholder="Alamat" required style="width: 100%; min-height: 70px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; resize: vertical;"></textarea>
                   </div>
                 </div>
 
-                <!-- Upgraded Upload Media Sections for Edit Form -->
-                <div class="form-group-item" style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
-                  <h4 style="font-family: var(--font-headers); font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-cloud-arrow-up text-accent"></i> Berkas & Aset Media Atlit
-                  </h4>
-                </div>
-                
-                <div class="pm-form-row">
+                <!-- STEP 2: Handicap & Klub -->
+                <div class="edit-player-step-pane" data-step="2">
                   <div class="form-group-item">
-                    <label class="form-lbl">Foto Profil / Avatar</label>
-                    <div class="custom-file-upload" id="edit-avatar-zone" style="position: relative; border: 1px dashed rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; min-height: 58px; display: flex; align-items: center; justify-content: center;">
-                      <input type="file" id="edit-player-avatar-file" accept="image/*" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
-                      <div class="upload-content" id="edit-avatar-preview-area">
-                        <i class="fa-solid fa-image" style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 4px;"></i>
-                        <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0;">Upload Avatar (PNG/JPG)</p>
+                    <label class="form-lbl" for="edit-player-club">Klub / Arena Biliar <span style="color: var(--red);">*</span></label>
+                    <div class="select-wrapper width-100">
+                      <select id="edit-player-club" required style="width: 100%; padding-left: 16px;">
+                        <!-- Dihasilkan secara dinamis -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row-double">
+                    <div class="form-group-item">
+                      <label class="form-lbl" for="edit-player-hc">Handicap Resmi <span style="color: var(--red);">*</span></label>
+                      <div class="select-wrapper width-100">
+                        <select id="edit-player-hc" required style="width: 100%; padding-left: 16px;">
+                          <option value="3B">Handicap 3B</option>
+                          <option value="3N">Handicap 3N</option>
+                          <option value="3A">Handicap 3A</option>
+                          <option value="4B">Handicap 4B</option>
+                          <option value="4A">Handicap 4A</option>
+                          <option value="5B">Handicap 5B</option>
+                          <option value="5A">Handicap 5A</option>
+                          <option value="6">Handicap 6</option>
+                          <option value="7">Handicap 7</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group-item">
+                      <label class="form-lbl" for="edit-player-points">Poin Berjalan (Kenaikan HC) <span style="color: var(--red);">*</span></label>
+                      <input type="number" id="edit-player-points" min="0" placeholder="Poin berjalan" required>
+                    </div>
+                  </div>
+                  <div class="form-group-item">
+                    <label class="form-lbl" for="edit-player-status">Status Keanggotaan <span style="color: var(--red);">*</span></label>
+                    <div class="select-wrapper width-100">
+                      <select id="edit-player-status" required style="width: 100%; padding-left: 16px;">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 3: Dokumen & Foto -->
+                <div class="edit-player-step-pane" data-step="3">
+                  <div class="pm-form-row">
+                    <div class="form-group-item">
+                      <label class="form-lbl">Foto Profil / Avatar</label>
+                      <div class="custom-file-upload" id="edit-avatar-zone" style="position: relative; border: 1px dashed rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; min-height: 58px; display: flex; align-items: center; justify-content: center;">
+                        <input type="file" id="edit-player-avatar-file" accept="image/*" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                        <div class="upload-content" id="edit-avatar-preview-area">
+                          <i class="fa-solid fa-image" style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 4px;"></i>
+                          <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0;">Upload Avatar (PNG/JPG)</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group-item">
+                      <label class="form-lbl">Foto Cover Banner</label>
+                      <div class="custom-file-upload" id="edit-cover-zone" style="position: relative; border: 1px dashed rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; min-height: 58px; display: flex; align-items: center; justify-content: center;">
+                        <input type="file" id="edit-player-cover-file" accept="image/*" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                        <div class="upload-content" id="edit-cover-preview-area">
+                          <i class="fa-solid fa-panorama" style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 4px;"></i>
+                          <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0;">Upload Cover (Billiard scene)</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div class="form-group-item">
-                    <label class="form-lbl">Foto Cover Banner</label>
-                    <div class="custom-file-upload" id="edit-cover-zone" style="position: relative; border: 1px dashed rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; min-height: 58px; display: flex; align-items: center; justify-content: center;">
-                      <input type="file" id="edit-player-cover-file" accept="image/*" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
-                      <div class="upload-content" id="edit-cover-preview-area">
-                        <i class="fa-solid fa-panorama" style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 4px;"></i>
-                        <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0;">Upload Cover (Billiard scene)</p>
+
+                  <div class="form-group-item" style="margin-top: 12px; margin-bottom: 12px;">
+                    <label class="form-lbl">Dokumen KTP (Kartu Tanda Penduduk) <span style="color: #fbbf24; font-weight: bold;">*</span></label>
+                    <div class="custom-file-upload" id="edit-ktp-zone" style="position: relative; border: 1px dashed rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 16px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;">
+                      <input type="file" id="edit-player-ktp-file" accept="image/*,application/pdf" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                      <div class="upload-content" id="edit-ktp-preview-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%;">
+                        <i class="fa-solid fa-address-card" style="font-size: 1.5rem; color: #fbbf24; margin-bottom: 4px;"></i>
+                        <strong style="font-size: 0.78rem; color: #fbbf24; margin: 0;">Pilih Berkas KTP atau Seret ke Sini</strong>
+                        <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0;">PNG, JPG, atau PDF (Maks. 5MB)</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="form-group-item" style="margin-top: 12px; margin-bottom: 12px;">
-                  <label class="form-lbl">Dokumen KTP (Kartu Tanda Penduduk) <span style="color: #fbbf24; font-weight: bold;">*</span></label>
-                  <div class="custom-file-upload" id="edit-ktp-zone" style="position: relative; border: 1px dashed rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 16px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;">
-                    <input type="file" id="edit-player-ktp-file" accept="image/*,application/pdf" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
-                    <div class="upload-content" id="edit-ktp-preview-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%;">
-                      <i class="fa-solid fa-address-card" style="font-size: 1.5rem; color: #fbbf24; margin-bottom: 4px;"></i>
-                      <strong style="font-size: 0.78rem; color: #fbbf24; margin: 0;">Pilih Berkas KTP atau Seret ke Sini</strong>
-                      <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0;">PNG, JPG, atau PDF (Maks. 5MB)</p>
-                    </div>
-                  </div>
-                </div>
-
+                <!-- Wizard Actions -->
                 <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('ad-edit-drawer').style.display = 'none'" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
-                  <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
-                  </button>
+                  <button type="button" class="btn btn-secondary" id="edit-player-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+                  <button type="button" class="btn btn-secondary" id="edit-player-modal-btn-prev" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm); display: none;"><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>
+                  <button type="button" class="btn btn-primary" id="edit-player-modal-btn-next" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff;">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+                  <button type="submit" class="btn btn-primary" id="edit-player-modal-btn-submit" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); border: none; color: #fff; display: none;"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
                 </div>
               </form>
             </div>
