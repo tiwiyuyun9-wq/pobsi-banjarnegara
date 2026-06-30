@@ -6359,7 +6359,7 @@ function renderAdminClubPreview(searchQuery = '') {
   const avgTables = totalClubs > 0 ? (totalTables / totalClubs).toFixed(1) : 0;
 
   // Update Stats DOM Elements
-  const totalClubsEl = document.getElementById('pm-total-clubs');
+  const totalClubsEl = document.getElementById('pm-total-registered-clubs');
   const totalTablesEl = document.getElementById('pm-total-tables');
   const activeMembersEl = document.getElementById('pm-active-members');
   const avgTablesEl = document.getElementById('pm-avg-tables');
