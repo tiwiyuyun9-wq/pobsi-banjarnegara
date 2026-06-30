@@ -11705,11 +11705,17 @@ function renderPointBreakdown(eventScores) {
   const container = document.getElementById('ap-breakdown-grid');
   if (!container) return;
 
-  const eventNames = [
-    'RD HT', 'JP HT', 'LMS HT', 'SYP HT',
-    'RD HT (2)', 'JP HT (2)', 'LMS HT (2)', 'PLT HT',
-    'SYP HT (2)', 'RD HT (3)'
-  ];
+  const eventNames = bocSirkuits && bocSirkuits.length > 0 ? bocSirkuits : [];
+
+  if (eventNames.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); padding: 32px 16px; font-size: 0.85rem; grid-column: 1 / -1; width: 100%; opacity: 0.85; border: 1px dashed rgba(255,255,255,0.06); border-radius: 8px; background: rgba(255,255,255,0.01);">
+        <i class="fa-solid fa-folder-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block; color: var(--text-muted);"></i>
+        Belum ada sirkuit terdaftar untuk musim BOC tahun ${currentBocYear}
+      </div>
+    `;
+    return;
+  }
 
   const maxScore = 12; // Maximum possible score
 
