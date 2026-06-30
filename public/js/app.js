@@ -9431,7 +9431,7 @@ function findAthleteBySlug(slug) {
       name: player.name,
       club: player.club || 'Independen',
       handicap: player.handicap || '3B',
-      points: 0, // Standings points (BOC points) is 0 for athletes not in standings
+      points: parseFloat(player.points || 0), // Handicap points from player database
       played: 0,
       won: 0,
       lost: 0,
@@ -9443,7 +9443,8 @@ function findAthleteBySlug(slug) {
       age: player.age || null,
       phone: player.phone || null,
       address: player.address || null,
-      status: player.status || 'Aktif'
+      status: player.status || 'Aktif',
+      _fromPlayers: true // Flag to distinguish data source
     };
   }
 
@@ -11657,6 +11658,9 @@ function renderAthleteProfile(athlete) {
   // KPI Cards
   const kpiPoints = document.getElementById('ap-kpi-points');
   if (kpiPoints) kpiPoints.textContent = points;
+  const kpiPointsSub = document.getElementById('ap-kpi-points-sub');
+  if (kpiPointsSub) kpiPointsSub.textContent = athlete._fromPlayers ? 'Poin Berjalan' : 'Poin BOC';
+
   const kpiRank = document.getElementById('ap-kpi-rank');
   if (kpiRank) kpiRank.textContent = isRanked ? '#' + rank : '-';
   const kpiRankSub = document.getElementById('ap-kpi-rank-sub');
@@ -11667,10 +11671,16 @@ function renderAthleteProfile(athlete) {
   
   const kpiEvents = document.getElementById('ap-kpi-events');
   if (kpiEvents) kpiEvents.textContent = eventsPlayed;
+  const kpiEventsSub = document.getElementById('ap-kpi-events-sub');
+  if (kpiEventsSub) kpiEventsSub.textContent = eventsPlayed > 0 ? 'BOC Series' : 'Belum Ada Event';
+
   const kpiWinrate = document.getElementById('ap-kpi-winrate');
   if (kpiWinrate) kpiWinrate.textContent = winRate + '%';
   const kpiMatchesSub = document.getElementById('ap-kpi-matches-sub');
-  if (kpiMatchesSub) kpiMatchesSub.textContent = 'Dari ' + (played || Math.max(eventsPlayed * 8, 4)) + ' Pertandingan';
+  if (kpiMatchesSub) {
+    const totalMatches = played > 0 ? played : (eventsPlayed > 0 ? eventsPlayed * 8 : 0);
+    kpiMatchesSub.textContent = totalMatches > 0 ? 'Dari ' + totalMatches + ' Pertandingan' : 'Belum Ada Data';
+  }
 
   // Point Breakdown
   renderPointBreakdown(eventScores);
