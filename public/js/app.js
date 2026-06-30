@@ -11907,18 +11907,6 @@ function renderTournamentResults(name, eventScores) {
   
   if (!recentList || !bocTbody) return;
 
-  const eventNames = [
-    'RD HT (Seri 1)', 'JP HT (Seri 1)', 'LMS HT (Seri 1)', 'SYP HT (Seri 1)',
-    'RD HT (Seri 2)', 'JP HT (Seri 2)', 'LMS HT (Seri 2)', 'PLT HT',
-    'SYP HT (Seri 2)', 'RD HT (Seri 3)'
-  ];
-
-  const dates = [
-    '10 Feb 2025', '12 Mar 2025', '15 Apr 2025', '18 Mei 2025',
-    '12 Jun 2025', '15 Jul 2025', '20 Ags 2025', '10 Sep 2025',
-    '15 Okt 2025', '20 Nov 2025'
-  ];
-
   function getMockPosition(score) {
     if (score === 12) return { text: 'Champion', badge: 'ap-badge-champion', ptsClass: '' };
     if (score === 9) return { text: 'Runner-Up', badge: 'ap-badge-runner', ptsClass: 'points-silver' };
@@ -11930,12 +11918,26 @@ function renderTournamentResults(name, eventScores) {
   }
 
   const results = [];
+  const activeSirkuits = bocSirkuits && bocSirkuits.length > 0 ? bocSirkuits : [];
+
   eventScores.forEach((score, idx) => {
-    if (score !== "" && score !== undefined && score !== null) {
+    if (score !== "" && score !== undefined && score !== null && idx < activeSirkuits.length) {
+      const sirkuitName = activeSirkuits[idx];
+      const matchEvent = appData.events.find(e => e.title && e.title.toUpperCase().includes(sirkuitName.toUpperCase()));
+      let dateStr = '';
+      if (matchEvent && matchEvent.date) {
+        dateStr = matchEvent.date;
+      } else {
+        const mockMonths = ['Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const month = mockMonths[idx % mockMonths.length];
+        const day = 10 + (idx * 2) % 18;
+        dateStr = `${day} ${month} ${currentBocYear}`;
+      }
+
       results.push({ 
-        event: eventNames[idx], 
+        event: sirkuitName, 
         score: parseInt(score), 
-        date: dates[idx] || '2025',
+        date: dateStr,
         idx 
       });
     }
