@@ -11968,6 +11968,17 @@ function renderTournamentResults(name, eventScores) {
     `;
   }).join('');
 
+  const getStatusPill = (status) => {
+    const norm = (status || '').toLowerCase().trim();
+    if (norm === 'ongoing' || norm === 'berlangsung' || norm === 'daftar') {
+      return `<span class="ap-status-pill status-ongoing">Berlangsung</span>`;
+    }
+    if (norm === 'cancelled' || norm === 'batal') {
+      return `<span class="ap-status-pill status-cancelled">Batal</span>`;
+    }
+    return `<span class="ap-status-pill">Selesai</span>`;
+  };
+
   // Populate BATTLE OF CHAMPIONS RESULTS Table
   bocTbody.innerHTML = results.map(r => {
     const pos = getMockPosition(r.score);
@@ -11978,7 +11989,7 @@ function renderTournamentResults(name, eventScores) {
         <td class="ap-tbl-date">${r.date}</td>
         <td style="font-weight: 700; color: ${r.score === 12 ? '#fbbf24' : '#fff'};">${posText}</td>
         <td class="text-center" style="font-weight:900; color:#fbbf24;">${r.score}</td>
-        <td class="text-center"><span class="ap-status-pill">Completed</span></td>
+        <td class="text-center">${getStatusPill(r.status)}</td>
       </tr>
     `;
   }).join('');
@@ -12116,15 +12127,16 @@ function renderQualificationBanner(rank) {
   const banner = document.getElementById('ap-qualification-banner');
   if (!banner) return;
 
+  const yearText = currentBocYear || '2026';
   if (rank <= 16) {
     banner.className = 'ap-qualification-banner';
-    document.getElementById('ap-qual-title').textContent = 'Lolos Battle of Champions 2026';
-    document.getElementById('ap-qual-desc').textContent = 'Atlet ini berada dalam zona 16 besar kualifikasi BOC — berhak tampil di babak final bergengsi.';
+    document.getElementById('ap-qual-title').textContent = `Lolos Battle of Champions ${yearText}`;
+    document.getElementById('ap-qual-desc').textContent = `Atlet ini berada dalam zona 16 besar kualifikasi BOC ${yearText} — berhak tampil di babak final bergengsi.`;
     banner.querySelector('.ap-qual-icon').className = 'fa-solid fa-crown ap-qual-icon';
   } else {
     banner.className = 'ap-qualification-banner ap-qual-out';
     document.getElementById('ap-qual-title').textContent = 'Di Luar Zona Kualifikasi';
-    document.getElementById('ap-qual-desc').textContent = 'Atlet ini masih membutuhkan poin tambahan untuk menembus zona 16 besar kualifikasi BOC 2026.';
+    document.getElementById('ap-qual-desc').textContent = `Atlet ini masih membutuhkan poin tambahan untuk menembus zona 16 besar kualifikasi BOC ${yearText}.`;
     banner.querySelector('.ap-qual-icon').className = 'fa-solid fa-circle-exclamation ap-qual-icon';
   }
 }
@@ -12141,7 +12153,7 @@ function scrollToBocResults() {
 function shareAthleteProfile(platform) {
   const name = document.getElementById('ap-hero-name').textContent;
   const url = window.location.href;
-  const text = name + ' — Profil Atlet POBSI Banjarnegara | Battle of Champions 2026';
+  const text = name + ' — Profil Atlet POBSI Banjarnegara | Battle of Champions ' + (currentBocYear || '2026');
 
   if (platform === 'whatsapp') {
     window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + url), '_blank');
