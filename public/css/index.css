@@ -13783,3 +13783,13 @@ span.flatpickr-weekday {
   }
 }
 
+/* Custom styling overrides for Admin Mode to hide public bottom nav and reset padding */
+body.admin-mode-active {
+  padding-bottom: 0 !important;
+}
+body.admin-mode-active .mobile-bottom-nav,
+body.admin-mode-active .mobile-bottom-sheet,
+body.admin-mode-active .mobile-sheet-overlay {
+  display: none !important;
+}
+

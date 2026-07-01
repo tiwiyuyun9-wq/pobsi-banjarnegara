@@ -2617,6 +2617,7 @@ async function checkAdminRoute() {
   const pathName = window.location.pathname;
   
   if (pathName.startsWith("/athletes/")) {
+    document.body.classList.remove("admin-mode-active");
     const slug = pathName.split("/athletes/")[1];
     const publicHeader = document.querySelector(".main-header");
     const publicFooter = document.querySelector(".main-footer");
@@ -2638,6 +2639,7 @@ async function checkAdminRoute() {
   }
 
   if (pathName.startsWith("/events/")) {
+    document.body.classList.remove("admin-mode-active");
     const eventId = pathName.split("/events/")[1];
     const publicHeader = document.querySelector(".main-header");
     const publicFooter = document.querySelector(".main-footer");
@@ -2668,6 +2670,7 @@ async function checkAdminRoute() {
   const workspaceScreen = document.getElementById("admin-workspace-screen");
   
   if (pathName.startsWith("/admin") || pathName.startsWith("/admin/")) {
+    document.body.classList.add("admin-mode-active");
     // Sembunyikan bagian publik
     if (publicHeader) publicHeader.style.display = "none";
     if (publicContent) publicContent.style.display = "none";
@@ -2816,6 +2819,7 @@ async function checkAdminRoute() {
       if (errorMsg) errorMsg.style.display = "none";
     }
   } else {
+    document.body.classList.remove("admin-mode-active");
     // Tampilkan bagian publik
     if (publicHeader) publicHeader.style.display = "";
     if (publicContent) publicContent.style.display = "";
