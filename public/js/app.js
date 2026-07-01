@@ -4908,12 +4908,9 @@ function setupPlayerManagement() {
   if (btnEditProfile) {
     btnEditProfile.addEventListener("click", () => {
       if (pmActivePlayerId) {
-        window.history.pushState({}, "", `/admin/athletes/${pmActivePlayerId}`);
-        checkAdminRoute();
-        setTimeout(() => {
-          const adEditBtn = document.getElementById("ad-btn-edit-top");
-          if (adEditBtn) adEditBtn.click();
-        }, 120);
+        if (typeof window.openEditPlayerDrawer === "function") {
+          window.openEditPlayerDrawer(pmActivePlayerId);
+        }
       }
     });
   }
