@@ -7840,72 +7840,92 @@ function setupAthleteDetailActions() {
   // Toggle active status action
   const btnStatus = document.getElementById("ad-fbtn-status");
   if (btnStatus) {
-    btnStatus.addEventListener("click", () => {
+    const newBtnStatus = btnStatus.cloneNode(true);
+    btnStatus.parentNode.replaceChild(newBtnStatus, btnStatus);
+
+    newBtnStatus.addEventListener("click", () => {
       const player = appData.players.find(p => p.id === adActivePlayerId);
       if (!player) return;
       const newStatus = (player.status || "Aktif") === "Aktif" ? "Nonaktif" : "Aktif";
       
-      if (confirm(`Yakin ingin mengubah status atlet menjadi ${newStatus}?`)) {
-        if (isServerOnline) {
-          fetch(`/api/players/${adActivePlayerId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-          }).then(res => {
-            if (res.ok) {
-              alert(`Status atlet berhasil diubah menjadi ${newStatus}!`);
-              loadDataFromApi().then(() => {
-                renderAthleteDetail(adActivePlayerId);
-                renderWorkspacePreviews();
-              });
-            }
-          }).catch(err => alert(`Error: ${err.message}`));
-        } else {
-          player.status = newStatus;
-          alert(`Luring: Status diubah menjadi ${newStatus}`);
-          renderAthleteDetail(adActivePlayerId);
-          renderWorkspacePreviews();
-        }
-      }
+      showCustomConfirm(
+        "Konfirmasi Status",
+        `Apakah Anda yakin ingin mengubah status atlet "${player.name}" menjadi ${newStatus}?`,
+        () => {
+          if (isServerOnline) {
+            fetch(`/api/players/${adActivePlayerId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus })
+            }).then(res => {
+              if (res.ok) {
+                showCustomToast(`Status atlet berhasil diubah menjadi ${newStatus}!`, "success");
+                loadDataFromApi().then(() => {
+                  renderAthleteDetail(adActivePlayerId);
+                  renderWorkspacePreviews();
+                });
+              } else {
+                showCustomToast("Gagal memperbarui status atlet di server.", "error");
+              }
+            }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
+          } else {
+            player.status = newStatus;
+            showCustomToast(`Luring: Status diubah menjadi ${newStatus}`, "success");
+            renderAthleteDetail(adActivePlayerId);
+            renderWorkspacePreviews();
+          }
+        },
+        newStatus === "Aktif" ? "Aktifkan" : "Nonaktifkan",
+        newStatus === "Aktif" ? "primary" : "warning"
+      );
     });
   }
 
   // Delete action
   const btnDelete = document.getElementById("ad-fbtn-delete");
   if (btnDelete) {
-    btnDelete.addEventListener("click", async () => {
+    const newBtnDelete = btnDelete.cloneNode(true);
+    btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
+
+    newBtnDelete.addEventListener("click", () => {
       const player = appData.players.find(p => p.id === adActivePlayerId);
       if (!player) return;
 
-      if (confirm(`PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database?`)) {
-        if (isServerOnline) {
-          try {
-            const res = await fetch(`/api/players/${adActivePlayerId}`, {
-              method: 'DELETE'
-            });
-            if (res.ok) {
-              alert(`Atlet "${player.name}" berhasil dihapus.`);
-              await loadDataFromApi();
-              updateWorkspaceStats();
-              renderWorkspacePreviews();
-              window.history.pushState({}, "", "/admin");
-              switchAdminPane("pane-players");
-            } else {
-              const err = await res.json();
-              alert(`Gagal menghapus: ${err.error}`);
+      showCustomConfirm(
+        "Hapus Atlet",
+        `PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database? Tindakan ini tidak dapat dibatalkan.`,
+        async () => {
+          if (isServerOnline) {
+            try {
+              const res = await fetch(`/api/players/${adActivePlayerId}`, {
+                method: 'DELETE'
+              });
+              if (res.ok) {
+                showCustomToast(`Atlet "${player.name}" berhasil dihapus.`, "success");
+                await loadDataFromApi();
+                updateWorkspaceStats();
+                renderWorkspacePreviews();
+                window.history.pushState({}, "", "/admin");
+                switchAdminPane("pane-players");
+              } else {
+                const err = await res.json();
+                showCustomToast(`Gagal menghapus: ${err.error}`, "error");
+              }
+            } catch (err) {
+              showCustomToast(`Error: ${err.message}`, "error");
             }
-          } catch (err) {
-            alert(`Error: ${err.message}`);
+          } else {
+            appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
+            showCustomToast(`Luring: Atlet "${player.name}" dihapus dari memori browser.`, "success");
+            updateWorkspaceStats();
+            renderWorkspacePreviews();
+            window.history.pushState({}, "", "/admin");
+            switchAdminPane("pane-players");
           }
-        } else {
-          appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
-          alert(`Luring: Atlet "${player.name}" dihapus dari memori browser.`);
-          updateWorkspaceStats();
-          renderWorkspacePreviews();
-          window.history.pushState({}, "", "/admin");
-          switchAdminPane("pane-players");
-        }
-      }
+        },
+        "Hapus Atlet",
+        "danger"
+      );
     });
   }
 }
