@@ -3721,11 +3721,11 @@ async function setupAdminPanel() {
 
   function handleAvatarFileSelection(file) {
     if (!file.type.startsWith("image/")) {
-      alert("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).");
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.");
+      showCustomToast("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
       return;
     }
 
@@ -3786,11 +3786,11 @@ async function setupAdminPanel() {
 
   function handleCoverFileSelection(file) {
     if (!file.type.startsWith("image/")) {
-      alert("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).");
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert("Ukuran gambar cover terlalu besar! Maksimal batas ukuran berkas adalah 2MB.");
+      showCustomToast("Ukuran gambar cover terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
       return;
     }
     const reader = new FileReader();
@@ -3848,11 +3848,11 @@ async function setupAdminPanel() {
   function handleKtpFileSelection(file) {
     const isValidType = file.type.startsWith("image/") || file.type === "application/pdf";
     if (!isValidType) {
-      alert("Format berkas tidak valid! Silakan unggah Gambar (JPG, PNG) atau dokumen PDF.");
+      showCustomToast("Format berkas tidak valid! Silakan unggah Gambar (JPG, PNG) atau dokumen PDF.", "error");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("Ukuran berkas KTP terlalu besar! Maksimal batas ukuran berkas adalah 5MB.");
+      showCustomToast("Ukuran berkas KTP terlalu besar! Maksimal batas ukuran berkas adalah 5MB.", "error");
       return;
     }
     const reader = new FileReader();
@@ -3930,11 +3930,11 @@ async function setupAdminPanel() {
 
   function handleEventPosterFileSelection(file) {
     if (!file.type.startsWith("image/")) {
-      alert("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).");
+      showCustomToast("Format berkas tidak valid! Silakan unggah gambar (JPG, PNG, WebP).", "error");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.");
+      showCustomToast("Ukuran gambar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
       return;
     }
 
@@ -4552,12 +4552,9 @@ function setupPlayerManagement() {
     pmTableBody.querySelectorAll(".pm-edit-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        window.history.pushState({}, "", `/admin/athletes/${btn.dataset.id}`);
-        checkAdminRoute();
-        setTimeout(() => {
-          const adEditBtn = document.getElementById("ad-btn-edit-top");
-          if (adEditBtn) adEditBtn.click();
-        }, 120);
+        if (typeof window.openEditPlayerDrawer === "function") {
+          window.openEditPlayerDrawer(btn.dataset.id);
+        }
       });
     });
 
@@ -4623,6 +4620,20 @@ function setupPlayerManagement() {
     if (pmSelectedIds.size > 0) {
       pmBulkBar.style.display = "flex";
       pmSelectedCount.textContent = pmSelectedIds.size;
+
+      // Update bulk toggle status button dynamically
+      const btnBulkToggleStatus = document.getElementById('pm-bulk-toggle-status');
+      if (btnBulkToggleStatus) {
+        const selectedPlayers = appData.players.filter(p => pmSelectedIds.has(p.id.toString()));
+        const allNonactive = selectedPlayers.length > 0 && selectedPlayers.every(p => p.status === 'Nonaktif');
+        if (allNonactive) {
+          btnBulkToggleStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> Aktifkan`;
+          btnBulkToggleStatus.className = "pm-bulk-btn green";
+        } else {
+          btnBulkToggleStatus.innerHTML = `<i class="fa-solid fa-ban"></i> Nonaktifkan`;
+          btnBulkToggleStatus.className = "pm-bulk-btn amber";
+        }
+      }
     } else {
       pmBulkBar.style.display = "none";
     }
@@ -4642,6 +4653,14 @@ function setupPlayerManagement() {
 
     // Profile card
     document.getElementById("pm-detail-avatar").src = player.avatar;
+    const coverEl = document.getElementById("pm-detail-cover");
+    if (coverEl) {
+      if (player.cover) {
+        coverEl.style.backgroundImage = `url(${player.cover})`;
+      } else {
+        coverEl.style.backgroundImage = 'linear-gradient(135deg, #1e3a8a, #3b82f6)';
+      }
+    }
     document.getElementById("pm-detail-name").textContent = player.name;
     document.getElementById("pm-detail-id").textContent = player.id || "-";
     document.getElementById("pm-detail-club").querySelector("span").textContent = player.club;
@@ -4654,17 +4673,18 @@ function setupPlayerManagement() {
     const hcTag = document.getElementById("pm-detail-hc-tag");
     hcTag.textContent = `Handicap ${player.handicap}`;
 
-    // Quick stats from standings
+    // Quick stats from standings and dynamic regional ranking
     const standing = getPlayerStanding(player.name);
-    document.getElementById("pm-detail-ranking").textContent = standing ? `#${standing.rank}` : "-";
-    document.getElementById("pm-detail-matches").textContent = standing ? standing.played : "-";
+    const regionalRank = getPlayerRegionalRank(player.id);
+    document.getElementById("pm-detail-ranking").textContent = regionalRank ? `#${regionalRank}` : "-";
+    document.getElementById("pm-detail-matches").textContent = standing ? standing.played : "0";
     if (standing && standing.played > 0) {
       const wr = Math.round((standing.won / standing.played) * 100);
       document.getElementById("pm-detail-winrate").textContent = `${wr}%`;
     } else {
-      document.getElementById("pm-detail-winrate").textContent = "-";
+      document.getElementById("pm-detail-winrate").textContent = "0%";
     }
-    document.getElementById("pm-detail-wins").textContent = standing ? standing.won : "-";
+    document.getElementById("pm-detail-wins").textContent = standing ? standing.won : "0";
 
     // Info tab
     document.getElementById("pm-info-name").textContent = player.name;
@@ -4734,27 +4754,36 @@ function setupPlayerManagement() {
     `;
   }
 
-  // Render tournament history (simulated)
+  // Render tournament history (dynamic)
   function renderTournamentHistory(player) {
     const container = document.getElementById("pm-tournament-list");
-    const events = appData.events || [];
-    if (events.length === 0) {
+    if (!container) return;
+    const ptsList = exactBocPoints[player.name];
+    const sirkuits = (typeof bocSirkuits !== 'undefined' ? bocSirkuits : []) || [];
+    let activeParticipations = [];
+    if (Array.isArray(ptsList)) {
+      ptsList.forEach((score, idx) => {
+        if (score !== undefined && score !== null && score !== "" && Number(score) > 0) {
+          const sirkuitObj = sirkuits[idx] || { name: `Sirkuit BOC #${idx + 1}`, date: `Sirkuit ${currentBocYear}` };
+          activeParticipations.push({
+            name: sirkuitObj.name || sirkuitObj.title || `Sirkuit BOC #${idx + 1}`,
+            date: sirkuitObj.date || `Sirkuit ${currentBocYear}`,
+            points: score
+          });
+        }
+      });
+    }
+    if (activeParticipations.length === 0) {
       container.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-dim);">Belum ada riwayat turnamen</span>';
       return;
     }
-    // Simulate: player participated in some events
-    const participated = events.slice(0, Math.min(4, events.length));
-    container.innerHTML = participated.map((evt, idx) => {
-      const places = ["gold", "silver", "bronze", "other"];
-      const labels = ["🥇", "🥈", "🥉", "#4"];
-      const placeClass = places[Math.min(idx, 3)];
-      const placeLabel = labels[Math.min(idx, 3)];
+    container.innerHTML = activeParticipations.map(part => {
       return `
         <div class="pm-tourney-item">
-          <div class="pm-tourney-place ${placeClass}">${placeLabel}</div>
+          <div class="pm-tourney-place other"><i class="fa-solid fa-trophy"></i></div>
           <div class="pm-tourney-info">
-            <div class="pm-tourney-name">${evt.title}</div>
-            <div class="pm-tourney-date">${evt.date}</div>
+            <div class="pm-tourney-name">${part.name}</div>
+            <div class="pm-tourney-date">${part.date} (Meraih ${part.points} Poin)</div>
           </div>
         </div>
       `;
@@ -4863,25 +4892,6 @@ function setupPlayerManagement() {
     btnPlayerCancel.onclick = () => { modalOverlay.style.display = "none"; };
   }
 
-  // Export button placeholder
-  const btnExport = document.getElementById("btn-export-players");
-  if (btnExport) {
-    btnExport.addEventListener("click", () => {
-      // Simple CSV export
-      const headers = ["ID", "Nama", "Klub", "Handicap", "Status", "Gender", "Umur", "No HP", "Alamat"];
-      const rows = appData.players.map(p => [
-        p.id, p.name, p.club, p.handicap, p.status || "Aktif", p.gender || "-", p.age || "-", p.phone || "-", p.address || "-"
-      ]);
-      const csv = [headers.join(","), ...rows.map(r => r.map(v => `"${v}"`).join(","))].join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "data_atlet_pobsi.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
 
   // Bind sidebar expansion buttons
   const btnViewFull = document.getElementById("pm-btn-view-full");
@@ -4898,13 +4908,125 @@ function setupPlayerManagement() {
   if (btnEditProfile) {
     btnEditProfile.addEventListener("click", () => {
       if (pmActivePlayerId) {
-        window.history.pushState({}, "", `/admin/athletes/${pmActivePlayerId}`);
-        checkAdminRoute();
-        setTimeout(() => {
-          const adEditBtn = document.getElementById("ad-btn-edit-top");
-          if (adEditBtn) adEditBtn.click();
-        }, 120);
+        if (typeof window.openEditPlayerDrawer === "function") {
+          window.openEditPlayerDrawer(pmActivePlayerId);
+        }
       }
+    });
+  }
+
+  // Expose helper to clear selected athletes
+  window.clearPlayerManagementSelection = function() {
+    pmSelectedIds.clear();
+    updateBulkBar();
+    updateCheckAllState();
+    renderPMTable();
+  };
+
+  // Hook Bulk Actions Buttons for Players
+  const btnBulkTransferClub = document.getElementById('pm-bulk-transfer-club');
+  if (btnBulkTransferClub) {
+    btnBulkTransferClub.addEventListener('click', () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+      window.openTransferClubModal(ids);
+    });
+  }
+
+
+  const btnBulkToggleStatus = document.getElementById('pm-bulk-toggle-status');
+  if (btnBulkToggleStatus) {
+    btnBulkToggleStatus.addEventListener('click', async () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+
+      const selectedPlayers = appData.players.filter(p => ids.includes(p.id.toString()));
+      const allNonactive = selectedPlayers.length > 0 && selectedPlayers.every(p => p.status === 'Nonaktif');
+      const targetStatus = allNonactive ? 'Aktif' : 'Nonaktif';
+
+      let successCount = 0;
+      for (const id of ids) {
+        const player = appData.players.find(p => p.id.toString() === id.toString());
+        if (!player) continue;
+
+        if (isServerOnline) {
+          try {
+            const res = await fetch(`/api/players/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: targetStatus })
+            });
+            if (res.ok) successCount++;
+          } catch (e) {}
+        } else {
+          player.status = targetStatus;
+          successCount++;
+        }
+      }
+
+      if (isServerOnline && successCount > 0) {
+        await loadDataFromApi();
+      }
+
+      showCustomToast(`Status ${successCount} atlet berhasil diubah menjadi ${targetStatus}!`, "success");
+      pmSelectedIds.clear();
+      updateBulkBar();
+      updateCheckAllState();
+      renderPMTable();
+      updateWorkspaceStats();
+    });
+  }
+
+  const btnBulkDelete = document.getElementById('pm-bulk-delete');
+  if (btnBulkDelete) {
+    btnBulkDelete.addEventListener('click', async () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+
+      showCustomConfirm(
+        "Hapus Atlet Terpilih",
+        `PERINGATAN: Yakin ingin menghapus ${ids.length} atlet terpilih secara permanen dari database resmi POBSI?`,
+        async () => {
+          let deletedCount = 0;
+          for (const id of ids) {
+            const player = appData.players.find(p => p.id.toString() === id.toString());
+            if (!player) continue;
+
+            if (isServerOnline) {
+              try {
+                const res = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+                if (res.ok) deletedCount++;
+              } catch (e) {}
+            } else {
+              appData.players = appData.players.filter(p => p.id.toString() !== id.toString());
+              deletedCount++;
+            }
+          }
+
+          if (isServerOnline && deletedCount > 0) {
+            await loadDataFromApi();
+          }
+
+          // Hide sidebar selection if the active player was deleted
+          if (pmActivePlayerId && ids.includes(pmActivePlayerId.toString())) {
+            const placeholder = document.getElementById("pm-sidebar-placeholder");
+            const content = document.getElementById("pm-sidebar-content");
+            if (placeholder) placeholder.style.display = "flex";
+            if (content) content.style.display = "none";
+            pmActivePlayerId = null;
+          }
+
+          showCustomToast(`Berhasil menghapus ${deletedCount} atlet!`, "success");
+          pmSelectedIds.clear();
+          updateBulkBar();
+          updateCheckAllState();
+          renderPMTable();
+          updateWorkspaceStats();
+          renderWorkspacePreviews();
+        },
+        "Hapus",
+        "danger"
+      );
     });
   }
 
@@ -4913,12 +5035,13 @@ function setupPlayerManagement() {
   updatePMStats();
   renderPMTable();
 
-  // Expose for re-render after adding a new player
+  // Expose for re-render after adding/updating players
   window.refreshPlayerManagement = function() {
     populatePMClubFilter();
     updatePMStats();
     renderPMTable();
   };
+  window.openPlayerDetail = openPlayerDetail;
 }
 
 // F. Interactive Billiard Balls Physics Simulator in Hero Section (WOW Factor)
@@ -6002,7 +6125,7 @@ function setupAdminClubsConsole() {
   const btnBulkExport = document.getElementById('pm-club-bulk-export');
   if (btnBulkExport) {
     btnBulkExport.addEventListener('click', () => {
-      alert(`Mengekspor ${pmSelectedClubIds.size} data klub ke CSV/Excel...`);
+      showCustomToast(`Mengekspor ${pmSelectedClubIds.size} data klub ke CSV/Excel...`, "info");
     });
   }
 
@@ -6033,7 +6156,7 @@ function setupAdminClubsConsole() {
       if (isServerOnline && successCount > 0) {
         await loadDataFromApi();
       }
-      alert(`Status ${successCount} klub berhasil diperbarui!`);
+      showCustomToast(`Status ${successCount} klub berhasil diperbarui!`, "success");
       pmSelectedClubIds.clear();
       updateClubBulkBar();
       updateClubCheckAllState();
@@ -6049,40 +6172,48 @@ function setupAdminClubsConsole() {
   if (btnBulkDelete) {
     btnBulkDelete.addEventListener('click', async () => {
       const ids = Array.from(pmSelectedClubIds);
-      if (confirm(`Yakin ingin menghapus ${ids.length} klub terpilih secara permanen dari database resmi POBSI?`)) {
-        let deletedCount = 0;
-        for (const id of ids) {
-          if (isServerOnline) {
-            try {
-              const res = await fetch(`/api/clubs/${id}`, { method: 'DELETE' });
-              if (res.ok) deletedCount++;
-            } catch(e) {}
-          } else {
-            appData.clubs = (appData.clubs || []).filter(c => c.id.toString() !== id);
-            deletedCount++;
-          }
-        }
-        if (isServerOnline && deletedCount > 0) {
-          await loadDataFromApi();
-        }
-        pmSelectedClubIds.clear();
-        updateClubBulkBar();
-        updateClubCheckAllState();
-        renderClubs();
-        renderAdminClubPreview();
-        updateWorkspaceStats();
-        loadStatistics();
-        populateClubFilters();
-        
-        // Clear sidebar selection if deleted
-        const sidebarPlaceholder = document.getElementById('pm-club-sidebar-placeholder');
-        const sidebarContent = document.getElementById('pm-club-sidebar-content');
-        if (sidebarPlaceholder) sidebarPlaceholder.style.display = 'flex';
-        if (sidebarContent) sidebarContent.style.display = 'none';
-        currentSelectedClubId = null;
+      if (ids.length === 0) return;
 
-        alert(`Berhasil menghapus ${deletedCount} klub!`);
-      }
+      showCustomConfirm(
+        "Hapus Klub Terpilih",
+        `Yakin ingin menghapus ${ids.length} klub terpilih secara permanen dari database resmi POBSI?`,
+        async () => {
+          let deletedCount = 0;
+          for (const id of ids) {
+            if (isServerOnline) {
+              try {
+                const res = await fetch(`/api/clubs/${id}`, { method: 'DELETE' });
+                if (res.ok) deletedCount++;
+              } catch(e) {}
+            } else {
+              appData.clubs = (appData.clubs || []).filter(c => c.id.toString() !== id);
+              deletedCount++;
+            }
+          }
+          if (isServerOnline && deletedCount > 0) {
+            await loadDataFromApi();
+          }
+          pmSelectedClubIds.clear();
+          updateClubBulkBar();
+          updateClubCheckAllState();
+          renderClubs();
+          renderAdminClubPreview();
+          updateWorkspaceStats();
+          loadStatistics();
+          populateClubFilters();
+          
+          // Clear sidebar selection if deleted
+          const sidebarPlaceholder = document.getElementById('pm-club-sidebar-placeholder');
+          const sidebarContent = document.getElementById('pm-club-sidebar-content');
+          if (sidebarPlaceholder) sidebarPlaceholder.style.display = 'flex';
+          if (sidebarContent) sidebarContent.style.display = 'none';
+          currentSelectedClubId = null;
+
+          showCustomToast(`Berhasil menghapus ${deletedCount} klub!`, "success");
+        },
+        "Hapus",
+        "danger"
+      );
     });
   }
 }
@@ -6126,7 +6257,7 @@ window.assignPlayerClub = async function(playerId, event) {
     // Validate if club exists (case-insensitive)
     const matchedClub = clubs.find(c => c.name.toLowerCase() === trimmedClub.toLowerCase());
     if (!matchedClub) {
-      alert(`Gagal: Klub "${trimmedClub}" tidak terdaftar di database resmi POBSI!`);
+      showCustomToast(`Gagal: Klub "${trimmedClub}" tidak terdaftar di database resmi POBSI!`, "error");
       return;
     }
 
@@ -6138,18 +6269,18 @@ window.assignPlayerClub = async function(playerId, event) {
           body: JSON.stringify({ club: matchedClub.name })
         });
         if (res.ok) {
-          alert(`Klub atlet "${player.name}" berhasil diubah menjadi "${matchedClub.name}"!`);
+          showCustomToast(`Klub atlet "${player.name}" berhasil diubah menjadi "${matchedClub.name}"!`, "success");
           await loadDataFromApi();
         } else {
           const err = await res.json();
-          alert(`Gagal: ${err.error}`);
+          showCustomToast(`Gagal: ${err.error}`, "error");
         }
       } catch (e) {
-        alert(`Error: ${e.message}`);
+        showCustomToast(`Error: ${e.message}`, "error");
       }
     } else {
       player.club = matchedClub.name;
-      alert(`Luring: Klub atlet "${player.name}" diubah menjadi "${matchedClub.name}"`);
+      showCustomToast(`Luring: Klub atlet "${player.name}" diubah menjadi "${matchedClub.name}"`, "info");
     }
 
     // Refresh views
@@ -6165,7 +6296,7 @@ window.exportPlayer = function(playerId, event) {
   if (event) event.stopPropagation();
   const player = appData.players.find(p => p.id.toString() === playerId.toString());
   if (!player) return;
-  alert(`Mengekspor data atlet "${player.name}" (ID: ${player.id || playerId}) ke Excel/CSV...`);
+  showCustomToast(`Mengekspor data atlet "${player.name}" (ID: ${player.id || playerId}) ke Excel/CSV...`, "info");
 };
 
 window.togglePlayerStatus = async function(playerId, event) {
@@ -6182,18 +6313,18 @@ window.togglePlayerStatus = async function(playerId, event) {
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
-        alert(`Status atlet "${player.name}" berhasil diubah menjadi ${newStatus}!`);
+        showCustomToast(`Status atlet "${player.name}" berhasil diubah menjadi ${newStatus}!`, "success");
         await loadDataFromApi();
       } else {
         const errJson = await res.json();
-        alert(`Gagal: ${errJson.error}`);
+        showCustomToast(`Gagal: ${errJson.error}`, "error");
       }
     } catch(err) {
-      alert(`Error: ${err.message}`);
+      showCustomToast(`Error: ${err.message}`, "error");
     }
   } else {
     player.status = newStatus;
-    alert(`Luring: Status atlet "${player.name}" diubah menjadi ${newStatus}`);
+    showCustomToast(`Luring: Status atlet "${player.name}" diubah menjadi ${newStatus}`, "info");
   }
   
   // Refresh views
@@ -6207,32 +6338,38 @@ window.deletePlayerDirect = async function(playerId, event) {
   const player = appData.players.find(p => p.id.toString() === playerId.toString());
   if (!player) return;
   
-  if (confirm(`PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database resmi POBSI?`)) {
-    if (isServerOnline) {
-      try {
-        const res = await fetch(`/api/players/${playerId}`, { method: 'DELETE' });
-        if (res.ok) {
-          alert(`Atlet "${player.name}" berhasil dihapus.`);
-          await loadDataFromApi();
-        } else {
-          const err = await res.json();
-          alert(`Gagal menghapus: ${err.error}`);
+  showCustomConfirm(
+    "Hapus Atlet",
+    `PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database resmi POBSI?`,
+    async () => {
+      if (isServerOnline) {
+        try {
+          const res = await fetch(`/api/players/${playerId}`, { method: 'DELETE' });
+          if (res.ok) {
+            showCustomToast(`Atlet "${player.name}" berhasil dihapus.`, "success");
+            await loadDataFromApi();
+          } else {
+            const err = await res.json();
+            showCustomToast(`Gagal menghapus: ${err.error}`, "error");
+          }
+        } catch (err) {
+          showCustomToast(`Error: ${err.message}`, "error");
         }
-      } catch (err) {
-        alert(`Error: ${err.message}`);
+      } else {
+        appData.players = appData.players.filter(p => p.id.toString() !== playerId.toString());
+        showCustomToast('Atlet dihapus dari memori luring.', "success");
       }
-    } else {
-      appData.players = appData.players.filter(p => p.id.toString() !== playerId.toString());
-      alert('Atlet dihapus dari memori luring.');
-    }
-    
-    // Refresh player management
-    if (typeof window.refreshPlayerManagement === 'function') {
-      window.refreshPlayerManagement();
-    }
-    updateWorkspaceStats();
-    renderWorkspacePreviews();
-  }
+      
+      // Refresh player management
+      if (typeof window.refreshPlayerManagement === 'function') {
+        window.refreshPlayerManagement();
+      }
+      updateWorkspaceStats();
+      renderWorkspacePreviews();
+    },
+    "Hapus",
+    "danger"
+  );
 };
 
 window.toggleClubStatus = async function(clubId, event) {
@@ -6249,18 +6386,18 @@ window.toggleClubStatus = async function(clubId, event) {
         body: JSON.stringify({ ...club, status: newStatus })
       });
       if (res.ok) {
-        alert(`Status klub "${club.name}" berhasil diubah menjadi ${newStatus}!`);
+        showCustomToast(`Status klub "${club.name}" berhasil diubah menjadi ${newStatus}!`, "success");
         await loadDataFromApi();
       } else {
         const errJson = await res.json();
-        alert(`Gagal: ${errJson.error}`);
+        showCustomToast(`Gagal: ${errJson.error}`, "error");
       }
     } catch(err) {
-      alert(`Error: ${err.message}`);
+      showCustomToast(`Error: ${err.message}`, "error");
     }
   } else {
     club.status = newStatus;
-    alert(`Luring: Status klub "${club.name}" diubah menjadi ${newStatus}`);
+    showCustomToast(`Luring: Status klub "${club.name}" diubah menjadi ${newStatus}`, "info");
   }
   
   // Refresh views
@@ -6668,7 +6805,7 @@ let adActivePlayerId = null;
 async function renderAthleteDetail(playerId) {
   const player = appData.players.find(p => p.id === playerId);
   if (!player) {
-    alert("Atlet tidak ditemukan!");
+    showCustomToast("Atlet tidak ditemukan!", "error");
     switchAdminPane("pane-players");
     return;
   }
@@ -7363,7 +7500,7 @@ function setupAthleteDetailActions() {
   const editClose = document.getElementById("ad-drawer-close");
 
   function openEditDrawer() {
-    const player = appData.players.find(p => p.id === adActivePlayerId);
+    const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
     if (!player) return;
 
     if (typeof window.resetEditPlayerWizard === 'function') {
@@ -7412,6 +7549,11 @@ function setupAthleteDetailActions() {
   const btnEditFooter = document.getElementById("ad-fbtn-edit");
   if (btnEditTop) btnEditTop.addEventListener("click", openEditDrawer);
   if (btnEditFooter) btnEditFooter.addEventListener("click", openEditDrawer);
+
+  window.openEditPlayerDrawer = function(playerId) {
+    adActivePlayerId = playerId;
+    openEditDrawer();
+  };
 
   if (editClose) {
     editClose.addEventListener("click", () => {
@@ -7486,7 +7628,7 @@ function setupAthleteDetailActions() {
       const file = e.target.files[0];
       if (file) {
         if (file.size > 2 * 1024 * 1024) {
-          alert("Ukuran gambar avatar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.");
+          showCustomToast("Ukuran gambar avatar terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
           return;
         }
         const reader = new FileReader();
@@ -7504,7 +7646,7 @@ function setupAthleteDetailActions() {
       const file = e.target.files[0];
       if (file) {
         if (file.size > 2 * 1024 * 1024) {
-          alert("Ukuran gambar cover terlalu besar! Maksimal batas ukuran berkas adalah 2MB.");
+          showCustomToast("Ukuran gambar cover terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
           return;
         }
         const reader = new FileReader();
@@ -7522,7 +7664,7 @@ function setupAthleteDetailActions() {
       const file = e.target.files[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
-          alert("Ukuran berkas KTP terlalu besar! Maksimal batas ukuran berkas adalah 5MB.");
+          showCustomToast("Ukuran berkas KTP terlalu besar! Maksimal batas ukuran berkas adalah 5MB.", "error");
           return;
         }
         const reader = new FileReader();
@@ -7559,7 +7701,7 @@ function setupAthleteDetailActions() {
           });
 
           if (res.ok) {
-            alert(`Berhasil memperbarui data atlet "${name}"!`);
+            showCustomToast(`Berhasil memperbarui data atlet "${name}"!`, "success");
             editDrawer.style.display = "none";
             
             // Reload all
@@ -7567,12 +7709,14 @@ function setupAthleteDetailActions() {
             updateWorkspaceStats();
             renderWorkspacePreviews();
             renderAthleteDetail(id);
+            if (typeof window.refreshPlayerManagement === 'function') window.refreshPlayerManagement();
+            if (typeof window.openPlayerDetail === 'function') window.openPlayerDetail(id);
           } else {
             const errJson = await res.json();
-            alert(`Gagal: ${errJson.error || 'Server error'}`);
+            showCustomToast(`Gagal: ${errJson.error || 'Server error'}`, "error");
           }
         } catch (err) {
-          alert(`Error koneksi server: ${err.message}`);
+          showCustomToast(`Error koneksi server: ${err.message}`, "error");
         }
       } else {
         // Offline
@@ -7587,12 +7731,14 @@ function setupAthleteDetailActions() {
             std.handicap = handicap;
           }
 
-          alert(`Mode Luring: Data "${name}" diperbarui sementara di memori browser!`);
+          showCustomToast(`Mode Luring: Data "${name}" diperbarui sementara di memori browser!`, "info");
           editDrawer.style.display = "none";
 
           updateWorkspaceStats();
           renderWorkspacePreviews();
           renderAthleteDetail(id);
+          if (typeof window.refreshPlayerManagement === 'function') window.refreshPlayerManagement();
+          if (typeof window.openPlayerDetail === 'function') window.openPlayerDetail(id);
         }
       }
     });
@@ -7602,7 +7748,7 @@ function setupAthleteDetailActions() {
   const btnHCTop = document.getElementById("ad-btn-hc-top");
   const btnHCFooter = document.getElementById("ad-fbtn-hc");
   async function triggerHCUpdate() {
-    const player = appData.players.find(p => p.id === adActivePlayerId);
+    const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
     if (!player) return;
 
     const modal = document.getElementById("ad-hc-modal");
@@ -7739,7 +7885,7 @@ function setupAthleteDetailActions() {
       const oldPoints = player.points || 0;
 
       if (newHC === oldHC && newPoints === oldPoints) {
-        alert("Tidak ada perubahan tingkat handicap maupun poin berjalan!");
+        showCustomToast("Tidak ada perubahan tingkat handicap maupun poin berjalan!", "info");
         return;
       }
 
@@ -7769,9 +7915,9 @@ function setupAthleteDetailActions() {
         }).then(res => {
           if (res.ok) {
             if (pointsReset) {
-              alert(`Handicap berhasil diperbarui menjadi HC ${newHC}! Poin handicap otomatis di-reset ke 0 karena atlet naik tingkat.`);
+              showCustomToast(`Handicap berhasil diperbarui menjadi HC ${newHC}! Poin handicap otomatis di-reset ke 0 karena atlet naik tingkat.`, "success");
             } else {
-              alert(`Data handicap & poin atlet berhasil diperbarui!`);
+              showCustomToast(`Data handicap & poin atlet berhasil diperbarui!`, "success");
             }
             if (hcModal) hcModal.style.display = "none";
             loadDataFromApi().then(() => {
@@ -7779,7 +7925,7 @@ function setupAthleteDetailActions() {
               renderWorkspacePreviews();
             });
           }
-        }).catch(err => alert(`Error: ${err.message}`));
+        }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
       } else {
         player.handicap = newHC;
         player.points = newPoints;
@@ -7804,9 +7950,9 @@ function setupAthleteDetailActions() {
         });
 
         if (pointsReset) {
-          alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin di-reset ke 0 (Naik Tingkat).`);
+          showCustomToast(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin di-reset ke 0 (Naik Tingkat).`, "info");
         } else {
-          alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin disesuaikan menjadi ${newPoints}.`);
+          showCustomToast(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin disesuaikan menjadi ${newPoints}.`, "info");
         }
         if (hcModal) hcModal.style.display = "none";
         renderAthleteDetail(playerId);
@@ -7815,97 +7961,170 @@ function setupAthleteDetailActions() {
     });
   }
 
-  // Transfer club action
+  // Expose global unified transfer modal handler
+  window.openTransferClubModal = function(playerIds) {
+    if (!playerIds || playerIds.length === 0) return;
+
+    const transferModal = document.getElementById("ad-transfer-club-modal");
+    const closeBtn = document.getElementById("transfer-modal-close");
+    const cancelBtn = document.getElementById("transfer-modal-btn-cancel");
+    const selectClub = document.getElementById("transfer-modal-select-club");
+    const formTransfer = document.getElementById("form-admin-transfer-club");
+
+    if (!transferModal || !selectClub || !formTransfer) return;
+
+    const isBulk = playerIds.length > 1;
+
+    // Set modal title based on bulk or single
+    const modalTitle = transferModal.querySelector(".pm-modal-header h3");
+    if (modalTitle) {
+      modalTitle.innerHTML = `<i class="fa-solid fa-exchange-alt text-gold"></i> ${isBulk ? "Transfer Klub Masal" : "Transfer Klub Atlet"}`;
+    }
+
+    // Find players
+    const players = playerIds.map(id => appData.players.find(p => p.id.toString() === id.toString())).filter(Boolean);
+    if (players.length === 0) return;
+
+    if (!isBulk) {
+      const player = players[0];
+      document.getElementById("transfer-modal-player-id").value = player.id;
+      document.getElementById("transfer-modal-player-name").textContent = player.name;
+      document.getElementById("transfer-modal-player-club").textContent = player.club || "Tanpa Klub";
+      document.getElementById("transfer-preview-current-club").textContent = player.club || "Tanpa Klub";
+    } else {
+      document.getElementById("transfer-modal-player-id").value = playerIds.join(",");
+      document.getElementById("transfer-modal-player-name").textContent = `${players.length} Atlet Terpilih`;
+      
+      // Check if they all share the same current club
+      const uniqueClubs = Array.from(new Set(players.map(p => p.club || "Tanpa Klub")));
+      const sharedClub = uniqueClubs.length === 1 ? uniqueClubs[0] : "Campuran";
+      
+      document.getElementById("transfer-modal-player-club").textContent = sharedClub;
+      document.getElementById("transfer-preview-current-club").textContent = sharedClub;
+    }
+
+    document.getElementById("transfer-preview-new-club").textContent = "-";
+    document.getElementById("transfer-modal-reason").value = "";
+
+    // Populate dropdown list with clubs
+    const clubs = appData.clubs || [];
+    let filteredClubs = clubs;
+    if (!isBulk) {
+      // Exclude current club of the single player
+      filteredClubs = clubs.filter(c => c.name !== players[0].club);
+    }
+
+    if (filteredClubs.length > 0) {
+      selectClub.innerHTML = '<option value="" disabled selected>-- Pilih Klub Tujuan --</option>' +
+        filteredClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+    } else {
+      selectClub.innerHTML = '<option value="" disabled selected>-- Tidak Ada Klub Alternatif --</option>';
+    }
+
+    // Update preview target club name on change
+    selectClub.onchange = () => {
+      document.getElementById("transfer-preview-new-club").textContent = selectClub.value || "-";
+    };
+
+    // Close handlers
+    const closeModal = () => { transferModal.style.display = "none"; };
+    if (closeBtn) closeBtn.onclick = closeModal;
+    if (cancelBtn) cancelBtn.onclick = closeModal;
+    transferModal.onclick = (e) => { if (e.target === transferModal) closeModal(); };
+
+    // Form submit handler
+    formTransfer.onsubmit = async (e) => {
+      e.preventDefault();
+      const selectedClubName = selectClub.value;
+      const reason = document.getElementById("transfer-modal-reason").value.trim();
+
+      if (!selectedClubName) {
+        showCustomToast("Silakan pilih klub tujuan transfer terlebih dahulu!", "error");
+        return;
+      }
+
+      const targetReason = reason || (isBulk ? "Transfer masal oleh Admin POBSI" : "Transfer administratif oleh Admin POBSI");
+
+      let successCount = 0;
+      
+      if (isServerOnline) {
+        showCustomToast("Memproses transfer klub...", "info");
+        
+        for (const player of players) {
+          const payload = {
+            club: selectedClubName,
+            transferReason: targetReason
+          };
+          try {
+            const res = await fetch(`/api/players/${player.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+              successCount++;
+            }
+          } catch (err) {
+            console.error(`Gagal transfer player ${player.id}:`, err);
+          }
+        }
+        
+        if (successCount > 0) {
+          showCustomToast(`Berhasil mentransfer ${successCount} atlet ke klub "${selectedClubName}"!`, "success");
+          transferModal.style.display = "none";
+          await loadDataFromApi();
+          
+          // Refresh views
+          if (!isBulk) {
+            renderAthleteDetail(players[0].id);
+          } else {
+            if (typeof window.clearPlayerManagementSelection === 'function') {
+              window.clearPlayerManagementSelection();
+            }
+          }
+          renderWorkspacePreviews();
+        } else {
+          showCustomToast("Gagal memproses transfer klub di server.", "error");
+        }
+      } else {
+        // Offline mode
+        for (const player of players) {
+          player.club = selectedClubName;
+          const std = appData.standings.find(s => s.name === player.name);
+          if (std) {
+            std.club = selectedClubName;
+          }
+          successCount++;
+        }
+        
+        showCustomToast(`Mode Luring: ${successCount} atlet ditransfer ke "${selectedClubName}"`, "success");
+        transferModal.style.display = "none";
+        
+        if (!isBulk) {
+          renderAthleteDetail(players[0].id);
+        } else {
+          if (typeof window.clearPlayerManagementSelection === 'function') {
+            window.clearPlayerManagementSelection();
+          }
+        }
+        renderWorkspacePreviews();
+      }
+    };
+
+    // Open Modal
+    transferModal.style.display = "flex";
+  };
+
+  // Transfer club action (detail page button)
   const btnTransfer = document.getElementById("ad-fbtn-transfer");
   if (btnTransfer) {
     const newBtnTransfer = btnTransfer.cloneNode(true);
     btnTransfer.parentNode.replaceChild(newBtnTransfer, btnTransfer);
 
     newBtnTransfer.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
-      if (!player) return;
-
-      const transferModal = document.getElementById("ad-transfer-club-modal");
-      const closeBtn = document.getElementById("transfer-modal-close");
-      const cancelBtn = document.getElementById("transfer-modal-btn-cancel");
-      const selectClub = document.getElementById("transfer-modal-select-club");
-      const formTransfer = document.getElementById("form-admin-transfer-club");
-
-      if (!transferModal || !selectClub || !formTransfer) return;
-
-      // Set modal initial texts and fields
-      document.getElementById("transfer-modal-player-id").value = player.id;
-      document.getElementById("transfer-modal-player-name").textContent = player.name;
-      document.getElementById("transfer-modal-player-club").textContent = player.club || "Klub -";
-      document.getElementById("transfer-preview-current-club").textContent = player.club || "Klub -";
-      document.getElementById("transfer-preview-new-club").textContent = "-";
-      document.getElementById("transfer-modal-reason").value = "";
-
-      // Populate dropdown list with clubs (excluding current club if possible, or just listing all)
-      const clubs = appData.clubs || [];
-      const filteredClubs = clubs.filter(c => c.name !== player.club);
-
-      if (filteredClubs.length > 0) {
-        selectClub.innerHTML = '<option value="" disabled selected>-- Pilih Klub Tujuan --</option>' +
-          filteredClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
-      } else {
-        selectClub.innerHTML = '<option value="" disabled selected>-- Tidak Ada Klub Alternatif --</option>';
+      if (adActivePlayerId) {
+        window.openTransferClubModal([adActivePlayerId]);
       }
-
-      // Update preview target club name on change
-      selectClub.onchange = () => {
-        document.getElementById("transfer-preview-new-club").textContent = selectClub.value || "-";
-      };
-
-      // Close handlers
-      if (closeBtn) closeBtn.onclick = () => { transferModal.style.display = "none"; };
-      if (cancelBtn) cancelBtn.onclick = () => { transferModal.style.display = "none"; };
-      transferModal.onclick = (e) => { if (e.target === transferModal) transferModal.style.display = "none"; };
-
-      // Form submit handler
-      formTransfer.onsubmit = (e) => {
-        e.preventDefault();
-        const selectedClubName = selectClub.value;
-        const reason = document.getElementById("transfer-modal-reason").value.trim();
-
-        if (!selectedClubName) {
-          showCustomToast("Silakan pilih klub tujuan transfer terlebih dahulu!", "error");
-          return;
-        }
-
-        const payload = {
-          club: selectedClubName,
-          transferReason: reason || "Transfer administratif oleh Admin POBSI"
-        };
-
-        if (isServerOnline) {
-          fetch(`/api/players/${player.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          }).then(res => {
-            if (res.ok) {
-              showCustomToast(`Klub atlet ${player.name} berhasil ditransfer ke "${selectedClubName}"!`, "success");
-              transferModal.style.display = "none";
-              loadDataFromApi().then(() => {
-                renderAthleteDetail(player.id);
-                renderWorkspacePreviews();
-              });
-            } else {
-              showCustomToast("Gagal memproses transfer klub di server.", "error");
-            }
-          }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
-        } else {
-          player.club = selectedClubName;
-          showCustomToast(`Luring: Klub atlet ${player.name} diperbarui menjadi "${selectedClubName}"`, "success");
-          transferModal.style.display = "none";
-          renderAthleteDetail(player.id);
-          renderWorkspacePreviews();
-        }
-      };
-
-      // Open Modal
-      transferModal.style.display = "flex";
     });
   }
 
@@ -7916,7 +8135,7 @@ function setupAthleteDetailActions() {
     btnStatus.parentNode.replaceChild(newBtnStatus, btnStatus);
 
     newBtnStatus.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
+      const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
       if (!player) return;
       const newStatus = (player.status || "Aktif") === "Aktif" ? "Nonaktif" : "Aktif";
       
@@ -7960,7 +8179,7 @@ function setupAthleteDetailActions() {
     btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
 
     newBtnDelete.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
+      const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
       if (!player) return;
 
       showCustomConfirm(
@@ -7987,7 +8206,7 @@ function setupAthleteDetailActions() {
               showCustomToast(`Error: ${err.message}`, "error");
             }
           } else {
-            appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
+            appData.players = appData.players.filter(p => p.id.toString() !== String(adActivePlayerId));
             showCustomToast(`Luring: Atlet "${player.name}" dihapus dari memori browser.`, "success");
             updateWorkspaceStats();
             renderWorkspacePreviews();
@@ -8010,7 +8229,7 @@ let adActiveClubId = null;
 function renderClubDetail(clubId) {
   const club = appData.clubs.find(c => c.id.toString() === clubId.toString());
   if (!club) {
-    alert("Klub tidak ditemukan!");
+    showCustomToast("Klub tidak ditemukan!", "error");
     switchAdminPane("pane-clubs");
     return;
   }
@@ -9657,11 +9876,10 @@ function setupBocAdminListeners() {
 }
 
 
-// Calculate dynamic regional ranking for a player among all athletes by lifetime points descending
 function getPlayerRegionalRank(playerId) {
   if (!appData.players || appData.players.length === 0) return null;
   const sorted = [...appData.players].sort((a, b) => (b.points || 0) - (a.points || 0));
-  const index = sorted.findIndex(p => p.id === playerId);
+  const index = sorted.findIndex(p => p.id && playerId && p.id.toString() === playerId.toString());
   return index !== -1 ? index + 1 : null;
 }
 
@@ -20761,18 +20979,23 @@ function setupSystemSettings() {
         });
       }
 
-      // Add click to clear avatar feature
       elPreview.style.cursor = "pointer";
       elPreview.title = "Klik untuk menghapus foto avatar";
       elPreview.addEventListener("click", () => {
         if (currentRole === "staff") return; // Staff cannot edit/delete
         if (orgAvatarsState[item.key]) {
-          if (confirm(`Hapus foto avatar untuk ${item.key.replace("_", " ")}?`)) {
-            orgAvatarsState[item.key] = "";
-            updatePreview();
-            if (elFile) elFile.value = "";
-            showCustomToast("Foto avatar dihapus dari form", "info");
-          }
+          showCustomConfirm(
+            "Hapus Avatar",
+            `Hapus foto avatar untuk ${item.key.replace("_", " ")}?`,
+            () => {
+              orgAvatarsState[item.key] = "";
+              updatePreview();
+              if (elFile) elFile.value = "";
+              showCustomToast("Foto avatar dihapus dari form", "info");
+            },
+            "Hapus",
+            "danger"
+          );
         }
       });
     }

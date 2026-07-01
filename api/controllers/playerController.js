@@ -169,6 +169,17 @@ exports.updatePlayer = async (req, res) => {
       ]
     );
 
+    // Hapus media lama jika diganti (replace rules untuk menghemat storage)
+    if (player.avatar && updated.avatar !== player.avatar) {
+      await deleteMedia(player.avatar).catch(err => console.error("Gagal menghapus avatar lama di SQLite:", err));
+    }
+    if (player.cover && updated.cover !== player.cover) {
+      await deleteMedia(player.cover).catch(err => console.error("Gagal menghapus cover lama di SQLite:", err));
+    }
+    if (player.ktp && updated.ktp !== player.ktp) {
+      await deleteMedia(player.ktp).catch(err => console.error("Gagal menghapus KTP lama di SQLite:", err));
+    }
+
     // Catat di handicap_history jika handicap berubah
     const isHandicapChanged = handicap !== undefined && handicap.toString().trim() !== player.handicap;
     if (isHandicapChanged) {

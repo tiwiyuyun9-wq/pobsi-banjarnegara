@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=23">
+  <link rel="stylesheet" href="css/index.css?v=24">
   
   <!-- Flatpickr for premium Date Picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -2311,9 +2311,6 @@
                   <button class="pm-btn pm-btn-primary" id="btn-open-add-player-modal" style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
                     <i class="fa-solid fa-plus"></i> Tambah Atlet
                   </button>
-                  <button class="pm-btn pm-btn-outline" id="btn-export-players" style="display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-file-export"></i> Export Data
-                  </button>
                 </div>
               </div>
 
@@ -2443,10 +2440,9 @@
               <div class="pm-bulk-bar" id="pm-bulk-bar" style="display:none;">
                 <span class="pm-bulk-count"><span id="pm-selected-count">0</span> atlet dipilih</span>
                 <div class="pm-bulk-actions">
-                  <button class="pm-bulk-btn blue"><i class="fa-solid fa-building"></i> Assign Klub</button>
-                  <button class="pm-bulk-btn teal"><i class="fa-solid fa-file-export"></i> Export</button>
-                  <button class="pm-bulk-btn amber"><i class="fa-solid fa-ban"></i> Nonaktifkan</button>
-                  <button class="pm-bulk-btn red"><i class="fa-solid fa-trash-can"></i> Hapus</button>
+                  <button class="pm-bulk-btn purple" id="pm-bulk-transfer-club"><i class="fa-solid fa-exchange-alt"></i> Transfer Klub</button>
+                  <button class="pm-bulk-btn amber" id="pm-bulk-toggle-status"><i class="fa-solid fa-ban"></i> Nonaktifkan</button>
+                  <button class="pm-bulk-btn red" id="pm-bulk-delete"><i class="fa-solid fa-trash-can"></i> Hapus</button>
                 </div>
               </div>
             </div>
@@ -2459,14 +2455,15 @@
               </div>
               <div class="pm-sidebar-content" id="pm-sidebar-content" style="display:none;">
                 <!-- Profile Card -->
-                <div class="pm-profile-card">
-                  <div class="pm-profile-avatar-wrap">
+                <div class="pm-profile-card" style="position: relative; overflow: hidden; border-radius: var(--radius-md); padding-top: 40px;">
+                  <div id="pm-detail-cover" style="position: absolute; top: 0; left: 0; right: 0; height: 75px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); background-size: cover; background-position: center; z-index: 1;"></div>
+                  <div class="pm-profile-avatar-wrap" style="position: relative; z-index: 2; margin: 0 auto 14px;">
                     <img class="pm-profile-avatar" id="pm-detail-avatar" src="" alt="Avatar">
                   </div>
-                  <h3 class="pm-profile-name" id="pm-detail-name"></h3>
-                  <span class="pm-profile-id" id="pm-detail-id"></span>
-                  <span class="pm-profile-club" id="pm-detail-club"><i class="fa-solid fa-building"></i> <span></span></span>
-                  <div class="pm-profile-tags">
+                  <h3 class="pm-profile-name" id="pm-detail-name" style="position: relative; z-index: 2;"></h3>
+                  <span class="pm-profile-id" id="pm-detail-id" style="position: relative; z-index: 2;"></span>
+                  <span class="pm-profile-club" id="pm-detail-club" style="position: relative; z-index: 2;"><i class="fa-solid fa-building"></i> <span></span></span>
+                  <div class="pm-profile-tags" style="position: relative; z-index: 2; margin-top: 8px;">
                     <span class="pm-tag green" id="pm-detail-status-tag"></span>
                     <span class="pm-tag blue" id="pm-detail-hc-tag"></span>
                   </div>
@@ -2789,7 +2786,7 @@
               <div class="ad-card ad-widget-card">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-user-group text-green"></i> PERFORMA TERAKHIR</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan semua riwayat pertandingan...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan semua riwayat pertandingan...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body">
                   <div class="ad-match-list" id="ad-match-list">
@@ -2802,7 +2799,7 @@
               <div class="ad-card ad-widget-card">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-medal text-gold"></i> RIWAYAT TURNAMEN</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan semua riwayat event...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan semua riwayat event...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body">
                   <div class="ad-tourney-list" id="ad-tourney-list">
@@ -2818,7 +2815,7 @@
               <div class="ad-card ad-widget-card ad-span-2">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-clock-rotate-left text-purple"></i> RIWAYAT HANDICAP</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan riwayat lengkap perubahan handicap...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan riwayat lengkap perubahan handicap...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body ad-table-wrapper">
                   <table class="ad-table">
