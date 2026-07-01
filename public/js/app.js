@@ -6746,8 +6746,22 @@ async function renderAthleteDetail(playerId) {
   const simulatedDOB = player.age ? `${18 + (player.age % 12)} Mei ${2026 - player.age}` : "12 Mei 1998";
   document.getElementById("ad-val-dob").textContent = simulatedDOB;
   
-  const simulatedJoin = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Januari 2026` : "12 Januari 2026";
-  document.getElementById("ad-val-join").textContent = simulatedJoin;
+  let joinDateStr = "";
+  const isPreSeeded = player.id && parseInt(player.id.replace("P", ""), 10) <= 28;
+  if (isPreSeeded) {
+    const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
+    joinDateStr = `${day} Januari 2026`;
+  } else if (player.created_at) {
+    const parsed = new Date(player.created_at);
+    if (!isNaN(parsed.getTime())) {
+      joinDateStr = parsed.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    } else {
+      joinDateStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    }
+  } else {
+    joinDateStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  }
+  document.getElementById("ad-val-join").textContent = joinDateStr;
 
   // Additional details
   document.getElementById("ad-val-age").textContent = (player.age || 24) + " Tahun";
@@ -7201,10 +7215,32 @@ function renderADTimeline(player, hcHistory, tourneys, matches) {
   }
 
   // 3. Add registration log at the very beginning (earliest date)
-  const joinDateStr = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Jan 2026` : "12 Jan 2026";
+  let regDateObj = null;
+  let regDateStr = "";
+  const isPreSeeded = player.id && parseInt(player.id.replace("P", ""), 10) <= 28;
+  if (isPreSeeded) {
+    const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
+    regDateObj = new Date(2026, 0, day, 9, 0);
+    regDateStr = `${day} Jan 2026`;
+  } else if (player.created_at) {
+    const parsed = new Date(player.created_at);
+    if (!isNaN(parsed.getTime())) {
+      regDateObj = parsed;
+      regDateStr = parsed.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    } else {
+      regDateObj = new Date();
+      regDateObj.setHours(9, 0, 0, 0);
+      regDateStr = regDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    }
+  } else {
+    regDateObj = new Date();
+    regDateObj.setHours(9, 0, 0, 0);
+    regDateStr = regDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  }
+
   logs.push({
-    dateObj: new Date(2026, 0, (parseInt(player.id.replace("P", "")) % 28) + 1),
-    time: `${joinDateStr} &bull; 09:00 WIB`,
+    dateObj: regDateObj,
+    time: `${regDateStr} &bull; 09:00 WIB`,
     title: "Atlet didaftarkan dalam sistem",
     desc: "Berkas dan profil terverifikasi oleh Admin Utama",
     cls: "green"
@@ -7216,9 +7252,11 @@ function renderADTimeline(player, hcHistory, tourneys, matches) {
   // Fallback to default mock if no data (e.g. newly created player without handicap history yet, except registration)
   if (logs.length <= 1 && (!hcHistory || hcHistory.length === 0) && (!tourneys || tourneys.length === 0) && (!matches || matches.length === 0)) {
     // If only registration is present, we can add a basic initialization change log to avoid an empty-looking timeline
+    const fallbackDateObj = new Date(regDateObj.getTime() + 60 * 60 * 1000); // 1 hour later
+    const fallbackDateStr = fallbackDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
     logs.unshift({
-      dateObj: new Date(2026, 0, (parseInt(player.id.replace("P", "")) % 28) + 1, 10, 0),
-      time: `${joinDateStr} &bull; 10:00 WIB`,
+      dateObj: fallbackDateObj,
+      time: `${fallbackDateStr} &bull; 10:00 WIB`,
       title: `Handicap awal ditetapkan ke HC ${player.handicap}`,
       desc: "Status handicap inisial diatur secara administratif saat registrasi",
       cls: "blue"

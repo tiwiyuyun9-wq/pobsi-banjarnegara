@@ -61,11 +61,12 @@ exports.addPlayer = async (req, res) => {
       phone: phone && phone.trim() ? phone.trim() : "0812-XXXX-XXXX",
       address: address && address.trim() ? address.trim() : "Kabupaten Banjarnegara",
       cover: coverUrl,
-      ktp: ktpUrl
+      ktp: ktpUrl,
+      created_at: new Date().toISOString()
     };
 
     await dbRun(
-      `INSERT INTO players (id, name, club, handicap, status, points, avatar, gender, age, phone, address, cover, ktp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO players (id, name, club, handicap, status, points, avatar, gender, age, phone, address, cover, ktp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newPlayer.id,
         newPlayer.name,
@@ -79,7 +80,8 @@ exports.addPlayer = async (req, res) => {
         newPlayer.phone,
         newPlayer.address,
         newPlayer.cover,
-        newPlayer.ktp
+        newPlayer.ktp,
+        newPlayer.created_at
       ]
     );
 
