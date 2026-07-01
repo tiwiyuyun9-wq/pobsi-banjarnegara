@@ -4623,6 +4623,20 @@ function setupPlayerManagement() {
     if (pmSelectedIds.size > 0) {
       pmBulkBar.style.display = "flex";
       pmSelectedCount.textContent = pmSelectedIds.size;
+
+      // Update bulk toggle status button dynamically
+      const btnBulkToggleStatus = document.getElementById('pm-bulk-toggle-status');
+      if (btnBulkToggleStatus) {
+        const selectedPlayers = appData.players.filter(p => pmSelectedIds.has(p.id.toString()));
+        const allNonactive = selectedPlayers.length > 0 && selectedPlayers.every(p => p.status === 'Nonaktif');
+        if (allNonactive) {
+          btnBulkToggleStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> Aktifkan`;
+          btnBulkToggleStatus.className = "pm-bulk-btn green";
+        } else {
+          btnBulkToggleStatus.innerHTML = `<i class="fa-solid fa-ban"></i> Nonaktifkan`;
+          btnBulkToggleStatus.className = "pm-bulk-btn amber";
+        }
+      }
     } else {
       pmBulkBar.style.display = "none";
     }
@@ -4995,23 +5009,26 @@ function setupPlayerManagement() {
       const ids = Array.from(pmSelectedIds);
       if (ids.length === 0) return;
 
+      const selectedPlayers = appData.players.filter(p => ids.includes(p.id.toString()));
+      const allNonactive = selectedPlayers.length > 0 && selectedPlayers.every(p => p.status === 'Nonaktif');
+      const targetStatus = allNonactive ? 'Aktif' : 'Nonaktif';
+
       let successCount = 0;
       for (const id of ids) {
         const player = appData.players.find(p => p.id.toString() === id.toString());
         if (!player) continue;
-        const newStatus = (player.status || 'Aktif') === 'Aktif' ? 'Nonaktif' : 'Aktif';
 
         if (isServerOnline) {
           try {
             const res = await fetch(`/api/players/${id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: newStatus })
+              body: JSON.stringify({ status: targetStatus })
             });
             if (res.ok) successCount++;
           } catch (e) {}
         } else {
-          player.status = newStatus;
+          player.status = targetStatus;
           successCount++;
         }
       }
@@ -5020,7 +5037,7 @@ function setupPlayerManagement() {
         await loadDataFromApi();
       }
 
-      alert(`Status ${successCount} atlet berhasil diperbarui!`);
+      alert(`Status ${successCount} atlet berhasil diubah menjadi ${targetStatus}!`);
       pmSelectedIds.clear();
       updateBulkBar();
       updateCheckAllState();
