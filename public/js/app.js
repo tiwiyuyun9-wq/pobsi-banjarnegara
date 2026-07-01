@@ -4877,25 +4877,6 @@ function setupPlayerManagement() {
     btnPlayerCancel.onclick = () => { modalOverlay.style.display = "none"; };
   }
 
-  // Export button placeholder
-  const btnExport = document.getElementById("btn-export-players");
-  if (btnExport) {
-    btnExport.addEventListener("click", () => {
-      // Simple CSV export
-      const headers = ["ID", "Nama", "Klub", "Handicap", "Status", "Gender", "Umur", "No HP", "Alamat"];
-      const rows = appData.players.map(p => [
-        p.id, p.name, p.club, p.handicap, p.status || "Aktif", p.gender || "-", p.age || "-", p.phone || "-", p.address || "-"
-      ]);
-      const csv = [headers.join(","), ...rows.map(r => r.map(v => `"${v}"`).join(","))].join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "data_atlet_pobsi.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
 
   // Bind sidebar expansion buttons
   const btnViewFull = document.getElementById("pm-btn-view-full");
