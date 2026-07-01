@@ -2455,14 +2455,15 @@
               </div>
               <div class="pm-sidebar-content" id="pm-sidebar-content" style="display:none;">
                 <!-- Profile Card -->
-                <div class="pm-profile-card">
-                  <div class="pm-profile-avatar-wrap">
+                <div class="pm-profile-card" style="position: relative; overflow: hidden; border-radius: var(--radius-md); padding-top: 40px;">
+                  <div id="pm-detail-cover" style="position: absolute; top: 0; left: 0; right: 0; height: 75px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); background-size: cover; background-position: center; z-index: 1;"></div>
+                  <div class="pm-profile-avatar-wrap" style="position: relative; z-index: 2; margin: 0 auto 14px;">
                     <img class="pm-profile-avatar" id="pm-detail-avatar" src="" alt="Avatar">
                   </div>
-                  <h3 class="pm-profile-name" id="pm-detail-name"></h3>
-                  <span class="pm-profile-id" id="pm-detail-id"></span>
-                  <span class="pm-profile-club" id="pm-detail-club"><i class="fa-solid fa-building"></i> <span></span></span>
-                  <div class="pm-profile-tags">
+                  <h3 class="pm-profile-name" id="pm-detail-name" style="position: relative; z-index: 2;"></h3>
+                  <span class="pm-profile-id" id="pm-detail-id" style="position: relative; z-index: 2;"></span>
+                  <span class="pm-profile-club" id="pm-detail-club" style="position: relative; z-index: 2;"><i class="fa-solid fa-building"></i> <span></span></span>
+                  <div class="pm-profile-tags" style="position: relative; z-index: 2; margin-top: 8px;">
                     <span class="pm-tag green" id="pm-detail-status-tag"></span>
                     <span class="pm-tag blue" id="pm-detail-hc-tag"></span>
                   </div>

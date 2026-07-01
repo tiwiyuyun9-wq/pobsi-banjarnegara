@@ -4656,6 +4656,14 @@ function setupPlayerManagement() {
 
     // Profile card
     document.getElementById("pm-detail-avatar").src = player.avatar;
+    const coverEl = document.getElementById("pm-detail-cover");
+    if (coverEl) {
+      if (player.cover) {
+        coverEl.style.backgroundImage = `url(${player.cover})`;
+      } else {
+        coverEl.style.backgroundImage = 'linear-gradient(135deg, #1e3a8a, #3b82f6)';
+      }
+    }
     document.getElementById("pm-detail-name").textContent = player.name;
     document.getElementById("pm-detail-id").textContent = player.id || "-";
     document.getElementById("pm-detail-club").querySelector("span").textContent = player.club;
