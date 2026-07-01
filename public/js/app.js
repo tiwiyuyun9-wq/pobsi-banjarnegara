@@ -4393,19 +4393,9 @@ function setupPlayerManagement() {
     return result;
   }
 
-  // Get ranking for a player
+  // Get ranking for a player dynamically among all athletes based on points descending
   function getPlayerRanking(playerId) {
-    const standing = appData.standings.find(s =>
-      appData.players.find(p => p.id === playerId && p.name === s.name)
-    );
-    if (standing) return standing.rank;
-    // Fallback: find by name
-    const player = appData.players.find(p => p.id === playerId);
-    if (player) {
-      const s = appData.standings.find(st => st.name === player.name);
-      if (s) return s.rank;
-    }
-    return null;
+    return getPlayerRegionalRank(playerId);
   }
 
   // Get standing data for a player
@@ -6451,18 +6441,21 @@ window.selectClubRow = function(clubId, element) {
       listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.82rem;">Belum ada atlet terafiliasi</div>`;
       return;
     }
-    listContainer.innerHTML = playersInClub.map(p => `
-      <div class="pm-tournament-item" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.02); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="${p.avatar}" alt="${p.name}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 0.82rem; font-weight: 700; color: #fff;">${p.name}</span>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">Ranking #${p.standing_rank || '-'}</span>
+    listContainer.innerHTML = playersInClub.map(p => {
+      const ranking = getPlayerRegionalRank(p.id);
+      return `
+        <div class="pm-tournament-item" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.02); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${p.avatar}" alt="${p.name}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #fff;">${p.name}</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Ranking #${ranking || '-'}</span>
+            </div>
           </div>
+          <span class="pm-hc-badge" style="font-size: 0.65rem; padding: 2px 6px;">HC ${p.handicap}</span>
         </div>
-        <span class="pm-hc-badge" style="font-size: 0.65rem; padding: 2px 6px;">HC ${p.handicap}</span>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 };
 
@@ -6715,10 +6708,9 @@ async function renderAthleteDetail(playerId) {
   const badgeHCEl = document.getElementById("ad-tag-handicap");
   if (badgeHCEl) badgeHCEl.textContent = `Handicap ${player.handicap}`;
 
-  // Get ranking
-  let rankVal = null;
+  // Get ranking dynamically among all athletes based on points descending
   const standing = appData.standings.find(s => s.name === player.name);
-  if (standing) rankVal = standing.rank;
+  const rankVal = getPlayerRegionalRank(player.id);
   const badgeRankEl = document.getElementById("ad-tag-ranking");
   if (badgeRankEl) {
     badgeRankEl.textContent = rankVal ? `Ranking #${rankVal}` : "Ranking -";
@@ -6901,7 +6893,17 @@ function drawTrendWinRateChart(standing) {
   const container = document.getElementById("ad-trend-chart-container");
   if (!container) return;
 
-  const wrBase = standing && standing.played > 0 ? Math.round((standing.won / standing.played) * 100) : 60;
+  if (!standing || !standing.played || standing.played === 0) {
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: var(--text-dim); font-size: 0.85rem; text-align: center; gap: 10px; padding: 20px;">
+        <i class="fa-solid fa-chart-line" style="font-size: 2rem; opacity: 0.25; color: var(--text-dim);"></i>
+        <span>Belum ada data pertandingan untuk menampilkan tren win rate.</span>
+      </div>
+    `;
+    return;
+  }
+
+  const wrBase = Math.round((standing.won / standing.played) * 100);
   // Generate slightly fluctuating win rate progression ending at the actual win rate
   const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"];
   const rates = [
@@ -6962,31 +6964,28 @@ function drawPerkembanganRankingChart(currentRank, dbRankHistory) {
   const container = document.getElementById("ad-ranking-chart-container");
   if (!container) return;
 
+  if (!dbRankHistory || dbRankHistory.length === 0) {
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: var(--text-dim); font-size: 0.85rem; text-align: center; gap: 10px; padding: 20px;">
+        <i class="fa-solid fa-ranking-star" style="font-size: 2rem; opacity: 0.25; color: var(--text-dim);"></i>
+        <span>Belum ada riwayat peringkat untuk menampilkan grafik perkembangan.</span>
+      </div>
+    `;
+    return;
+  }
+
   const rBase = currentRank || 15;
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
   let months, ranks;
 
-  if (dbRankHistory && dbRankHistory.length > 0) {
-    // Use real database data
-    months = dbRankHistory.map(r => {
-      const parts = r.date.split('-');
-      const monthIdx = parseInt(parts[1], 10) - 1;
-      return monthNames[monthIdx] || r.date;
-    });
-    ranks = dbRankHistory.map(r => r.rank);
-  } else {
-    // Fallback: simulated ranks from 12 months ago to now
-    months = ["Jul", "Sep", "Nov", "Jan", "Mar", "Mei"];
-    ranks = [
-      Math.min(24, rBase + 12),
-      Math.min(20, rBase + 8),
-      Math.min(16, rBase + 5),
-      Math.min(10, rBase + 3),
-      Math.min(7, rBase + 1),
-      rBase
-    ];
-  }
+  // Use real database data
+  months = dbRankHistory.map(r => {
+    const parts = r.date.split('-');
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    return monthNames[monthIdx] || r.date;
+  });
+  ranks = dbRankHistory.map(r => r.rank);
 
   const numPoints = ranks.length;
   const chartWidth = 410;
@@ -9658,9 +9657,13 @@ function setupBocAdminListeners() {
 }
 
 
-/* ==========================================================================
-   PUBLIC ATHLETE PROFILE PAGE (ATP/F1/Chess.com Inspired)
-   ========================================================================== */
+// Calculate dynamic regional ranking for a player among all athletes by lifetime points descending
+function getPlayerRegionalRank(playerId) {
+  if (!appData.players || appData.players.length === 0) return null;
+  const sorted = [...appData.players].sort((a, b) => (b.points || 0) - (a.points || 0));
+  const index = sorted.findIndex(p => p.id === playerId);
+  return index !== -1 ? index + 1 : null;
+}
 
 // Generate URL-safe slug from athlete name
 function generateSlug(name) {

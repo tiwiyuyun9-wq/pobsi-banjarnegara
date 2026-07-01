@@ -2649,11 +2649,14 @@
 
               <!-- Right Cards: 4 KPI Cards Grid -->
               <div class="ad-kpi-grid">
-                <div class="ad-kpi-card">
+                <div class="ad-kpi-card" style="position: relative;">
+                  <button class="ad-kpi-info-btn" onclick="document.getElementById('ad-ranking-info-modal').style.display='flex'" title="Info Ranking Regional" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; padding: 4px; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#fff';" onmouseout="this.style.opacity='0.6'; this.style.color='var(--text-muted)';">
+                    <i class="fa-solid fa-circle-info"></i>
+                  </button>
                   <div class="ad-kpi-icon gold"><i class="fa-solid fa-trophy"></i></div>
                   <div class="ad-kpi-content">
                     <span class="ad-kpi-value" id="ad-kpi-rank">#3</span>
-                    <span class="ad-kpi-label">Ranking Nasional</span>
+                    <span class="ad-kpi-label">Ranking Regional (Banjarnegara)</span>
                   </div>
                 </div>
                 <div class="ad-kpi-card" style="position: relative; flex-direction: column; align-items: flex-start; gap: 8px;">
@@ -3187,6 +3190,39 @@
                 <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff;">Proses Transfer</button>
               </div>
             </form>
+          </div>
+        </div>
+        
+        <!-- Regional Ranking Explanation Modal Overlay -->
+        <div class="pm-modal-overlay" id="ad-ranking-info-modal" style="display: none; justify-content: center; align-items: center; z-index: 10000; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);">
+          <div class="pm-modal" style="width: 500px; max-width: 90%; background: var(--bg-primary); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div class="pm-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 12px; margin-bottom: 16px;">
+              <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i class="fa-solid fa-circle-info text-gold" style="color: #ffd700;"></i> Informasi Ranking Regional
+              </h3>
+              <button class="pm-modal-close" onclick="document.getElementById('ad-ranking-info-modal').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; transition: color 0.2s;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="pm-modal-body" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
+              <p>Sistem <strong>Ranking Regional (Banjarnegara)</strong> dihitung secara otomatis dan dinamis berdasarkan ketentuan berikut:</p>
+              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">1.</span>
+                  <span><strong>Total Poin Akumulatif:</strong> Seluruh atlet diurutkan berdasarkan total poin berjalan (lifetime points) dari yang terbesar hingga terkecil.</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">2.</span>
+                  <span><strong>Perhitungan Dinamis:</strong> Setiap kali handicap diupdate, poin bertambah, atau ada atlet baru terdaftar, ranking akan langsung terupdate secara real-time di seluruh sistem (profil, tabel admin, dan klub).</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">3.</span>
+                  <span><strong>Tiebreaker:</strong> Apabila terdapat poin yang sama, urutan ditentukan berdasarkan ID pendaftaran atlet.</span>
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; font-style: italic; margin-top: 4px;">Peringkat ini mencerminkan prestasi atlet secara menyeluruh di Kabupaten Banjarnegara.</p>
+            </div>
+            <div class="pm-modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 16px; margin-top: 16px; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('ad-ranking-info-modal').style.display='none'" style="padding: 8px 20px; font-size: 0.85rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff; cursor: pointer; font-weight: 600;">Mengerti</button>
+            </div>
           </div>
         </div>
 

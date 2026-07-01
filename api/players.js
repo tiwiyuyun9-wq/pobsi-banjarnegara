@@ -1,5 +1,5 @@
 const { supabase, logActivity } = require('./_supabase');
-const { uploadMedia } = require('./_media-upload');
+const { uploadMedia, deleteMedia } = require('./_media-upload');
 
 module.exports = async (req, res) => {
   // CORS Headers
@@ -225,7 +225,7 @@ module.exports = async (req, res) => {
       // Cek apakah atlet ada
       const { data: player, error: checkErr } = await supabase
         .from('players')
-        .select('name')
+        .select('name, avatar, cover, ktp')
         .eq('id', id)
         .maybeSingle();
 
@@ -245,6 +245,17 @@ module.exports = async (req, res) => {
         .eq('id', id);
 
       if (deleteErr) throw deleteErr;
+
+      // Cascading delete profile photo, cover, and KTP files from storage
+      if (player.avatar) {
+        await deleteMedia(player.avatar).catch(err => console.error("Gagal menghapus avatar atlet:", err));
+      }
+      if (player.cover) {
+        await deleteMedia(player.cover).catch(err => console.error("Gagal menghapus cover atlet:", err));
+      }
+      if (player.ktp) {
+        await deleteMedia(player.ktp).catch(err => console.error("Gagal menghapus KTP atlet:", err));
+      }
 
       await logActivity("Atlet dihapus", `Atlet ${player.name} telah dihapus dari database`, "danger", "fa-user-minus");
 
