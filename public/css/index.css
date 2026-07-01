@@ -13830,3 +13830,109 @@ body.admin-mode-active .mobile-sheet-overlay {
   display: none !important;
 }
 
+/* Club details responsive design & mobile optimization */
+.club-detail-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  margin-top: 10px;
+}
+
+.club-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.club-detail-roster-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.club-detail-header-content {
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  width: calc(100% - 48px);
+}
+
+@media (max-width: 768px) {
+  .club-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .club-detail-roster-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  
+  .club-detail-roster-header .search-container {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .pub-club-detail-banner-container {
+    height: auto !important;
+    min-height: 220px;
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  
+  .club-detail-header-content {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    padding: 16px 20px 0 20px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+  
+  .club-detail-header-content > div:last-child {
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .club-detail-header-content h2 {
+    justify-content: center !important;
+    font-size: 1.25rem !important;
+  }
+
+  .club-detail-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .club-detail-stats {
+    gap: 6px !important;
+  }
+  .club-detail-stats > div {
+    padding: 8px 4px !important;
+  }
+  .club-detail-stats span:first-of-type {
+    font-size: 1.4rem !important;
+  }
+  .club-detail-stats span:last-of-type {
+    font-size: 0.6rem !important;
+  }
+}
+
+

@@ -5313,11 +5313,13 @@ window.renderPubClubRoster = function(clubId, filterText = '') {
 
   rosterTbody.innerHTML = filtered.map(p => `
     <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-      <td style="padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
-        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
-          ${p.avatar ? `<img src="${p.avatar}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-user" style="font-size: 0.8rem; color: var(--text-dim);"></i>`}
+      <td style="padding: 12px 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+            ${p.avatar ? `<img src="${p.avatar}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid fa-user" style="font-size: 0.8rem; color: var(--text-dim);"></i>`}
+          </div>
+          <span style="font-weight: 600; color: #fff;">${p.name}</span>
         </div>
-        <span style="font-weight: 600; color: #fff;">${p.name}</span>
       </td>
       <td style="padding: 12px 16px; text-align: center; color: var(--text-muted);">${p.gender || '-'}</td>
       <td style="padding: 12px 16px; text-align: center;"><span class="pm-hc-badge" style="font-size: 0.72rem; padding: 2px 8px; font-weight: 800;">HC ${p.handicap}</span></td>
