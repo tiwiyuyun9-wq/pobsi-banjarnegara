@@ -4552,12 +4552,9 @@ function setupPlayerManagement() {
     pmTableBody.querySelectorAll(".pm-edit-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        window.history.pushState({}, "", `/admin/athletes/${btn.dataset.id}`);
-        checkAdminRoute();
-        setTimeout(() => {
-          const adEditBtn = document.getElementById("ad-btn-edit-top");
-          if (adEditBtn) adEditBtn.click();
-        }, 120);
+        if (typeof window.openEditPlayerDrawer === "function") {
+          window.openEditPlayerDrawer(btn.dataset.id);
+        }
       });
     });
 
@@ -5041,12 +5038,13 @@ function setupPlayerManagement() {
   updatePMStats();
   renderPMTable();
 
-  // Expose for re-render after adding a new player
+  // Expose for re-render after adding/updating players
   window.refreshPlayerManagement = function() {
     populatePMClubFilter();
     updatePMStats();
     renderPMTable();
   };
+  window.openPlayerDetail = openPlayerDetail;
 }
 
 // F. Interactive Billiard Balls Physics Simulator in Hero Section (WOW Factor)
@@ -7555,6 +7553,11 @@ function setupAthleteDetailActions() {
   if (btnEditTop) btnEditTop.addEventListener("click", openEditDrawer);
   if (btnEditFooter) btnEditFooter.addEventListener("click", openEditDrawer);
 
+  window.openEditPlayerDrawer = function(playerId) {
+    adActivePlayerId = playerId;
+    openEditDrawer();
+  };
+
   if (editClose) {
     editClose.addEventListener("click", () => {
       editDrawer.style.display = "none";
@@ -7709,6 +7712,8 @@ function setupAthleteDetailActions() {
             updateWorkspaceStats();
             renderWorkspacePreviews();
             renderAthleteDetail(id);
+            if (typeof window.refreshPlayerManagement === 'function') window.refreshPlayerManagement();
+            if (typeof window.openPlayerDetail === 'function') window.openPlayerDetail(id);
           } else {
             const errJson = await res.json();
             showCustomToast(`Gagal: ${errJson.error || 'Server error'}`, "error");
@@ -7735,6 +7740,8 @@ function setupAthleteDetailActions() {
           updateWorkspaceStats();
           renderWorkspacePreviews();
           renderAthleteDetail(id);
+          if (typeof window.refreshPlayerManagement === 'function') window.refreshPlayerManagement();
+          if (typeof window.openPlayerDetail === 'function') window.openPlayerDetail(id);
         }
       }
     });
