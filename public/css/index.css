@@ -7477,6 +7477,29 @@ tr:hover td.sticky-col {
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
 }
 
+.ad-fbtn-blue {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+.ad-fbtn-blue:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.ad-fbtn-purple {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+.ad-fbtn-purple:hover {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+
 /* Centered Premium Modal Overlay & Box (Upgraded from sliding drawer) */
 .ad-drawer-overlay {
   position: fixed;
