@@ -5240,6 +5240,40 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Admin mobile responsive layout controls
+  const adminMobileToggle = document.getElementById('btn-admin-mobile-toggle');
+  const adminSidebar = document.querySelector('.admin-sidebar');
+  const adminSidebarOverlay = document.getElementById('admin-sidebar-overlay');
+  const adminMobileLogout = document.getElementById('btn-admin-mobile-logout');
+  const adminDesktopLogout = document.getElementById('btn-admin-logout');
+
+  if (adminMobileToggle && adminSidebar && adminSidebarOverlay) {
+    const toggleSidebar = () => {
+      adminSidebar.classList.toggle('active');
+      adminSidebarOverlay.classList.toggle('active');
+    };
+
+    const closeSidebar = () => {
+      adminSidebar.classList.remove('active');
+      adminSidebarOverlay.classList.remove('active');
+    };
+
+    adminMobileToggle.addEventListener('click', toggleSidebar);
+    adminSidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Auto close drawer when selecting menu items on mobile
+    const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+  }
+
+  if (adminMobileLogout && adminDesktopLogout) {
+    adminMobileLogout.addEventListener('click', () => {
+      adminDesktopLogout.click();
+    });
+  }
 });
 
 function setupClubSearch() {

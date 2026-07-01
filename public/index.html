@@ -1839,6 +1839,23 @@
        ADMIN CONTROL CENTER WORKSPACE (FULLSCREEN COMMAND CENTER)
        ============================================== -->
   <div id="admin-workspace-screen" class="admin-workspace-layout" style="display: none;">
+    <!-- Mobile Top Header Bar -->
+    <div class="admin-mobile-header">
+      <button class="mobile-menu-toggle" id="btn-admin-mobile-toggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="mobile-header-brand">
+        <img src="images/pobsi-logo.png" alt="Logo POBSI" class="mobile-logo-img">
+        <span class="mobile-brand-title">POBSI Command Center</span>
+      </div>
+      <button class="mobile-logout-btn" id="btn-admin-mobile-logout" title="Keluar Aman">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar overlay for closing on click -->
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay"></div>
+
     <!-- Left Sidebar Control Navigation -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
@@ -2281,7 +2298,7 @@
         
         <!-- PANE 2: ATLET / PLAYERS — Player Management Console -->
         <div class="workspace-pane" id="pane-players">
-          <div style="display: grid; grid-template-columns: 1fr 360px; gap: 24px;">
+          <div class="admin-split-layout">
             <!-- LEFT: Main Content Area -->
             <div>
               <!-- Page Header (SSOT: overview-header-block-premium) -->
@@ -4934,7 +4951,7 @@
 
         <!-- PANE 5: KELOLA KLUB — Club Management Console -->
         <div class="workspace-pane" id="pane-clubs">
-          <div style="display: grid; grid-template-columns: 1fr 360px; gap: 24px;">
+          <div class="admin-split-layout">
             <!-- LEFT: Main Content Area -->
             <div>
               <!-- Page Header (SSOT: overview-header-block-premium) -->
@@ -5410,7 +5427,7 @@
             </div>
 
             <!-- Row: Roster & Handicap Distribution Widget -->
-            <div class="ad-widgets-row" style="grid-template-columns: 1.4fr 0.8fr; gap: 24px;">
+            <div class="ad-widgets-row-split">
               <!-- Widget: Roster Atlet Table -->
               <div class="ad-card ad-widget-card" style="min-height: auto; width: 100%;">
                 <div class="ad-widget-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px;">
