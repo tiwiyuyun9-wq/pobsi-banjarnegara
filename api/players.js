@@ -183,6 +183,17 @@ module.exports = async (req, res) => {
 
       if (updateErr) throw updateErr;
 
+      // Hapus media lama jika diganti (replace rules untuk menghemat storage)
+      if (player.avatar && updated.avatar !== player.avatar) {
+        await deleteMedia(player.avatar).catch(err => console.error("Gagal menghapus avatar lama di Supabase:", err));
+      }
+      if (player.cover && updated.cover !== player.cover) {
+        await deleteMedia(player.cover).catch(err => console.error("Gagal menghapus cover lama di Supabase:", err));
+      }
+      if (player.ktp && updated.ktp !== player.ktp) {
+        await deleteMedia(player.ktp).catch(err => console.error("Gagal menghapus KTP lama di Supabase:", err));
+      }
+
       // Catat di handicap_history jika handicap berubah
       const isHandicapChanged = handicap !== undefined && handicap.toString().trim() !== player.handicap;
       if (isHandicapChanged) {
