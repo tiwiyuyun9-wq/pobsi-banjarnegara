@@ -4668,17 +4668,18 @@ function setupPlayerManagement() {
     const hcTag = document.getElementById("pm-detail-hc-tag");
     hcTag.textContent = `Handicap ${player.handicap}`;
 
-    // Quick stats from standings
+    // Quick stats from standings and dynamic regional ranking
     const standing = getPlayerStanding(player.name);
-    document.getElementById("pm-detail-ranking").textContent = standing ? `#${standing.rank}` : "-";
-    document.getElementById("pm-detail-matches").textContent = standing ? standing.played : "-";
+    const regionalRank = getPlayerRegionalRank(player.id);
+    document.getElementById("pm-detail-ranking").textContent = regionalRank ? `#${regionalRank}` : "-";
+    document.getElementById("pm-detail-matches").textContent = standing ? standing.played : "0";
     if (standing && standing.played > 0) {
       const wr = Math.round((standing.won / standing.played) * 100);
       document.getElementById("pm-detail-winrate").textContent = `${wr}%`;
     } else {
-      document.getElementById("pm-detail-winrate").textContent = "-";
+      document.getElementById("pm-detail-winrate").textContent = "0%";
     }
-    document.getElementById("pm-detail-wins").textContent = standing ? standing.won : "-";
+    document.getElementById("pm-detail-wins").textContent = standing ? standing.won : "0";
 
     // Info tab
     document.getElementById("pm-info-name").textContent = player.name;
@@ -4748,27 +4749,36 @@ function setupPlayerManagement() {
     `;
   }
 
-  // Render tournament history (simulated)
+  // Render tournament history (dynamic)
   function renderTournamentHistory(player) {
     const container = document.getElementById("pm-tournament-list");
-    const events = appData.events || [];
-    if (events.length === 0) {
+    if (!container) return;
+    const ptsList = exactBocPoints[player.name];
+    const sirkuits = (typeof bocSirkuits !== 'undefined' ? bocSirkuits : []) || [];
+    let activeParticipations = [];
+    if (Array.isArray(ptsList)) {
+      ptsList.forEach((score, idx) => {
+        if (score !== undefined && score !== null && score !== "" && Number(score) > 0) {
+          const sirkuitObj = sirkuits[idx] || { name: `Sirkuit BOC #${idx + 1}`, date: `Sirkuit ${currentBocYear}` };
+          activeParticipations.push({
+            name: sirkuitObj.name || sirkuitObj.title || `Sirkuit BOC #${idx + 1}`,
+            date: sirkuitObj.date || `Sirkuit ${currentBocYear}`,
+            points: score
+          });
+        }
+      });
+    }
+    if (activeParticipations.length === 0) {
       container.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-dim);">Belum ada riwayat turnamen</span>';
       return;
     }
-    // Simulate: player participated in some events
-    const participated = events.slice(0, Math.min(4, events.length));
-    container.innerHTML = participated.map((evt, idx) => {
-      const places = ["gold", "silver", "bronze", "other"];
-      const labels = ["🥇", "🥈", "🥉", "#4"];
-      const placeClass = places[Math.min(idx, 3)];
-      const placeLabel = labels[Math.min(idx, 3)];
+    container.innerHTML = activeParticipations.map(part => {
       return `
         <div class="pm-tourney-item">
-          <div class="pm-tourney-place ${placeClass}">${placeLabel}</div>
+          <div class="pm-tourney-place other"><i class="fa-solid fa-trophy"></i></div>
           <div class="pm-tourney-info">
-            <div class="pm-tourney-name">${evt.title}</div>
-            <div class="pm-tourney-date">${evt.date}</div>
+            <div class="pm-tourney-name">${part.name}</div>
+            <div class="pm-tourney-date">${part.date} (Meraih ${part.points} Poin)</div>
           </div>
         </div>
       `;
@@ -9854,11 +9864,10 @@ function setupBocAdminListeners() {
 }
 
 
-// Calculate dynamic regional ranking for a player among all athletes by lifetime points descending
 function getPlayerRegionalRank(playerId) {
   if (!appData.players || appData.players.length === 0) return null;
   const sorted = [...appData.players].sort((a, b) => (b.points || 0) - (a.points || 0));
-  const index = sorted.findIndex(p => p.id === playerId);
+  const index = sorted.findIndex(p => p.id && playerId && p.id.toString() === playerId.toString());
   return index !== -1 ? index + 1 : null;
 }
 
