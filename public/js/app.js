@@ -7797,7 +7797,7 @@ function setupAthleteDetailActions() {
         const reason = document.getElementById("transfer-modal-reason").value.trim();
 
         if (!selectedClubName) {
-          alert("Silakan pilih klub tujuan transfer terlebih dahulu!");
+          showCustomToast("Silakan pilih klub tujuan transfer terlebih dahulu!", "error");
           return;
         }
 
@@ -7813,19 +7813,19 @@ function setupAthleteDetailActions() {
             body: JSON.stringify(payload)
           }).then(res => {
             if (res.ok) {
-              alert(`Klub atlet ${player.name} berhasil ditransfer ke "${selectedClubName}"!`);
+              showCustomToast(`Klub atlet ${player.name} berhasil ditransfer ke "${selectedClubName}"!`, "success");
               transferModal.style.display = "none";
               loadDataFromApi().then(() => {
                 renderAthleteDetail(player.id);
                 renderWorkspacePreviews();
               });
             } else {
-              alert("Gagal memproses transfer klub di server.");
+              showCustomToast("Gagal memproses transfer klub di server.", "error");
             }
-          }).catch(err => alert(`Error: ${err.message}`));
+          }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
         } else {
           player.club = selectedClubName;
-          alert(`Luring: Klub atlet ${player.name} diperbarui menjadi "${selectedClubName}"`);
+          showCustomToast(`Luring: Klub atlet ${player.name} diperbarui menjadi "${selectedClubName}"`, "success");
           transferModal.style.display = "none";
           renderAthleteDetail(player.id);
           renderWorkspacePreviews();
