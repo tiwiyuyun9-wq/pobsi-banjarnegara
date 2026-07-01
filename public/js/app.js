@@ -6746,7 +6746,7 @@ async function renderAthleteDetail(playerId) {
   const simulatedDOB = player.age ? `${18 + (player.age % 12)} Mei ${2026 - player.age}` : "12 Mei 1998";
   document.getElementById("ad-val-dob").textContent = simulatedDOB;
   
-  const simulatedJoin = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Januari 2025` : "12 Januari 2025";
+  const simulatedJoin = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Januari 2026` : "12 Januari 2026";
   document.getElementById("ad-val-join").textContent = simulatedJoin;
 
   // Additional details
@@ -7201,9 +7201,9 @@ function renderADTimeline(player, hcHistory, tourneys, matches) {
   }
 
   // 3. Add registration log at the very beginning (earliest date)
-  const joinDateStr = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Jan 2025` : "12 Jan 2025";
+  const joinDateStr = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Jan 2026` : "12 Jan 2026";
   logs.push({
-    dateObj: new Date(2025, 0, (parseInt(player.id.replace("P", "")) % 28) + 1),
+    dateObj: new Date(2026, 0, (parseInt(player.id.replace("P", "")) % 28) + 1),
     time: `${joinDateStr} &bull; 09:00 WIB`,
     title: "Atlet didaftarkan dalam sistem",
     desc: "Berkas dan profil terverifikasi oleh Admin Utama",
@@ -7217,7 +7217,7 @@ function renderADTimeline(player, hcHistory, tourneys, matches) {
   if (logs.length <= 1 && (!hcHistory || hcHistory.length === 0) && (!tourneys || tourneys.length === 0) && (!matches || matches.length === 0)) {
     // If only registration is present, we can add a basic initialization change log to avoid an empty-looking timeline
     logs.unshift({
-      dateObj: new Date(2025, 0, (parseInt(player.id.replace("P", "")) % 28) + 1, 10, 0),
+      dateObj: new Date(2026, 0, (parseInt(player.id.replace("P", "")) % 28) + 1, 10, 0),
       time: `${joinDateStr} &bull; 10:00 WIB`,
       title: `Handicap awal ditetapkan ke HC ${player.handicap}`,
       desc: "Status handicap inisial diatur secara administratif saat registrasi",
@@ -12244,13 +12244,13 @@ function renderClubInfo(clubName) {
         if (!isNaN(joinDate.getTime())) {
           joinDateEl.textContent = joinDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
         } else {
-          joinDateEl.textContent = 'Januari 2025';
+          joinDateEl.textContent = 'Januari 2026';
         }
       } catch(e) {
-        joinDateEl.textContent = 'Januari 2025';
+        joinDateEl.textContent = 'Januari 2026';
       }
     } else {
-      joinDateEl.textContent = 'Januari 2025';
+      joinDateEl.textContent = 'Januari 2026';
     }
   }
 
