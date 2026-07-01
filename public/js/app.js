@@ -4908,6 +4908,174 @@ function setupPlayerManagement() {
     });
   }
 
+  // Hook Bulk Actions Buttons for Players
+  const btnBulkAssignClub = document.getElementById('pm-bulk-assign-club');
+  if (btnBulkAssignClub) {
+    btnBulkAssignClub.addEventListener('click', async () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+
+      const clubs = appData.clubs || [];
+      const clubList = Array.from(new Set(clubs.map(c => c.name))).sort().join(', ');
+      const newClub = prompt(`Pilih/Ketik nama klub baru untuk ${ids.length} atlet terpilih:\n\nKlub terdaftar: ${clubList}`);
+      
+      if (newClub !== null && newClub.trim() !== '') {
+        const trimmedClub = newClub.trim();
+        // Validate if club exists (case-insensitive)
+        const matchedClub = clubs.find(c => c.name.toLowerCase() === trimmedClub.toLowerCase());
+        if (!matchedClub) {
+          alert(`Gagal: Klub "${trimmedClub}" tidak terdaftar di database resmi POBSI!`);
+          return;
+        }
+
+        let successCount = 0;
+        for (const id of ids) {
+          const player = appData.players.find(p => p.id.toString() === id.toString());
+          if (!player) continue;
+
+          if (isServerOnline) {
+            try {
+              const res = await fetch(`/api/players/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ club: matchedClub.name })
+              });
+              if (res.ok) successCount++;
+            } catch (e) {}
+          } else {
+            player.club = matchedClub.name;
+            successCount++;
+          }
+        }
+
+        if (isServerOnline && successCount > 0) {
+          await loadDataFromApi();
+        }
+
+        alert(`Klub untuk ${successCount} atlet berhasil diubah menjadi "${matchedClub.name}"!`);
+        pmSelectedIds.clear();
+        updateBulkBar();
+        updateCheckAllState();
+        renderPMTable();
+        updateWorkspaceStats();
+        renderWorkspacePreviews();
+      }
+    });
+  }
+
+  const btnBulkExport = document.getElementById("pm-bulk-export");
+  if (btnBulkExport) {
+    btnBulkExport.addEventListener("click", () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+      const selectedPlayers = appData.players.filter(p => ids.includes(p.id.toString()));
+      const headers = ["ID", "Nama", "Klub", "Handicap", "Status", "Gender", "Umur", "No HP", "Alamat"];
+      const rows = selectedPlayers.map(p => [
+        p.id, p.name, p.club, p.handicap, p.status || "Aktif", p.gender || "-", p.age || "-", p.phone || "-", p.address || "-"
+      ]);
+      const csv = [headers.join(","), ...rows.map(r => r.map(v => `"${v}"`).join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `data_${ids.length}_atlet_pobsi.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      pmSelectedIds.clear();
+      updateBulkBar();
+      updateCheckAllState();
+      renderPMTable();
+    });
+  }
+
+  const btnBulkToggleStatus = document.getElementById('pm-bulk-toggle-status');
+  if (btnBulkToggleStatus) {
+    btnBulkToggleStatus.addEventListener('click', async () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+
+      let successCount = 0;
+      for (const id of ids) {
+        const player = appData.players.find(p => p.id.toString() === id.toString());
+        if (!player) continue;
+        const newStatus = (player.status || 'Aktif') === 'Aktif' ? 'Nonaktif' : 'Aktif';
+
+        if (isServerOnline) {
+          try {
+            const res = await fetch(`/api/players/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) successCount++;
+          } catch (e) {}
+        } else {
+          player.status = newStatus;
+          successCount++;
+        }
+      }
+
+      if (isServerOnline && successCount > 0) {
+        await loadDataFromApi();
+      }
+
+      alert(`Status ${successCount} atlet berhasil diperbarui!`);
+      pmSelectedIds.clear();
+      updateBulkBar();
+      updateCheckAllState();
+      renderPMTable();
+      updateWorkspaceStats();
+    });
+  }
+
+  const btnBulkDelete = document.getElementById('pm-bulk-delete');
+  if (btnBulkDelete) {
+    btnBulkDelete.addEventListener('click', async () => {
+      const ids = Array.from(pmSelectedIds);
+      if (ids.length === 0) return;
+
+      if (confirm(`PERINGATAN: Yakin ingin menghapus ${ids.length} atlet terpilih secara permanen dari database resmi POBSI?`)) {
+        let deletedCount = 0;
+        for (const id of ids) {
+          const player = appData.players.find(p => p.id.toString() === id.toString());
+          if (!player) continue;
+
+          if (isServerOnline) {
+            try {
+              const res = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+              if (res.ok) deletedCount++;
+            } catch (e) {}
+          } else {
+            appData.players = appData.players.filter(p => p.id.toString() !== id.toString());
+            deletedCount++;
+          }
+        }
+
+        if (isServerOnline && deletedCount > 0) {
+          await loadDataFromApi();
+        }
+
+        // Hide sidebar selection if the active player was deleted
+        if (pmActivePlayerId && ids.includes(pmActivePlayerId.toString())) {
+          const placeholder = document.getElementById("pm-sidebar-placeholder");
+          const content = document.getElementById("pm-sidebar-content");
+          if (placeholder) placeholder.style.display = "flex";
+          if (content) content.style.display = "none";
+          pmActivePlayerId = null;
+        }
+
+        alert(`Berhasil menghapus ${deletedCount} atlet!`);
+        pmSelectedIds.clear();
+        updateBulkBar();
+        updateCheckAllState();
+        renderPMTable();
+        updateWorkspaceStats();
+        renderWorkspacePreviews();
+      }
+    });
+  }
+
   // Initial render
   populatePMClubFilter();
   updatePMStats();
