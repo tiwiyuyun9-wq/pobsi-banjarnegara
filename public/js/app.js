@@ -20841,6 +20841,8 @@ function setupSystemSettings() {
   const orgKomisiPrestasiInput = document.getElementById("set-org-komisi-prestasi");
   const orgKomisiWasitInput = document.getElementById("set-org-komisi-wasit");
   const formOrgStructure = document.getElementById("form-settings-org-structure");
+  let tempLogoBase64 = "";
+  let tempFaviconBase64 = "";
 
   const bocCutoffInput = document.getElementById("set-boc-cutoff");
   const bocMaxhcInput = document.getElementById("set-boc-maxhc");
@@ -20910,6 +20912,81 @@ function setupSystemSettings() {
         }
       }
       previewIframe.src = val || "";
+    });
+  }
+
+  // Logo & Favicon upload and preview handling
+  const previewLogo = document.getElementById("preview-org-logo");
+  const previewFavicon = document.getElementById("preview-org-favicon");
+  const uploadLogoInput = document.getElementById("upload-org-logo");
+  const uploadFaviconInput = document.getElementById("upload-org-favicon");
+
+  const updateBrandingPreviews = () => {
+    const savedLogo = localStorage.getItem("pobsi_logo");
+    if (savedLogo && previewLogo) {
+      previewLogo.innerHTML = `<img src="${savedLogo}?t=${Date.now()}" style="width:100%; height:100%; object-fit:contain; display:block;">`;
+    }
+    const savedFavicon = localStorage.getItem("pobsi_favicon");
+    if (savedFavicon && previewFavicon) {
+      previewFavicon.innerHTML = `<img src="${savedFavicon}?t=${Date.now()}" style="width:100%; height:100%; object-fit:contain; display:block;">`;
+    }
+  };
+
+  updateBrandingPreviews();
+
+  if (uploadLogoInput) {
+    uploadLogoInput.addEventListener("change", (e) => {
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah logo.", "error");
+        uploadLogoInput.value = "";
+        return;
+      }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        showCustomToast("Ukuran logo terlalu besar! Maksimal 2MB.", "error");
+        uploadLogoInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        tempLogoBase64 = ev.target.result;
+        if (previewLogo) {
+          previewLogo.innerHTML = `<img src="${tempLogoBase64}" style="width:100%; height:100%; object-fit:contain; display:block;">`;
+        }
+        showCustomToast("Logo berhasil dimuat. Simpan profil untuk menyimpan.", "info");
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (uploadFaviconInput) {
+    uploadFaviconInput.addEventListener("change", (e) => {
+      if (currentRole === "staff") {
+        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah favicon.", "error");
+        uploadFaviconInput.value = "";
+        return;
+      }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 1 * 1024 * 1024) {
+        showCustomToast("Ukuran favicon terlalu besar! Maksimal 1MB.", "error");
+        uploadFaviconInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        tempFaviconBase64 = ev.target.result;
+        if (previewFavicon) {
+          previewFavicon.innerHTML = `<img src="${tempFaviconBase64}" style="width:100%; height:100%; object-fit:contain; display:block;">`;
+        }
+        showCustomToast("Favicon berhasil dimuat. Simpan profil untuk menyimpan.", "info");
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -21081,25 +21158,73 @@ function setupSystemSettings() {
 
   // Form Submit: Org profile
   if (formOrg) {
-    formOrg.addEventListener("submit", (e) => {
+    formOrg.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (currentRole === "staff") {
         showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah profil organisasi.", "error");
         return;
       }
-      localStorage.setItem("pobsi_org_name", orgNameInput.value.trim());
-      localStorage.setItem("pobsi_chairman", chairmanInput.value.trim());
-      localStorage.setItem("pobsi_email", emailInput.value.trim());
-      localStorage.setItem("pobsi_whatsapp", whatsappInput.value.trim());
-      localStorage.setItem("pobsi_address", addressInput.value.trim());
-      if (mapsInput) {
-        localStorage.setItem("pobsi_maps_url", mapsInput.value.trim());
+
+      const submitBtn = formOrg.querySelector("button[type='submit']");
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : "";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
       }
 
-      showCustomToast("Profil organisasi berhasil diperbarui!", "success");
-      
-      // Update public page texts immediately
-      applySettingsToDOM();
+      try {
+        // Upload Logo if changed
+        if (tempLogoBase64) {
+          const res = await fetch("/api/misc?action=upload-branding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "logo", fileData: tempLogoBase64 })
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            localStorage.setItem("pobsi_logo", result.url);
+            tempLogoBase64 = "";
+          } else {
+            throw new Error(result.error || "Gagal mengunggah logo");
+          }
+        }
+
+        // Upload Favicon if changed
+        if (tempFaviconBase64) {
+          const res = await fetch("/api/misc?action=upload-branding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "favicon", fileData: tempFaviconBase64 })
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            localStorage.setItem("pobsi_favicon", result.url);
+            tempFaviconBase64 = "";
+          } else {
+            throw new Error(result.error || "Gagal mengunggah favicon");
+          }
+        }
+
+        localStorage.setItem("pobsi_org_name", orgNameInput.value.trim());
+        localStorage.setItem("pobsi_chairman", chairmanInput.value.trim());
+        localStorage.setItem("pobsi_email", emailInput.value.trim());
+        localStorage.setItem("pobsi_whatsapp", whatsappInput.value.trim());
+        localStorage.setItem("pobsi_address", addressInput.value.trim());
+        if (mapsInput) {
+          localStorage.setItem("pobsi_maps_url", mapsInput.value.trim());
+        }
+
+        showCustomToast("Profil organisasi berhasil diperbarui!", "success");
+        applySettingsToDOM();
+      } catch (err) {
+        console.error("Gagal memperbarui profil organisasi:", err);
+        showCustomToast(`Kesalahan: ${err.message || "Gagal menyimpan pengunggahan"}`, "error");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      }
     });
   }
 
@@ -21440,6 +21565,41 @@ function applySettingsToDOM() {
 
   // Document Title
   document.title = `${orgName} - Platform Digital Resmi Biliar`;
+
+  // Apply custom logo if set
+  const customLogo = localStorage.getItem("pobsi_logo");
+  if (customLogo) {
+    const logoSrc = `${customLogo}?t=${Date.now()}`;
+    document.querySelectorAll(".logo-img, .footer-logo-img, .mobile-logo-img").forEach(el => {
+      el.src = logoSrc;
+    });
+  } else {
+    document.querySelectorAll(".logo-img, .footer-logo-img, .mobile-logo-img").forEach(el => {
+      el.src = "images/pobsi-logo.png";
+    });
+  }
+
+  // Apply custom favicon if set
+  const customFavicon = localStorage.getItem("pobsi_favicon");
+  if (customFavicon) {
+    const faviconUrl = `${customFavicon}?t=${Date.now()}`;
+    
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    link.href = faviconUrl;
+
+    let shortcutLink = document.querySelector("link[rel='shortcut icon']");
+    if (!shortcutLink) {
+      shortcutLink = document.createElement('link');
+      shortcutLink.rel = 'shortcut icon';
+      document.getElementsByTagName('head')[0].appendChild(shortcutLink);
+    }
+    shortcutLink.href = faviconUrl;
+  }
 
   // Header logo text updates (splits first word and remainder)
   const words = orgName.split(" ");

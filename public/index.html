@@ -5646,6 +5646,45 @@
                         </div>
                       </div>
 
+                      <!-- Branding: Logo & Favicon -->
+                      <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 10px;">
+                        
+                        <!-- Logo Upload Group -->
+                        <div class="form-group-item">
+                          <label class="form-lbl">Logo Organisasi</label>
+                          <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+                            <div id="preview-org-logo" style="width: 64px; height: 64px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25); overflow: hidden; flex-shrink: 0;">
+                              <i class="fa-solid fa-image" style="font-size: 1.5rem; color: var(--text-dim);"></i>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                              <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; margin: 0; width: fit-content; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Unggah Logo
+                                <input type="file" id="upload-org-logo" accept="image/*" style="display: none;">
+                              </label>
+                              <span style="font-size: 0.65rem; color: var(--text-muted);">Maksimal 2MB (PNG, JPG, SVG, WEBP)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Favicon Upload Group -->
+                        <div class="form-group-item">
+                          <label class="form-lbl">Favicon Situs (Icon Tab)</label>
+                          <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+                            <div id="preview-org-favicon" style="width: 64px; height: 64px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25); overflow: hidden; flex-shrink: 0;">
+                              <i class="fa-solid fa-globe" style="font-size: 1.5rem; color: var(--text-dim);"></i>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                              <label class="pm-btn" style="padding: 6px 12px; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; margin: 0; width: fit-content; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Unggah Favicon
+                                <input type="file" id="upload-org-favicon" accept="image/x-icon,image/png,image/svg+xml" style="display: none;">
+                              </label>
+                              <span style="font-size: 0.65rem; color: var(--text-muted);">Maksimal 1MB (ICO, PNG, SVG)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
                       <button type="submit" class="pm-btn pm-btn-primary" style="margin-top: 10px; width: fit-content; align-self: flex-start;">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
                       </button>
