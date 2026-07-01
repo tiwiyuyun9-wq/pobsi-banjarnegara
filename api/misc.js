@@ -1,4 +1,5 @@
 const { supabase } = require('./_supabase');
+const { uploadBrandingMedia } = require('./_media-upload');
 
 /**
  * Consolidated serverless function for miscellaneous endpoints.
@@ -96,7 +97,28 @@ module.exports = async (req, res) => {
       return res.status(405).json({ error: "Method tidak diizinkan!" });
     }
 
-    return res.status(400).json({ error: `Unknown action: ${action}. Valid actions: db-status, activity-logs` });
+    /* ==========================================================================
+       ACTION: upload-branding
+       ========================================================================== */
+    if (action === 'upload-branding') {
+      if (req.method !== 'POST') {
+        return res.status(405).json({ error: "Method tidak diizinkan! Gunakan POST." });
+      }
+
+      const { type, fileData } = req.body;
+      if (!type || !fileData) {
+        return res.status(400).json({ error: "Parameter type dan fileData wajib dikirimkan!" });
+      }
+
+      if (type !== 'logo' && type !== 'favicon') {
+        return res.status(400).json({ error: "Parameter type harus berupa 'logo' atau 'favicon'!" });
+      }
+
+      const fileUrl = await uploadBrandingMedia(fileData, type);
+      return res.status(200).json({ success: true, url: fileUrl });
+    }
+
+    return res.status(400).json({ error: `Unknown action: ${action}. Valid actions: db-status, activity-logs, upload-branding` });
   } catch (error) {
     console.error(`Error in api/misc.js (action=${action}, method=${req.method}):`, error);
     return res.status(500).json({ error: "Kesalahan server internal: " + error.message });

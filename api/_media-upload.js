@@ -143,4 +143,101 @@ async function deleteMedia(fileUrl) {
   return false;
 }
 
-module.exports = { uploadMedia, deleteMedia };
+/**
+ * Handles uploading branding assets (logo / favicon) with an overwrite/replace policy.
+ * 
+ * @param {string} fileData - Base64 data string.
+ * @param {string} type - 'logo' or 'favicon'.
+ * @returns {Promise<string>} The public URL or relative file path.
+ */
+async function uploadBrandingMedia(fileData, type) {
+  if (!fileData) return "";
+  if (fileData.startsWith('http://') || fileData.startsWith('https://') || fileData.startsWith('/uploads/')) {
+    return fileData;
+  }
+  if (!fileData.includes(';base64,')) {
+    return fileData;
+  }
+
+  try {
+    const parts = fileData.split(';base64,');
+    const header = parts[0];
+    const base64Data = parts[1];
+    const mime = header.split(':')[1].split(';')[0];
+    
+    let ext = '.png';
+    if (mime.includes('x-icon') || mime.includes('microsoft.icon') || mime.includes('ico')) ext = '.ico';
+    else if (mime.includes('jpeg') || mime.includes('jpg')) ext = '.jpg';
+    else if (mime.includes('webp')) ext = '.webp';
+    else if (mime.includes('svg')) ext = '.svg';
+
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    if (isSupabaseEnabled) {
+      // 1. Supabase Storage - clean up existing branding of same type first to save storage
+      try {
+        const { data: files } = await supabase.storage.from('media').list('settings');
+        if (files && files.length > 0) {
+          const toDelete = files
+            .filter(f => f.name.startsWith(type))
+            .map(f => `settings/${f.name}`);
+          if (toDelete.length > 0) {
+            await supabase.storage.from('media').remove(toDelete);
+            console.log(`🗑️ Supabase: Cleaned up old branding files:`, toDelete);
+          }
+        }
+      } catch (cleanErr) {
+        console.warn('⚠️ Gagal membersihkan media lama dari Supabase:', cleanErr.message);
+      }
+
+      // Upload new branding file
+      const storagePath = `settings/${type}${ext}`;
+      const { data, error } = await supabase.storage
+        .from('media')
+        .upload(storagePath, buffer, {
+          contentType: mime,
+          upsert: true,
+          duplex: 'half'
+        });
+
+      if (error) {
+        console.error(`❌ Gagal mengunggah branding ke Supabase Storage:`, error.message);
+        throw error;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('media')
+        .getPublicUrl(storagePath);
+
+      return publicUrlData.publicUrl;
+    } else {
+      // 2. Local Fallback - clean up existing files of same type in local uploads directory
+      const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'settings');
+      if (fs.existsSync(uploadsDir)) {
+        const files = fs.readdirSync(uploadsDir);
+        files.forEach(file => {
+          if (file.startsWith(type)) {
+            try {
+              fs.unlinkSync(path.join(uploadsDir, file));
+              console.log(`🗑️ Local: Cleaned up old branding file: ${file}`);
+            } catch (unlinkErr) {
+              console.warn(`⚠️ Gagal menghapus file lokal ${file}:`, unlinkErr);
+            }
+          }
+        });
+      } else {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadsDir, `${type}${ext}`);
+      fs.writeFileSync(filePath, buffer);
+      
+      return `/uploads/settings/${type}${ext}`;
+    }
+  } catch (err) {
+    console.error('❌ Error uploading branding media:', err);
+    return fileData;
+  }
+}
+
+module.exports = { uploadMedia, deleteMedia, uploadBrandingMedia };

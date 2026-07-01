@@ -490,6 +490,25 @@ if (isSupabaseEnabled) {
       if (req.method === 'POST') return activityLogController.addActivityLog(req, res);
       return res.status(405).json({ error: 'Method not allowed' });
     }
+    if (action === 'upload-branding') {
+      if (req.method !== 'POST') {
+        return res.status(405).json({ error: "Method tidak diizinkan! Gunakan POST." });
+      }
+      const { type, fileData } = req.body;
+      if (!type || !fileData) {
+        return res.status(400).json({ error: "Parameter type dan fileData wajib dikirimkan!" });
+      }
+      if (type !== 'logo' && type !== 'favicon') {
+        return res.status(400).json({ error: "Parameter type harus berupa 'logo' atau 'favicon'!" });
+      }
+      const { uploadBrandingMedia } = require('./api/_media-upload');
+      try {
+        const fileUrl = await uploadBrandingMedia(fileData, type);
+        return res.status(200).json({ success: true, url: fileUrl });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
     return res.status(400).json({ error: 'Unknown action' });
   });
 
