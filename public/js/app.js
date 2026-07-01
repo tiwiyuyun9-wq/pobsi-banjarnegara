@@ -4194,6 +4194,69 @@ async function setupAdminPanel() {
 // PLAYER MANAGEMENT CONSOLE — Full JS Logic
 // ============================================================================
 window.currentAddPlayerStep = 1;
+window.currentEditPlayerStep = 1;
+
+window.updateEditPlayerWizardUI = function() {
+  const step = window.currentEditPlayerStep;
+  const panes = document.querySelectorAll(".edit-player-step-pane");
+  panes.forEach(pane => {
+    const paneStep = parseInt(pane.getAttribute("data-step"), 10);
+    if (paneStep === step) {
+      pane.classList.add("active");
+    } else {
+      pane.classList.remove("active");
+    }
+  });
+
+  const steps = document.querySelectorAll("#edit-player-wizard-stepper .wizard-step");
+  steps.forEach(s => {
+    const sStep = parseInt(s.getAttribute("data-step"), 10);
+    const circle = s.querySelector(".wizard-step-circle");
+    s.classList.remove("active", "completed");
+    if (sStep === step) {
+      s.classList.add("active");
+      if (circle) circle.innerHTML = sStep;
+    } else if (sStep < step) {
+      s.classList.add("completed");
+      if (circle) circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+    } else {
+      if (circle) circle.innerHTML = sStep;
+    }
+  });
+
+  const progress = document.getElementById("edit-player-wizard-progress");
+  if (progress && steps.length > 1) {
+    const percent = ((step - 1) / (steps.length - 1)) * 100;
+    progress.style.width = `${percent}%`;
+  }
+
+  const btnCancel = document.getElementById("edit-player-modal-btn-cancel");
+  const btnPrev = document.getElementById("edit-player-modal-btn-prev");
+  const btnNext = document.getElementById("edit-player-modal-btn-next");
+  const btnSubmit = document.getElementById("edit-player-modal-btn-submit");
+
+  if (step === 1) {
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (btnPrev) btnPrev.style.display = "none";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 2) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "inline-block";
+    if (btnSubmit) btnSubmit.style.display = "none";
+  } else if (step === 3) {
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnPrev) btnPrev.style.display = "inline-block";
+    if (btnNext) btnNext.style.display = "none";
+    if (btnSubmit) btnSubmit.style.display = "inline-block";
+  }
+};
+
+window.resetEditPlayerWizard = function() {
+  window.currentEditPlayerStep = 1;
+  window.updateEditPlayerWizardUI();
+};
 
 window.updateAddPlayerWizardUI = function() {
   const step = window.currentAddPlayerStep;
@@ -5161,6 +5224,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === pubModal) {
         pubModal.style.display = 'none';
         window.activePubClubId = null;
+      }
+    });
+  }
+
+  const athleteResultsCloseBtn = document.getElementById('pub-athlete-results-modal-close');
+  const athleteResultsModal = document.getElementById('pub-athlete-results-modal');
+  if (athleteResultsCloseBtn && athleteResultsModal) {
+    athleteResultsCloseBtn.addEventListener('click', () => {
+      athleteResultsModal.style.display = 'none';
+    });
+    athleteResultsModal.addEventListener('click', (e) => {
+      if (e.target === athleteResultsModal) {
+        athleteResultsModal.style.display = 'none';
       }
     });
   }
@@ -6359,7 +6435,7 @@ function renderAdminClubPreview(searchQuery = '') {
   const avgTables = totalClubs > 0 ? (totalTables / totalClubs).toFixed(1) : 0;
 
   // Update Stats DOM Elements
-  const totalClubsEl = document.getElementById('pm-total-clubs');
+  const totalClubsEl = document.getElementById('pm-total-registered-clubs');
   const totalTablesEl = document.getElementById('pm-total-tables');
   const activeMembersEl = document.getElementById('pm-active-members');
   const avgTablesEl = document.getElementById('pm-avg-tables');
@@ -7113,6 +7189,10 @@ function setupAthleteDetailActions() {
     const player = appData.players.find(p => p.id === adActivePlayerId);
     if (!player) return;
 
+    if (typeof window.resetEditPlayerWizard === 'function') {
+      window.resetEditPlayerWizard();
+    }
+
     document.getElementById("edit-player-id").value = player.id;
     document.getElementById("edit-player-name").value = player.name;
     
@@ -7166,6 +7246,57 @@ function setupAthleteDetailActions() {
     editDrawer.addEventListener("click", (e) => {
       if (e.target === editDrawer) editDrawer.style.display = "none";
     });
+  }
+
+  // Edit player wizard button click listeners
+  const btnEditPlayerPrev = document.getElementById("edit-player-modal-btn-prev");
+  const btnEditPlayerNext = document.getElementById("edit-player-modal-btn-next");
+  const btnEditPlayerCancel = document.getElementById("edit-player-modal-btn-cancel");
+
+  if (btnEditPlayerPrev) {
+    btnEditPlayerPrev.onclick = function() {
+      if (window.currentEditPlayerStep > 1) {
+        window.currentEditPlayerStep--;
+        window.updateEditPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnEditPlayerNext) {
+    btnEditPlayerNext.onclick = function() {
+      if (window.currentEditPlayerStep === 1) {
+        // Validate Step 1
+        const nameVal = document.getElementById("edit-player-name").value.trim();
+        const ageVal = document.getElementById("edit-player-age").value.trim();
+        const phoneVal = document.getElementById("edit-player-phone").value.trim();
+        const addressVal = document.getElementById("edit-player-address").value.trim();
+
+        if (!nameVal || !ageVal || !phoneVal || !addressVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang informasi pribadi wajib!", "error");
+          return;
+        }
+      } else if (window.currentEditPlayerStep === 2) {
+        // Validate Step 2
+        const clubVal = document.getElementById("edit-player-club").value.trim();
+        const hcVal = document.getElementById("edit-player-hc").value.trim();
+        const pointsVal = document.getElementById("edit-player-points").value.trim();
+        const statusVal = document.getElementById("edit-player-status").value.trim();
+
+        if (!clubVal || !hcVal || !pointsVal || !statusVal) {
+          showCustomToast("Mohon lengkapi seluruh bidang handicap, klub, dan status wajib!", "error");
+          return;
+        }
+      }
+
+      if (window.currentEditPlayerStep < 3) {
+        window.currentEditPlayerStep++;
+        window.updateEditPlayerWizardUI();
+      }
+    };
+  }
+
+  if (btnEditPlayerCancel && editDrawer) {
+    btnEditPlayerCancel.onclick = () => { editDrawer.style.display = "none"; };
   }
 
   // Change listeners for file inputs in edit form
@@ -7320,8 +7451,36 @@ function setupAthleteDetailActions() {
     selectSource.value = "Tournament Result";
     selectNew.value = player.handicap || "4B";
 
+    const previewCurrentPoints = document.getElementById("hc-preview-current-points");
+    const previewNewPoints = document.getElementById("hc-preview-new-points");
+    if (previewCurrentPoints) previewCurrentPoints.textContent = `${player.points || 0} Poin`;
+    if (previewNewPoints) previewNewPoints.textContent = `${player.points || 0} Poin`;
+
+    const pointsInput = document.getElementById("hc-modal-input-points");
+    if (pointsInput) {
+      pointsInput.value = player.points || 0;
+      pointsInput.oninput = function() {
+        if (previewNewPoints) {
+          previewNewPoints.textContent = `${pointsInput.value || 0} Poin`;
+        }
+      };
+    }
+
     selectNew.onchange = function() {
       newBadge.textContent = selectNew.value;
+      const hcOrder = ["3B", "3N", "3A", "4B", "4A", "5B", "5A", "6", "7"];
+      const oldIndex = hcOrder.indexOf(player.handicap || "4B");
+      const newIndex = hcOrder.indexOf(selectNew.value);
+      if (pointsInput) {
+        if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1) {
+          pointsInput.value = 0;
+        } else {
+          pointsInput.value = player.points || 0;
+        }
+        if (previewNewPoints) {
+          previewNewPoints.textContent = `${pointsInput.value} Poin`;
+        }
+      }
     };
 
     // Render Recent Changes History snapshot in the modal — fetch from DB
@@ -7392,6 +7551,7 @@ function setupAthleteDetailActions() {
 
       const playerId = document.getElementById("hc-modal-player-id").value;
       const newHC = document.getElementById("hc-modal-select-new").value;
+      const newPoints = parseFloat(document.getElementById("hc-modal-input-points").value || 0);
       const source = document.getElementById("hc-modal-select-source").value;
       const reason = document.getElementById("hc-modal-reason").value;
 
@@ -7399,9 +7559,10 @@ function setupAthleteDetailActions() {
       if (!player) return;
 
       const oldHC = player.handicap || "4B";
+      const oldPoints = player.points || 0;
 
-      if (newHC === oldHC) {
-        alert("Handicap baru sama dengan handicap saat ini!");
+      if (newHC === oldHC && newPoints === oldPoints) {
+        alert("Tidak ada perubahan tingkat handicap maupun poin berjalan!");
         return;
       }
 
@@ -7411,11 +7572,15 @@ function setupAthleteDetailActions() {
       const newIndex = hcOrder.indexOf(newHC);
       
       const fullReason = reason ? `${source} — ${reason}` : source;
-      const payload = { handicap: newHC, hcChangeReason: fullReason, hcChangeAdmin: "Super Admin POBSI" };
-      let pointsReset = false;
+      const payload = { 
+        handicap: newHC, 
+        points: newPoints,
+        hcChangeReason: fullReason, 
+        hcChangeAdmin: "Super Admin POBSI" 
+      };
       
-      if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1) {
-        payload.points = 0.0;
+      let pointsReset = false;
+      if (newIndex > oldIndex && oldIndex !== -1 && newIndex !== -1 && newPoints === 0 && oldPoints > 0) {
         pointsReset = true;
       }
 
@@ -7429,7 +7594,7 @@ function setupAthleteDetailActions() {
             if (pointsReset) {
               alert(`Handicap berhasil diperbarui menjadi HC ${newHC}! Poin handicap otomatis di-reset ke 0 karena atlet naik tingkat.`);
             } else {
-              alert(`Handicap berhasil diperbarui menjadi HC ${newHC}!`);
+              alert(`Data handicap & poin atlet berhasil diperbarui!`);
             }
             if (hcModal) hcModal.style.display = "none";
             loadDataFromApi().then(() => {
@@ -7440,11 +7605,9 @@ function setupAthleteDetailActions() {
         }).catch(err => alert(`Error: ${err.message}`));
       } else {
         player.handicap = newHC;
-        if (pointsReset) {
-          player.points = 0.0;
-        }
+        player.points = newPoints;
         
-        // Also update standings if names match and points are reset
+        // Also update standings if names match
         const std = appData.standings.find(s => s.name === player.name);
         if (std) {
           std.handicap = newHC;
@@ -7466,7 +7629,7 @@ function setupAthleteDetailActions() {
         if (pointsReset) {
           alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin di-reset ke 0 (Naik Tingkat).`);
         } else {
-          alert(`Luring: Handicap diperbarui menjadi HC ${newHC}`);
+          alert(`Luring: Handicap diperbarui menjadi HC ${newHC} & Poin disesuaikan menjadi ${newPoints}.`);
         }
         if (hcModal) hcModal.style.display = "none";
         renderAthleteDetail(playerId);
@@ -9253,23 +9416,51 @@ function generateSlug(name) {
 function findAthleteBySlug(slug) {
   // Search in standings (primary source for BOC data)
   const standing = appData.standings.find(s => generateSlug(s.name) === slug);
-  if (!standing) return null;
+  
+  if (standing) {
+    // Enrich with player data if available
+    const player = appData.players.find(p => 
+      p.name.toLowerCase() === standing.name.toLowerCase()
+    );
 
-  // Enrich with player data if available
-  const player = appData.players.find(p => 
-    p.name.toLowerCase() === standing.name.toLowerCase()
-  );
+    return {
+      ...standing,
+      id: player ? player.id : null,
+      avatar: player ? player.avatar : null,
+      cover: player ? player.cover : null,
+      gender: player ? player.gender : 'Laki-laki',
+      age: player ? player.age : null,
+      phone: player ? player.phone : null,
+      address: player ? player.address : null,
+      status: player ? player.status : 'Aktif'
+    };
+  }
 
-  return {
-    ...standing,
-    id: player ? player.id : null,
-    avatar: player ? player.avatar : null,
-    gender: player ? player.gender : 'Laki-laki',
-    age: player ? player.age : null,
-    phone: player ? player.phone : null,
-    address: player ? player.address : null,
-    status: player ? player.status : 'Aktif'
-  };
+  // Fallback: Search in players (for registered players without standings yet)
+  const player = appData.players.find(p => generateSlug(p.name) === slug);
+  if (player) {
+    return {
+      id: player.id,
+      name: player.name,
+      club: player.club || 'Independen',
+      handicap: player.handicap || '3B',
+      points: 0, // Standings points (BOC points) is 0 for athletes not in standings of the current year series
+      played: 0,
+      won: 0,
+      lost: 0,
+      winRate: '0%',
+      rank: 999,
+      avatar: player.avatar || null,
+      cover: player.cover || null,
+      gender: player.gender || 'Laki-laki',
+      age: player.age || null,
+      phone: player.phone || null,
+      address: player.address || null,
+      status: player.status || 'Aktif'
+    };
+  }
+
+  return null;
 }
 
 // Open the public athlete profile page
@@ -11405,6 +11596,7 @@ function renderAthleteProfile(athlete) {
   if (!athlete) return;
 
   const rank = athlete.rank || 999;
+  const isRanked = rank < 999;
   const name = athlete.name || 'Unknown';
   const club = athlete.club || '-';
   const hc = athlete.handicap || '-';
@@ -11448,12 +11640,13 @@ function renderAthleteProfile(athlete) {
     if (rank === 1) avatarRankBadge.textContent = '🥇';
     else if (rank === 2) avatarRankBadge.textContent = '🥈';
     else if (rank === 3) avatarRankBadge.textContent = '🥉';
-    else avatarRankBadge.textContent = '#' + rank;
+    else if (isRanked) avatarRankBadge.textContent = '#' + rank;
+    else avatarRankBadge.textContent = '-';
   }
 
   // Set small elegant laurels rank badge next to name
   const laurelRank = document.getElementById('ap-laurel-rank-text');
-  if (laurelRank) laurelRank.textContent = '#' + rank;
+  if (laurelRank) laurelRank.textContent = isRanked ? '#' + rank : '-';
 
   // Hero name & breadcrumb
   const nameEl = document.getElementById('ap-hero-name');
@@ -11477,18 +11670,29 @@ function renderAthleteProfile(athlete) {
   // KPI Cards
   const kpiPoints = document.getElementById('ap-kpi-points');
   if (kpiPoints) kpiPoints.textContent = points;
+  const kpiPointsSub = document.getElementById('ap-kpi-points-sub');
+  if (kpiPointsSub) kpiPointsSub.textContent = 'Poin BOC';
+
   const kpiRank = document.getElementById('ap-kpi-rank');
-  if (kpiRank) kpiRank.textContent = '#' + rank;
+  if (kpiRank) kpiRank.textContent = isRanked ? '#' + rank : '-';
+  const kpiRankSub = document.getElementById('ap-kpi-rank-sub');
+  if (kpiRankSub) kpiRankSub.textContent = isRanked ? 'Dari Seluruh Atlet' : 'Belum Berperingkat';
 
   const eventScores = getPlayerEventScores(name, points);
   const eventsPlayed = eventScores.filter(s => s !== "").length;
   
   const kpiEvents = document.getElementById('ap-kpi-events');
   if (kpiEvents) kpiEvents.textContent = eventsPlayed;
+  const kpiEventsSub = document.getElementById('ap-kpi-events-sub');
+  if (kpiEventsSub) kpiEventsSub.textContent = eventsPlayed > 0 ? 'BOC Series' : 'Belum Ada Event';
+
   const kpiWinrate = document.getElementById('ap-kpi-winrate');
   if (kpiWinrate) kpiWinrate.textContent = winRate + '%';
   const kpiMatchesSub = document.getElementById('ap-kpi-matches-sub');
-  if (kpiMatchesSub) kpiMatchesSub.textContent = 'Dari ' + (played || Math.max(eventsPlayed * 8, 4)) + ' Pertandingan';
+  if (kpiMatchesSub) {
+    const totalMatches = played > 0 ? played : (eventsPlayed > 0 ? eventsPlayed * 8 : 0);
+    kpiMatchesSub.textContent = totalMatches > 0 ? 'Dari ' + totalMatches + ' Pertandingan' : 'Belum Ada Data';
+  }
 
   // Point Breakdown
   renderPointBreakdown(eventScores);
@@ -11497,6 +11701,7 @@ function renderAthleteProfile(athlete) {
   renderRankingHistoryChart(rank, points, eventsPlayed);
 
   // Tournament Results Table & Recent Results List
+  window.currentAthleteEventScores = eventScores;
   renderTournamentResults(name, eventScores);
 
   // Club Information
@@ -11514,11 +11719,17 @@ function renderPointBreakdown(eventScores) {
   const container = document.getElementById('ap-breakdown-grid');
   if (!container) return;
 
-  const eventNames = [
-    'RD HT', 'JP HT', 'LMS HT', 'SYP HT',
-    'RD HT (2)', 'JP HT (2)', 'LMS HT (2)', 'PLT HT',
-    'SYP HT (2)', 'RD HT (3)'
-  ];
+  const eventNames = bocSirkuits && bocSirkuits.length > 0 ? bocSirkuits : [];
+
+  if (eventNames.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); padding: 32px 16px; font-size: 0.85rem; grid-column: 1 / -1; width: 100%; opacity: 0.85; border: 1px dashed rgba(255,255,255,0.06); border-radius: 8px; background: rgba(255,255,255,0.01);">
+        <i class="fa-solid fa-folder-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block; color: var(--text-muted);"></i>
+        Belum ada sirkuit terdaftar untuk musim BOC tahun ${currentBocYear}
+      </div>
+    `;
+    return;
+  }
 
   const maxScore = 12; // Maximum possible score
 
@@ -11570,10 +11781,30 @@ function renderPointBreakdown(eventScores) {
   }, 100);
 }
 
-// Render ranking history SVG chart (simulated progression)
 function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   const container = document.getElementById('ap-ranking-chart');
   if (!container) return;
+
+  const isUnranked = !currentRank || currentRank >= 999;
+  if (isUnranked) {
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.minHeight = '220px';
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 0.85rem; width: 100%; opacity: 0.85;">
+        <i class="fa-solid fa-chart-line" style="font-size: 1.5rem; margin-bottom: 10px; display: block; color: var(--text-muted);"></i>
+        Belum ada riwayat peringkat untuk atlet ini pada musim BOC
+      </div>
+    `;
+    return;
+  }
+
+  // Restore layout in case it was set to flex
+  container.style.display = '';
+  container.style.alignItems = '';
+  container.style.justifyContent = '';
+  container.style.minHeight = '';
 
   const numPoints = 4;
   const dataPoints = [];
@@ -11589,7 +11820,13 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   }
   dataPoints[numPoints - 1] = currentRank;
 
-  const xLabels = ['BOC #1', 'BOC #2', 'BOC #3', 'BOC #4'];
+  const baseYear = parseInt(currentBocYear) || 2026;
+  const xLabels = [
+    `BOC ${baseYear - 3}`,
+    `BOC ${baseYear - 2}`,
+    `BOC ${baseYear - 1}`,
+    `BOC ${baseYear}`
+  ];
 
   const isMobile = window.innerWidth < 768;
   const w = isMobile ? 360 : 780;
@@ -11602,7 +11839,7 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   const plotH = h - padTop - padBottom;
 
   const minVal = 1;
-  const maxVal = 20;
+  const maxVal = Math.max(20, ...dataPoints);
   const range = maxVal - minVal;
 
   const points = dataPoints.map((rank, i) => {
@@ -11627,7 +11864,16 @@ function renderRankingHistoryChart(currentRank, totalPoints, eventsPlayed) {
   let areaD = pathD + ` L ${lastPt.x} ${h - padBottom} L ${firstPt.x} ${h - padBottom} Z`;
 
   let gridLines = '';
-  const yLabels = [1, 5, 10, 15, 20];
+  // Generate dynamic Y labels evenly spaced
+  const stepY = range / 4;
+  const yLabels = [
+    1,
+    Math.round(minVal + stepY),
+    Math.round(minVal + stepY * 2),
+    Math.round(minVal + stepY * 3),
+    maxVal
+  ];
+
   yLabels.forEach(yVal => {
     const percentage = (yVal - minVal) / range;
     const y = padTop + percentage * plotH;
@@ -11675,18 +11921,6 @@ function renderTournamentResults(name, eventScores) {
   
   if (!recentList || !bocTbody) return;
 
-  const eventNames = [
-    'RD HT (Seri 1)', 'JP HT (Seri 1)', 'LMS HT (Seri 1)', 'SYP HT (Seri 1)',
-    'RD HT (Seri 2)', 'JP HT (Seri 2)', 'LMS HT (Seri 2)', 'PLT HT',
-    'SYP HT (Seri 2)', 'RD HT (Seri 3)'
-  ];
-
-  const dates = [
-    '10 Feb 2025', '12 Mar 2025', '15 Apr 2025', '18 Mei 2025',
-    '12 Jun 2025', '15 Jul 2025', '20 Ags 2025', '10 Sep 2025',
-    '15 Okt 2025', '20 Nov 2025'
-  ];
-
   function getMockPosition(score) {
     if (score === 12) return { text: 'Champion', badge: 'ap-badge-champion', ptsClass: '' };
     if (score === 9) return { text: 'Runner-Up', badge: 'ap-badge-runner', ptsClass: 'points-silver' };
@@ -11698,12 +11932,26 @@ function renderTournamentResults(name, eventScores) {
   }
 
   const results = [];
+  const activeSirkuits = bocSirkuits && bocSirkuits.length > 0 ? bocSirkuits : [];
+
   eventScores.forEach((score, idx) => {
-    if (score !== "" && score !== undefined && score !== null) {
+    if (score !== "" && score !== undefined && score !== null && idx < activeSirkuits.length) {
+      const sirkuitName = activeSirkuits[idx];
+      const matchEvent = appData.events.find(e => e.title && e.title.toUpperCase().includes(sirkuitName.toUpperCase()));
+      let dateStr = '';
+      if (matchEvent && matchEvent.date) {
+        dateStr = matchEvent.date;
+      } else {
+        const mockMonths = ['Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const month = mockMonths[idx % mockMonths.length];
+        const day = 10 + (idx * 2) % 18;
+        dateStr = `${day} ${month} ${currentBocYear}`;
+      }
+
       results.push({ 
-        event: eventNames[idx], 
+        event: sirkuitName, 
         score: parseInt(score), 
-        date: dates[idx] || '2025',
+        date: dateStr,
         idx 
       });
     }
@@ -11734,6 +11982,17 @@ function renderTournamentResults(name, eventScores) {
     `;
   }).join('');
 
+  const getStatusPill = (status) => {
+    const norm = (status || '').toLowerCase().trim();
+    if (norm === 'ongoing' || norm === 'berlangsung' || norm === 'daftar') {
+      return `<span class="ap-status-pill status-ongoing">Berlangsung</span>`;
+    }
+    if (norm === 'cancelled' || norm === 'batal') {
+      return `<span class="ap-status-pill status-cancelled">Batal</span>`;
+    }
+    return `<span class="ap-status-pill">Selesai</span>`;
+  };
+
   // Populate BATTLE OF CHAMPIONS RESULTS Table
   bocTbody.innerHTML = results.map(r => {
     const pos = getMockPosition(r.score);
@@ -11744,7 +12003,7 @@ function renderTournamentResults(name, eventScores) {
         <td class="ap-tbl-date">${r.date}</td>
         <td style="font-weight: 700; color: ${r.score === 12 ? '#fbbf24' : '#fff'};">${posText}</td>
         <td class="text-center" style="font-weight:900; color:#fbbf24;">${r.score}</td>
-        <td class="text-center"><span class="ap-status-pill">Completed</span></td>
+        <td class="text-center">${getStatusPill(r.status)}</td>
       </tr>
     `;
   }).join('');
@@ -11757,19 +12016,85 @@ function renderClubInfo(clubName) {
   const athleteCountEl = document.getElementById('ap-club-athlete-count');
   const topRankEl = document.getElementById('ap-club-top-rank');
   const joinDateEl = document.getElementById('ap-club-join-date');
+  const logoContainer = document.getElementById('ap-club-logo-container');
+  const detailBtn = document.getElementById('ap-club-detail-btn');
+
+  // Find club in appData.clubs
+  const club = (appData.clubs || []).find(c => c.name.toLowerCase() === clubName.toLowerCase());
 
   if (titleEl) titleEl.textContent = clubName;
-  if (locationEl) locationEl.textContent = 'Banjarnegara, Jawa Tengah';
-  if (joinDateEl) joinDateEl.textContent = 'Januari 2025';
+  if (locationEl) locationEl.textContent = club ? (club.address || 'Banjarnegara, Jawa Tengah') : 'Banjarnegara, Jawa Tengah';
+  
+  if (joinDateEl) {
+    if (club && club.created_at) {
+      try {
+        const joinDate = new Date(club.created_at);
+        if (!isNaN(joinDate.getTime())) {
+          joinDateEl.textContent = joinDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        } else {
+          joinDateEl.textContent = 'Januari 2025';
+        }
+      } catch(e) {
+        joinDateEl.textContent = 'Januari 2025';
+      }
+    } else {
+      joinDateEl.textContent = 'Januari 2025';
+    }
+  }
 
-  const clubAthletes = appData.standings.filter(s => 
-    s.club && s.club.toLowerCase() === clubName.toLowerCase()
+  // Calculate real athlete count from registered players
+  const clubAthletes = appData.players.filter(p => 
+    p.club && p.club.toLowerCase() === clubName.toLowerCase()
   );
   if (athleteCountEl) athleteCountEl.textContent = clubAthletes.length + ' Atlet';
   
+  // Calculate best rank from standings for these athletes
   if (topRankEl) {
-    const bestRank = clubAthletes.reduce((min, a) => Math.min(min, a.rank || 999), 999);
+    const clubAthleteNames = clubAthletes.map(p => p.name.toLowerCase());
+    const standingsAthletes = appData.standings.filter(s => 
+      clubAthleteNames.includes(s.name.toLowerCase())
+    );
+    const bestRank = standingsAthletes.reduce((min, a) => Math.min(min, a.rank || 999), 999);
     topRankEl.textContent = bestRank < 999 ? '#' + bestRank + ' BOC Ranking' : '-';
+  }
+
+  // Handle club logo rendering
+  if (logoContainer) {
+    if (club && club.logo) {
+      logoContainer.innerHTML = `<img src="${club.logo}" alt="${clubName}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+    } else {
+      const displayAbbr = club ? (club.abbr || club.name.substring(0, 7).toUpperCase()) : 'VICTORY';
+      logoContainer.innerHTML = `
+        <svg viewBox="0 0 100 120" width="100%" height="100%">
+          <defs>
+            <linearGradient id="club-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffe259" />
+              <stop offset="100%" stop-color="#ca8a04" />
+            </linearGradient>
+          </defs>
+          <path d="M 15 10 L 85 10 C 85 10, 88 55, 70 85 C 58 105, 50 112, 50 112 C 50 112, 42 105, 30 85 C 12 55, 15 10, 15 10 Z" fill="#070c19" stroke="url(#club-gold)" stroke-width="2"/>
+          <line x1="26" y1="94" x2="74" y2="26" stroke="url(#club-gold)" stroke-width="1.2" stroke-opacity="0.6"/>
+          <line x1="74" y1="94" x2="26" y2="26" stroke="url(#club-gold)" stroke-width="1.2" stroke-opacity="0.6"/>
+          <text x="50" y="42" fill="url(#club-gold)" font-size="9.5" font-family="Outfit" font-weight="900" text-anchor="middle" letter-spacing="0.8">${displayAbbr}</text>
+          <circle cx="50" cy="68" r="13" fill="#111" stroke="url(#club-gold)" stroke-width="1.2"/>
+          <circle cx="50" cy="68" r="6.5" fill="#fff"/>
+          <text x="50" y="71.5" fill="#111" font-size="8.5" font-family="Inter" font-weight="900" text-anchor="middle">8</text>
+        </svg>
+      `;
+    }
+  }
+
+  // Handle button navigation
+  if (detailBtn) {
+    if (club) {
+      detailBtn.onclick = function() {
+        window.openPublicClubDetail(club.id);
+      };
+    } else {
+      detailBtn.onclick = function() {
+        switchTab('tab-clubs');
+      };
+    }
   }
 }
 
@@ -11816,32 +12141,142 @@ function renderQualificationBanner(rank) {
   const banner = document.getElementById('ap-qualification-banner');
   if (!banner) return;
 
+  const yearText = currentBocYear || '2026';
   if (rank <= 16) {
     banner.className = 'ap-qualification-banner';
-    document.getElementById('ap-qual-title').textContent = 'Lolos Battle of Champions 2026';
-    document.getElementById('ap-qual-desc').textContent = 'Atlet ini berada dalam zona 16 besar kualifikasi BOC — berhak tampil di babak final bergengsi.';
+    document.getElementById('ap-qual-title').textContent = `Lolos Battle of Champions ${yearText}`;
+    document.getElementById('ap-qual-desc').textContent = `Atlet ini berada dalam zona 16 besar kualifikasi BOC ${yearText} — berhak tampil di babak final bergengsi.`;
     banner.querySelector('.ap-qual-icon').className = 'fa-solid fa-crown ap-qual-icon';
   } else {
     banner.className = 'ap-qualification-banner ap-qual-out';
     document.getElementById('ap-qual-title').textContent = 'Di Luar Zona Kualifikasi';
-    document.getElementById('ap-qual-desc').textContent = 'Atlet ini masih membutuhkan poin tambahan untuk menembus zona 16 besar kualifikasi BOC 2026.';
+    document.getElementById('ap-qual-desc').textContent = `Atlet ini masih membutuhkan poin tambahan untuk menembus zona 16 besar kualifikasi BOC ${yearText}.`;
     banner.querySelector('.ap-qual-icon').className = 'fa-solid fa-circle-exclamation ap-qual-icon';
   }
 }
 
-// Scroll smoothly to results table
-function scrollToBocResults() {
-  const table = document.querySelector('.ap-col-boc-table');
-  if (table) {
-    table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// Open the public athlete tournament results modal
+function openAthleteResultsModal(athleteName, eventScores, avatarUrl, clubName, totalPoints, handicap) {
+  const modal = document.getElementById('pub-athlete-results-modal');
+  const nameEl = document.getElementById('pub-athlete-results-name');
+  const avatarEl = document.getElementById('pub-athlete-results-avatar');
+  const hcEl = document.getElementById('pub-athlete-results-hc');
+  const clubEl = document.getElementById('pub-athlete-results-club');
+  const pointsEl = document.getElementById('pub-athlete-results-points');
+  const tbody = document.getElementById('pub-athlete-results-tbody');
+
+  if (!modal || !tbody) return;
+
+  if (nameEl) nameEl.textContent = athleteName;
+  if (avatarEl) {
+    avatarEl.src = avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(athleteName)}`;
   }
+  if (hcEl) {
+    hcEl.textContent = `HC ${handicap || '3B'}`;
+    hcEl.className = `table-badge-hc ${getHandicapColorClass(handicap)}`;
+  }
+  if (clubEl) clubEl.textContent = clubName || 'Independen';
+  if (pointsEl) pointsEl.textContent = `${totalPoints || 0} Pts`;
+
+  const results = [];
+  const activeSirkuits = (bocSirkuits && bocSirkuits.length > 0) ? bocSirkuits : [];
+
+  eventScores.forEach((score, idx) => {
+    if (score !== "" && score !== undefined && score !== null && idx < activeSirkuits.length) {
+      const sirkuitName = activeSirkuits[idx];
+      const matchEvent = appData.events.find(e => e.title && e.title.toUpperCase().includes(sirkuitName.toUpperCase()));
+      let dateStr = '';
+      if (matchEvent && matchEvent.date) {
+        dateStr = matchEvent.date;
+      } else {
+        const mockMonths = ['Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const month = mockMonths[idx % mockMonths.length];
+        const day = 10 + (idx * 2) % 18;
+        dateStr = `${day} ${month} ${currentBocYear || '2026'}`;
+      }
+
+      results.push({ 
+        event: sirkuitName, 
+        score: parseInt(score, 10), 
+        date: dateStr,
+        status: matchEvent && matchEvent.status ? matchEvent.status : 'Selesai',
+        idx 
+      });
+    }
+  });
+
+  results.sort((a, b) => b.score - a.score);
+
+  if (results.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 16px;">
+          <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; display: block; opacity: 0.6;"></i>
+          Belum ada riwayat hasil turnamen untuk atlet ini
+        </td>
+      </tr>
+    `;
+  } else {
+    const getMockPositionLocal = (score) => {
+      if (score === 12) return { text: 'Champion', badge: 'ap-badge-champion', ptsClass: '' };
+      if (score === 9) return { text: 'Runner-Up', badge: 'ap-badge-runner', ptsClass: 'points-silver' };
+      if (score === 7) return { text: 'Semifinal', badge: 'ap-badge-top8', ptsClass: 'points-blue' };
+      if (score === 5) return { text: 'Top 8', badge: 'ap-badge-top8', ptsClass: 'points-blue' };
+      if (score === 3) return { text: 'Top 16', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+      if (score === 1) return { text: 'Top 32', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+      return { text: 'Peserta', badge: 'ap-badge-top16', ptsClass: 'points-blue' };
+    };
+
+    const getStatusPillLocal = (status) => {
+      const norm = (status || '').toLowerCase().trim();
+      if (norm === 'ongoing' || norm === 'berlangsung' || norm === 'daftar') {
+        return `<span class="ap-status-pill status-ongoing">Berlangsung</span>`;
+      }
+      if (norm === 'cancelled' || norm === 'batal') {
+        return `<span class="ap-status-pill status-cancelled">Batal</span>`;
+      }
+      return `<span class="ap-status-pill">Selesai</span>`;
+    };
+
+    tbody.innerHTML = results.map(r => {
+      const pos = getMockPositionLocal(r.score);
+      const posText = r.score === 12 ? '🥇 Champion' : (r.score === 9 ? '🥈 Runner-Up' : pos.text);
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+          <td style="padding: 12px 16px; font-weight: 600; color: #fff;">${r.event}</td>
+          <td style="padding: 12px 16px; color: var(--text-muted);">${r.date}</td>
+          <td style="padding: 12px 16px; font-weight: 700; color: ${r.score === 12 ? '#fbbf24' : '#fff'};">${posText}</td>
+          <td style="padding: 12px 16px; text-align: center; font-weight: 900; color: #fbbf24;">${r.score}</td>
+          <td style="padding: 12px 16px; text-align: center;">${getStatusPillLocal(r.status)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  modal.style.display = 'flex';
 }
+
+// Scroll smoothly to results table or open results modal
+function scrollToBocResults() {
+  const athleteName = document.getElementById('ap-hero-name')?.textContent || '';
+  const avatarUrl = document.getElementById('ap-hero-portrait')?.src || '';
+  const clubName = document.getElementById('ap-club-badge')?.textContent?.trim() || 'Independen';
+  const totalPoints = parseInt(document.getElementById('ap-kpi-points')?.textContent, 10) || 0;
+  const handicap = document.getElementById('ap-hc-badge')?.textContent?.replace('HC ', '')?.trim() || '3B';
+  const scores = window.currentAthleteEventScores || [];
+
+  openAthleteResultsModal(athleteName, scores, avatarUrl, clubName, totalPoints, handicap);
+}
+
+// Bind to window context
+window.scrollToBocResults = scrollToBocResults;
+window.openAthleteResultsModal = openAthleteResultsModal;
 
 // Share athlete profile
 function shareAthleteProfile(platform) {
   const name = document.getElementById('ap-hero-name').textContent;
   const url = window.location.href;
-  const text = name + ' — Profil Atlet POBSI Banjarnegara | Battle of Champions 2026';
+  const text = name + ' — Profil Atlet POBSI Banjarnegara | Battle of Champions ' + (currentBocYear || '2026');
 
   if (platform === 'whatsapp') {
     window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + url), '_blank');
