@@ -7548,7 +7548,7 @@ function setupAthleteDetailActions() {
   const editClose = document.getElementById("ad-drawer-close");
 
   function openEditDrawer() {
-    const player = appData.players.find(p => p.id === adActivePlayerId);
+    const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
     if (!player) return;
 
     if (typeof window.resetEditPlayerWizard === 'function') {
@@ -7787,7 +7787,7 @@ function setupAthleteDetailActions() {
   const btnHCTop = document.getElementById("ad-btn-hc-top");
   const btnHCFooter = document.getElementById("ad-fbtn-hc");
   async function triggerHCUpdate() {
-    const player = appData.players.find(p => p.id === adActivePlayerId);
+    const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
     if (!player) return;
 
     const modal = document.getElementById("ad-hc-modal");
@@ -8007,7 +8007,7 @@ function setupAthleteDetailActions() {
     btnTransfer.parentNode.replaceChild(newBtnTransfer, btnTransfer);
 
     newBtnTransfer.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
+      const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
       if (!player) return;
 
       const transferModal = document.getElementById("ad-transfer-club-modal");
@@ -8101,7 +8101,7 @@ function setupAthleteDetailActions() {
     btnStatus.parentNode.replaceChild(newBtnStatus, btnStatus);
 
     newBtnStatus.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
+      const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
       if (!player) return;
       const newStatus = (player.status || "Aktif") === "Aktif" ? "Nonaktif" : "Aktif";
       
@@ -8145,7 +8145,7 @@ function setupAthleteDetailActions() {
     btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
 
     newBtnDelete.addEventListener("click", () => {
-      const player = appData.players.find(p => p.id === adActivePlayerId);
+      const player = appData.players.find(p => p.id.toString() === String(adActivePlayerId));
       if (!player) return;
 
       showCustomConfirm(
@@ -8172,7 +8172,7 @@ function setupAthleteDetailActions() {
               showCustomToast(`Error: ${err.message}`, "error");
             }
           } else {
-            appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
+            appData.players = appData.players.filter(p => p.id.toString() !== String(adActivePlayerId));
             showCustomToast(`Luring: Atlet "${player.name}" dihapus dari memori browser.`, "success");
             updateWorkspaceStats();
             renderWorkspacePreviews();
