@@ -7750,6 +7750,9 @@ function setupAthleteDetailActions() {
     btnTransfer.parentNode.replaceChild(newBtnTransfer, btnTransfer);
 
     newBtnTransfer.addEventListener("click", () => {
+      const player = appData.players.find(p => p.id === adActivePlayerId);
+      if (!player) return;
+
       const transferModal = document.getElementById("ad-transfer-club-modal");
       const closeBtn = document.getElementById("transfer-modal-close");
       const cancelBtn = document.getElementById("transfer-modal-btn-cancel");
