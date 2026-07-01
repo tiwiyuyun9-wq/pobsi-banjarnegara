@@ -394,15 +394,22 @@ async function loadDataFromApi() {
     console.log(`Menghubungkan ke Vercel Serverless API untuk memuat database tahun ${currentBocYear}...`);
     
     // Fetch keenam endpoint dan sirkuit secara paralel untuk performa maksimal
-    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes, matchesRes] = await Promise.all([
+    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes, matchesRes, dbStatusRes] = await Promise.all([
       fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/standings?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/events', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/docs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/clubs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/boc-sirkuits?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/matches', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch('/api/matches', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/db-status', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
+
+    if (dbStatusRes && dbStatusRes.database) {
+      window.activeDatabase = dbStatusRes.database;
+    } else {
+      window.activeDatabase = "SQLite";
+    }
 
     // Update database runtime jika response API valid
     if (playersRes && Array.isArray(playersRes)) {
@@ -6747,7 +6754,8 @@ async function renderAthleteDetail(playerId) {
   document.getElementById("ad-val-dob").textContent = simulatedDOB;
   
   let joinDateStr = "";
-  const isPreSeeded = player.id && parseInt(player.id.replace("P", ""), 10) <= 28;
+  const idNum = player.id ? parseInt(player.id.replace("P", ""), 10) : 999;
+  const isPreSeeded = !player.created_at && (idNum <= 2 || (idNum <= 28 && window.activeDatabase !== "Supabase"));
   if (isPreSeeded) {
     const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
     joinDateStr = `${day} Januari 2026`;
@@ -7217,7 +7225,8 @@ function renderADTimeline(player, hcHistory, tourneys, matches) {
   // 3. Add registration log at the very beginning (earliest date)
   let regDateObj = null;
   let regDateStr = "";
-  const isPreSeeded = player.id && parseInt(player.id.replace("P", ""), 10) <= 28;
+  const idNum = player.id ? parseInt(player.id.replace("P", ""), 10) : 999;
+  const isPreSeeded = !player.created_at && (idNum <= 2 || (idNum <= 28 && window.activeDatabase !== "Supabase"));
   if (isPreSeeded) {
     const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
     regDateObj = new Date(2026, 0, day, 9, 0);
