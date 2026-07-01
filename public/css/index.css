@@ -7336,7 +7336,7 @@ tr:hover td.sticky-col {
 /* Timeline widget */
 .ad-timeline-wrapper {
   overflow-y: auto;
-  max-height: 220px;
+  max-height: 380px;
 }
 
 .ad-timeline {
@@ -7366,6 +7366,7 @@ tr:hover td.sticky-col {
 .ad-timeline-dot.gold { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
 .ad-timeline-dot.purple { background: #8b5cf6; box-shadow: 0 0 8px rgba(139, 92, 246, 0.5); }
 .ad-timeline-dot.green { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+.ad-timeline-dot.red { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
 
 .ad-timeline-content {
   display: flex;

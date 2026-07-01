@@ -6871,7 +6871,7 @@ async function renderAthleteDetail(playerId) {
   renderADHandicapHistory(player, hcHistory);
 
   // Load timeline
-  renderADTimeline(player, hcHistory, tourneys);
+  renderADTimeline(player, hcHistory, tourneys, matches);
 }
 
 // 2. Chart Rendering using inline SVGs
@@ -7133,7 +7133,7 @@ function renderADHandicapHistory(player, dbHistory) {
   `).join("");
 }
 
-function renderADTimeline(player, hcHistory, tourneys) {
+function renderADTimeline(player, hcHistory, tourneys, matches) {
   const container = document.getElementById("ad-timeline-container");
   if (!container) return;
 
@@ -7186,6 +7186,20 @@ function renderADTimeline(player, hcHistory, tourneys) {
     });
   }
 
+  // 2b. Add match history logs
+  if (matches && matches.length > 0) {
+    matches.forEach(m => {
+      const isWin = m.outcome === "W";
+      logs.push({
+        dateObj: parseDate(m.date),
+        time: `${m.date} &bull; 15:00 WIB`,
+        title: isWin ? `Pertandingan: Menang vs ${m.opponent_name}` : `Pertandingan: Kalah vs ${m.opponent_name}`,
+        desc: `Skor akhir ${m.score} (${m.opponent_club || "Tanpa Klub"})`,
+        cls: isWin ? "green" : "red"
+      });
+    });
+  }
+
   // 3. Add registration log at the very beginning (earliest date)
   const joinDateStr = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Jan 2025` : "12 Jan 2025";
   logs.push({
@@ -7200,7 +7214,7 @@ function renderADTimeline(player, hcHistory, tourneys) {
   logs.sort((a, b) => b.dateObj - a.dateObj);
 
   // Fallback to default mock if no data (e.g. newly created player without handicap history yet, except registration)
-  if (logs.length <= 1 && (!hcHistory || hcHistory.length === 0) && (!tourneys || tourneys.length === 0)) {
+  if (logs.length <= 1 && (!hcHistory || hcHistory.length === 0) && (!tourneys || tourneys.length === 0) && (!matches || matches.length === 0)) {
     // If only registration is present, we can add a basic initialization change log to avoid an empty-looking timeline
     logs.unshift({
       dateObj: new Date(2025, 0, (parseInt(player.id.replace("P", "")) % 28) + 1, 10, 0),
