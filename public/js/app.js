@@ -4940,31 +4940,6 @@ function setupPlayerManagement() {
     });
   }
 
-  const btnBulkExport = document.getElementById("pm-bulk-export");
-  if (btnBulkExport) {
-    btnBulkExport.addEventListener("click", () => {
-      const ids = Array.from(pmSelectedIds);
-      if (ids.length === 0) return;
-      const selectedPlayers = appData.players.filter(p => ids.includes(p.id.toString()));
-      const headers = ["ID", "Nama", "Klub", "Handicap", "Status", "Gender", "Umur", "No HP", "Alamat"];
-      const rows = selectedPlayers.map(p => [
-        p.id, p.name, p.club, p.handicap, p.status || "Aktif", p.gender || "-", p.age || "-", p.phone || "-", p.address || "-"
-      ]);
-      const csv = [headers.join(","), ...rows.map(r => r.map(v => `"${v}"`).join(","))].join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `data_${ids.length}_atlet_pobsi.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      pmSelectedIds.clear();
-      updateBulkBar();
-      updateCheckAllState();
-      renderPMTable();
-    });
-  }
 
   const btnBulkToggleStatus = document.getElementById('pm-bulk-toggle-status');
   if (btnBulkToggleStatus) {
