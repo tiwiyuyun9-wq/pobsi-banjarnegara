@@ -3133,6 +3133,70 @@
         </div>
 
 
+        <!-- Transfer Club Premium Modal Popup (SSOT: pm-modal) -->
+        <div class="pm-modal-overlay" id="ad-transfer-club-modal" style="display: none; justify-content: center; align-items: center;">
+          <div class="pm-modal" style="width: 550px; max-width: 95%;">
+            <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+              <div>
+                <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-exchange-alt text-gold"></i> Transfer Klub Atlet
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                  <span id="transfer-modal-player-name" style="font-weight: 600; color: var(--text-main);">-</span>
+                  <span style="color: rgba(255,255,255,0.15)">|</span>
+                  <span id="transfer-modal-player-club">-</span>
+                </p>
+              </div>
+              <button class="pm-modal-close" id="transfer-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="form-admin-transfer-club" class="admin-form-element" style="gap: 20px; padding: 20px 24px 24px 24px;">
+              <input type="hidden" id="transfer-modal-player-id">
+              
+              <!-- Visual Preview Block -->
+              <div class="hc-preview-block" style="background: rgba(15, 23, 50, 0.45); border: 1px solid rgba(251, 191, 36, 0.12); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-around; position: relative; overflow: hidden; margin-bottom: 10px;">
+                <!-- Left: Current Club -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2;">
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Klub Saat Ini</span>
+                  <span class="ad-tag" id="transfer-preview-current-club" style="font-size: 0.88rem; font-weight: 700; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 4px 12px; border-radius: 6px; text-align: center; max-width: 140px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">-</span>
+                </div>
+                
+                <!-- Center Arrow -->
+                <div style="display: flex; flex-direction: column; align-items: center; z-index: 2;">
+                  <i class="fa-solid fa-exchange-alt text-gold" style="font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));"></i>
+                </div>
+                
+                <!-- Right: New Club -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2;">
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Klub Tujuan</span>
+                  <span class="ad-tag green" id="transfer-preview-new-club" style="font-size: 0.88rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 6px; text-align: center; max-width: 140px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">-</span>
+                </div>
+              </div>
+              
+              <!-- Club Selection Dropdown -->
+              <div class="form-group-item">
+                <label class="form-lbl" for="transfer-modal-select-club">Pilih Klub Baru <span style="color: var(--red);">*</span></label>
+                <select id="transfer-modal-select-club" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: var(--transition-smooth);">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <!-- Reason text input -->
+              <div class="form-group-item">
+                <label class="form-lbl" for="transfer-modal-reason">Alasan Transfer / Keterangan</label>
+                <textarea id="transfer-modal-reason" placeholder="Masukkan alasan transfer atau rincian administratif (opsional)..." style="width: 100%; min-height: 80px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth); resize: vertical;"></textarea>
+              </div>
+              
+              <!-- Modal Footer Actions -->
+              <div class="pm-modal-footer" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" id="transfer-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff;">Proses Transfer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+
         <!-- PANE 2C: BATTLE OF CHAMPIONS MANAGEMENT CENTER -->
         <div class="workspace-pane" id="pane-boc">
           <div id="boc-standings-container">

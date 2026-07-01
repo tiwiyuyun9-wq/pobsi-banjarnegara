@@ -7746,33 +7746,91 @@ function setupAthleteDetailActions() {
   // Transfer club action
   const btnTransfer = document.getElementById("ad-fbtn-transfer");
   if (btnTransfer) {
-    btnTransfer.addEventListener("click", () => {
-      const newClub = prompt("Masukkan Nama Klub Baru untuk Atlet:", "Golden Banjarnegara");
-      if (newClub) {
+    const newBtnTransfer = btnTransfer.cloneNode(true);
+    btnTransfer.parentNode.replaceChild(newBtnTransfer, btnTransfer);
+
+    newBtnTransfer.addEventListener("click", () => {
+      const transferModal = document.getElementById("ad-transfer-club-modal");
+      const closeBtn = document.getElementById("transfer-modal-close");
+      const cancelBtn = document.getElementById("transfer-modal-btn-cancel");
+      const selectClub = document.getElementById("transfer-modal-select-club");
+      const formTransfer = document.getElementById("form-admin-transfer-club");
+
+      if (!transferModal || !selectClub || !formTransfer) return;
+
+      // Set modal initial texts and fields
+      document.getElementById("transfer-modal-player-id").value = player.id;
+      document.getElementById("transfer-modal-player-name").textContent = player.name;
+      document.getElementById("transfer-modal-player-club").textContent = player.club || "Klub -";
+      document.getElementById("transfer-preview-current-club").textContent = player.club || "Klub -";
+      document.getElementById("transfer-preview-new-club").textContent = "-";
+      document.getElementById("transfer-modal-reason").value = "";
+
+      // Populate dropdown list with clubs (excluding current club if possible, or just listing all)
+      const clubs = appData.clubs || [];
+      const filteredClubs = clubs.filter(c => c.name !== player.club);
+
+      if (filteredClubs.length > 0) {
+        selectClub.innerHTML = '<option value="" disabled selected>-- Pilih Klub Tujuan --</option>' +
+          filteredClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+      } else {
+        selectClub.innerHTML = '<option value="" disabled selected>-- Tidak Ada Klub Alternatif --</option>';
+      }
+
+      // Update preview target club name on change
+      selectClub.onchange = () => {
+        document.getElementById("transfer-preview-new-club").textContent = selectClub.value || "-";
+      };
+
+      // Close handlers
+      if (closeBtn) closeBtn.onclick = () => { transferModal.style.display = "none"; };
+      if (cancelBtn) cancelBtn.onclick = () => { transferModal.style.display = "none"; };
+      transferModal.onclick = (e) => { if (e.target === transferModal) transferModal.style.display = "none"; };
+
+      // Form submit handler
+      formTransfer.onsubmit = (e) => {
+        e.preventDefault();
+        const selectedClubName = selectClub.value;
+        const reason = document.getElementById("transfer-modal-reason").value.trim();
+
+        if (!selectedClubName) {
+          alert("Silakan pilih klub tujuan transfer terlebih dahulu!");
+          return;
+        }
+
+        const payload = {
+          club: selectedClubName,
+          transferReason: reason || "Transfer administratif oleh Admin POBSI"
+        };
+
         if (isServerOnline) {
-          fetch(`/api/players/${adActivePlayerId}`, {
+          fetch(`/api/players/${player.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ club: newClub })
+            body: JSON.stringify(payload)
           }).then(res => {
             if (res.ok) {
-              alert(`Klub berhasil diperbarui menjadi "${newClub}"!`);
+              alert(`Klub atlet ${player.name} berhasil ditransfer ke "${selectedClubName}"!`);
+              transferModal.style.display = "none";
               loadDataFromApi().then(() => {
-                renderAthleteDetail(adActivePlayerId);
+                renderAthleteDetail(player.id);
                 renderWorkspacePreviews();
               });
+            } else {
+              alert("Gagal memproses transfer klub di server.");
             }
           }).catch(err => alert(`Error: ${err.message}`));
         } else {
-          const player = appData.players.find(p => p.id === adActivePlayerId);
-          if (player) {
-            player.club = newClub;
-            alert(`Luring: Klub diperbarui menjadi "${newClub}"`);
-            renderAthleteDetail(adActivePlayerId);
-            renderWorkspacePreviews();
-          }
+          player.club = selectedClubName;
+          alert(`Luring: Klub atlet ${player.name} diperbarui menjadi "${selectedClubName}"`);
+          transferModal.style.display = "none";
+          renderAthleteDetail(player.id);
+          renderWorkspacePreviews();
         }
-      }
+      };
+
+      // Open Modal
+      transferModal.style.display = "flex";
     });
   }
 
