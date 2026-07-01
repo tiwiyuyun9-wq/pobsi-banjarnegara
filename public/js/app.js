@@ -6724,6 +6724,18 @@ async function renderAthleteDetail(playerId) {
     badgeStatusEl.className = `ad-tag ${isAktif ? "green" : "red"}`;
   }
 
+  const btnStatus = document.getElementById("ad-fbtn-status");
+  if (btnStatus) {
+    const isAktif = (player.status || "Aktif").toLowerCase() === "aktif";
+    if (isAktif) {
+      btnStatus.innerHTML = `<i class="fa-solid fa-ban"></i> Nonaktifkan Atlet`;
+      btnStatus.className = "ad-fbtn ad-fbtn-amber";
+    } else {
+      btnStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> Aktifkan Atlet`;
+      btnStatus.className = "ad-fbtn ad-fbtn-green";
+    }
+  }
+
   // Personal details
   document.getElementById("ad-val-name").textContent = player.name;
   document.getElementById("ad-val-club").textContent = player.club;

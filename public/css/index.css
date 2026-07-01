@@ -7465,6 +7465,17 @@ tr:hover td.sticky-col {
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
 }
 
+.ad-fbtn-green {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+.ad-fbtn-green:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
 /* Centered Premium Modal Overlay & Box (Upgraded from sliding drawer) */
 .ad-drawer-overlay {
   position: fixed;
