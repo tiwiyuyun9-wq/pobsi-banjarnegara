@@ -1696,7 +1696,7 @@
             <div class="ap-club-loc"><i class="fa-solid fa-location-dot"></i> <span id="ap-club-location">Banjarnegara, Jawa Tengah</span></div>
             <div class="ap-club-stat-row"><span class="ap-club-stat-label">Total Atlet</span><span class="ap-club-stat-val" id="ap-club-athlete-count">16 Atlet</span></div>
             <div class="ap-club-stat-row"><span class="ap-club-stat-label">Atlet Terbaik</span><span class="ap-club-stat-val" id="ap-club-top-rank">#1 BOC Ranking</span></div>
-            <div class="ap-club-stat-row"><span class="ap-club-stat-label">Bergabung Sejak</span><span class="ap-club-stat-val" id="ap-club-join-date">Januari 2025</span></div>
+            <div class="ap-club-stat-row"><span class="ap-club-stat-label">Bergabung Sejak</span><span class="ap-club-stat-val" id="ap-club-join-date">Januari 2026</span></div>
           </div>
         </div>
         <button class="ap-club-link-btn" id="ap-club-detail-btn" onclick="switchTab('tab-clubs')">
@@ -1839,6 +1839,23 @@
        ADMIN CONTROL CENTER WORKSPACE (FULLSCREEN COMMAND CENTER)
        ============================================== -->
   <div id="admin-workspace-screen" class="admin-workspace-layout" style="display: none;">
+    <!-- Mobile Top Header Bar -->
+    <div class="admin-mobile-header">
+      <button class="mobile-menu-toggle" id="btn-admin-mobile-toggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="mobile-header-brand">
+        <img src="images/pobsi-logo.png" alt="Logo POBSI" class="mobile-logo-img">
+        <span class="mobile-brand-title">POBSI Command Center</span>
+      </div>
+      <button class="mobile-logout-btn" id="btn-admin-mobile-logout" title="Keluar Aman">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar overlay for closing on click -->
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay"></div>
+
     <!-- Left Sidebar Control Navigation -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
@@ -2281,7 +2298,7 @@
         
         <!-- PANE 2: ATLET / PLAYERS — Player Management Console -->
         <div class="workspace-pane" id="pane-players">
-          <div style="display: grid; grid-template-columns: 1fr 360px; gap: 24px;">
+          <div class="admin-split-layout">
             <!-- LEFT: Main Content Area -->
             <div>
               <!-- Page Header (SSOT: overview-header-block-premium) -->
@@ -2558,12 +2575,6 @@
                 <button class="ad-btn ad-btn-outline" id="ad-btn-back">
                   <i class="fa-solid fa-arrow-left"></i> Kembali
                 </button>
-                <button class="ad-btn ad-btn-primary" id="ad-btn-edit-top">
-                  <i class="fa-solid fa-pen-to-square"></i> Edit Atlet
-                </button>
-                <button class="ad-btn ad-btn-purple" id="ad-btn-hc-top">
-                  <i class="fa-solid fa-chart-line"></i> Update Handicap
-                </button>
               </div>
             </div>
 
@@ -2638,11 +2649,14 @@
 
               <!-- Right Cards: 4 KPI Cards Grid -->
               <div class="ad-kpi-grid">
-                <div class="ad-kpi-card">
+                <div class="ad-kpi-card" style="position: relative;">
+                  <button class="ad-kpi-info-btn" onclick="document.getElementById('ad-ranking-info-modal').style.display='flex'" title="Info Ranking Regional" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; padding: 4px; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#fff';" onmouseout="this.style.opacity='0.6'; this.style.color='var(--text-muted)';">
+                    <i class="fa-solid fa-circle-info"></i>
+                  </button>
                   <div class="ad-kpi-icon gold"><i class="fa-solid fa-trophy"></i></div>
                   <div class="ad-kpi-content">
                     <span class="ad-kpi-value" id="ad-kpi-rank">#3</span>
-                    <span class="ad-kpi-label">Ranking Nasional</span>
+                    <span class="ad-kpi-label">Ranking Regional (Banjarnegara)</span>
                   </div>
                 </div>
                 <div class="ad-kpi-card" style="position: relative; flex-direction: column; align-items: flex-start; gap: 8px;">
@@ -2688,10 +2702,10 @@
                 <button class="ad-fbtn ad-fbtn-outline" id="ad-fbtn-edit">
                   <i class="fa-solid fa-pen"></i> Edit Profil
                 </button>
-                <button class="ad-fbtn ad-fbtn-outline" id="ad-fbtn-hc">
+                <button class="ad-fbtn ad-fbtn-blue" id="ad-fbtn-hc">
                   <i class="fa-solid fa-arrow-trend-up"></i> Update Handicap
                 </button>
-                <button class="ad-fbtn ad-fbtn-outline" id="ad-fbtn-transfer">
+                <button class="ad-fbtn ad-fbtn-purple" id="ad-fbtn-transfer">
                   <i class="fa-solid fa-exchange-alt"></i> Transfer Klub
                 </button>
                 <button class="ad-fbtn ad-fbtn-amber" id="ad-fbtn-status">
@@ -3112,6 +3126,103 @@
                 <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff;">Update Handicap</button>
               </div>
             </form>
+          </div>
+        </div>
+
+
+        <!-- Transfer Club Premium Modal Popup (SSOT: pm-modal) -->
+        <div class="pm-modal-overlay" id="ad-transfer-club-modal" style="display: none; justify-content: center; align-items: center;">
+          <div class="pm-modal" style="width: 550px; max-width: 95%;">
+            <div class="pm-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px;">
+              <div>
+                <h3 style="font-family: var(--font-headers); font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-exchange-alt text-gold"></i> Transfer Klub Atlet
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                  <span id="transfer-modal-player-name" style="font-weight: 600; color: var(--text-main);">-</span>
+                  <span style="color: rgba(255,255,255,0.15)">|</span>
+                  <span id="transfer-modal-player-club">-</span>
+                </p>
+              </div>
+              <button class="pm-modal-close" id="transfer-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="form-admin-transfer-club" class="admin-form-element" style="gap: 20px; padding: 20px 24px 24px 24px;">
+              <input type="hidden" id="transfer-modal-player-id">
+              
+              <!-- Visual Preview Block -->
+              <div class="hc-preview-block" style="background: rgba(15, 23, 50, 0.45); border: 1px solid rgba(251, 191, 36, 0.12); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-around; position: relative; overflow: hidden; margin-bottom: 10px;">
+                <!-- Left: Current Club -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2;">
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Klub Saat Ini</span>
+                  <span class="ad-tag" id="transfer-preview-current-club" style="font-size: 0.88rem; font-weight: 700; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 4px 12px; border-radius: 6px; text-align: center; max-width: 140px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">-</span>
+                </div>
+                
+                <!-- Center Arrow -->
+                <div style="display: flex; flex-direction: column; align-items: center; z-index: 2;">
+                  <i class="fa-solid fa-exchange-alt text-gold" style="font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));"></i>
+                </div>
+                
+                <!-- Right: New Club -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2;">
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Klub Tujuan</span>
+                  <span class="ad-tag green" id="transfer-preview-new-club" style="font-size: 0.88rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 6px; text-align: center; max-width: 140px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">-</span>
+                </div>
+              </div>
+              
+              <!-- Club Selection Dropdown -->
+              <div class="form-group-item">
+                <label class="form-lbl" for="transfer-modal-select-club">Pilih Klub Baru <span style="color: var(--red);">*</span></label>
+                <select id="transfer-modal-select-club" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: var(--transition-smooth);">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <!-- Reason text input -->
+              <div class="form-group-item">
+                <label class="form-lbl" for="transfer-modal-reason">Alasan Transfer / Keterangan</label>
+                <textarea id="transfer-modal-reason" placeholder="Masukkan alasan transfer atau rincian administratif (opsional)..." style="width: 100%; min-height: 80px; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-smooth); resize: vertical;"></textarea>
+              </div>
+              
+              <!-- Modal Footer Actions -->
+              <div class="pm-modal-footer" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" id="transfer-modal-btn-cancel" style="padding: 10px 20px; font-size: 0.88rem; border-radius: var(--radius-sm);">Batal</button>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.88rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff;">Proses Transfer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Regional Ranking Explanation Modal Overlay -->
+        <div class="pm-modal-overlay" id="ad-ranking-info-modal" style="display: none; justify-content: center; align-items: center; z-index: 10000; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);">
+          <div class="pm-modal" style="width: 500px; max-width: 90%; background: var(--bg-primary); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div class="pm-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 12px; margin-bottom: 16px;">
+              <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i class="fa-solid fa-circle-info text-gold" style="color: #ffd700;"></i> Informasi Ranking Regional
+              </h3>
+              <button class="pm-modal-close" onclick="document.getElementById('ad-ranking-info-modal').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; transition: color 0.2s;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="pm-modal-body" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
+              <p>Sistem <strong>Ranking Regional (Banjarnegara)</strong> dihitung secara otomatis dan dinamis berdasarkan ketentuan berikut:</p>
+              <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">1.</span>
+                  <span><strong>Total Poin Akumulatif:</strong> Seluruh atlet diurutkan berdasarkan total poin berjalan (lifetime points) dari yang terbesar hingga terkecil.</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">2.</span>
+                  <span><strong>Perhitungan Dinamis:</strong> Setiap kali handicap diupdate, poin bertambah, atau ada atlet baru terdaftar, ranking akan langsung terupdate secara real-time di seluruh sistem (profil, tabel admin, dan klub).</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <span style="color: #ffd700; font-weight: bold;">3.</span>
+                  <span><strong>Tiebreaker:</strong> Apabila terdapat poin yang sama, urutan ditentukan berdasarkan ID pendaftaran atlet.</span>
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; font-style: italic; margin-top: 4px;">Peringkat ini mencerminkan prestasi atlet secara menyeluruh di Kabupaten Banjarnegara.</p>
+            </div>
+            <div class="pm-modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 16px; margin-top: 16px; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('ad-ranking-info-modal').style.display='none'" style="padding: 8px 20px; font-size: 0.85rem; border-radius: var(--radius-sm); background: var(--gradient-primary); border: none; color: #fff; cursor: pointer; font-weight: 600;">Mengerti</button>
+            </div>
           </div>
         </div>
 
@@ -4934,7 +5045,7 @@
 
         <!-- PANE 5: KELOLA KLUB — Club Management Console -->
         <div class="workspace-pane" id="pane-clubs">
-          <div style="display: grid; grid-template-columns: 1fr 360px; gap: 24px;">
+          <div class="admin-split-layout">
             <!-- LEFT: Main Content Area -->
             <div>
               <!-- Page Header (SSOT: overview-header-block-premium) -->
@@ -5410,7 +5521,7 @@
             </div>
 
             <!-- Row: Roster & Handicap Distribution Widget -->
-            <div class="ad-widgets-row" style="grid-template-columns: 1.4fr 0.8fr; gap: 24px;">
+            <div class="ad-widgets-row-split">
               <!-- Widget: Roster Atlet Table -->
               <div class="ad-card ad-widget-card" style="min-height: auto; width: 100%;">
                 <div class="ad-widget-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px;">

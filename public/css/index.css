@@ -7336,7 +7336,7 @@ tr:hover td.sticky-col {
 /* Timeline widget */
 .ad-timeline-wrapper {
   overflow-y: auto;
-  max-height: 220px;
+  max-height: 380px;
 }
 
 .ad-timeline {
@@ -7366,6 +7366,7 @@ tr:hover td.sticky-col {
 .ad-timeline-dot.gold { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
 .ad-timeline-dot.purple { background: #8b5cf6; box-shadow: 0 0 8px rgba(139, 92, 246, 0.5); }
 .ad-timeline-dot.green { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+.ad-timeline-dot.red { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
 
 .ad-timeline-content {
   display: flex;
@@ -7464,6 +7465,40 @@ tr:hover td.sticky-col {
   border-color: rgba(239, 68, 68, 0.4);
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
 }
+
+.ad-fbtn-green {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+.ad-fbtn-green:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.ad-fbtn-blue {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+.ad-fbtn-blue:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.ad-fbtn-purple {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+.ad-fbtn-purple:hover {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
 
 /* Centered Premium Modal Overlay & Box (Upgraded from sliding drawer) */
 .ad-drawer-overlay {
@@ -13505,5 +13540,291 @@ span.flatpickr-weekday {
 }
 .status-option-card.selected .status-option-dot {
   display: block !important;
+}
+
+/* ==========================================================================
+   26. TRULY RESPONSIVE & MOBILE-FRIENDLY ADMIN OVERHAUL
+   ========================================================================== */
+
+/* Custom Admin Split Layouts */
+.admin-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+
+.ad-widgets-row-split {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 24px;
+}
+
+/* Mobile Admin Top Header Bar (Hidden on Desktop) */
+.admin-mobile-header {
+  display: none;
+  height: 60px;
+  background: #070e1f;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1000;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.mobile-menu-toggle {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.mobile-brand-title {
+  font-family: var(--font-headers);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.mobile-logout-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--red);
+  font-size: 1.1rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.mobile-logout-btn:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Sidebar Drawer Backdrop Overlay */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9997;
+  animation: pmFadeIn 0.25s ease;
+}
+
+.admin-sidebar-overlay.active {
+  display: block;
+}
+
+/* Media Query: Large Tablets / Small Laptops (Width <= 1180px) */
+@media (max-width: 1180px) {
+  .admin-split-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .ad-widgets-row-split {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Media Query: Medium Tablets / Portrait Viewports (Width <= 992px) */
+@media (max-width: 992px) {
+  /* Enforce stack behavior on split grids even if declared display: flex inline */
+  .pane-split-layout {
+    flex-direction: column !important;
+  }
+  .pane-split-layout > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+}
+
+/* Media Query: Mobile Viewports (Width <= 768px) */
+@media (max-width: 768px) {
+  .admin-mobile-header {
+    display: flex;
+  }
+
+  .admin-workspace-layout {
+    flex-direction: column !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  /* Transform Sidebar Navigation into a Left Slide-over Drawer */
+  .admin-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: -280px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 30px 20px !important;
+    border-right: 1px solid rgba(59, 130, 246, 0.15) !important;
+    background: #040713 !important;
+  }
+
+  .admin-sidebar.active {
+    left: 0 !important;
+  }
+
+  .sidebar-user-info {
+    display: flex !important;
+  }
+
+  .sidebar-menu {
+    flex-direction: column !important;
+    overflow-x: visible !important;
+    gap: 6px !important;
+    padding-bottom: 0 !important;
+    margin-top: 10px !important;
+  }
+
+  .sidebar-link {
+    white-space: nowrap !important;
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .sidebar-footer {
+    display: block !important;
+    margin-top: auto !important;
+  }
+
+  /* Make Main Content fill the remaining viewport height safely below mobile header */
+  .admin-workspace-content {
+    height: calc(100vh - 60px) !important;
+    width: 100% !important;
+    overflow-y: auto !important;
+    display: block !important;
+  }
+
+  .workspace-body {
+    overflow-y: visible !important;
+  }
+
+  /* Stacking overview/header panels */
+  .overview-header-block-premium {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    min-height: auto !important;
+    padding: 20px 0 !important;
+  }
+
+  .workspace-title-premium {
+    font-size: 1.6rem !important;
+  }
+
+  .workspace-subtitle-premium {
+    font-size: 0.8rem !important;
+  }
+
+  /* Force stack KPI metrics cards vertical flow */
+  .admin-stats-grid-premium {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .card-atlet-hero {
+    grid-column: span 1 !important;
+  }
+
+  /* Align event registrant options and buttons */
+  #event-register-athlete-form-wrap {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  #event-register-athlete-select {
+    width: 100% !important;
+  }
+
+  /* Align filters elements beautifully on small screens */
+  .table-filters {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 20px !important;
+    gap: 10px !important;
+  }
+
+  .table-filters select,
+  .table-filters .search-box,
+  .table-filters button {
+    width: 100% !important;
+  }
+
+  .workspace-header {
+    height: auto !important;
+    padding: 16px 20px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .workspace-pane {
+    padding: 20px 16px !important;
+  }
+}
+
+/* Media Query: Extremely Narrow Viewports (Width <= 600px) */
+@media (max-width: 600px) {
+  /* Stack event podium cards vertically */
+  #event-results-podium-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Custom styling overrides for Admin Mode to hide public bottom nav and reset padding */
+body.admin-mode-active {
+  padding-bottom: 0 !important;
+}
+body.admin-mode-active .mobile-bottom-nav,
+body.admin-mode-active .mobile-bottom-sheet,
+body.admin-mode-active .mobile-sheet-overlay {
+  display: none !important;
 }
 

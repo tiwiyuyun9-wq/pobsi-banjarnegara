@@ -61,6 +61,7 @@ db.serialize(() => {
   // Safely add cover and ktp columns to support upload integrations (ignores error if columns already exist)
   db.run(`ALTER TABLE players ADD COLUMN cover TEXT`, () => {});
   db.run(`ALTER TABLE players ADD COLUMN ktp TEXT`, () => {});
+  db.run(`ALTER TABLE players ADD COLUMN created_at TEXT`, () => {});
 
   // 2. Buat Tabel Standings
   db.run(`CREATE TABLE IF NOT EXISTS standings (

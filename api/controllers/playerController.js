@@ -1,6 +1,6 @@
 // Player Controller - Mengelola Data Atlet Handicap
 const { dbAll, dbGet, dbRun, logActivity } = require('../config/db');
-const { uploadMedia } = require('../_media-upload');
+const { uploadMedia, deleteMedia } = require('../_media-upload');
 
 exports.getPlayers = async (req, res) => {
   try {
@@ -61,11 +61,12 @@ exports.addPlayer = async (req, res) => {
       phone: phone && phone.trim() ? phone.trim() : "0812-XXXX-XXXX",
       address: address && address.trim() ? address.trim() : "Kabupaten Banjarnegara",
       cover: coverUrl,
-      ktp: ktpUrl
+      ktp: ktpUrl,
+      created_at: new Date().toISOString()
     };
 
     await dbRun(
-      `INSERT INTO players (id, name, club, handicap, status, points, avatar, gender, age, phone, address, cover, ktp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO players (id, name, club, handicap, status, points, avatar, gender, age, phone, address, cover, ktp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newPlayer.id,
         newPlayer.name,
@@ -79,7 +80,8 @@ exports.addPlayer = async (req, res) => {
         newPlayer.phone,
         newPlayer.address,
         newPlayer.cover,
-        newPlayer.ktp
+        newPlayer.ktp,
+        newPlayer.created_at
       ]
     );
 
@@ -203,7 +205,7 @@ exports.deletePlayer = async (req, res) => {
   }
 
   try {
-    const player = await dbGet(`SELECT name FROM players WHERE id = ?`, [id]);
+    const player = await dbGet(`SELECT name, avatar, cover, ktp FROM players WHERE id = ?`, [id]);
     if (!player) {
       return res.status(404).json({ error: "Atlet tidak ditemukan!" });
     }
@@ -213,6 +215,17 @@ exports.deletePlayer = async (req, res) => {
     
     // Delete from players
     await dbRun(`DELETE FROM players WHERE id = ?`, [id]);
+
+    // Cleanup media files from storage
+    if (player.avatar) {
+      await deleteMedia(player.avatar).catch(err => console.error("Gagal menghapus avatar atlet SQLite:", err));
+    }
+    if (player.cover) {
+      await deleteMedia(player.cover).catch(err => console.error("Gagal menghapus cover atlet SQLite:", err));
+    }
+    if (player.ktp) {
+      await deleteMedia(player.ktp).catch(err => console.error("Gagal menghapus KTP atlet SQLite:", err));
+    }
 
     await logActivity("Atlet dihapus", `Atlet ${player.name} telah dihapus dari database`, "danger", "fa-user-minus");
     

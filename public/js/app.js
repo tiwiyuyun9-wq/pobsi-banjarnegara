@@ -394,15 +394,22 @@ async function loadDataFromApi() {
     console.log(`Menghubungkan ke Vercel Serverless API untuk memuat database tahun ${currentBocYear}...`);
     
     // Fetch keenam endpoint dan sirkuit secara paralel untuk performa maksimal
-    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes, matchesRes] = await Promise.all([
+    const [playersRes, standingsRes, eventsRes, docsRes, clubsRes, bocSirkuitsRes, matchesRes, dbStatusRes] = await Promise.all([
       fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/standings?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/events', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/docs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/clubs', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/boc-sirkuits?year=${currentBocYear}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/matches', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch('/api/matches', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/db-status', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
+
+    if (dbStatusRes && dbStatusRes.database) {
+      window.activeDatabase = dbStatusRes.database;
+    } else {
+      window.activeDatabase = "SQLite";
+    }
 
     // Update database runtime jika response API valid
     if (playersRes && Array.isArray(playersRes)) {
@@ -2617,6 +2624,7 @@ async function checkAdminRoute() {
   const pathName = window.location.pathname;
   
   if (pathName.startsWith("/athletes/")) {
+    document.body.classList.remove("admin-mode-active");
     const slug = pathName.split("/athletes/")[1];
     const publicHeader = document.querySelector(".main-header");
     const publicFooter = document.querySelector(".main-footer");
@@ -2638,6 +2646,7 @@ async function checkAdminRoute() {
   }
 
   if (pathName.startsWith("/events/")) {
+    document.body.classList.remove("admin-mode-active");
     const eventId = pathName.split("/events/")[1];
     const publicHeader = document.querySelector(".main-header");
     const publicFooter = document.querySelector(".main-footer");
@@ -2668,6 +2677,7 @@ async function checkAdminRoute() {
   const workspaceScreen = document.getElementById("admin-workspace-screen");
   
   if (pathName.startsWith("/admin") || pathName.startsWith("/admin/")) {
+    document.body.classList.add("admin-mode-active");
     // Sembunyikan bagian publik
     if (publicHeader) publicHeader.style.display = "none";
     if (publicContent) publicContent.style.display = "none";
@@ -2816,6 +2826,7 @@ async function checkAdminRoute() {
       if (errorMsg) errorMsg.style.display = "none";
     }
   } else {
+    document.body.classList.remove("admin-mode-active");
     // Tampilkan bagian publik
     if (publicHeader) publicHeader.style.display = "";
     if (publicContent) publicContent.style.display = "";
@@ -4382,19 +4393,9 @@ function setupPlayerManagement() {
     return result;
   }
 
-  // Get ranking for a player
+  // Get ranking for a player dynamically among all athletes based on points descending
   function getPlayerRanking(playerId) {
-    const standing = appData.standings.find(s =>
-      appData.players.find(p => p.id === playerId && p.name === s.name)
-    );
-    if (standing) return standing.rank;
-    // Fallback: find by name
-    const player = appData.players.find(p => p.id === playerId);
-    if (player) {
-      const s = appData.standings.find(st => st.name === player.name);
-      if (s) return s.rank;
-    }
-    return null;
+    return getPlayerRegionalRank(playerId);
   }
 
   // Get standing data for a player
@@ -5238,6 +5239,40 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === athleteResultsModal) {
         athleteResultsModal.style.display = 'none';
       }
+    });
+  }
+
+  // Admin mobile responsive layout controls
+  const adminMobileToggle = document.getElementById('btn-admin-mobile-toggle');
+  const adminSidebar = document.querySelector('.admin-sidebar');
+  const adminSidebarOverlay = document.getElementById('admin-sidebar-overlay');
+  const adminMobileLogout = document.getElementById('btn-admin-mobile-logout');
+  const adminDesktopLogout = document.getElementById('btn-admin-logout');
+
+  if (adminMobileToggle && adminSidebar && adminSidebarOverlay) {
+    const toggleSidebar = () => {
+      adminSidebar.classList.toggle('active');
+      adminSidebarOverlay.classList.toggle('active');
+    };
+
+    const closeSidebar = () => {
+      adminSidebar.classList.remove('active');
+      adminSidebarOverlay.classList.remove('active');
+    };
+
+    adminMobileToggle.addEventListener('click', toggleSidebar);
+    adminSidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Auto close drawer when selecting menu items on mobile
+    const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+  }
+
+  if (adminMobileLogout && adminDesktopLogout) {
+    adminMobileLogout.addEventListener('click', () => {
+      adminDesktopLogout.click();
     });
   }
 });
@@ -6406,18 +6441,21 @@ window.selectClubRow = function(clubId, element) {
       listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.82rem;">Belum ada atlet terafiliasi</div>`;
       return;
     }
-    listContainer.innerHTML = playersInClub.map(p => `
-      <div class="pm-tournament-item" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.02); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="${p.avatar}" alt="${p.name}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 0.82rem; font-weight: 700; color: #fff;">${p.name}</span>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">Ranking #${p.standing_rank || '-'}</span>
+    listContainer.innerHTML = playersInClub.map(p => {
+      const ranking = getPlayerRegionalRank(p.id);
+      return `
+        <div class="pm-tournament-item" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.02); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${p.avatar}" alt="${p.name}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #fff;">${p.name}</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Ranking #${ranking || '-'}</span>
+            </div>
           </div>
+          <span class="pm-hc-badge" style="font-size: 0.65rem; padding: 2px 6px;">HC ${p.handicap}</span>
         </div>
-        <span class="pm-hc-badge" style="font-size: 0.65rem; padding: 2px 6px;">HC ${p.handicap}</span>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 };
 
@@ -6670,10 +6708,9 @@ async function renderAthleteDetail(playerId) {
   const badgeHCEl = document.getElementById("ad-tag-handicap");
   if (badgeHCEl) badgeHCEl.textContent = `Handicap ${player.handicap}`;
 
-  // Get ranking
-  let rankVal = null;
+  // Get ranking dynamically among all athletes based on points descending
   const standing = appData.standings.find(s => s.name === player.name);
-  if (standing) rankVal = standing.rank;
+  const rankVal = getPlayerRegionalRank(player.id);
   const badgeRankEl = document.getElementById("ad-tag-ranking");
   if (badgeRankEl) {
     badgeRankEl.textContent = rankVal ? `Ranking #${rankVal}` : "Ranking -";
@@ -6686,6 +6723,18 @@ async function renderAthleteDetail(playerId) {
     badgeStatusEl.className = `ad-tag ${isAktif ? "green" : "red"}`;
   }
 
+  const btnStatus = document.getElementById("ad-fbtn-status");
+  if (btnStatus) {
+    const isAktif = (player.status || "Aktif").toLowerCase() === "aktif";
+    if (isAktif) {
+      btnStatus.innerHTML = `<i class="fa-solid fa-ban"></i> Nonaktifkan Atlet`;
+      btnStatus.className = "ad-fbtn ad-fbtn-amber";
+    } else {
+      btnStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> Aktifkan Atlet`;
+      btnStatus.className = "ad-fbtn ad-fbtn-green";
+    }
+  }
+
   // Personal details
   document.getElementById("ad-val-name").textContent = player.name;
   document.getElementById("ad-val-club").textContent = player.club;
@@ -6696,8 +6745,23 @@ async function renderAthleteDetail(playerId) {
   const simulatedDOB = player.age ? `${18 + (player.age % 12)} Mei ${2026 - player.age}` : "12 Mei 1998";
   document.getElementById("ad-val-dob").textContent = simulatedDOB;
   
-  const simulatedJoin = player.id ? `${(parseInt(player.id.replace("P", "")) % 28) + 1} Januari 2025` : "12 Januari 2025";
-  document.getElementById("ad-val-join").textContent = simulatedJoin;
+  let joinDateStr = "";
+  const idNum = player.id ? parseInt(player.id.replace("P", ""), 10) : 999;
+  const isPreSeeded = !player.created_at && (idNum <= 2 || (idNum <= 28 && window.activeDatabase !== "Supabase"));
+  if (isPreSeeded) {
+    const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
+    joinDateStr = `${day} Januari 2026`;
+  } else if (player.created_at) {
+    const parsed = new Date(player.created_at);
+    if (!isNaN(parsed.getTime())) {
+      joinDateStr = parsed.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    } else {
+      joinDateStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    }
+  } else {
+    joinDateStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  }
+  document.getElementById("ad-val-join").textContent = joinDateStr;
 
   // Additional details
   document.getElementById("ad-val-age").textContent = (player.age || 24) + " Tahun";
@@ -6821,7 +6885,7 @@ async function renderAthleteDetail(playerId) {
   renderADHandicapHistory(player, hcHistory);
 
   // Load timeline
-  renderADTimeline(player);
+  renderADTimeline(player, hcHistory, tourneys, matches);
 }
 
 // 2. Chart Rendering using inline SVGs
@@ -6829,7 +6893,17 @@ function drawTrendWinRateChart(standing) {
   const container = document.getElementById("ad-trend-chart-container");
   if (!container) return;
 
-  const wrBase = standing && standing.played > 0 ? Math.round((standing.won / standing.played) * 100) : 60;
+  if (!standing || !standing.played || standing.played === 0) {
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: var(--text-dim); font-size: 0.85rem; text-align: center; gap: 10px; padding: 20px;">
+        <i class="fa-solid fa-chart-line" style="font-size: 2rem; opacity: 0.25; color: var(--text-dim);"></i>
+        <span>Belum ada data pertandingan untuk menampilkan tren win rate.</span>
+      </div>
+    `;
+    return;
+  }
+
+  const wrBase = Math.round((standing.won / standing.played) * 100);
   // Generate slightly fluctuating win rate progression ending at the actual win rate
   const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"];
   const rates = [
@@ -6890,31 +6964,28 @@ function drawPerkembanganRankingChart(currentRank, dbRankHistory) {
   const container = document.getElementById("ad-ranking-chart-container");
   if (!container) return;
 
+  if (!dbRankHistory || dbRankHistory.length === 0) {
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: var(--text-dim); font-size: 0.85rem; text-align: center; gap: 10px; padding: 20px;">
+        <i class="fa-solid fa-ranking-star" style="font-size: 2rem; opacity: 0.25; color: var(--text-dim);"></i>
+        <span>Belum ada riwayat peringkat untuk menampilkan grafik perkembangan.</span>
+      </div>
+    `;
+    return;
+  }
+
   const rBase = currentRank || 15;
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
   let months, ranks;
 
-  if (dbRankHistory && dbRankHistory.length > 0) {
-    // Use real database data
-    months = dbRankHistory.map(r => {
-      const parts = r.date.split('-');
-      const monthIdx = parseInt(parts[1], 10) - 1;
-      return monthNames[monthIdx] || r.date;
-    });
-    ranks = dbRankHistory.map(r => r.rank);
-  } else {
-    // Fallback: simulated ranks from 12 months ago to now
-    months = ["Jul", "Sep", "Nov", "Jan", "Mar", "Mei"];
-    ranks = [
-      Math.min(24, rBase + 12),
-      Math.min(20, rBase + 8),
-      Math.min(16, rBase + 5),
-      Math.min(10, rBase + 3),
-      Math.min(7, rBase + 1),
-      rBase
-    ];
-  }
+  // Use real database data
+  months = dbRankHistory.map(r => {
+    const parts = r.date.split('-');
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    return monthNames[monthIdx] || r.date;
+  });
+  ranks = dbRankHistory.map(r => r.rank);
 
   const numPoints = ranks.length;
   const chartWidth = 410;
@@ -7083,16 +7154,122 @@ function renderADHandicapHistory(player, dbHistory) {
   `).join("");
 }
 
-function renderADTimeline(player) {
+function renderADTimeline(player, hcHistory, tourneys, matches) {
   const container = document.getElementById("ad-timeline-container");
   if (!container) return;
 
-  const logs = [
-    { time: "18 Mei 2025 &bull; 10:30 WIB", title: `Handicap dinaikkan ke HC ${player.handicap}`, desc: "Pembaruan otomatis oleh Admin POBSI setelah Series #4", cls: "blue" },
-    { time: "10 Mei 2025 &bull; 18:45 WIB", title: "Menjuarai BOC Series #4", desc: "Berhasil mengalahkan lawan di babak final dengan skor 7-4", cls: "gold" },
-    { time: "20 Apr 2025 &bull; 17:20 WIB", title: "Mencapai Semi Final", desc: "Handicap Challenge Cup di Star Billiard", cls: "purple" },
-    { time: "12 Jan 2025 &bull; 09:15 WIB", title: "Atlet didaftarkan dalam sistem", desc: "Berkas dan profil terverifikasi oleh Admin Utama", cls: "green" }
-  ];
+  const logs = [];
+
+  // Helper to parse dates in Indonesian (abbreviated or full)
+  const parseDate = (str) => {
+    if (!str) return new Date();
+    const months = {
+      jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, jun: 5, jul: 6, agu: 7, ags: 7, sep: 8, okt: 9, nov: 10, des: 11
+    };
+    const parts = str.toLowerCase().trim().split(/\s+/);
+    if (parts.length >= 3) {
+      const day = parseInt(parts[0], 10);
+      const monthStr = parts[1].substring(0, 3);
+      const month = months[monthStr] !== undefined ? months[monthStr] : 0;
+      const year = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+    return new Date();
+  };
+
+  // 1. Add handicap history logs
+  if (hcHistory && hcHistory.length > 0) {
+    hcHistory.forEach(h => {
+      logs.push({
+        dateObj: parseDate(h.date),
+        time: `${h.date} &bull; 10:00 WIB`,
+        title: `Handicap diubah ke HC ${h.to_hc}`,
+        desc: `Pembaruan oleh ${h.admin_name || "Admin"}: ${h.reason}`,
+        cls: "blue"
+      });
+    });
+  }
+
+  // 2. Add tournament history logs
+  if (tourneys && tourneys.length > 0) {
+    tourneys.forEach(t => {
+      let cls = "purple";
+      if (t.badge && t.badge.toLowerCase().includes("juara")) cls = "gold";
+      else if (t.badge && t.badge.toLowerCase().includes("runner")) cls = "silver";
+
+      logs.push({
+        dateObj: parseDate(t.date),
+        time: `${t.date} &bull; 18:00 WIB`,
+        title: `${t.badge} - ${t.title}`,
+        desc: `Turnamen diselenggarakan di ${t.venue}`,
+        cls: cls
+      });
+    });
+  }
+
+  // 2b. Add match history logs
+  if (matches && matches.length > 0) {
+    matches.forEach(m => {
+      const isWin = m.outcome === "W";
+      logs.push({
+        dateObj: parseDate(m.date),
+        time: `${m.date} &bull; 15:00 WIB`,
+        title: isWin ? `Pertandingan: Menang vs ${m.opponent_name}` : `Pertandingan: Kalah vs ${m.opponent_name}`,
+        desc: `Skor akhir ${m.score} (${m.opponent_club || "Tanpa Klub"})`,
+        cls: isWin ? "green" : "red"
+      });
+    });
+  }
+
+  // 3. Add registration log at the very beginning (earliest date)
+  let regDateObj = null;
+  let regDateStr = "";
+  const idNum = player.id ? parseInt(player.id.replace("P", ""), 10) : 999;
+  const isPreSeeded = !player.created_at && (idNum <= 2 || (idNum <= 28 && window.activeDatabase !== "Supabase"));
+  if (isPreSeeded) {
+    const day = (parseInt(player.id.replace("P", "")) % 28) + 1;
+    regDateObj = new Date(2026, 0, day, 9, 0);
+    regDateStr = `${day} Jan 2026`;
+  } else if (player.created_at) {
+    const parsed = new Date(player.created_at);
+    if (!isNaN(parsed.getTime())) {
+      regDateObj = parsed;
+      regDateStr = parsed.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    } else {
+      regDateObj = new Date();
+      regDateObj.setHours(9, 0, 0, 0);
+      regDateStr = regDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    }
+  } else {
+    regDateObj = new Date();
+    regDateObj.setHours(9, 0, 0, 0);
+    regDateStr = regDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  logs.push({
+    dateObj: regDateObj,
+    time: `${regDateStr} &bull; 09:00 WIB`,
+    title: "Atlet didaftarkan dalam sistem",
+    desc: "Berkas dan profil terverifikasi oleh Admin Utama",
+    cls: "green"
+  });
+
+  // Sort logs descending by dateObj
+  logs.sort((a, b) => b.dateObj - a.dateObj);
+
+  // Fallback to default mock if no data (e.g. newly created player without handicap history yet, except registration)
+  if (logs.length <= 1 && (!hcHistory || hcHistory.length === 0) && (!tourneys || tourneys.length === 0) && (!matches || matches.length === 0)) {
+    // If only registration is present, we can add a basic initialization change log to avoid an empty-looking timeline
+    const fallbackDateObj = new Date(regDateObj.getTime() + 60 * 60 * 1000); // 1 hour later
+    const fallbackDateStr = fallbackDateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    logs.unshift({
+      dateObj: fallbackDateObj,
+      time: `${fallbackDateStr} &bull; 10:00 WIB`,
+      title: `Handicap awal ditetapkan ke HC ${player.handicap}`,
+      desc: "Status handicap inisial diatur secara administratif saat registrasi",
+      cls: "blue"
+    });
+  }
 
   container.innerHTML = logs.map(l => `
     <div class="ad-timeline-item">
@@ -7641,105 +7818,186 @@ function setupAthleteDetailActions() {
   // Transfer club action
   const btnTransfer = document.getElementById("ad-fbtn-transfer");
   if (btnTransfer) {
-    btnTransfer.addEventListener("click", () => {
-      const newClub = prompt("Masukkan Nama Klub Baru untuk Atlet:", "Golden Banjarnegara");
-      if (newClub) {
+    const newBtnTransfer = btnTransfer.cloneNode(true);
+    btnTransfer.parentNode.replaceChild(newBtnTransfer, btnTransfer);
+
+    newBtnTransfer.addEventListener("click", () => {
+      const player = appData.players.find(p => p.id === adActivePlayerId);
+      if (!player) return;
+
+      const transferModal = document.getElementById("ad-transfer-club-modal");
+      const closeBtn = document.getElementById("transfer-modal-close");
+      const cancelBtn = document.getElementById("transfer-modal-btn-cancel");
+      const selectClub = document.getElementById("transfer-modal-select-club");
+      const formTransfer = document.getElementById("form-admin-transfer-club");
+
+      if (!transferModal || !selectClub || !formTransfer) return;
+
+      // Set modal initial texts and fields
+      document.getElementById("transfer-modal-player-id").value = player.id;
+      document.getElementById("transfer-modal-player-name").textContent = player.name;
+      document.getElementById("transfer-modal-player-club").textContent = player.club || "Klub -";
+      document.getElementById("transfer-preview-current-club").textContent = player.club || "Klub -";
+      document.getElementById("transfer-preview-new-club").textContent = "-";
+      document.getElementById("transfer-modal-reason").value = "";
+
+      // Populate dropdown list with clubs (excluding current club if possible, or just listing all)
+      const clubs = appData.clubs || [];
+      const filteredClubs = clubs.filter(c => c.name !== player.club);
+
+      if (filteredClubs.length > 0) {
+        selectClub.innerHTML = '<option value="" disabled selected>-- Pilih Klub Tujuan --</option>' +
+          filteredClubs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+      } else {
+        selectClub.innerHTML = '<option value="" disabled selected>-- Tidak Ada Klub Alternatif --</option>';
+      }
+
+      // Update preview target club name on change
+      selectClub.onchange = () => {
+        document.getElementById("transfer-preview-new-club").textContent = selectClub.value || "-";
+      };
+
+      // Close handlers
+      if (closeBtn) closeBtn.onclick = () => { transferModal.style.display = "none"; };
+      if (cancelBtn) cancelBtn.onclick = () => { transferModal.style.display = "none"; };
+      transferModal.onclick = (e) => { if (e.target === transferModal) transferModal.style.display = "none"; };
+
+      // Form submit handler
+      formTransfer.onsubmit = (e) => {
+        e.preventDefault();
+        const selectedClubName = selectClub.value;
+        const reason = document.getElementById("transfer-modal-reason").value.trim();
+
+        if (!selectedClubName) {
+          showCustomToast("Silakan pilih klub tujuan transfer terlebih dahulu!", "error");
+          return;
+        }
+
+        const payload = {
+          club: selectedClubName,
+          transferReason: reason || "Transfer administratif oleh Admin POBSI"
+        };
+
         if (isServerOnline) {
-          fetch(`/api/players/${adActivePlayerId}`, {
+          fetch(`/api/players/${player.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ club: newClub })
+            body: JSON.stringify(payload)
           }).then(res => {
             if (res.ok) {
-              alert(`Klub berhasil diperbarui menjadi "${newClub}"!`);
+              showCustomToast(`Klub atlet ${player.name} berhasil ditransfer ke "${selectedClubName}"!`, "success");
+              transferModal.style.display = "none";
               loadDataFromApi().then(() => {
-                renderAthleteDetail(adActivePlayerId);
+                renderAthleteDetail(player.id);
                 renderWorkspacePreviews();
               });
+            } else {
+              showCustomToast("Gagal memproses transfer klub di server.", "error");
             }
-          }).catch(err => alert(`Error: ${err.message}`));
+          }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
         } else {
-          const player = appData.players.find(p => p.id === adActivePlayerId);
-          if (player) {
-            player.club = newClub;
-            alert(`Luring: Klub diperbarui menjadi "${newClub}"`);
-            renderAthleteDetail(adActivePlayerId);
-            renderWorkspacePreviews();
-          }
+          player.club = selectedClubName;
+          showCustomToast(`Luring: Klub atlet ${player.name} diperbarui menjadi "${selectedClubName}"`, "success");
+          transferModal.style.display = "none";
+          renderAthleteDetail(player.id);
+          renderWorkspacePreviews();
         }
-      }
+      };
+
+      // Open Modal
+      transferModal.style.display = "flex";
     });
   }
 
   // Toggle active status action
   const btnStatus = document.getElementById("ad-fbtn-status");
   if (btnStatus) {
-    btnStatus.addEventListener("click", () => {
+    const newBtnStatus = btnStatus.cloneNode(true);
+    btnStatus.parentNode.replaceChild(newBtnStatus, btnStatus);
+
+    newBtnStatus.addEventListener("click", () => {
       const player = appData.players.find(p => p.id === adActivePlayerId);
       if (!player) return;
       const newStatus = (player.status || "Aktif") === "Aktif" ? "Nonaktif" : "Aktif";
       
-      if (confirm(`Yakin ingin mengubah status atlet menjadi ${newStatus}?`)) {
-        if (isServerOnline) {
-          fetch(`/api/players/${adActivePlayerId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-          }).then(res => {
-            if (res.ok) {
-              alert(`Status atlet berhasil diubah menjadi ${newStatus}!`);
-              loadDataFromApi().then(() => {
-                renderAthleteDetail(adActivePlayerId);
-                renderWorkspacePreviews();
-              });
-            }
-          }).catch(err => alert(`Error: ${err.message}`));
-        } else {
-          player.status = newStatus;
-          alert(`Luring: Status diubah menjadi ${newStatus}`);
-          renderAthleteDetail(adActivePlayerId);
-          renderWorkspacePreviews();
-        }
-      }
+      showCustomConfirm(
+        "Konfirmasi Status",
+        `Apakah Anda yakin ingin mengubah status atlet "${player.name}" menjadi ${newStatus}?`,
+        () => {
+          if (isServerOnline) {
+            fetch(`/api/players/${adActivePlayerId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus })
+            }).then(res => {
+              if (res.ok) {
+                showCustomToast(`Status atlet berhasil diubah menjadi ${newStatus}!`, "success");
+                loadDataFromApi().then(() => {
+                  renderAthleteDetail(adActivePlayerId);
+                  renderWorkspacePreviews();
+                });
+              } else {
+                showCustomToast("Gagal memperbarui status atlet di server.", "error");
+              }
+            }).catch(err => showCustomToast(`Error: ${err.message}`, "error"));
+          } else {
+            player.status = newStatus;
+            showCustomToast(`Luring: Status diubah menjadi ${newStatus}`, "success");
+            renderAthleteDetail(adActivePlayerId);
+            renderWorkspacePreviews();
+          }
+        },
+        newStatus === "Aktif" ? "Aktifkan" : "Nonaktifkan",
+        newStatus === "Aktif" ? "primary" : "warning"
+      );
     });
   }
 
   // Delete action
   const btnDelete = document.getElementById("ad-fbtn-delete");
   if (btnDelete) {
-    btnDelete.addEventListener("click", async () => {
+    const newBtnDelete = btnDelete.cloneNode(true);
+    btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
+
+    newBtnDelete.addEventListener("click", () => {
       const player = appData.players.find(p => p.id === adActivePlayerId);
       if (!player) return;
 
-      if (confirm(`PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database?`)) {
-        if (isServerOnline) {
-          try {
-            const res = await fetch(`/api/players/${adActivePlayerId}`, {
-              method: 'DELETE'
-            });
-            if (res.ok) {
-              alert(`Atlet "${player.name}" berhasil dihapus.`);
-              await loadDataFromApi();
-              updateWorkspaceStats();
-              renderWorkspacePreviews();
-              window.history.pushState({}, "", "/admin");
-              switchAdminPane("pane-players");
-            } else {
-              const err = await res.json();
-              alert(`Gagal menghapus: ${err.error}`);
+      showCustomConfirm(
+        "Hapus Atlet",
+        `PERINGATAN: Yakin ingin menghapus atlet "${player.name}" secara permanen dari database? Tindakan ini tidak dapat dibatalkan.`,
+        async () => {
+          if (isServerOnline) {
+            try {
+              const res = await fetch(`/api/players/${adActivePlayerId}`, {
+                method: 'DELETE'
+              });
+              if (res.ok) {
+                showCustomToast(`Atlet "${player.name}" berhasil dihapus.`, "success");
+                await loadDataFromApi();
+                updateWorkspaceStats();
+                renderWorkspacePreviews();
+                window.history.pushState({}, "", "/admin");
+                switchAdminPane("pane-players");
+              } else {
+                const err = await res.json();
+                showCustomToast(`Gagal menghapus: ${err.error}`, "error");
+              }
+            } catch (err) {
+              showCustomToast(`Error: ${err.message}`, "error");
             }
-          } catch (err) {
-            alert(`Error: ${err.message}`);
+          } else {
+            appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
+            showCustomToast(`Luring: Atlet "${player.name}" dihapus dari memori browser.`, "success");
+            updateWorkspaceStats();
+            renderWorkspacePreviews();
+            window.history.pushState({}, "", "/admin");
+            switchAdminPane("pane-players");
           }
-        } else {
-          appData.players = appData.players.filter(p => p.id !== adActivePlayerId);
-          alert(`Luring: Atlet "${player.name}" dihapus dari memori browser.`);
-          updateWorkspaceStats();
-          renderWorkspacePreviews();
-          window.history.pushState({}, "", "/admin");
-          switchAdminPane("pane-players");
-        }
-      }
+        },
+        "Hapus Atlet",
+        "danger"
+      );
     });
   }
 }
@@ -9399,9 +9657,13 @@ function setupBocAdminListeners() {
 }
 
 
-/* ==========================================================================
-   PUBLIC ATHLETE PROFILE PAGE (ATP/F1/Chess.com Inspired)
-   ========================================================================== */
+// Calculate dynamic regional ranking for a player among all athletes by lifetime points descending
+function getPlayerRegionalRank(playerId) {
+  if (!appData.players || appData.players.length === 0) return null;
+  const sorted = [...appData.players].sort((a, b) => (b.points || 0) - (a.points || 0));
+  const index = sorted.findIndex(p => p.id === playerId);
+  return index !== -1 ? index + 1 : null;
+}
 
 // Generate URL-safe slug from athlete name
 function generateSlug(name) {
@@ -12032,13 +12294,13 @@ function renderClubInfo(clubName) {
         if (!isNaN(joinDate.getTime())) {
           joinDateEl.textContent = joinDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
         } else {
-          joinDateEl.textContent = 'Januari 2025';
+          joinDateEl.textContent = 'Januari 2026';
         }
       } catch(e) {
-        joinDateEl.textContent = 'Januari 2025';
+        joinDateEl.textContent = 'Januari 2026';
       }
     } else {
-      joinDateEl.textContent = 'Januari 2025';
+      joinDateEl.textContent = 'Januari 2026';
     }
   }
 
