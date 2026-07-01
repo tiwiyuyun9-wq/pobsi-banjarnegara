@@ -2443,7 +2443,7 @@
               <div class="pm-bulk-bar" id="pm-bulk-bar" style="display:none;">
                 <span class="pm-bulk-count"><span id="pm-selected-count">0</span> atlet dipilih</span>
                 <div class="pm-bulk-actions">
-                  <button class="pm-bulk-btn blue" id="pm-bulk-assign-club"><i class="fa-solid fa-building"></i> Assign Klub</button>
+                  <button class="pm-bulk-btn purple" id="pm-bulk-transfer-club"><i class="fa-solid fa-exchange-alt"></i> Transfer Klub</button>
                   <button class="pm-bulk-btn teal" id="pm-bulk-export"><i class="fa-solid fa-file-export"></i> Export</button>
                   <button class="pm-bulk-btn amber" id="pm-bulk-toggle-status"><i class="fa-solid fa-ban"></i> Nonaktifkan</button>
                   <button class="pm-bulk-btn red" id="pm-bulk-delete"><i class="fa-solid fa-trash-can"></i> Hapus</button>
@@ -2789,7 +2789,7 @@
               <div class="ad-card ad-widget-card">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-user-group text-green"></i> PERFORMA TERAKHIR</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan semua riwayat pertandingan...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan semua riwayat pertandingan...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body">
                   <div class="ad-match-list" id="ad-match-list">
@@ -2802,7 +2802,7 @@
               <div class="ad-card ad-widget-card">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-medal text-gold"></i> RIWAYAT TURNAMEN</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan semua riwayat event...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan semua riwayat event...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body">
                   <div class="ad-tourney-list" id="ad-tourney-list">
@@ -2818,7 +2818,7 @@
               <div class="ad-card ad-widget-card ad-span-2">
                 <div class="ad-widget-header">
                   <h4 class="ad-widget-title"><i class="fa-solid fa-clock-rotate-left text-purple"></i> RIWAYAT HANDICAP</h4>
-                  <button class="ad-link-btn" onclick="alert('Menampilkan riwayat lengkap perubahan handicap...')">Lihat Semua</button>
+                  <button class="ad-link-btn" onclick="showCustomToast('Menampilkan riwayat lengkap perubahan handicap...', 'info')">Lihat Semua</button>
                 </div>
                 <div class="ad-widget-body ad-table-wrapper">
                   <table class="ad-table">
