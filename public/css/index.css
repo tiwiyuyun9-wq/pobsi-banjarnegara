@@ -537,8 +537,10 @@ h1, h2, h3, h4, h5, h6 {
 .tab-pane {
   display: none;
   animation: tabFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
-.tab-pane.active { display: block; }
+.tab-pane.active { display: block; content-visibility: visible; }
 
 @keyframes tabFadeIn {
   from { opacity: 0; transform: translateY(16px); }
@@ -561,7 +563,9 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   position: relative;
   overflow: hidden;
-  background-image: linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('../images/hero-player.png');
+  background-image: linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('../images/hero-player.webp');
+  background-image: linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), -webkit-image-set(url('../images/hero-player.webp') type('image/webp'), url('../images/hero-player.png') type('image/png'));
+  background-image: linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), image-set(url('../images/hero-player.webp') type('image/webp'), url('../images/hero-player.png') type('image/png'));
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
@@ -7741,7 +7745,15 @@ tr:hover td.sticky-col {
   background: 
     linear-gradient(90deg, rgba(7, 12, 25, 0.95) 0%, rgba(6, 11, 24, 0.88) 50%, rgba(7, 12, 25, 0.95) 100%),
     radial-gradient(circle at left center, rgba(37, 99, 235, 0.12) 0%, rgba(6, 11, 24, 0) 65%),
-    url('../images/hero-player.png');
+    url('../images/hero-player.webp');
+  background: 
+    linear-gradient(90deg, rgba(7, 12, 25, 0.95) 0%, rgba(6, 11, 24, 0.88) 50%, rgba(7, 12, 25, 0.95) 100%),
+    radial-gradient(circle at left center, rgba(37, 99, 235, 0.12) 0%, rgba(6, 11, 24, 0) 65%),
+    -webkit-image-set(url('../images/hero-player.webp') type('image/webp'), url('../images/hero-player.png') type('image/png'));
+  background: 
+    linear-gradient(90deg, rgba(7, 12, 25, 0.95) 0%, rgba(6, 11, 24, 0.88) 50%, rgba(7, 12, 25, 0.95) 100%),
+    radial-gradient(circle at left center, rgba(37, 99, 235, 0.12) 0%, rgba(6, 11, 24, 0) 65%),
+    image-set(url('../images/hero-player.webp') type('image/webp'), url('../images/hero-player.png') type('image/png'));
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

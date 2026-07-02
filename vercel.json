@@ -13,5 +13,31 @@
     { "source": "/api/activity-logs", "destination": "/api/misc.js?action=activity-logs" },
     { "source": "/api/db-status", "destination": "/api/misc.js?action=db-status" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    }
   ]
 }
