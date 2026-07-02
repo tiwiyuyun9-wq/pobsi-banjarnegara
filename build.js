@@ -90,9 +90,9 @@ async function convertImagesToWebP() {
   console.log('🖼️  Converting images to WebP...');
 
   const images = [
-    { name: 'pobsi-logo.png', width: 200, quality: 80 },
+    { name: 'pobsi-logo.png', width: 100, quality: 75 },
     { name: 'hero-player.png', width: 1200, quality: 75 },
-    { name: 'Logo Koni.png', width: 200, quality: 80 },
+    { name: 'logo-koni.png', width: 100, quality: 75 },
     { name: 'club-avatar.png', width: 300, quality: 75 },
     { name: 'player-avatar.png', width: 300, quality: 75 },
     { name: 'club-cover.png', width: 800, quality: 70 },

@@ -5050,22 +5050,34 @@ function setupHeroBilliardSimulator() {
   if (!table) return;
 
   const balls = table.querySelectorAll(".billiard-ball");
+  let cachedBalls = [];
+
+  const updateCoordinatesCache = () => {
+    const rect = table.getBoundingClientRect();
+    cachedBalls = Array.from(balls).map(ball => {
+      const ballRect = ball.getBoundingClientRect();
+      return {
+        element: ball,
+        centerX: (ballRect.left + ballRect.width / 2) - rect.left,
+        centerY: (ballRect.top + ballRect.height / 2) - rect.top
+      };
+    });
+  };
+
+  table.addEventListener("mouseenter", updateCoordinatesCache);
 
   table.addEventListener("mousemove", (e) => {
-    // Dapatkan koordinat kursor mouse relatif terhadap meja tanding virtual
+    if (cachedBalls.length === 0) {
+      updateCoordinatesCache();
+    }
     const rect = table.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    balls.forEach(ball => {
-      // Dapatkan pusat posisi bola biliar relatif terhadap meja
-      const ballRect = ball.getBoundingClientRect();
-      const ballCenterX = (ballRect.left + ballRect.width / 2) - rect.left;
-      const ballCenterY = (ballRect.top + ballRect.height / 2) - rect.top;
-
-      // Hitung jarak vektor antara mouse dan pusat bola
-      const dx = ballCenterX - mouseX;
-      const dy = ballCenterY - mouseY;
+    cachedBalls.forEach(ball => {
+      // Hitung jarak vektor antara mouse dan pusat bola biliar (menggunakan koordinat ter-cache)
+      const dx = ball.centerX - mouseX;
+      const dy = ball.centerY - mouseY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       // Jika mouse mendekat (jarak kurang dari 90px), dorong bola menjauh secara proporsional!
@@ -5075,8 +5087,8 @@ function setupHeroBilliardSimulator() {
         const pushY = (dy / distance) * force * 50; // Pergeseran hingga 50px
 
         // Aplikasikan 2D transform slide dan 3D spherical shadow shift
-        ball.style.transform = `translate(${pushX}px, ${pushY}px) scale(1.05)`;
-        ball.style.boxShadow = `inset -6px -6px 12px rgba(0,0,0,0.4), ${-pushX/3}px ${-pushY/3}px 12px rgba(0,0,0,0.45)`;
+        ball.element.style.transform = `translate(${pushX}px, ${pushY}px) scale(1.05)`;
+        ball.element.style.boxShadow = `inset -6px -6px 12px rgba(0,0,0,0.4), ${-pushX/3}px ${-pushY/3}px 12px rgba(0,0,0,0.45)`;
       }
     });
   });
@@ -5087,6 +5099,7 @@ function setupHeroBilliardSimulator() {
       ball.style.transform = `translate(0, 0) scale(1)`;
       ball.style.boxShadow = ``;
     });
+    cachedBalls = []; // Reset cache agar selalu terkalibrasi jika ada perubahan ukuran/scroll
   });
 }
 
