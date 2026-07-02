@@ -22,11 +22,12 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
   <!-- Preload critical hero image for LCP -->
-  <link rel="preload" as="image" href="images/hero-player.webp" type="image/webp">
+  <link rel="preload" as="image" href="images/hero-player.webp" type="image/webp" fetchpriority="high">
   
 
 
-  <!-- Critical CSS loaded synchronously (minified) -->
+  <!-- Preload critical CSS to optimize network dependency path -->
+  <link rel="preload" href="css/index.min.css?v=25" as="style">
   <link rel="stylesheet" href="css/index.min.css?v=25">
   
   <!-- Google Fonts — loaded async to avoid render-blocking -->
@@ -122,7 +123,7 @@
          ============================================== -->
     <section class="tab-pane active" id="tab-home">
       <!-- Hero Section — Full-Width Background Layout -->
-      <div class="hero-section animate-on-scroll">
+      <div class="hero-section">
         <div class="hero-inner-container">
           <!-- Left Content -->
           <div class="hero-left-content">
@@ -342,7 +343,7 @@
     <section class="tab-pane" id="tab-champions">
       <div id="boc-public-standings-container">
         <!-- Premium BOC Hero Section (Unified Full-Width) -->
-        <div class="hero-section animate-on-scroll" id="boc-public-hero-section">
+        <div class="hero-section" id="boc-public-hero-section">
           <!-- Inner layout container matching home page hero grid -->
           <div class="hero-inner-container">
             

@@ -52,7 +52,7 @@ async function minifyJS() {
     },
     sourceMap: {
       filename: "app.min.js",
-      url: "app.min.js.map"
+      url: false
     }
   });
 
