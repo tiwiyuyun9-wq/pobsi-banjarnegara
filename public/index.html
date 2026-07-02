@@ -26,7 +26,8 @@
   
 
 
-  <!-- Critical CSS loaded synchronously (minified) -->
+  <!-- Preload critical CSS to optimize network dependency path -->
+  <link rel="preload" href="css/index.min.css?v=25" as="style">
   <link rel="stylesheet" href="css/index.min.css?v=25">
   
   <!-- Google Fonts — loaded async to avoid render-blocking -->
