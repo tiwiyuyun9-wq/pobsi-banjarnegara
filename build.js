@@ -50,6 +50,10 @@ async function minifyJS() {
     output: {
       comments: false,
     },
+    sourceMap: {
+      filename: "app.min.js",
+      url: "app.min.js.map"
+    }
   });
 
   if (result.error) {
@@ -58,8 +62,11 @@ async function minifyJS() {
   }
 
   fs.writeFileSync(outputFile, result.code, 'utf8');
+  if (result.map) {
+    fs.writeFileSync(outputFile + '.map', result.map, 'utf8');
+  }
   const savedKB = ((js.length - result.code.length) / 1024).toFixed(1);
-  console.log(`  ✅ app.js: ${(js.length / 1024).toFixed(1)} KiB → ${(result.code.length / 1024).toFixed(1)} KiB (saved ${savedKB} KiB)`);
+  console.log(`  ✅ app.js: ${(js.length / 1024).toFixed(1)} KiB → ${(result.code.length / 1024).toFixed(1)} KiB (saved ${savedKB} KiB, map generated)`);
 
   // Also minify data.js
   const dataInputFile = path.join(JS_DIR, 'data.js');
