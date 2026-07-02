@@ -1,0 +1,370 @@
+﻿diff --git a/public/js/app.js b/public/js/app.js
+index be20d73..ab5fc72 100644
+--- a/public/js/app.js
++++ b/public/js/app.js
+@@ -701,7 +701,7 @@ function loadStatistics() {
+     const hcKey = p.handicap ? p.handicap.toString().trim() : '3N';
+     return sum + (hcWeight[hcKey] || 3.5);
+   }, 0);
+-  const hcAvg = (hcSum / totalPlayers).toFixed(1);
++  const hcAvg = totalPlayers === 0 ? "0.0" : (hcSum / totalPlayers).toFixed(1);
+   document.getElementById("hc-stat-average").textContent = `HC ${hcAvg}`;
+ 
+   // Handicap Paling Banyak
+@@ -710,7 +710,7 @@ function loadStatistics() {
+     const hc = p.handicap ? p.handicap.toString().trim() : '3N';
+     hcCounts[hc] = (hcCounts[hc] || 0) + 1;
+   });
+-  let mostCommonHc = '3N';
++  let mostCommonHc = totalPlayers === 0 ? '-' : '3N';
+   let maxCount = 0;
+   for (const hc in hcCounts) {
+     if (hcCounts[hc] > maxCount) {
+@@ -718,9 +718,7 @@ function loadStatistics() {
+       mostCommonHc = hc;
+     }
+   }
+-  document.getElementById("hc-stat-most").textContent = `HC ${mostCommonHc}`;
+-
+-  // Hero Floating Cards Data: BOC Prize Pool Showcase (Static display in HTML)
++  document.getElementById("hc-stat-most").textContent = mostCommonHc === '-' ? '-' : `HC ${mostCommonHc}`;
+ 
+   // Average handicap display
+   const heroAvgHandicapEl = document.getElementById("hero-avg-handicap");
+@@ -766,8 +764,16 @@ function loadStatistics() {
+         heroEventBadgeContainer.classList.add("badge-ended");
+       }
+     }
++  } else if (heroEventTitleEl) {
++    heroEventTitleEl.textContent = "BELUM ADA EVENT";
++    if (heroEventDateEl) heroEventDateEl.textContent = "JADWAL BELUM DITENTUKAN";
++    if (heroEventSubEl) heroEventSubEl.textContent = "POBSI BANJARNEGARA";
++    if (heroEventBadgeTextEl && heroEventBadgeDotEl && heroEventBadgeContainer) {
++      heroEventBadgeTextEl.textContent = "OFFLINE";
++      heroEventBadgeDotEl.className = "live-badge-dot dot-ended";
++      heroEventBadgeContainer.className = "live-badge badge-ended";
++    }
+   }
+-}
+ 
+ // 6. Load Home Highlights (Event & Top Standings Glance)
+ function loadHomeHighlights() {
+@@ -802,35 +808,54 @@ function loadHomeHighlights() {
+         </div>
+       </div>
+     `;
++  } else if (eventContainer) {
++    eventContainer.innerHTML = `
++      <div style="text-align: center; padding: 32px 16px; color: var(--text-dim); width: 100%;">
++        <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
++        Belum ada agenda turnamen terdekat yang dijadwalkan.<br>
++        <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Silakan hubungi Pengcab POBSI untuk informasi lebih lanjut.</span>
++      </div>
++    `;
+   }
+ 
+   // B. Sekilas BOC Klasemen 3 Besar
+   const quickStandingsContainer = document.getElementById("quick-standings-placeholder");
+   if (quickStandingsContainer) {
+     const top3 = appData.standings.slice(0, 3);
+-    quickStandingsContainer.innerHTML = top3.map(player => {
+-      const slug = generateSlug(player.name);
+-      return `
+-      <div class="top-player-item">
+-        <div class="player-left">
+-          <div class="player-rank-medal rank-${player.rank}">
+-            ${player.rank === 1 ? '<i class="fa-solid fa-crown" style="font-size:0.75rem"></i>' : player.rank}
++    if (top3.length === 0) {
++      quickStandingsContainer.innerHTML = `
++        <div style="text-align: center; padding: 32px 16px; color: var(--text-dim); width: 100%;">
++          <i class="fa-solid fa-medal" style="font-size: 2.2rem; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
++          Belum ada data klasemen terkini untuk musim ini.<br>
++          <span style="font-size: 0.78rem; opacity: 0.7; margin-top: 4px; display: inline-block;">Klasemen akan otomatis terupdate setelah seri sirkuit berjalan.</span>
++        </div>
++      `;
++    } else {
++      quickStandingsContainer.innerHTML = top3.map(player => {
++        const slug = generateSlug(player.name);
++        return `
++        <div class="top-player-item">
++          <div class="player-left">
++            <div class="player-rank-medal rank-${player.rank}">
++              ${player.rank === 1 ? '<i class="fa-solid fa-crown" style="font-size:0.75rem"></i>' : player.rank}
++            </div>
++            <div class="player-name-club">
++              <a href="javascript:void(0)" onclick="openAthleteProfile('${slug}')" class="player-name-bold" style="color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.15); transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">${player.name}</a>
++              <span class="player-club-small">${player.club}</span>
++            </div>
+           </div>
+-          <div class="player-name-club">
+-            <a href="javascript:void(0)" onclick="openAthleteProfile('${slug}')" class="player-name-bold" style="color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.15); transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">${player.name}</a>
+-            <span class="player-club-small">${player.club}</span>
++          <div class="player-right-stats">
++            <span class="player-hc-badge">HC ${player.handicap}</span>
++            <span class="player-points-text">${player.points} Pts</span>
+           </div>
+         </div>
+-        <div class="player-right-stats">
+-          <span class="player-hc-badge">HC ${player.handicap}</span>
+-          <span class="player-points-text">${player.points} Pts</span>
+-        </div>
+-      </div>
+-      `;
+-    }).join("");
++        `;
++      }).join("");
++    }
+   }
+ }
+ 
++
+ // 7. Battle of Champions Leaderboard Logic
+ // 7. Battle of Champions Leaderboard Logic
+ const exactBocPoints = {
+@@ -18711,6 +18736,16 @@ function setupSystemSettings() {
+   const whatsappInput = document.getElementById("set-org-whatsapp");
+   const addressInput = document.getElementById("set-org-address");
+ 
++  const orgPelindungInput = document.getElementById("set-org-pelindung");
++  const orgKetuaInput = document.getElementById("set-org-ketua-umum");
++  const orgWakilInput = document.getElementById("set-org-wakil-ketua");
++  const orgSekretarisInput = document.getElementById("set-org-sekretaris");
++  const orgBendaharaInput = document.getElementById("set-org-bendahara");
++  const orgKomisiTeknikInput = document.getElementById("set-org-komisi-teknik");
++  const orgKomisiPrestasiInput = document.getElementById("set-org-komisi-prestasi");
++  const orgKomisiWasitInput = document.getElementById("set-org-komisi-wasit");
++  const formOrgStructure = document.getElementById("form-settings-org-structure");
++
+   const bocCutoffInput = document.getElementById("set-boc-cutoff");
+   const bocMaxhcInput = document.getElementById("set-boc-maxhc");
+   const bocYearInput = document.getElementById("set-boc-year");
+@@ -18760,6 +18795,117 @@ function setupSystemSettings() {
+   if (whatsappInput) whatsappInput.value = localStorage.getItem("pobsi_whatsapp") || "+62 812-3456-789";
+   if (addressInput) addressInput.value = localStorage.getItem("pobsi_address") || "Banjarnegara, Jawa Tengah";
+ 
++  if (orgPelindungInput) orgPelindungInput.value = localStorage.getItem("org_role_pelindung") || "Ketua KONI Banjarnegara";
++  if (orgKetuaInput) orgKetuaInput.value = localStorage.getItem("org_role_ketua") || "Wahyu Hidayat, S.E.";
++  if (orgWakilInput) orgWakilInput.value = localStorage.getItem("org_role_wakil") || "FX. Bambang Setyono";
++  if (orgSekretarisInput) orgSekretarisInput.value = localStorage.getItem("org_role_sekretaris") || "Yanto, S.Kom";
++  if (orgBendaharaInput) orgBendaharaInput.value = localStorage.getItem("org_role_bendahara") || "Heri Purwanto";
++  if (orgKomisiTeknikInput) orgKomisiTeknikInput.value = localStorage.getItem("org_role_komisi_teknik") || "Slamet Riyadi";
++  if (orgKomisiPrestasiInput) orgKomisiPrestasiInput.value = localStorage.getItem("org_role_komisi_prestasi") || "Edy Susanto, S.Pd.";
++  if (orgKomisiWasitInput) orgKomisiWasitInput.value = localStorage.getItem("org_role_komisi_wasit") || "Joko Wahyono";
++
++  // Initialize dynamic organizational structure avatars state
++  let orgAvatarsState = {
++    pelindung: localStorage.getItem("org_avatar_pelindung") || "",
++    ketua: localStorage.getItem("org_avatar_ketua") || "",
++    wakil: localStorage.getItem("org_avatar_wakil") || "",
++    sekretaris: localStorage.getItem("org_avatar_sekretaris") || "",
++    bendahara: localStorage.getItem("org_avatar_bendahara") || "",
++    komisi_teknik: localStorage.getItem("org_avatar_komisi_teknik") || "",
++    komisi_prestasi: localStorage.getItem("org_avatar_komisi_prestasi") || "",
++    komisi_wasit: localStorage.getItem("org_avatar_komisi_wasit") || ""
++  };
++
++  const orgAvatarConfig = [
++    { key: "pelindung", fileId: "upload-avatar-pelindung", previewId: "preview-avatar-pelindung", nameId: "set-org-pelindung", defaultIcon: '<i class="fa-solid fa-shield-halved"></i>' },
++    { key: "ketua", fileId: "upload-avatar-ketua", previewId: "preview-avatar-ketua", nameId: "set-org-ketua-umum" },
++    { key: "wakil", fileId: "upload-avatar-wakil", previewId: "preview-avatar-wakil", nameId: "set-org-wakil-ketua" },
++    { key: "sekretaris", fileId: "upload-avatar-sekretaris", previewId: "preview-avatar-sekretaris", nameId: "set-org-sekretaris" },
++    { key: "bendahara", fileId: "upload-avatar-bendahara", previewId: "preview-avatar-bendahara", nameId: "set-org-bendahara" },
++    { key: "komisi_teknik", fileId: "upload-avatar-komisi-teknik", previewId: "preview-avatar-komisi-teknik", nameId: "set-org-komisi-teknik" },
++    { key: "komisi_prestasi", fileId: "upload-avatar-komisi-prestasi", previewId: "preview-avatar-komisi-prestasi", nameId: "set-org-komisi-prestasi" },
++    { key: "komisi_wasit", fileId: "upload-avatar-komisi-wasit", previewId: "preview-avatar-komisi-wasit", nameId: "set-org-komisi-wasit" }
++  ];
++
++  // Initialize previews and events
++  orgAvatarConfig.forEach(item => {
++    const elPreview = document.getElementById(item.previewId);
++    const elInput = document.getElementById(item.nameId);
++    const elFile = document.getElementById(item.fileId);
++
++    if (elPreview) {
++      const updatePreview = () => {
++        const savedAvatar = orgAvatarsState[item.key];
++        if (savedAvatar) {
++          elPreview.innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
++        } else {
++          if (item.defaultIcon) {
++            elPreview.innerHTML = item.defaultIcon;
++          } else {
++            const nameVal = elInput ? elInput.value : "";
++            elPreview.innerHTML = "";
++            elPreview.textContent = getInitialsForAvatar(nameVal);
++          }
++        }
++      };
++
++      // Initial run
++      updatePreview();
++
++      // Listen for name typing updates if there is no custom avatar
++      if (elInput) {
++        elInput.addEventListener("input", () => {
++          if (!orgAvatarsState[item.key]) {
++            updatePreview();
++          }
++        });
++      }
++
++      // Add click to clear avatar feature
++      elPreview.style.cursor = "pointer";
++      elPreview.title = "Klik untuk menghapus foto avatar";
++      elPreview.addEventListener("click", () => {
++        if (currentRole === "staff") return; // Staff cannot edit/delete
++        if (orgAvatarsState[item.key]) {
++          if (confirm(`Hapus foto avatar untuk ${item.key.replace("_", " ")}?`)) {
++            orgAvatarsState[item.key] = "";
++            updatePreview();
++            if (elFile) elFile.value = "";
++            showCustomToast("Foto avatar dihapus dari form", "info");
++          }
++        }
++      });
++    }
++
++    // Handle File Upload Select and Base64 conversion
++    if (elFile && elPreview) {
++      elFile.addEventListener("change", (e) => {
++        if (currentRole === "staff") {
++          showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah foto avatar.", "error");
++          elFile.value = "";
++          return;
++        }
++        const file = e.target.files[0];
++        if (!file) return;
++
++        if (file.size > 2 * 1024 * 1024) {
++          showCustomToast("Ukuran foto terlalu besar! Maksimal batas ukuran berkas adalah 2MB.", "error");
++          elFile.value = "";
++          return;
++        }
++
++        const reader = new FileReader();
++        reader.onload = (ev) => {
++          const base64Data = ev.target.result;
++          orgAvatarsState[item.key] = base64Data;
++          elPreview.innerHTML = `<img src="${base64Data}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
++          showCustomToast("Foto avatar berhasil dimuat!", "success");
++        };
++        reader.readAsDataURL(file);
++      });
++    }
++  });
++
+   if (bocCutoffInput) bocCutoffInput.value = bocSettings.cutoff_limit || "16";
+   if (bocMaxhcInput) bocMaxhcInput.value = bocSettings.max_handicap || "Bebas";
+   if (bocYearInput) bocYearInput.value = localStorage.getItem("currentBocYear") || "2026";
+@@ -18784,6 +18930,9 @@ function setupSystemSettings() {
+     if (formOrg) {
+       formOrg.querySelectorAll("input, button").forEach(el => el.disabled = true);
+     }
++    if (formOrgStructure) {
++      formOrgStructure.querySelectorAll("input, button").forEach(el => el.disabled = true);
++    }
+     if (formRules) {
+       formRules.querySelectorAll("input, select, button").forEach(el => el.disabled = true);
+     }
+@@ -18828,7 +18977,39 @@ function setupSystemSettings() {
+     });
+   }
+ 
+-  // Form Submit: BOC Rules
++  // Form Submit: Org Structure
++  if (formOrgStructure) {
++    formOrgStructure.addEventListener("submit", (e) => {
++      e.preventDefault();
++      if (currentRole === "staff") {
++        showCustomToast("Akses Dibatasi: Peran Staff tidak diizinkan mengubah struktur organisasi.", "error");
++        return;
++      }
++      localStorage.setItem("org_role_pelindung", orgPelindungInput.value.trim());
++      localStorage.setItem("org_role_ketua", orgKetuaInput.value.trim());
++      localStorage.setItem("org_role_wakil", orgWakilInput.value.trim());
++      localStorage.setItem("org_role_sekretaris", orgSekretarisInput.value.trim());
++      localStorage.setItem("org_role_bendahara", orgBendaharaInput.value.trim());
++      localStorage.setItem("org_role_komisi_teknik", orgKomisiTeknikInput.value.trim());
++      localStorage.setItem("org_role_komisi_prestasi", orgKomisiPrestasiInput.value.trim());
++      localStorage.setItem("org_role_komisi_wasit", orgKomisiWasitInput.value.trim());
++
++      // Save avatars
++      localStorage.setItem("org_avatar_pelindung", orgAvatarsState.pelindung);
++      localStorage.setItem("org_avatar_ketua", orgAvatarsState.ketua);
++      localStorage.setItem("org_avatar_wakil", orgAvatarsState.wakil);
++      localStorage.setItem("org_avatar_sekretaris", orgAvatarsState.sekretaris);
++      localStorage.setItem("org_avatar_bendahara", orgAvatarsState.bendahara);
++      localStorage.setItem("org_avatar_komisi_teknik", orgAvatarsState.komisi_teknik);
++      localStorage.setItem("org_avatar_komisi_prestasi", orgAvatarsState.komisi_prestasi);
++      localStorage.setItem("org_avatar_komisi_wasit", orgAvatarsState.komisi_wasit);
++
++      showCustomToast("Struktur organisasi berhasil diperbarui!", "success");
++      
++      // Update public page texts immediately
++      renderDynamicOrgChart();
++    });
++  }
+   if (formRules) {
+     formRules.addEventListener("submit", async (e) => {
+       e.preventDefault();
+@@ -19161,10 +19342,60 @@ function applySettingsToDOM() {
+   if (footerCopyright) {
+     footerCopyright.innerHTML = `&copy; 2026 ${orgName}. Hak Cipta Dilindungi. Didukung oleh KONI Kabupaten Banjarnegara.`;
+   }
++
++  // Render the Dynamic Organization Structure
++  renderDynamicOrgChart();
++}
++
++function renderDynamicOrgChart() {
++  const roles = [
++    { key: "pelindung", id: "org-name-pelindung", defaultVal: "Ketua KONI Banjarnegara", defaultAvatar: '<i class="fa-solid fa-shield-halved"></i>' },
++    { key: "ketua", id: "org-name-ketua", defaultVal: "Wahyu Hidayat, S.E." },
++    { key: "wakil", id: "org-name-wakil", defaultVal: "FX. Bambang Setyono" },
++    { key: "sekretaris", id: "org-name-sekretaris", defaultVal: "Yanto, S.Kom" },
++    { key: "bendahara", id: "org-name-bendahara", defaultVal: "Heri Purwanto" },
++    { key: "komisi_teknik", id: "org-name-komisi-teknik", defaultVal: "Slamet Riyadi" },
++    { key: "komisi_prestasi", id: "org-name-komisi-prestasi", defaultVal: "Edy Susanto, S.Pd." },
++    { key: "komisi_wasit", id: "org-name-komisi-wasit", defaultVal: "Joko Wahyono" }
++  ];
++
++  roles.forEach(role => {
++    const nameVal = localStorage.getItem(`org_role_${role.key}`) || role.defaultVal;
++    const avatarVal = localStorage.getItem(`org_avatar_${role.key}`);
++    const elName = document.getElementById(role.id);
++    if (elName) {
++      elName.textContent = nameVal;
++      const node = elName.closest(".org-node");
++      const avatarContainer = node ? node.querySelector(".org-avatar") : null;
++      if (avatarContainer) {
++        if (avatarVal) {
++          avatarContainer.innerHTML = `<img src="${avatarVal}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
++        } else {
++          if (role.defaultAvatar) {
++            avatarContainer.innerHTML = role.defaultAvatar;
++          } else {
++            avatarContainer.textContent = getInitialsForAvatar(nameVal);
++          }
++        }
++      }
++    }
++  });
++}
++
++function getInitialsForAvatar(name) {
++  if (!name) return "";
++  // Strip common titles/academic acronyms
++  let cleaned = name.replace(/(?:S\.?E\.?|S\.?Kom|S\.?Pd\.?|FX\.)/gi, "").trim();
++  const parts = cleaned.split(/\s+/).filter(p => p.length > 0);
++  if (parts.length >= 2) {
++    return (parts[0][0] + parts[1][0]).toUpperCase();
++  }
++  return parts[0] ? parts[0].substring(0, 2).toUpperCase() : "";
+ }
+ 
+ window.setupSystemSettings = setupSystemSettings;
+ window.applySettingsToDOM = applySettingsToDOM;
++window.renderDynamicOrgChart = renderDynamicOrgChart;
+ 
+ // ==========================================================================
+ // ACTIVITY LOGS AND DB SYNCHRONIZATION OVERHAUL (BOC 2026 DESIGN SYSTEM)

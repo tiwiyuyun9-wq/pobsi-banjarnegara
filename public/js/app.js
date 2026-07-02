@@ -1186,7 +1186,7 @@ function applyBocSettingsToDOM() {
         publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.98) 0%, rgba(6, 11, 24, 0.95) 50%, rgba(6, 11, 24, 0.98) 100%)`;
         publicHero.style.backgroundColor = "#060b18";
       } else {
-        publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('/images/hero-player.png')`;
+        publicHero.style.backgroundImage = `linear-gradient(90deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 30%, rgba(6, 11, 24, 0.25) 65%, rgba(6, 11, 24, 0.95) 100%), url('/images/hero-player.webp')`;
       }
     }
   }
@@ -2189,7 +2189,7 @@ function renderHandicapList() {
         <td style="color:var(--text-muted); font-size:0.85rem">${startIndex + index + 1}</td>
         <td class="table-name-bold">
           <div class="player-profile-cell">
-            <img src="${player.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(player.name)}`}" alt="${player.name}" class="player-avatar-small" onerror="this.src='images/player-avatar.png';">
+            <img src="${player.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(player.name)}`}" alt="${player.name}" class="player-avatar-small" onerror="this.src='images/player-avatar.webp';">
             <div class="player-profile-info">
               <span class="player-name-text">${player.name}</span>
               <span class="player-sub-info">${player.gender || 'Laki-laki'} &bull; ${player.age || 24} Tahun</span>
@@ -3164,7 +3164,7 @@ function renderTopAthletes() {
           <div class="top-athlete-left">
             ${medalHtml}
             <div class="top-athlete-avatar-wrapper">
-              <img src="${avatarUrl}" alt="${player.name}" class="top-athlete-avatar" onerror="this.src='images/player-avatar.png';">
+              <img src="${avatarUrl}" alt="${player.name}" class="top-athlete-avatar" onerror="this.src='images/player-avatar.webp';">
             </div>
             <div class="top-athlete-meta">
               <span class="athlete-name-bold">${player.name}</span>
@@ -6510,7 +6510,7 @@ window.selectClubRow = function(clubId, element) {
   const statusTagEl = document.getElementById('pm-club-detail-status-tag');
 
   if (logoEl) {
-    logoEl.src = club.logo ? club.logo : 'images/club-avatar.png';
+    logoEl.src = club.logo ? club.logo : 'images/club-avatar.webp';
   }
   if (coverEl) {
     if (club.cover) {
@@ -6913,7 +6913,7 @@ async function renderAthleteDetail(playerId) {
     if (player.cover) {
       coverEl.style.backgroundImage = `url('${player.cover}')`;
     } else {
-      coverEl.style.backgroundImage = `url('images/hero-player.png')`; // fallback
+      coverEl.style.backgroundImage = `url('images/hero-player.webp')`; // fallback
     }
   }
 
@@ -7201,7 +7201,7 @@ function renderADMatches(player, standing, dbMatches) {
       <div class="ad-match-item">
         <div class="ad-match-left">
           <span class="ad-match-date">${m.date}</span>
-          <img class="ad-match-opp-avatar" src="${opponentAvatar}" alt="Avatar" onerror="this.src='images/player-avatar.png';">
+          <img class="ad-match-opp-avatar" src="${opponentAvatar}" alt="Avatar" onerror="this.src='images/player-avatar.webp';">
           <div class="ad-match-opp-meta">
             <span class="ad-match-opp-name">${m.opponent_name}</span>
             <span class="ad-match-opp-club">${m.opponent_club}</span>
@@ -8248,8 +8248,8 @@ function renderClubDetail(clubId) {
   // 1b. Avatar / logo
   const avatarEl = document.getElementById("ad-club-detail-avatar");
   if (avatarEl) {
-    avatarEl.src = club.logo || "images/club-avatar.png";
-    avatarEl.onerror = function() { this.src = "images/club-avatar.png"; };
+    avatarEl.src = club.logo || "images/club-avatar.webp";
+    avatarEl.onerror = function() { this.src = "images/club-avatar.webp"; };
   }
 
   // 2. Large profile header meta
@@ -8350,7 +8350,7 @@ function renderClubDetail(clubId) {
           <tr>
             <td>
               <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="${avatar}" alt="${p.name}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(59, 130, 246, 0.2);" onerror="this.src='images/player-avatar.png';">
+                <img src="${avatar}" alt="${p.name}" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(59, 130, 246, 0.2);" onerror="this.src='images/player-avatar.webp';">
                 <div style="display: flex; flex-direction: column;">
                   <span style="font-weight: 700; color: #fff; font-size: 0.88rem;">${p.name}</span>
                   <span style="font-size: 0.72rem; color: var(--text-muted);">ID: ${p.id}</span>
@@ -10430,13 +10430,13 @@ function renderBocPlayoffConsole(event) {
       // Find winner details
       const winnerPlayer = (appData.players || []).find(p => p.name === winnerName) || (appData.standings || []).find(s => s.name === winnerName);
       const winnerClub = winnerPlayer ? winnerPlayer.club : "-";
-      const winnerAvatar = (winnerPlayer && winnerPlayer.avatar && winnerPlayer.avatar.trim() !== '') ? winnerPlayer.avatar : 'images/player-avatar.png';
+      const winnerAvatar = (winnerPlayer && winnerPlayer.avatar && winnerPlayer.avatar.trim() !== '') ? winnerPlayer.avatar : 'images/player-avatar.webp';
 
       dynamicCardContainer.innerHTML = `
         <div class="boc-finalist-profile-card top-seed" onclick="openAthleteProfile('${generateSlug(winnerName)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; box-shadow: 0 0 25px rgba(251, 191, 36, 0.15); backdrop-filter: blur(12px);">
           <div style="position: absolute; top: 12px; right: 12px; font-size: 1.1rem; color: #fbbf24; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));"><i class="fa-solid fa-crown"></i></div>
           <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid #fbbf24; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); background: rgba(0,0,0,0.2);">
-            <img src="${winnerAvatar}" alt="${winnerName}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+            <img src="${winnerAvatar}" alt="${winnerName}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.webp'">
           </div>
           <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">CHAMPION OF THE SEASON</span>
           <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${winnerName}</h3>
@@ -10478,12 +10478,12 @@ function renderBocPlayoffConsole(event) {
 
         // Retrieve player data for defending champ to get avatar
         const defPlayer = (appData.players || []).find(p => p.name === defendingChamp.name) || (appData.standings || []).find(s => s.name === defendingChamp.name);
-        const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.png';
+        const defAvatar = (defPlayer && defPlayer.avatar && defPlayer.avatar.trim() !== '') ? defPlayer.avatar : 'images/player-avatar.webp';
 
         dynamicCardContainer.innerHTML = `
           <div class="boc-finalist-profile-card" onclick="openAthleteProfile('${generateSlug(defendingChamp.name)}')" style="width: 100%; max-width: 320px; padding: 22px 24px; backdrop-filter: blur(12px);">
             <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); transition: border-color 0.2s;">
-              <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.png'">
+              <img src="${defAvatar}" alt="${defendingChamp.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/player-avatar.webp'">
             </div>
             <span style="font-family: var(--font-headers); font-size: 0.72rem; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase;">DEFENDING CHAMPION</span>
             <h3 style="font-family: var(--font-headers); font-size: 1.25rem; font-weight: 900; color: #fff; margin: 6px 0 2px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${defendingChamp.name}</h3>
@@ -12091,7 +12091,7 @@ function renderAthleteProfile(athlete) {
   // Set cover picture dynamically with gradients
   const heroOverlay = document.querySelector('.ap-hero-bg-overlay');
   if (heroOverlay) {
-    const coverUrl = athlete.cover || 'images/hero-player.png';
+    const coverUrl = athlete.cover || 'images/hero-player.webp';
     heroOverlay.style.backgroundImage = `
       linear-gradient(90deg, rgba(7, 12, 25, 0.95) 0%, rgba(6, 11, 24, 0.88) 50%, rgba(7, 12, 25, 0.95) 100%),
       radial-gradient(circle at left center, rgba(37, 99, 235, 0.12) 0%, rgba(6, 11, 24, 0) 65%),
@@ -21577,7 +21577,7 @@ function applySettingsToDOM() {
     });
   } else {
     document.querySelectorAll(".logo-img, .footer-logo-img, .mobile-logo-img").forEach(el => {
-      el.src = "images/pobsi-logo.png";
+      el.src = "images/pobsi-logo.webp";
     });
   }
 

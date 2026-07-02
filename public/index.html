@@ -11,21 +11,45 @@
   <meta name="author" content="POBSI Banjarnegara">
   <title>POBSI Kabupaten Banjarnegara - Platform Digital Resmi Biliar</title>
   
-  <!-- Google Fonts - Outfit (Sports/Modern) & Inter (Body Text) -->
+  <!-- DNS Prefetch & Preconnect for external domains -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <!-- Preload critical hero image for LCP -->
+  <link rel="preload" as="image" href="images/hero-player.webp" type="image/webp">
   
-  <!-- FontAwesome Icons for modern aesthetic -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Preload critical font files -->
+  <link rel="preload" as="font" href="https://fonts.gstatic.com/s/outfit/v11/QGYyz_MVcBeNP4NjuGObqx1XmO1I4TC1C4G-EiAou6Y.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwY.woff2" type="font/woff2" crossorigin>
+
+  <!-- Critical CSS loaded synchronously (minified) -->
+  <link rel="stylesheet" href="css/index.min.css?v=25">
   
-  <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=24">
+  <!-- Google Fonts — loaded async to avoid render-blocking -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   
-  <!-- Flatpickr for premium Date Picker -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <!-- FontAwesome Icons — loaded async to avoid render-blocking -->
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+  
+  <!-- Flatpickr CSS — loaded async (only needed for date picker interactions) -->
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  </noscript>
 </head>
+
 <body>
 
   <!-- Animated Gradient Mesh Background -->
@@ -54,7 +78,10 @@
     <div class="header-container">
       <a href="#" class="logo-area" id="logo-home-trigger">
         <div class="logo-icon-wrapper">
-          <img src="images/pobsi-logo.png" alt="Logo POBSI Banjarnegara" class="logo-img">
+          <picture>
+            <source srcset="images/pobsi-logo.webp" type="image/webp">
+            <img src="images/pobsi-logo.png" alt="Logo POBSI Banjarnegara" class="logo-img" width="48" height="48" fetchpriority="high">
+          </picture>
         </div>
         <div class="logo-text">
           <span class="logo-title">POBSI</span>
@@ -121,19 +148,19 @@
               <span class="affiliate-label">TERAFILIASI DENGAN</span>
               <div class="affiliate-logos">
                 <div class="affiliate-item">
-                  <img src="images/Logo%20Koni.png" alt="Logo KONI" class="affiliate-img">
+                  <picture><source srcset="images/Logo Koni.webp" type="image/webp"><img src="images/Logo%20Koni.png" alt="Logo KONI" class="affiliate-img" width="40" height="40" loading="lazy"></picture>
                   <div><strong>KONI</strong><br><small>BANJARNEGARA</small></div>
                 </div>
                 <div class="affiliate-item">
-                  <img src="images/pobsi-logo.png" alt="Logo POBSI" class="affiliate-img">
+                  <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI" class="affiliate-img" width="40" height="40" loading="lazy"></picture>
                   <div><strong>POBSI</strong><br><small>JAWA TENGAH</small></div>
                 </div>
                 <div class="affiliate-item">
-                  <img src="images/pobsi-logo.png" alt="Logo POBSI" class="affiliate-img">
+                  <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI" class="affiliate-img" width="40" height="40" loading="lazy"></picture>
                   <div><strong>POBSI</strong><br><small>PUSAT</small></div>
                 </div>
                 <div class="affiliate-item">
-                  <img src="images/Logo%20Koni.png" alt="Logo KONI" class="affiliate-img">
+                  <picture><source srcset="images/Logo Koni.webp" type="image/webp"><img src="images/Logo%20Koni.png" alt="Logo KONI" class="affiliate-img" width="40" height="40" loading="lazy"></picture>
                   <div><strong>Organisasi Resmi</strong><br><small>di Bawah KONI</small></div>
                 </div>
               </div>
@@ -1732,7 +1759,7 @@
     <div class="footer-container">
       <div class="footer-brand">
         <div class="footer-logo-row">
-          <img src="images/pobsi-logo.png" alt="Logo POBSI KAB. BANJARNEGARA" class="footer-logo-img">
+          <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI KAB. BANJARNEGARA" class="footer-logo-img" loading="lazy"></picture>
           <span class="footer-logo-text">POBSI KAB. BANJARNEGARA</span>
         </div>
         <p class="footer-desc">
@@ -1796,9 +1823,7 @@
   <div id="admin-login-screen" class="admin-screen-overlay" style="display: none;">
     <div class="admin-login-card">
       <div class="login-logo-area">
-        <div class="logo-icon-wrapper">
-          <img src="images/pobsi-logo.png" alt="Logo POBSI" class="logo-img">
-        </div>
+          <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI" class="logo-img" loading="lazy"></picture>
         <div class="logo-text">
           <span class="logo-title" style="color: var(--text-main);">POBSI</span>
           <span class="logo-subtitle">BANJARNEGARA</span>
@@ -1845,7 +1870,7 @@
         <i class="fa-solid fa-bars"></i>
       </button>
       <div class="mobile-header-brand">
-        <img src="images/pobsi-logo.png" alt="Logo POBSI" class="mobile-logo-img">
+        <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI" class="mobile-logo-img" loading="lazy"></picture>
         <span class="mobile-brand-title">POBSI Command Center</span>
       </div>
       <button class="mobile-logout-btn" id="btn-admin-mobile-logout" title="Keluar Aman">
@@ -1860,7 +1885,7 @@
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
         <div class="logo-icon-wrapper">
-          <img src="images/pobsi-logo.png" alt="Logo POBSI" class="logo-img">
+          <picture><source srcset="images/pobsi-logo.webp" type="image/webp"><img src="images/pobsi-logo.png" alt="Logo POBSI" class="logo-img" loading="lazy"></picture>
         </div>
         <div class="logo-text">
           <span class="logo-title" style="color: #fff;">POBSI</span>
@@ -6741,12 +6766,13 @@
     </div>
   </div>
 
-  <!-- Flatpickr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+  <!-- Flatpickr JS (deferred — not needed for initial render) -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js" defer></script>
 
-  <!-- Loaded Data and Script files -->
-  <script src="js/data.js"></script>
-  <script src="js/app.js?v=27"></script>
+  <!-- Loaded Data and Script files (minified) -->
+  <script src="js/data.min.js" defer></script>
+  <script src="js/app.min.js?v=28" defer></script>
 </body>
 </html>
+
